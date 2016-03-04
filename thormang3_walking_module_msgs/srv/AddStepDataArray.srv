@@ -1,0 +1,5 @@
+bool       auto_start
+bool       remove_existing_step_data
+StepData[] step_data_array
+---
+int32 result

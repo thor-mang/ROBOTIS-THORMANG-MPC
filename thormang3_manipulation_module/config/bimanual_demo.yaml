@@ -1,0 +1,29 @@
+# initial pose
+
+ini_pose :
+  mov_time : 5.0
+  left_position : [ 0.35 , 0.05 , 1.1 ]
+  left_orientation : [ 0.0 , 0.0 , -90.0 ]
+  right_position : [ 0.35 , -0.05 , 1.1 ]
+  right_orientation : [ 0.0 , 0.0 , 90.0 ]
+
+# left arm trajectory
+
+bimanual :
+  mov_time : 10.0
+  via_num : 4
+  via_time : [ 2.0 , 4.0 , 6.0 , 8.0 ]				# [sec]
+  left_via_position:						# x , y , z [m]
+    1 : [ 0.35 , -0.05 , 1.1 ]
+    2 : [ 0.35 , -0.05 , 1.0 ]
+    3 : [ 0.35 ,  0.15 , 1.0 ]
+    4 : [ 0.35 ,  0.15 , 1.1 ]					
+  left_tar_position : [ 0.35 , 0.05 , 1.1 ]			# x , y , z [m]
+  left_tar_orientation : [ 0.0 , 0.0 , -90.0 ]
+  right_via_position:						# x , y , z [m]
+    1 : [ 0.35 , -0.15 , 1.1 ]
+    2 : [ 0.35 , -0.15 , 1.0 ]
+    3 : [ 0.35 ,  0.05 , 1.0 ]
+    4 : [ 0.35 ,  0.05 , 1.1 ]				
+  right_tar_position : [ 0.35 , -0.05 , 1.1 ]			# x , y , z [m]
+  right_tar_orientation : [ 0.0 , 0.0 , 90.0 ]
