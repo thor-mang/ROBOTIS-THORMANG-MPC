@@ -29,7 +29,7 @@ find_package(Eigen REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
+#  INCLUDE_DIRS include
 #  LIBRARIES thormang3_manager
 #  CATKIN_DEPENDS robotis_controller roscpp
 #  DEPENDS system_lib
