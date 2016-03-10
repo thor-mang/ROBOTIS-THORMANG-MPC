@@ -30,6 +30,16 @@ int main(int argc, char **argv)
 
     std::string         _init_file      = _nh.param<std::string>("init_file_path", "");
 
+    /* gazebo simulation */
+    _controller->gazebo_mode            = _nh.param<bool>("gazebo", false);
+    if(_controller->gazebo_mode == true)
+    {
+        ROS_WARN("SET TO GAZEBO MODE!");
+        std::string         _robot_name     = _nh.param<std::string>("gazebo_robot_name", "");
+        if(_robot_name != "")
+            _controller->gazebo_robot_name  = _robot_name;
+    }
+
     if(_robot_file == "")
     {
         ROS_ERROR("NO robot file path in the ROS parameters.");
