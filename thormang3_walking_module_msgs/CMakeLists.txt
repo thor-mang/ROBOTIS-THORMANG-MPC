@@ -21,7 +21,6 @@ add_message_files(
   StepTimeData.msg
   StepPositionData.msg
   StepData.msg
-  StepDataArray.msg
   BalanceParam.msg
   RobotPose.msg
 )

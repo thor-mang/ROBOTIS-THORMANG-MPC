@@ -11,7 +11,8 @@
 #include <vector>
 #include <pthread.h>
 
-#include "math/walking_module_math.h"
+#include "math/WalkingModuleMath.h"
+#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
 
 
 namespace ROBOTIS
@@ -20,6 +21,8 @@ namespace ROBOTIS
 	class PreviewControlWalking
 	{
 	private:
+		ThorMang3KinematicsDynamics* thormang3_kd_;
+
 		static PreviewControlWalking* m_UniqueInstance;
 		std::vector<StepData> m_StepData;
 
@@ -124,8 +127,6 @@ namespace ROBOTIS
 		//double GetYLandingDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain);
 
 	public:
-		int m_OutAngleValue[16];
-		double m_OutAngleDeg[16];
 		double m_OutAngleRad[16];
 
 		virtual ~PreviewControlWalking();
@@ -322,8 +323,6 @@ namespace ROBOTIS
 //		void GetCurrentPose(matd *current_matGtoCOB, matd *current_matGtoRF, matd *current_matGtoLF);
 
 		void SetFTScaleFactor(double right_ft_scale_factor, double left_ft_scale_factor);
-
-		bool computeIK(double *out, double x, double y, double z, double a, double b, double c);
 
 	};
 }

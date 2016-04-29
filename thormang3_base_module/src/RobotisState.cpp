@@ -5,9 +5,7 @@
  *      Author: sch
  */
 
-#include "thormang3_base_module/RobotisCommon.h"
 #include "thormang3_base_module/RobotisState.h"
-#include "thormang3_base_module/Transformation.h"
 
 namespace ROBOTIS_BASE
 {
@@ -34,9 +32,6 @@ RobotisState::RobotisState()
     joint_via_ddpose = Eigen::MatrixXd::Zero( via_num , MAX_JOINT_ID + 1 );
 
     via_time = Eigen::MatrixXd::Zero( via_num , 1 );
-
-    // msgs
-    send_tra_msg.data = "";
 }
 
 RobotisState::~RobotisState(){}

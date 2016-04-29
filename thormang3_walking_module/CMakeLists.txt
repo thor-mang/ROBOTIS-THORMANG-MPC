@@ -3,16 +3,19 @@ project(thormang3_walking_module)
 
 
 find_package(catkin REQUIRED COMPONENTS
+  dynamixel_sdk
   robotis_device
   robotis_controller_msgs
   robotis_framework_common
+  robotis_math
   roscpp
   std_msgs
   sensor_msgs
   geometry_msgs
-  thormang3_walking_module_msgs
   cmake_modules
   eigen_conversions
+  thormang3_kinematics_dynamics
+  thormang3_walking_module_msgs
 )
 
 find_package(Eigen REQUIRED)
@@ -20,7 +23,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
 #  CATKIN_DEPENDS walking_module_msgs
-#  LIBRARIES test_motion_module
+  LIBRARIES thormang3_walking_module
 #  CATKIN_DEPENDS robotis_device roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -40,9 +43,8 @@ include_directories(
 
 ## Declare a C++ library
 add_library(thormang3_walking_module
-  src/linear_algebra.cpp
+  src/LinearAlgebra.cpp
   src/WaklingModule.cpp
-  src/ForceTorqueSensor.cpp
   src/PreviewControlWalking.cpp
 )
 
@@ -53,7 +55,6 @@ add_dependencies(thormang3_walking_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(thormang3_walking_module
-  robotis_device
   yaml-cpp
   ${catkin_LIBRARIES}
 )

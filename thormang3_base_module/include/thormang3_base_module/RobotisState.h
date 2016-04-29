@@ -2,13 +2,8 @@
 #ifndef BASE_MODULE_ROBOTISSTATE_H_
 #define BASE_MODULE_ROBOTISSTATE_H_
 
-#define EIGEN_NO_DEBUG
-#define EIGEN_NO_STATIC_ASSERT
-
-#include <std_msgs/Float64.h>
-#include <std_msgs/String.h>
-
-#include "RobotisCommon.h"
+#include "robotis_math/RobotisMath.h"
+#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
 
 namespace ROBOTIS_BASE
 {
@@ -41,11 +36,6 @@ public:
     Eigen::MatrixXd joint_via_ddpose;
 
     Eigen::MatrixXd via_time;
-
-    // msgs
-    std_msgs::String send_tra_msg;
-
-
 };
 
 }

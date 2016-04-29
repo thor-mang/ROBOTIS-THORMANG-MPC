@@ -5,8 +5,8 @@
  *      Author: zerom
  */
 
-#ifndef ROBOTIS_THORMANG_WALKING_MODULE_INCLUDE_WALKING_MODULE_WALKINGMOTIONMODULE_H_
-#define ROBOTIS_THORMANG_WALKING_MODULE_INCLUDE_WALKING_MODULE_WALKINGMOTIONMODULE_H_
+#ifndef WALKING_MODULE_H_
+#define WALKING_MODULE_H_
 
 
 #include <ros/ros.h>
@@ -16,10 +16,14 @@
 #include <sensor_msgs/Imu.h>
 #include <boost/thread.hpp>
 
-#include "ForceTorqueSensor.h"
+
 #include "PreviewControlWalking.h"
 #include "WalkingModuleCommon.h"
+
 #include "robotis_framework_common/MotionModule.h"
+
+
+#include "robotis_controller_msgs/StatusMsg.h"
 
 #include "thormang3_walking_module_msgs/RobotPose.h"
 #include "thormang3_walking_module_msgs/GetReferenceStepData.h"
@@ -28,7 +32,7 @@
 #include "thormang3_walking_module_msgs/SetBalanceParam.h"
 #include "thormang3_walking_module_msgs/IsRunning.h"
 #include "thormang3_walking_module_msgs/RemoveExistingStepData.h"
-#include "thormang3_base_module_msgs/CalibrationWrench.h"
+//#include "thormang3_base_module_msgs/CalibrationWrench.h"
 
 
 //#include "imu_3dm_gx4/FilterOutput.h"
@@ -52,16 +56,6 @@ private:
     Eigen::MatrixXd desired_matrix_g_to_lfoot_;
 
 
-    double total_mass_;
-    Eigen::MatrixXd r_foot_ft_air_, l_foot_ft_air_;
-    Eigen::MatrixXd r_foot_ft_gnd_, l_foot_ft_gnd_;
-    double r_foot_ft_scale_factor_, l_foot_ft_scale_factor_;
-    double r_foot_ft_current_voltage_[6];
-    double l_foot_ft_current_voltage_[6];
-
-    ForceTorqueSensor r_foot_ft_sensor;
-    ForceTorqueSensor l_foot_ft_sensor;
-
     WalkingMotionModule();
 
     void QueueThread();
@@ -72,9 +66,9 @@ private:
     /* ROS Topic Publish Functions */
     int r_foot_ft_publish_checker_;
     int l_foot_ft_publish_checker_;
-    ros::Publisher robot_pose_pub;
-    ros::Publisher status_msg_pub;
-    std_msgs::String status_msg;
+    ros::Publisher robot_pose_pub_;
+    ros::Publisher status_msg_pub_;
+
     thormang3_walking_module_msgs::RobotPose  robot_pose_msg_;
     bool	balance_update_with_loop_;
     double  balance_update_duration_;
@@ -86,10 +80,12 @@ private:
 
     void	PublishRobotPose(void);
 
+    void	PublishStatusMsg(unsigned int type, std::string msg);
+
     /* ROS Topic Callback Functions */
 //    void	IMUFilterOutputCallback(const imu_3dm_gx4::FilterOutput::ConstPtr &msg);
     void	IMUDataOutputCallback(const sensor_msgs::Imu::ConstPtr &msg);
-    void	FTSensorCalibrationDataCallback(const thormang3_base_module_msgs::CalibrationWrench::ConstPtr &msg);
+    //void	FTSensorCalibrationDataCallback(const thormang3_base_module_msgs::CalibrationWrench::ConstPtr &msg);
 
     /* ROS Service Callback Functions */
     bool 	GetReferenceStepDataServiceCallback(thormang3_walking_module_msgs::GetReferenceStepData::Request  &req,
@@ -121,14 +117,15 @@ public:
     double l_foot_Tx_Nm, l_foot_Ty_Nm, l_foot_Tz_Nm;
 
     static WalkingMotionModule *GetInstance() { return unique_instance_; }
-    void    Initialize(const int control_cycle_msec);
-    void	ForceTorqueSensorInitialize();
-    void    Process(std::map<std::string, Dynamixel *> dxls);
-    bool	IsRunning(void);
+    void    Initialize(const int control_cycle_msec, Robot *robot);
+    //void	ForceTorqueSensorInitialize();
+    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors);
 
+    void	Stop();
+    bool	IsRunning();
 };
 
 }
 
 
-#endif /* ROBOTIS_THORMANG_TEST_MOTION_MODULE_INCLUDE_TEST_MOTION_MODULE_TESTMOTIONMODULE_H_ */
+#endif /* WALKING_MODULE_H_ */

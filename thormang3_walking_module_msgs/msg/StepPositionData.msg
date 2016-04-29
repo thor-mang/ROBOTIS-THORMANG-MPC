@@ -1,9 +1,12 @@
 #### Step Position Data
+
 ## MovingFootFlag
-# LFootMove = 1;
-# RFootMove = 2;
-# NFootMove = 3;
 int16       moving_foot
+
+int16 LFootMove=1 # Left foot constant
+int16 RFootMove=2 # Right foot constant
+int16 NFootMove=3 # No foot constant
+
 
 
 ### Unit [meter, rad]

@@ -1,8 +1,6 @@
 #include "thormang3_walking_module/PreviewControlWalking.h"
-
 #include <cmath>
 #include <iostream>
-
 
 
 using namespace ROBOTIS;
@@ -12,7 +10,6 @@ static const double MMtoM = 0.001;
 static const double MStoS = 0.001;
 
 #define NO_STEP_IDX	(-1)
-#define PI 			(3.14159265358979323846)
 #define G  			(9810.0*MMtoM) // mm/s^2(= 9.81m/s^2 *1000mm/1m)
 #define TIME_UNIT 	(8*MStoS)
 
@@ -60,6 +57,7 @@ PreviewControlWalking::PreviewControlWalking()
 
 	//uID = (char*)"PreviewControlWalking";
 
+	thormang3_kd_ = new ROBOTIS::ThorMang3KinematicsDynamics(ROBOTIS::WHOLE_BODY);
 
 	m_PresentRightFootPosition.x = 0.0;    m_PresentRightFootPosition.y = -0.5*186.0*MMtoM;  m_PresentRightFootPosition.z = -0.630*MMtoM;
 	m_PresentRightFootPosition.roll = 0.0; m_PresentRightFootPosition.pitch = 0.0; m_PresentRightFootPosition.yaw = 0.0;
@@ -85,8 +83,8 @@ PreviewControlWalking::PreviewControlWalking()
 
 //	matRFtoRFT = GetOrientationMatrix(PI,0,0)*GetOrientationMatrix(0,0,PI);
 //	matLFtoLFT = GetOrientationMatrix(PI,0,0);
-	matRFtoRFT = GetOrientationMatrix(PI,0,0);
-	matLFtoLFT = GetOrientationMatrix(PI,0,0);
+	matRFtoRFT = GetOrientationMatrix(M_PI,0,0);
+	matLFtoLFT = GetOrientationMatrix(M_PI,0,0);
 
 	matGtoCOB = GetTransformMatrix(m_PresentBodyPosition.x, m_PresentBodyPosition.y, m_PresentBodyPosition.z,
 			m_PresentBodyPosition.roll, m_PresentBodyPosition.pitch, m_PresentBodyPosition.yaw);
@@ -103,7 +101,7 @@ PreviewControlWalking::PreviewControlWalking()
 	matLHtoLF = matLHtoCOB*matCOBtoG*matGtoLF;
 
 
-	m_GoalWaistYawAngleRad = 0.0*PI;
+	m_GoalWaistYawAngleRad = 0.0*M_PI;
 	m_ReferenceStepDataforAddition.PositionData.bMovingFoot = NFootMove;
 	m_ReferenceStepDataforAddition.PositionData.dElbowSwingGain = 0.1;
 	m_ReferenceStepDataforAddition.PositionData.dShoulderSwingGain = 0.05;
@@ -154,44 +152,32 @@ PreviewControlWalking::PreviewControlWalking()
 	dir[6] = -1;  dir[7] = -1; dir[8] = -1;   dir[9] = -1; dir[10] = 1; dir[11] = 1;
 	dir[12] = -1; dir[13] = 1; dir[14] = -1;  dir[15] = 1;
 
-#ifdef WEBOT_SIMULATION
-	//for webot
-	dir_output[0] = -1; dir_output[1] = -1; dir_output[2] =  1; dir_output[3] =  1; dir_output[4] = -1; dir_output[5] = 1;
-	dir_output[6] = -1; dir_output[7] = -1; dir_output[8] = -1; dir_output[9] = -1; dir_output[10]=  1; dir_output[11] = 1;
-	dir_output[12] = -1; dir_output[13] = 1;  dir_output[14] = -1; dir_output[15] =  1;
-	m_InitAngle[0]  =   0.0;  m_InitAngle[1]  =  0.0;  m_InitAngle[2]  = -5.7106;  m_InitAngle[3] =  11.4212; m_InitAngle[4]  =  5.7106; m_InitAngle[5]  = 0.0;
-	m_InitAngle[6]  =   0.0;  m_InitAngle[7]  =  0.0;  m_InitAngle[8]  =  5.7106;  m_InitAngle[9] = -11.4212; m_InitAngle[10] = -5.7106; m_InitAngle[11] = 0.0;
-	m_InitAngle[12] = -45.0,  m_InitAngle[13] = 45.0;  m_InitAngle[14] =  45.0;    m_InitAngle[15] =  -45.0;
-	//	dir_output = {  -1,    -1,        1,        1,      -1,     1,    -1,    -1,       -1,         -1,         1,     1,     -1,      1,    -1,     1};
-	//	InitAngle  = { 0.0,   0.0,  -5.7106,  11.4212,  5.7106,   0.0,   0.0,   0.0,   5.7106,   -11.4212,   -5.7106,   0.0,  -45.0,   45.0,  45.0,  -45.0};
-#else
-//	//for thor 2.1
-//	dir_output[0] = -1; dir_output[1] =  1; dir_output[2] = -1; dir_output[3] = -1; dir_output[4] = -1; dir_output[5] = 1;
-//	dir_output[6] = -1; dir_output[7] =  1; dir_output[8] =  1; dir_output[9] =  1; dir_output[10]=  1; dir_output[11] = 1;
-//	dir_output[12] = -1; dir_output[13] = 1;  dir_output[14] = -1; dir_output[15] =  1;
-//	m_InitAngle[0]  =   0.0;  m_InitAngle[1]  =  0.0;  m_InitAngle[2]  =   0.0;  m_InitAngle[3] =  0.0; m_InitAngle[4]  = 0.0; m_InitAngle[5]  = 0.0;
-//	m_InitAngle[6]  =   0.0;  m_InitAngle[7]  =  0.0;  m_InitAngle[8]  =   0.0;  m_InitAngle[9] =  0.0; m_InitAngle[10] = 0.0; m_InitAngle[11] = 0.0;
-//	//m_InitAngle[12] = -45.0,  m_InitAngle[13] = 45.0;  m_InitAngle[14] =  90.0;  m_InitAngle[15] = -90.0;
-//	m_InitAngle[12] = -59.3426,  m_InitAngle[13] = 59.3426;  m_InitAngle[14] =  133.0279;  m_InitAngle[15] = -133.0279;
 
 	//for thor 3.0
-	dir_output[0] = -1; dir_output[1] =  -1; dir_output[2] = -1; dir_output[3] = -1; dir_output[4] =  1; dir_output[5]  = 1;
-	dir_output[6] = -1; dir_output[7] =  -1; dir_output[8] =  1; dir_output[9] =  1; dir_output[10]= -1; dir_output[11] = 1;
+	dir_output[0] = thormang3_kd_->thormang3_link_data[id_r_leg_start + 2*0]->joint_axis.coeff(2, 0);
+	dir_output[1] = thormang3_kd_->thormang3_link_data[id_r_leg_start + 2*1]->joint_axis.coeff(0, 0);
+	dir_output[2] = thormang3_kd_->thormang3_link_data[id_r_leg_start + 2*2]->joint_axis.coeff(1, 0);
+	dir_output[3] = thormang3_kd_->thormang3_link_data[id_r_leg_start + 2*3]->joint_axis.coeff(1, 0);
+	dir_output[4] = thormang3_kd_->thormang3_link_data[id_r_leg_start + 2*4]->joint_axis.coeff(1, 0);
+	dir_output[5] = thormang3_kd_->thormang3_link_data[id_r_leg_start + 2*5]->joint_axis.coeff(0, 0);
+
+
+	dir_output[6]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*0]->joint_axis.coeff(2, 0);
+	dir_output[7]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*1]->joint_axis.coeff(0, 0);
+	dir_output[8]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*2]->joint_axis.coeff(1, 0);
+	dir_output[9]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*3]->joint_axis.coeff(1, 0);
+	dir_output[10] = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*4]->joint_axis.coeff(1, 0);
+	dir_output[11] = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*5]->joint_axis.coeff(0, 0);
+
 	dir_output[12] = -1; dir_output[13] = 1;  dir_output[14] = -1; dir_output[15] =  1;
+
+
 	m_InitAngle[0]  =   0.0;  m_InitAngle[1]  =  0.0;  m_InitAngle[2]  =   0.0;  m_InitAngle[3] =  0.0; m_InitAngle[4]  = 0.0; m_InitAngle[5]  = 0.0;
 	m_InitAngle[6]  =   0.0;  m_InitAngle[7]  =  0.0;  m_InitAngle[8]  =   0.0;  m_InitAngle[9] =  0.0; m_InitAngle[10] = 0.0; m_InitAngle[11] = 0.0;
 	//m_InitAngle[12] = -45.0,  m_InitAngle[13] = 45.0;  m_InitAngle[14] =  90.0;  m_InitAngle[15] = -90.0;
 	m_InitAngle[12] = -45.0,  m_InitAngle[13] = 45.0;  m_InitAngle[14] =  135.0;  m_InitAngle[15] = -135.0;
 
-	//	dir_output = {      -1,         -1,          -1,        -1,             1,            1,          -1,         -1,           1,         1,             -1,         1,      -1,     1,     -1,      1};
-	//	InitAngle  = {     0.0,        0.0,      5.7106,   33.5788,       -5.7106,          0.0,         0.0,        0.0,     -5.7106,  -33.5788,         5.7106,       0.0,   -45.0,  45.0,   45.0,  -45.0};
-#endif
 
-	//	r_arm[0] = -45.0; r_arm[1] = -0.17*180.0/PI + 90.0; r_arm[2] =  90.0; r_arm[3] =  90.0; r_arm[4] = 0.0; r_arm[5] = 0.0;
-	//	l_arm[0] =  45.0; l_arm[1] =  0.17*180.0/PI - 90.0; l_arm[2] = -90.0; l_arm[3] = -90.0; l_arm[4] = 0.0; l_arm[5] = 0.0;
-
-	//	r_arm[0] = -59.3426; r_arm[1] =  85.7115; r_arm[2] =  0.0; r_arm[3] =  133.0279; r_arm[4] = 0.0; r_arm[5] = 0.0;
-	//	l_arm[0] =  59.3426; l_arm[1] = -85.7115; l_arm[2] =  0.0; l_arm[3] = -133.0279; l_arm[4] = 0.0; l_arm[5] = 0.0;
 
 	r_arm[0] =  -45.0; r_arm[1] =  90.0; r_arm[2] = 0.0;
 	r_arm[3] =  135.0; r_arm[4] = -90.0; r_arm[5] = 0.0;
@@ -303,11 +289,11 @@ PreviewControlWalking::PreviewControlWalking()
 
 	FOOT_LANDING_DETECTION_TIME_MAX_SEC = 1.0;
 
-	FOOT_ROLL_ADJUSTMENT_ABS_MAX_RAD = 10.0*PI/180;
-	FOOT_PITCH_ADJUSTMENT_ABS_MAX_RAD = 10.0*PI/180;
+	FOOT_ROLL_ADJUSTMENT_ABS_MAX_RAD = 10.0*M_PI/180;
+	FOOT_PITCH_ADJUSTMENT_ABS_MAX_RAD = 10.0*M_PI/180;
 
-	FOOT_ROLL_ADJUSTMENT_ABS_MAX_RAD_BY_FT  = 5.0*PI/180.0;
-	FOOT_PITCH_ADJUSTMENT_ABS_MAX_RAD_BY_FT = 5.0*PI/180.0;
+	FOOT_ROLL_ADJUSTMENT_ABS_MAX_RAD_BY_FT  = 5.0*M_PI/180.0;
+	FOOT_PITCH_ADJUSTMENT_ABS_MAX_RAD_BY_FT = 5.0*M_PI/180.0;
 
 	COB_X_ADJUSTMENT_ABS_MAX_MM = 50;
 	COB_Y_ADJUSTMENT_ABS_MAX_MM = 50;
@@ -318,8 +304,8 @@ PreviewControlWalking::PreviewControlWalking()
 	X_ADJUSTMENT_ABS_MAX_MM 	 = 50.0;
 	Y_ADJUSTMENT_ABS_MAX_MM 	 = 50.0;
 	Z_ADJUSTMENT_ABS_MAX_MM 	 = 50.0;
-	ROLL_ADJUSTMENT_ABS_MAX_RAD  = 15.0*PI/180.0;
-	PITCH_ADJUSTMENT_ABS_MAX_RAD = 15.0*PI/180.0;
+	ROLL_ADJUSTMENT_ABS_MAX_RAD  = 15.0*M_PI/180.0;
+	PITCH_ADJUSTMENT_ABS_MAX_RAD = 15.0*M_PI/180.0;
 
 
 	current_right_fx_N  = current_right_fy_N  = current_right_fz_N  = 0;
@@ -383,10 +369,17 @@ PreviewControlWalking::PreviewControlWalking()
 	m_left_ft_scale_factor = 1.0;
 
 
-	m_right_dsp_fz_N = -1.0*(42.0)*9.8*0.5;
-	m_right_ssp_fz_N = -1.0*(42.0)*9.8;
-	m_left_dsp_fz_N  = -1.0*(42.0)*9.8*0.5;
-	m_left_ssp_fz_N  = -1.0*(42.0)*9.8;
+	double _total_mass_of_robot = thormang3_kd_->TotalMass(0);
+//	printf("ROBOT TOTAL MASS : %f \n", _total_mass_of_robot);
+//	m_right_dsp_fz_N = -1.0*(42.0)*9.8*0.5;
+//	m_right_ssp_fz_N = -1.0*(42.0)*9.8;
+//	m_left_dsp_fz_N  = -1.0*(42.0)*9.8*0.5;
+//	m_left_ssp_fz_N  = -1.0*(42.0)*9.8;
+
+	m_right_dsp_fz_N = -1.0*(_total_mass_of_robot)*9.8*0.5;
+	m_right_ssp_fz_N = -1.0*(_total_mass_of_robot)*9.8;
+	m_left_dsp_fz_N  = -1.0*(_total_mass_of_robot)*9.8*0.5;
+	m_left_ssp_fz_N  = -1.0*(_total_mass_of_robot)*9.8;
 
 	m_Left_Fz_Sigmoid_StartTime = 0;
 	m_Left_Fz_Sigmoid_EndTime  = 0;
@@ -542,13 +535,13 @@ void PreviewControlWalking::Initialize()
 	epr.x -=  COB_X_MANUAL_ADJUSTMENT_M;
 	epl.x -=  COB_X_MANUAL_ADJUSTMENT_M;
 	double angle[12];
-	if(computeIK(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false) {
-		printf("RIKsolve failed : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
+	if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false) {
+		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
 		return;
 	}
 
-	if(computeIK(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false) {
-		printf("RIKsolve failed : %f %f %f %f %f %f\n", epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw);
+	if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false) {
+		printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
 		return;
 	}
 
@@ -556,8 +549,8 @@ void PreviewControlWalking::Initialize()
 	double rangle[6], langle[6];
 	for(int idx = 0; idx < 6; idx++)
 	{
-		rangle[idx] = angle[idx]*dir[idx]*180.0/PI;
-		langle[idx] = angle[idx+6]*dir[idx+6]*180.0/PI;
+		rangle[idx] = angle[idx]*dir[idx]*180.0/M_PI;
+		langle[idx] = angle[idx+6]*dir[idx+6]*180.0/M_PI;
 	}
 
 
@@ -670,35 +663,27 @@ void PreviewControlWalking::Initialize()
 
 	for(int idx = 0; idx < 6; idx++)
 	{
-		m_OutAngleDeg[idx] = (double)dir_output[idx]*angle[idx]*180.0/PI + m_InitAngle[idx];
-		m_OutAngleDeg[idx+6] = (double)dir_output[idx+6]*angle[idx+6]*180.0/PI + m_InitAngle[idx+6];
+		m_OutAngleRad[idx]   = angle[idx];
+		m_OutAngleRad[idx+6] = angle[idx+6];
 	}
 
 
-	printf("RLEG : %f %f %f %f %f %f\n", m_OutAngleDeg[0], m_OutAngleDeg[1], m_OutAngleDeg[2], m_OutAngleDeg[3], m_OutAngleDeg[4], m_OutAngleDeg[5]);
-	printf("LLEG : %f %f %f %f %f %f\n", m_OutAngleDeg[6], m_OutAngleDeg[7], m_OutAngleDeg[8], m_OutAngleDeg[9], m_OutAngleDeg[10], m_OutAngleDeg[11]);
+	printf("RLEG : %f %f %f %f %f %f\n", m_OutAngleRad[0]*180.0/M_PI, m_OutAngleRad[1]*180.0/M_PI, m_OutAngleRad[2]*180.0/M_PI,
+			m_OutAngleRad[3]*180.0/M_PI, m_OutAngleRad[4]*180.0/M_PI, m_OutAngleRad[5]*180.0/M_PI);
+	printf("LLEG : %f %f %f %f %f %f\n", m_OutAngleRad[6]*180.0/M_PI, m_OutAngleRad[7]*180.0/M_PI, m_OutAngleRad[8]*180.0/M_PI,
+			m_OutAngleRad[9]*180.0/M_PI, m_OutAngleRad[10]*180.0/M_PI, m_OutAngleRad[11]*180.0/M_PI);
 
-	m_OutAngleDeg[12] = ((double)dir_output[12]*(epr.x - epl.x)*m_ShoulerSwingGain + m_InitAngle[12]);
-	m_OutAngleDeg[13] = ((double)dir_output[13]*(epl.x - epr.x)*m_ShoulerSwingGain + m_InitAngle[13]);
-	m_OutAngleDeg[14] = ((double)dir_output[14]*(epr.x - epl.x)*m_ElbowSwingGain   + m_InitAngle[14]);
-	m_OutAngleDeg[15] = ((double)dir_output[15]*(epl.x - epr.x)*m_ElbowSwingGain   + m_InitAngle[15]);
-
-	for(int idx = 0; idx < 16; idx++)
-	{
-		m_OutAngleValue[idx] = m_OutAngleDeg[idx]*250950.0/180.0;
-	}
-
-	m_OutAngleValue[2] -= (double)dir_output[2] * (HIP_PITCH_OFFSET) * (250950.0)/180.0;
-	m_OutAngleValue[8] -= (double)dir_output[8] * (HIP_PITCH_OFFSET) * (250950.0)/180.0;
-
-	m_OutAngleValue[4]  += (double)dir_output[4]  * ANKLE_PITCH_OFFSET *(250950.0)/180.0;
-	m_OutAngleValue[10] += (double)dir_output[10] * ANKLE_PITCH_OFFSET *(250950.0)/180.0;
+	m_OutAngleRad[12] = ((double)dir_output[12]*(epr.x - epl.x)*m_ShoulerSwingGain + m_InitAngle[12])*M_PI/180.0;
+	m_OutAngleRad[13] = ((double)dir_output[13]*(epl.x - epr.x)*m_ShoulerSwingGain + m_InitAngle[13])*M_PI/180.0;
+	m_OutAngleRad[14] = ((double)dir_output[14]*(epr.x - epl.x)*m_ElbowSwingGain   + m_InitAngle[14])*M_PI/180.0;
+	m_OutAngleRad[15] = ((double)dir_output[15]*(epl.x - epr.x)*m_ElbowSwingGain   + m_InitAngle[15])*M_PI/180.0;
 
 
-	for(int idx = 0; idx < 16; idx++)
-	{
-		m_OutAngleRad[idx] = m_OutAngleValue[idx]*PI/250950.0;
-	}
+	m_OutAngleRad[2] -= (double)dir_output[2] * (HIP_PITCH_OFFSET) * (M_PI)/180.0;
+	m_OutAngleRad[8] -= (double)dir_output[8] * (HIP_PITCH_OFFSET) * (M_PI)/180.0;
+
+	m_OutAngleRad[4]  += (double)dir_output[4]  * ANKLE_PITCH_OFFSET *(M_PI)/180.0;
+	m_OutAngleRad[10] += (double)dir_output[10] * ANKLE_PITCH_OFFSET *(M_PI)/180.0;
 
 
 	m_Left_Fz_Sigmoid_StartTime = 0;
@@ -782,24 +767,23 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
 
 
 	double angle[12];
-	if(computeIK(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false) {
-		printf("RIKsolve failed : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
+	if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
+		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
 		return;
 	}
 
-	if(computeIK(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false) {
-		printf("LIKsolve failed\n");
+	if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
+		printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
 		return;
 	}
+
 
 	double rangle[6], langle[6];
 	for(int idx = 0; idx < 6; idx++)
 	{
-		rangle[idx] = angle[idx]*dir[idx]*180.0/PI;
-		langle[idx] = angle[idx+6]*dir[idx+6]*180.0/PI;
+		rangle[idx] = angle[idx]*dir[idx]*180.0/M_PI;
+		langle[idx] = angle[idx+6]*dir[idx+6]*180.0/M_PI;
 	}
-
-
 
 	m_ReferenceStepDataforAddition.PositionData.bMovingFoot = NFootMove;
 	m_ReferenceStepDataforAddition.PositionData.dElbowSwingGain = 0.0;
@@ -852,31 +836,21 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
 
 	for(int idx = 0; idx < 6; idx++)
 	{
-		m_OutAngleDeg[idx] = (double)dir_output[idx]*angle[idx]*180.0/PI + m_InitAngle[idx];
-		m_OutAngleDeg[idx+6] = (double)dir_output[idx+6]*angle[idx+6]*180.0/PI + m_InitAngle[idx+6];
+		m_OutAngleRad[idx]   = angle[idx];
+		m_OutAngleRad[idx+6] = angle[idx+6];
 	}
 
-	m_OutAngleDeg[12] = ((double)dir_output[12]*(epr.x - epl.x)*m_ShoulerSwingGain + m_InitAngle[12]);
-	m_OutAngleDeg[13] = ((double)dir_output[13]*(epl.x - epr.x)*m_ShoulerSwingGain + m_InitAngle[13]);
-	m_OutAngleDeg[14] = ((double)dir_output[14]*(epr.x - epl.x)*m_ElbowSwingGain   + m_InitAngle[14]);
-	m_OutAngleDeg[15] = ((double)dir_output[15]*(epl.x - epr.x)*m_ElbowSwingGain   + m_InitAngle[15]);
-
-	for(int idx = 0; idx < 16; idx++)
-	{
-		m_OutAngleValue[idx] = m_OutAngleDeg[idx]*250950.0/180.0;
-	}
-
-	m_OutAngleValue[2] -= (double)dir_output[2] * (HIP_PITCH_OFFSET) * (250950.0)/180.0;
-	m_OutAngleValue[8] -= (double)dir_output[8] * (HIP_PITCH_OFFSET) * (250950.0)/180.0;
-
-	m_OutAngleValue[4]  += (double)dir_output[4]  * ANKLE_PITCH_OFFSET *(250950.0)/180.0;
-	m_OutAngleValue[10] += (double)dir_output[10] * ANKLE_PITCH_OFFSET *(250950.0)/180.0;
+	m_OutAngleRad[12] = ((double)dir_output[12]*(epr.x - epl.x)*m_ShoulerSwingGain + m_InitAngle[12])*M_PI/180.0;
+	m_OutAngleRad[13] = ((double)dir_output[13]*(epl.x - epr.x)*m_ShoulerSwingGain + m_InitAngle[13])*M_PI/180.0;
+	m_OutAngleRad[14] = ((double)dir_output[14]*(epr.x - epl.x)*m_ElbowSwingGain   + m_InitAngle[14])*M_PI/180.0;
+	m_OutAngleRad[15] = ((double)dir_output[15]*(epl.x - epr.x)*m_ElbowSwingGain   + m_InitAngle[15])*M_PI/180.0;
 
 
-	for(int idx = 0; idx < 16; idx++)
-	{
-		m_OutAngleRad[idx] = m_OutAngleValue[idx]*PI/250950.0;
-	}
+	m_OutAngleRad[2] -= (double)dir_output[2] * (HIP_PITCH_OFFSET) * (M_PI)/180.0;
+	m_OutAngleRad[8] -= (double)dir_output[8] * (HIP_PITCH_OFFSET) * (M_PI)/180.0;
+
+	m_OutAngleRad[4]  += (double)dir_output[4]  * ANKLE_PITCH_OFFSET *(M_PI)/180.0;
+	m_OutAngleRad[10] += (double)dir_output[10] * ANKLE_PITCH_OFFSET *(M_PI)/180.0;
 
 
 	m_Left_Fz_Sigmoid_StartTime = 0;
@@ -1250,9 +1224,9 @@ double PreviewControlWalking::GetDampingControllerOutput(double desired, double 
 	double cut_off_freq = 1.0/goal_settling_time;
 	double alpha = 1.0;
 	if(TIME_UNIT < 1.0)
-		alpha = (2.0*PI*cut_off_freq*TIME_UNIT)/(1.0+2.0*PI*cut_off_freq*TIME_UNIT);
+		alpha = (2.0*M_PI*cut_off_freq*TIME_UNIT)/(1.0+2.0*M_PI*cut_off_freq*TIME_UNIT);
 	else
-		alpha = (2.0*PI*cut_off_freq*TIME_UNIT/1000.0)/(1.0+2.0*PI*cut_off_freq*TIME_UNIT/1000.0);
+		alpha = (2.0*M_PI*cut_off_freq*TIME_UNIT/1000.0)/(1.0+2.0*M_PI*cut_off_freq*TIME_UNIT/1000.0);
 
 	double output =  alpha*(desired - present) + (1.0 - alpha)*previous_output;
 
@@ -1538,16 +1512,16 @@ void PreviewControlWalking::Process()
 
 			double z_swap_amp = 0.5*(m_StepData[0].PositionData.dZ_Swap_Amplitude);
 			double z_swap_amp_shift = z_swap_amp;
-			double z_swap_phase_shift = PI*0.5;
+			double z_swap_phase_shift = M_PI*0.5;
 
 			double body_roll_swap_dir = 1.0;
 			double body_roll_swap_amp = 0.5*(HIP_ROLL_FEEDFORWARD_ANGLE_RAD);
 			double body_roll_swap_amp_shift = body_roll_swap_amp;
 
-			if(bc_move_amp >= PI)
-				bc_move_amp -= 2.0*PI;
-			else if(bc_move_amp <= -PI)
-				bc_move_amp += 2.0*PI;
+			if(bc_move_amp >= M_PI)
+				bc_move_amp -= 2.0*M_PI;
+			else if(bc_move_amp <= -M_PI)
+				bc_move_amp += 2.0*M_PI;
 
 			detail_balance_time_idx = (int)( (body_move_periodTime - m_WalkingTime + m_ReferenceTime) / (double)TIME_UNIT );
 			if(detail_balance_time_idx >= m_PreviewSize)
@@ -1605,7 +1579,7 @@ void PreviewControlWalking::Process()
 
 				z_vibe_amp = m_StepData[0].PositionData.dFootHeight*0.5;
 				z_vibe_amp_shift = z_vibe_amp;
-				z_vibe_phase_shift = PI*0.5;
+				z_vibe_phase_shift = M_PI*0.5;
 
 				body_roll_swap_dir = -1.0;
 			}
@@ -1630,7 +1604,7 @@ void PreviewControlWalking::Process()
 
 				z_vibe_amp = m_StepData[0].PositionData.dFootHeight*0.5;
 				z_vibe_amp_shift = z_vibe_amp;
-				z_vibe_phase_shift = PI*0.5;
+				z_vibe_phase_shift = M_PI*0.5;
 
 				body_roll_swap_dir = 1.0;
 			}
@@ -1655,15 +1629,15 @@ void PreviewControlWalking::Process()
 
 				z_vibe_amp = 0.0;
 				z_vibe_amp_shift = z_vibe_amp;
-				z_vibe_phase_shift = PI*0.5;
+				z_vibe_phase_shift = M_PI*0.5;
 
 				body_roll_swap_dir = 0.0;
 			}
 
-			if(c_move_amp >= PI)
-				c_move_amp -= 2.0*PI;
-			else if(c_move_amp <= -PI)
-				c_move_amp += 2.0*PI;
+			if(c_move_amp >= M_PI)
+				c_move_amp -= 2.0*M_PI;
+			else if(c_move_amp <= -M_PI)
+				c_move_amp += 2.0*M_PI;
 
 
 			if( time <= ssp_time_start)
@@ -1675,8 +1649,8 @@ void PreviewControlWalking::Process()
 				b_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_pitch, m_StepData[0].TimeData.sigmoid_distortion_pitch);
 				c_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_yaw,   m_StepData[0].TimeData.sigmoid_distortion_yaw);
 
-				z_vibe         = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*PI*ssp_time_start/foot_move_period_time, z_vibe_amp, z_vibe_amp_shift);
-				body_roll_swap = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
+				z_vibe         = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp, z_vibe_amp_shift);
+				body_roll_swap = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
 				if(m_StepData[0].PositionData.bMovingFoot == RFootMove)
 				{
 					m_Balancing_Index = 1;
@@ -1696,8 +1670,8 @@ void PreviewControlWalking::Process()
 				b_move = wsigmoid(time, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_pitch, m_StepData[0].TimeData.sigmoid_distortion_pitch);
 				c_move = wsigmoid(time, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_yaw,   m_StepData[0].TimeData.sigmoid_distortion_yaw);
 
-				z_vibe         = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
-				body_roll_swap = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
+				z_vibe         = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
+				body_roll_swap = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
 
 				if(m_StepData[0].PositionData.bMovingFoot == RFootMove)
 				{
@@ -1724,8 +1698,8 @@ void PreviewControlWalking::Process()
 				b_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_pitch, m_StepData[0].TimeData.sigmoid_distortion_pitch);
 				c_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_yaw,   m_StepData[0].TimeData.sigmoid_distortion_yaw);
 
-				z_vibe         = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
-				body_roll_swap = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
+				z_vibe         = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
+				body_roll_swap = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
 				if(m_StepData[0].PositionData.bMovingFoot == RFootMove)
 				{
 					m_Balancing_Index = 4;
@@ -2261,11 +2235,11 @@ void PreviewControlWalking::Process()
 			l_y_adjustment_mm_by_ft = GetLeftYDampingControlOutput(0.0, mat_left_force.coeff(1,0), BALANCE_Y_TIME_CONSTANT, BALANCE_Y_GAIN_BY_FT*MMtoM);
 
 
-			hip_roll_adjustment_deg = GetHipRollDampingControllerOutput(0, iu_roll_rad*180.0/PI, BALANCE_HIP_ROLL_TIME_CONSTANT, BALANCE_HIP_ROLL_GAIN);
-			hip_pitch_adjustment_deg = GetHipPitchDampingControllerOutput(HIP_PITCH_OFFSET, iu_pitch_rad*180.0/PI, BALANCE_HIP_PITCH_TIME_CONSTANT, BALANCE_HIP_PITCH_GAIN);
+			hip_roll_adjustment_deg = GetHipRollDampingControllerOutput(0, iu_roll_rad*180.0/M_PI, BALANCE_HIP_ROLL_TIME_CONSTANT, BALANCE_HIP_ROLL_GAIN);
+			hip_pitch_adjustment_deg = GetHipPitchDampingControllerOutput(HIP_PITCH_OFFSET, iu_pitch_rad*180.0/M_PI, BALANCE_HIP_PITCH_TIME_CONSTANT, BALANCE_HIP_PITCH_GAIN);
 
 			foot_r_roll_adjustment_rad_by_imu  = GetAnkleRollDampingControllerOutput(m_PresentBodyPosition.roll, iu_roll_rad,  BALANCE_ANKLE_ROLL_TIME_CONSTANT_BY_IMU,  BALANCE_ANKLE_ROLL_GAIN_BY_IMU);
-			foot_r_pitch_adjustment_rad_by_imu = GetAnklePitchDampingControllerOutput(m_PresentBodyPosition.pitch + HIP_PITCH_OFFSET*PI/180.0, iu_pitch_rad, BALANCE_ANKLE_PITCH_TIME_CONSTANT_BY_IMU, BALANCE_ANKLE_PITCH_GAIN_BY_IMU);
+			foot_r_pitch_adjustment_rad_by_imu = GetAnklePitchDampingControllerOutput(m_PresentBodyPosition.pitch + HIP_PITCH_OFFSET*M_PI/180.0, iu_pitch_rad, BALANCE_ANKLE_PITCH_TIME_CONSTANT_BY_IMU, BALANCE_ANKLE_PITCH_GAIN_BY_IMU);
 
 
 			foot_l_roll_adjustment_rad_by_imu = foot_r_roll_adjustment_rad_by_imu;
@@ -2284,7 +2258,7 @@ void PreviewControlWalking::Process()
 
 
 			if(DEBUG_PRINT)
-				fprintf(stderr, " : %f %f %f %f %f %f %f %f\n", cob_x_adjustment_mm, cob_y_adjustment_mm, foot_r_roll_adjustment_rad*180.0/PI, foot_r_pitch_adjustment_rad*180.0/PI, foot_l_roll_adjustment_rad*180.0/PI, foot_l_pitch_adjustment_rad*180.0/PI,  right_leg_fz_N,  left_leg_fz_N);
+				fprintf(stderr, " : %f %f %f %f %f %f %f %f\n", cob_x_adjustment_mm, cob_y_adjustment_mm, foot_r_roll_adjustment_rad*180.0/M_PI, foot_r_pitch_adjustment_rad*180.0/M_PI, foot_l_roll_adjustment_rad*180.0/M_PI, foot_l_pitch_adjustment_rad*180.0/M_PI,  right_leg_fz_N,  left_leg_fz_N);
 
 			matd matBlanceRotationIMU = GetOrientationMatrix(foot_r_roll_adjustment_rad_by_imu + foot_r_roll_adjustment_rad, foot_r_pitch_adjustment_rad_by_imu + foot_r_pitch_adjustment_rad, 0.0);
 			matd epr_xy, epl_xy;
@@ -2419,23 +2393,63 @@ void PreviewControlWalking::Process()
 
 
 
-		if((epr.yaw > 30.0*PI/180.0) || (epl.yaw < -30.0*PI/180.0) ) {
+		if((epr.yaw > 30.0*M_PI/180.0) || (epl.yaw < -30.0*M_PI/180.0) ) {
 			printf("yawyaw\n");
 			return;
 		}
 
-		if((epr.yaw < -30.0*PI/180.0) || (epl.yaw > 30.0*PI/180.0) ) {
+		if((epr.yaw < -30.0*M_PI/180.0) || (epl.yaw > 30.0*M_PI/180.0) ) {
 			printf("yawyaw2\n");
 			return;
 		}
 
+//		double angle[12] = { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0,};
+//		if(computeIK(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
+//			printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
+//			return;
+//		}
+//
+//		if(computeIK(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
+//			printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
+//			return;
+//		}
+//
+//		m_OutAngleRad[0]  = angle[0];
+//		m_OutAngleRad[1]  = angle[1];
+//		m_OutAngleRad[2]  = angle[2];
+//		m_OutAngleRad[3]  = angle[3];
+//		m_OutAngleRad[4]  = angle[4];
+//		m_OutAngleRad[5]  = angle[5];
+//		m_OutAngleRad[6]  = angle[6];
+//		m_OutAngleRad[7]  = angle[7];
+//		m_OutAngleRad[8]  = angle[8];
+//		m_OutAngleRad[9]  = angle[9];
+//		m_OutAngleRad[10] = angle[10];
+//		m_OutAngleRad[11] = angle[11];
+//
+//
+//
+//		for(int idx = 0; idx < 6; idx++)
+//		{
+//			m_OutAngleDeg[idx] = (double)dir_output[idx]*m_OutAngleRad[idx]*180.0/PI + m_InitAngle[idx];
+//			m_OutAngleDeg[idx+6] = (double)dir_output[idx+6]*m_OutAngleRad[idx+6]*180.0/PI + m_InitAngle[idx+6];
+//
+//			//			double right_joint_speed = ((m_OutAngleDeg[idx] - m_PrevOutAngleDeg[idx])/0.008)/6.0;
+//			//			if(fabs(right_joint_speed) > 28.0)
+//			//				fprintf(stderr, "right %d th joint exceed nominal speed(%f)\n", idx, right_joint_speed);
+//			//
+//			//			double left_joint_speed = ((m_OutAngleDeg[idx+6] - m_PrevOutAngleDeg[idx+6])/0.008)/6.0;
+//			//			if(fabs(left_joint_speed) > 28.0)
+//			//				fprintf(stderr, "left %d th joint exceed nominal speed(%f)\n", idx, left_joint_speed);
+//		}
+
 		double angle[12] = { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0,};
-		if(computeIK(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
+		if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
 			printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
 			return;
 		}
 
-		if(computeIK(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
+		if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
 			printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
 			return;
 		}
@@ -2453,46 +2467,24 @@ void PreviewControlWalking::Process()
 		m_OutAngleRad[10] = angle[10];
 		m_OutAngleRad[11] = angle[11];
 
+		m_OutAngleRad[12] = ((double)dir_output[12]*(epr.x - epl.x)*m_ShoulerSwingGain + m_InitAngle[12])*M_PI/180.0;
+		m_OutAngleRad[13] = ((double)dir_output[13]*(epl.x - epr.x)*m_ShoulerSwingGain + m_InitAngle[13])*M_PI/180.0;
+		m_OutAngleRad[14] = ((double)dir_output[14]*(epr.x - epl.x)*m_ElbowSwingGain   + m_InitAngle[14])*M_PI/180.0;
+		m_OutAngleRad[15] = ((double)dir_output[15]*(epl.x - epr.x)*m_ElbowSwingGain   + m_InitAngle[15])*M_PI/180.0;
 
 
-		for(int idx = 0; idx < 6; idx++)
-		{
-			m_OutAngleDeg[idx] = (double)dir_output[idx]*m_OutAngleRad[idx]*180.0/PI + m_InitAngle[idx];
-			m_OutAngleDeg[idx+6] = (double)dir_output[idx+6]*m_OutAngleRad[idx+6]*180.0/PI + m_InitAngle[idx+6];
-
-			//			double right_joint_speed = ((m_OutAngleDeg[idx] - m_PrevOutAngleDeg[idx])/0.008)/6.0;
-			//			if(fabs(right_joint_speed) > 28.0)
-			//				fprintf(stderr, "right %d th joint exceed nominal speed(%f)\n", idx, right_joint_speed);
-			//
-			//			double left_joint_speed = ((m_OutAngleDeg[idx+6] - m_PrevOutAngleDeg[idx+6])/0.008)/6.0;
-			//			if(fabs(left_joint_speed) > 28.0)
-			//				fprintf(stderr, "left %d th joint exceed nominal speed(%f)\n", idx, left_joint_speed);
-		}
-
-
-
-
-		m_OutAngleDeg[12] = ((double)dir_output[12]*(epr.x - epl.x)*m_ShoulerSwingGain + m_InitAngle[12]);
-		m_OutAngleDeg[13] = ((double)dir_output[13]*(epl.x - epr.x)*m_ShoulerSwingGain + m_InitAngle[13]);
-		m_OutAngleDeg[14] = ((double)dir_output[14]*(epr.x - epl.x)*m_ElbowSwingGain   + m_InitAngle[14]);
-		m_OutAngleDeg[15] = ((double)dir_output[15]*(epl.x - epr.x)*m_ElbowSwingGain   + m_InitAngle[15]);
-
-		for(int idx = 0; idx < 16; idx++)
-		{
-			m_OutAngleValue[idx] = m_OutAngleDeg[idx]*250950.0/180.0;
-		}
 
 		//		m_OutAngleValue[1] -= (double)dir_output[1] * (hip_roll_adjustment_deg*1.0 + hip_right_roll_adjustment_deg*0.0) * 250950.0/180.0;
 		//		m_OutAngleValue[7] -= (double)dir_output[7] * (hip_roll_adjustment_deg*1.0 + hip_left_roll_adjustment_deg*0.0) * 250950.0/180.0;
 
-		m_OutAngleValue[1] -= (double)dir_output[1] * hip_roll_adjustment_deg * 1.0 * 250950.0/180.0;
-		m_OutAngleValue[7] -= (double)dir_output[7] * hip_roll_adjustment_deg * 1.0 * 250950.0/180.0;
+		m_OutAngleRad[1] -= (double)dir_output[1] * hip_roll_adjustment_deg * 1.0 * M_PI/180.0;
+		m_OutAngleRad[7] -= (double)dir_output[7] * hip_roll_adjustment_deg * 1.0 * M_PI/180.0;
 
-		m_OutAngleValue[2] -= (double)dir_output[2] * (HIP_PITCH_OFFSET + hip_pitch_adjustment_deg) * 250950.0/180.0;
-		m_OutAngleValue[8] -= (double)dir_output[8] * (HIP_PITCH_OFFSET + hip_pitch_adjustment_deg) * 250950.0/180.0;
+		m_OutAngleRad[2] -= (double)dir_output[2] * (HIP_PITCH_OFFSET + hip_pitch_adjustment_deg) * M_PI/180.0;
+		m_OutAngleRad[8] -= (double)dir_output[8] * (HIP_PITCH_OFFSET + hip_pitch_adjustment_deg) * M_PI/180.0;
 
-		m_OutAngleValue[4]  += (double)dir_output[4]  * ANKLE_PITCH_OFFSET *(250950.0)/180.0;
-		m_OutAngleValue[10] += (double)dir_output[10] * ANKLE_PITCH_OFFSET *(250950.0)/180.0;
+		m_OutAngleRad[4]  += (double)dir_output[4]  * ANKLE_PITCH_OFFSET * M_PI/180.0;
+		m_OutAngleRad[10] += (double)dir_output[10] * ANKLE_PITCH_OFFSET * M_PI/180.0;
 
 
 		//printf("%f %f %f %f %f\n", hip_roll_adjustment_deg, HIP_PITCH_OFFSET, hip_pitch_adjustment_deg, current_imu_roll_rad, current_imu_pitch_rad);
@@ -2500,23 +2492,18 @@ void PreviewControlWalking::Process()
 
 		if(m_StepData.size() != 0) {
 			if(m_StepData[0].PositionData.bMovingFoot == LFootMove)
-				m_OutAngleValue[1] = m_OutAngleValue[1] + body_roll_swap*250950.0/PI;
+				m_OutAngleRad[1] = m_OutAngleRad[1] + body_roll_swap;
 			else if(m_StepData[0].PositionData.bMovingFoot == RFootMove)
-				m_OutAngleValue[1] = m_OutAngleValue[1] - 0.35*body_roll_swap*250950.0/PI;
+				m_OutAngleRad[1] = m_OutAngleRad[1] - 0.35*body_roll_swap;
 		}
 
 
 
 		if(m_StepData.size() != 0) {
 			if(m_StepData[0].PositionData.bMovingFoot == RFootMove)
-				m_OutAngleValue[7] = m_OutAngleValue[7] + body_roll_swap*250950.0/PI;
+				m_OutAngleRad[7] = m_OutAngleRad[7] + body_roll_swap;
 			else if(m_StepData[0].PositionData.bMovingFoot == LFootMove)
-				m_OutAngleValue[7] = m_OutAngleValue[7] - 0.35*body_roll_swap*250950.0/PI;
-		}
-
-		for(int idx = 0; idx < 16; idx++)
-		{
-			m_OutAngleRad[idx] = m_OutAngleValue[idx]*PI/250950.0;
+				m_OutAngleRad[7] = m_OutAngleRad[7] - 0.35*body_roll_swap;
 		}
 
 	}
@@ -2525,7 +2512,7 @@ void PreviewControlWalking::Process()
 
 double PreviewControlWalking::wsin(double time, double period, double period_shift, double mag, double mag_shift)
 {
-	return mag * sin(2 * PI / period * time - period_shift) + mag_shift;
+	return mag * sin(2 * M_PI / period * time - period_shift) + mag_shift;
 }
 
 double PreviewControlWalking::wsigmoid(double time, double period, double time_shift, double mag, double mag_shift, double sigmoid_ratio, double distortion_ratio)
@@ -2538,9 +2525,9 @@ double PreviewControlWalking::wsigmoid(double time, double period, double time_s
 		}
 		else
 		{
-			t = 2.0*PI*(time - time_shift)/(period*(2-sigmoid_ratio));
+			t = 2.0*M_PI*(time - time_shift)/(period*(2-sigmoid_ratio));
 			sigmoid_distor_gain = distortion_ratio + (1-distortion_ratio)*(time-(time_shift+period*(1-sigmoid_ratio)))/(period*(2-sigmoid_ratio));
-			Amplitude = mag/(2.0*PI);
+			Amplitude = mag/(2.0*M_PI);
 			value = mag_shift + Amplitude*(t - sigmoid_distor_gain*sin(t));
 		}
 	}
@@ -2548,9 +2535,9 @@ double PreviewControlWalking::wsigmoid(double time, double period, double time_s
 		if( time <= time_shift+period*(1-sigmoid_ratio))
 			value = mag_shift;
 		else {
-			t = 2.0*PI*(time - time_shift-period*(1-sigmoid_ratio))/(period*sigmoid_ratio);
+			t = 2.0*M_PI*(time - time_shift-period*(1-sigmoid_ratio))/(period*sigmoid_ratio);
 			sigmoid_distor_gain = distortion_ratio + (1-distortion_ratio)*(time-(time_shift+period*(1-sigmoid_ratio)))/(period*sigmoid_ratio);
-			Amplitude = mag/(2.0*PI);
+			Amplitude = mag/(2.0*M_PI);
 			value = mag_shift + Amplitude*(t - sigmoid_distor_gain*sin(t));
 		}
 	}
@@ -2561,9 +2548,9 @@ double PreviewControlWalking::wsigmoid(double time, double period, double time_s
 		else if(time >= time_shift + period*(1.0+nsigmoid_ratio)*0.5)
 			value = mag + mag_shift;
 		else {
-			t = 2.0*PI*(time - (time_shift+period*(1.0-nsigmoid_ratio)*0.5))/(period*nsigmoid_ratio);
+			t = 2.0*M_PI*(time - (time_shift+period*(1.0-nsigmoid_ratio)*0.5))/(period*nsigmoid_ratio);
 			sigmoid_distor_gain = distortion_ratio + (1.0-distortion_ratio)*(time-(time_shift+period*(1.0-nsigmoid_ratio)*0.5))/(period*nsigmoid_ratio);
-			Amplitude = mag/(2.0*PI);
+			Amplitude = mag/(2.0*M_PI);
 			value = mag_shift + Amplitude*(t - sigmoid_distor_gain*sin(t));
 		}
 	}
@@ -2577,99 +2564,4 @@ void PreviewControlWalking::SetFTScaleFactor(double right_ft_scale_factor, doubl
 {
 	m_right_ft_scale_factor = right_ft_scale_factor;
 	m_left_ft_scale_factor = left_ft_scale_factor;
-}
-
-bool PreviewControlWalking::computeIK(double *out, double x, double y, double z, double a, double b, double c)
-{
-	Eigen::MatrixXd target_transform;
-	Eigen::Matrix4d Tad, Tda, Tcd, Tdc, Tac;
-	Eigen::Vector3d vec;
-
-	bool  invertible;
-	double _Rac, _Acos, _Atan, _k, _l, _m, _n, _s, _c, _theta;
-	double THIGH_LENGTH 	= 0.3*1000.0*MMtoM;   //std::fabs(robotis_joint[id_r_leg_start + 2*3]->relative_position.coeff(2,0));
-	double CALF_LENGTH  	= 0.3*1000.0*MMtoM;   //std::fabs(robotis_joint[id_r_leg_start + 2*4]->relative_position.coeff(2,0));
-	double ANKLE_LENGTH 	= 0.1145*1000.0*MMtoM; //std::fabs(robotis_joint[id_r_leg_end]->relative_position(2,0));
-	double LEG_SIDE_OFFSET  = 0.186*1000.0*MMtoM; //2.0*(std::fabs(robotis_joint[id_r_leg_start]->relative_position.coeff(1, 0)));
-
-	target_transform = GetTransformMatrix(x, y, z, a, b, c);
-
-	Tad << target_transform.coeff(0,0),  target_transform.coeff(0,1),  target_transform.coeff(0,2),  target_transform.coeff(0,3),
-		   target_transform.coeff(1,0),  target_transform.coeff(1,1),  target_transform.coeff(1,2),  target_transform.coeff(1,3),
-		   target_transform.coeff(2,0),  target_transform.coeff(2,1),  target_transform.coeff(2,2),  target_transform.coeff(2,3),
-		   target_transform.coeff(3,0),  target_transform.coeff(3,1),  target_transform.coeff(3,2),  target_transform.coeff(3,3);
-
-
-	vec.coeffRef(0) = Tad.coeff(0,3) + Tad.coeff(0,2) * ANKLE_LENGTH;
-	vec.coeffRef(1) = Tad.coeff(1,3) + Tad.coeff(1,2) * ANKLE_LENGTH;
-	vec.coeffRef(2) = Tad.coeff(2,3) + Tad.coeff(2,2) * ANKLE_LENGTH;
-
-	// Get Knee
-	_Rac = vec.norm();
-	_Acos = acos((_Rac * _Rac - THIGH_LENGTH * THIGH_LENGTH - CALF_LENGTH * CALF_LENGTH) / (2.0 * THIGH_LENGTH * CALF_LENGTH));
-	if(std::isnan(_Acos) == 1)
-		return false;
-	*(out + 3) = _Acos;
-
-	// Get Ankle Roll
-	Tad.computeInverseWithCheck(Tda, invertible);
-	if(invertible == false)
-		return false;
-
-	_k = sqrt(Tda.coeff(1,3) * Tda.coeff(1,3) +  Tda.coeff(2,3) * Tda.coeff(2,3));
-	_l = sqrt(Tda.coeff(1,3) * Tda.coeff(1,3) + (Tda.coeff(2,3) - ANKLE_LENGTH)*(Tda.coeff(2,3) - ANKLE_LENGTH));
-	_m = (_k * _k - _l * _l - ANKLE_LENGTH * ANKLE_LENGTH) / (2.0 * _l * ANKLE_LENGTH);
-
-	if(_m > 1.0)
-		_m = 1.0;
-	else if(_m < -1.0)
-		_m = -1.0;
-	_Acos = acos(_m);
-
-	if(std::isnan(_Acos) == 1)
-		return false;
-
-	if(Tda.coeff(1,3) < 0.0)
-		*(out + 5) = -_Acos;
-	else
-		*(out + 5) = _Acos;
-
-	// Get Hip Yaw
-	Tcd = GetTransformMatrix(0, 0, -ANKLE_LENGTH, *(out + 5), 0, 0);
-	Tcd.computeInverseWithCheck(Tdc, invertible);
-	if(invertible == false)
-		return false;
-
-	Tac = Tad * Tdc;
-	_Atan = atan2(-Tac.coeff(0,1) , Tac.coeff(1,1));
-	if(std::isinf(_Atan) != 0)
-		return false;
-	*(out) = _Atan;
-
-	// Get Hip Roll
-	_Atan = atan2(Tac.coeff(2,1), -Tac.coeff(0,1) * sin(*(out)) + Tac.coeff(1,1) * cos(*(out)));
-	if(std::isinf(_Atan) != 0)
-		return false;
-	*(out + 1) = _Atan;
-
-
-	// Get Hip Pitch and Ankle Pitch
-	_Atan = atan2(Tac.coeff(0,2) * cos(*(out)) + Tac.coeff(1,2) * sin(*(out)), Tac.coeff(0,0) * cos(*(out)) + Tac.coeff(1,0) * sin(*(out)));
-	if(std::isinf(_Atan) == 1)
-		return false;
-	_theta = _Atan;
-	_k = sin(*(out + 3)) * CALF_LENGTH;
-	_l = -THIGH_LENGTH - cos(*(out + 3)) * CALF_LENGTH;
-	_m = cos(*(out)) * vec.coeff(0) + sin(*(out)) * vec.coeff(1);
-	_n = cos(*(out + 1)) * vec.coeff(2) + sin(*(out)) * sin(*(out + 1)) * vec.coeff(0) - cos(*(out)) * sin(*(out + 1)) * vec.coeff(1);
-	_s = (_k * _n + _l * _m) / (_k * _k + _l * _l);
-	_c = (_n - _k * _s) / _l;
-	_Atan = atan2(_s, _c);
-	if(std::isinf(_Atan) == 1)
-		return false;
-	*(out + 2) = _Atan;
-	*(out + 4) = _theta - *(out + 3) - *(out + 2);
-
-
-	return true;
 }

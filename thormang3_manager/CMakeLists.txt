@@ -8,8 +8,14 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_device
   robotis_controller
   robotis_controller_msgs
+  robotis_math
   
   cmake_modules
+  ati_ft_sensor
+  thormang3_kinematics_dynamics
+  
+  thormang3_feet_ft_module
+  
   thormang3_head_control_module
   thormang3_manipulation_module
   thormang3_walking_module
@@ -29,7 +35,7 @@ find_package(Eigen REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+#   INCLUDE_DIRS include
 #  LIBRARIES thormang3_manager
 #  CATKIN_DEPENDS robotis_controller roscpp
 #  DEPENDS system_lib
@@ -57,10 +63,5 @@ add_executable(thormang3_manager src/thormang3_manager.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(thormang3_manager
-  robotis_controller
-  thormang3_head_control_module
-  thormang3_manipulation_module
-  thormang3_walking_module
-  thormang3_base_module
   ${catkin_LIBRARIES}
 )

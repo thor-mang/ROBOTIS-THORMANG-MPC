@@ -29,7 +29,7 @@ MotionModuleTutorial::~MotionModuleTutorial()
     queue_thread_.join();
 }
 
-void MotionModuleTutorial::Initialize(const int control_cycle_msec)
+void MotionModuleTutorial::Initialize(const int control_cycle_msec, Robot *robot)
 {
     control_cycle_msec_ = control_cycle_msec;
     queue_thread_       = boost::thread(boost::bind(&MotionModuleTutorial::QueueThread, this));
@@ -59,7 +59,7 @@ void MotionModuleTutorial::TopicCallback(const std_msgs::Int16::ConstPtr &msg)
     pub1_.publish(_msg);
 }
 
-void MotionModuleTutorial::Process(std::map<std::string, Dynamixel *> dxls)
+void MotionModuleTutorial::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
     if(enable == false)
         return;
@@ -77,6 +77,15 @@ void MotionModuleTutorial::Process(std::map<std::string, Dynamixel *> dxls)
     result["r_el"]->goal_position           = 0;
 }
 
+void MotionModuleTutorial::Stop()
+{
+	return;
+}
+
+bool MotionModuleTutorial::IsRunning()
+{
+	return false;
+}
 
 
 

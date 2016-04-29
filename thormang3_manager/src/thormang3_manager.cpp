@@ -5,14 +5,17 @@
  *      Author: zerom
  */
 
-
 #include "robotis_controller/RobotisController.h"
+
+/* Sensor Module Header */
+#include "thormang3_feet_ft_module/ThorMang3FeetForceTorqueSensorModule.h"
 
 /* Motion Module Header */
 #include "thormang3_base_module/BaseModule.h"
 #include "thormang3_head_control_module/HeadControlModule.h"
 #include "thormang3_manipulation_module/ManipulationModule.h"
 #include "thormang3_walking_module/WalkingModule.h"
+
 
 using namespace ROBOTIS;
 
@@ -57,11 +60,14 @@ int main(int argc, char **argv)
 
     sleep(1);
 
+    /* Add Sensor Module */
+    _controller->AddSensorModule((SensorModule*)ThorMang3FeetForceTorqueSensor::GetInstance());
+
     /* Add Motion Module */
-    _controller->AddModule((MotionModule*)BaseModule::GetInstance());
-    _controller->AddModule((MotionModule*)ManipulationModule::GetInstance());
-    _controller->AddModule((MotionModule*)HeadControlModule::GetInstance());
-    _controller->AddModule((MotionModule*)WalkingMotionModule::GetInstance());
+    _controller->AddMotionModule((MotionModule*)BaseModule::GetInstance());
+    _controller->AddMotionModule((MotionModule*)ManipulationModule::GetInstance());
+    _controller->AddMotionModule((MotionModule*)HeadControlModule::GetInstance());
+    _controller->AddMotionModule((MotionModule*)WalkingMotionModule::GetInstance());
 
     _controller->StartTimer();
 
