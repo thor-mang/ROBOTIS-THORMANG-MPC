@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     RobotisController  *_controller     = RobotisController::GetInstance();
 
     /* Load ROS Parameter */
-    std::string         _offset_file    = _nh.param<std::string>("offset_table", "");
+    std::string         _offset_file    = _nh.param<std::string>("offset_file_path", "");
     std::string         _robot_file     = _nh.param<std::string>("robot_file_path", "");
 
     std::string         _init_file      = _nh.param<std::string>("init_file_path", "");
