@@ -8,8 +8,6 @@
 #ifndef HEAD_CONTROL_MODULE_H_
 #define HEAD_CONTROL_MODULE_H_
 
-#define EIGEN_NO_DEBUG
-#define EIGEN_NO_STATIC_ASSERT
 
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
@@ -18,11 +16,9 @@
 #include <sensor_msgs/JointState.h>
 #include <boost/thread.hpp>
 
-#include <Eigen/Dense>
-
-#include <cmath>
-
 #include "robotis_framework_common/MotionModule.h"
+#include "robotis_math/RobotisMath.h"
+#include "robotis_controller_msgs/StatusMsg.h"
 
 namespace ROBOTIS
 {
@@ -37,7 +33,9 @@ private:
     boost::thread	*tra_gene_thread_;
     boost::mutex	tra_lock_;
     ros::Publisher	moving_head_pub_;
+    ros::Publisher  status_msg_pub_;
     const bool 		DEBUG;
+    bool            stop_process_;
     bool			is_moving_;
     bool 			is_direct_control_;
     int 			tra_count_, tra_size_;
@@ -58,18 +56,27 @@ private:
 
     HeadControlModule();
 
+    /* ROS Topic Callback Functions */
+    void Get3DLidarCallback(const std_msgs::String::ConstPtr &msg);
+    void SetHeadJointCallback(const sensor_msgs::JointState::ConstPtr &msg);
+
     void QueueThread();
-    void beforeMoveLidar();
-    void startMoveLidar();
-    void afterMoveLidar();
-    bool isMoving();
-    void publishLidarMoveTopic(std::string msg_data);
+    void JointTraGeneThread();
 
+    void BeforeMoveLidar();
+    void StartMoveLidar();
+    void AfterMoveLidar();
+    void PublishLidarMoveMsg(std::string msg_data);
 
-    Eigen::MatrixXd minimumJerkTra( double pos_start , double vel_start , double accel_start,
+    void StartMoving();
+    void FinishMoving();
+    void StopMoving();
+
+    void PublishStatusMsg(unsigned int type, std::string msg);
+
+    Eigen::MatrixXd MinimumJerkTraPVA( double pos_start , double vel_start , double accel_start,
                                       double pos_end ,   double vel_end ,   double accel_end,
                                       double smp_time ,  double mov_time );
-    void jointTraGeneProc();
 
     enum HEAD_LIDAR_MODE
     {
@@ -86,12 +93,11 @@ public:
 
     static HeadControlModule *GetInstance() { return unique_instance_; }
 
-    /* ROS Topic Callback Functions */
-    void    Get3DLidarCallback(const std_msgs::String::ConstPtr &msg);
-    void 	setHeadJointCallback(const sensor_msgs::JointState::ConstPtr &msg);
+    void    Initialize(const int control_cycle_msec, Robot *robot);
+    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors);
 
-    void    Initialize(const int control_cycle_msec);
-    void    Process(std::map<std::string, Dynamixel *> dxls);
+    void	Stop();
+    bool	IsRunning();
 };
 
 }

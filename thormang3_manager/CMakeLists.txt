@@ -8,8 +8,14 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_device
   robotis_controller
   robotis_controller_msgs
+  robotis_math
   
   cmake_modules
+  ati_ft_sensor
+  thormang3_kinematics_dynamics
+  
+  thormang3_feet_ft_module
+  
   thormang3_head_control_module
   thormang3_manipulation_module
   thormang3_walking_module

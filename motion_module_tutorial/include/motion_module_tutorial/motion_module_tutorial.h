@@ -44,8 +44,11 @@ public:
     /* ROS Topic Callback Functions */
     void    TopicCallback(const std_msgs::Int16::ConstPtr &msg);
 
-    void    Initialize(const int control_cycle_msec);
-    void    Process(std::map<std::string, Dynamixel *> dxls);
+    void    Initialize(const int control_cycle_msec, Robot *robot);
+    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors);
+
+    void	Stop();
+    bool	IsRunning();
 };
 
 }

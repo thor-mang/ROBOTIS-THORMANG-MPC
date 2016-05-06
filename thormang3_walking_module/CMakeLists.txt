@@ -3,16 +3,19 @@ project(thormang3_walking_module)
 
 
 find_package(catkin REQUIRED COMPONENTS
+  dynamixel_sdk
   robotis_device
   robotis_controller_msgs
   robotis_framework_common
+  robotis_math
   roscpp
   std_msgs
   sensor_msgs
   geometry_msgs
-  thormang3_walking_module_msgs
   cmake_modules
   eigen_conversions
+  thormang3_kinematics_dynamics
+  thormang3_walking_module_msgs
 )
 
 find_package(Eigen REQUIRED)
@@ -40,9 +43,8 @@ include_directories(
 
 ## Declare a C++ library
 add_library(thormang3_walking_module
-  src/linear_algebra.cpp
+  src/LinearAlgebra.cpp
   src/WaklingModule.cpp
-  src/ForceTorqueSensor.cpp
   src/PreviewControlWalking.cpp
 )
 
