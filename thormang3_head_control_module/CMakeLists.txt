@@ -46,7 +46,7 @@ find_package(Eigen REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES test_motion_module
+  LIBRARIES thormang3_head_control_module
 #  CATKIN_DEPENDS robotis_device roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -83,7 +83,6 @@ add_dependencies(thormang3_head_control_module ${${PROJECT_NAME}_EXPORTED_TARGET
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(thormang3_head_control_module
-  robotis_device
   ${catkin_LIBRARIES}
 )
 

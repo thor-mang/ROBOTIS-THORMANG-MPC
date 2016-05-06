@@ -27,7 +27,7 @@ find_package(Eigen REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES wholebody_module
+  LIBRARIES thormang3_base_module
 #  CATKIN_DEPENDS robotis_device roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -50,7 +50,6 @@ add_library(thormang3_base_module
 add_dependencies(thormang3_base_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(thormang3_base_module
-  robotis_device
   ${catkin_LIBRARIES}
   yaml-cpp
 )

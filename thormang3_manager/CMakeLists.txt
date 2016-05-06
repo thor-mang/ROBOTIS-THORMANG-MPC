@@ -30,7 +30,7 @@ find_package(Eigen REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES thormang3_manager
+  LIBRARIES thormang3_manager
 #  CATKIN_DEPENDS robotis_controller roscpp
 #  DEPENDS system_lib
 )
@@ -57,10 +57,5 @@ add_executable(thormang3_manager src/thormang3_manager.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(thormang3_manager
-  robotis_controller
-  thormang3_head_control_module
-  thormang3_manipulation_module
-  thormang3_walking_module
-  thormang3_base_module
   ${catkin_LIBRARIES}
 )

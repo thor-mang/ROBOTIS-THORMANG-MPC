@@ -14,7 +14,7 @@ find_package(Eigen REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES thormang3_wrist_ft_module
+  LIBRARIES thormang3_wrist_ft_module
 #  CATKIN_DEPENDS geomtry_msgs robotis_device roscpp
 #  DEPENDS system_lib
 )
@@ -37,7 +37,6 @@ add_dependencies(thormang3_wrist_ft_module ${${PROJECT_NAME}_EXPORTED_TARGETS} $
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(thormang3_wrist_ft_module
-   robotis_device
    yaml-cpp
    ${catkin_LIBRARIES}
 )

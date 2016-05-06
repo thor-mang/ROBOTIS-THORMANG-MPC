@@ -20,7 +20,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
 #  CATKIN_DEPENDS walking_module_msgs
-#  LIBRARIES test_motion_module
+  LIBRARIES thormang3_walking_module
 #  CATKIN_DEPENDS robotis_device roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -53,7 +53,6 @@ add_dependencies(thormang3_walking_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(thormang3_walking_module
-  robotis_device
   yaml-cpp
   ${catkin_LIBRARIES}
 )

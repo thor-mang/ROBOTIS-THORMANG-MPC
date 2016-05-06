@@ -19,7 +19,7 @@ find_package(Eigen REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES thormang3_manipulation_module
+  LIBRARIES thormang3_manipulation_module
 #  CATKIN_DEPENDS robotis_device roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -44,7 +44,6 @@ add_library(thormang3_manipulation_module
 add_dependencies(thormang3_manipulation_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(thormang3_manipulation_module
-  robotis_device
   yaml-cpp
   ${catkin_LIBRARIES}
 )
