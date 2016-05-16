@@ -317,7 +317,7 @@ void ThorMang3FeetForceTorqueSensor::QueueThread()
 }
 
 
-void ThorMang3FeetForceTorqueSensor::Process(std::map<std::string, Dynamixel *> dxls)
+void ThorMang3FeetForceTorqueSensor::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors)
 {
 	exist_r_leg_an_r_ = false;
 	exist_r_leg_an_p_ = false;

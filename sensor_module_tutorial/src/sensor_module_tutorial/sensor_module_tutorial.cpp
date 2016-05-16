@@ -55,7 +55,7 @@ void SensorModuleTutorial::TopicCallback(const std_msgs::Int16::ConstPtr &msg)
     pub1_.publish(_msg);
 }
 
-void SensorModuleTutorial::Process(std::map<std::string, Dynamixel *> dxls)
+void SensorModuleTutorial::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors)
 {
     UINT16_T ext_port_data_1 = dxls["r_leg_an_p"]->dxl_state->bulk_read_table["external_port_data_1"];
     UINT16_T ext_port_data_2 = dxls["r_leg_an_p"]->dxl_state->bulk_read_table["external_port_data_2"];
