@@ -14,8 +14,6 @@
 
 using namespace ROBOTIS;
 
-ThorMang3FeetForceTorqueSensor *ThorMang3FeetForceTorqueSensor::unique_instance_ = new ThorMang3FeetForceTorqueSensor();
-
 ThorMang3FeetForceTorqueSensor::ThorMang3FeetForceTorqueSensor()
     : control_cycle_msec_(8)
 {
