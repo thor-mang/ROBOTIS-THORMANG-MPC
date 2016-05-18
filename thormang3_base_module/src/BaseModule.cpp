@@ -218,6 +218,7 @@ void BaseModule::QueueThread()
     while(_ros_node.ok())
     {
         _callback_queue.callAvailable();
+        usleep(100);
     }
 }
 
