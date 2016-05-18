@@ -1,4 +1,4 @@
-r_arm_sh_p1 :   # H54-100-S500-R
+r_arm_sh_p1 :   # H54-200-S500-R
    return_delay_time     :  10    # item name : value
    operating_mode        :  3
    shutdown              :  58
@@ -13,7 +13,7 @@ r_arm_sh_p1 :   # H54-100-S500-R
    velocity_p_gain       : 180
    velocity_i_gain       : 452
 
-l_arm_sh_p1 :   # H54-100-S500-R
+l_arm_sh_p1 :   # H54-200-S500-R
    return_delay_time     :  10    
    operating_mode        :  3     
    shutdown              :  58    
