@@ -7,8 +7,8 @@
 
 [ device info ]
 # TYPE    | PORT NAME    | ID  | MODEL          | PROTOCOL | DEV NAME     | BULK READ ITEMS
-dynamixel | /dev/ttyUSB0 | 1   | H54-100-S500-R | 2.0      | r_arm_sh_p1  | present_position, present_voltage
-dynamixel | /dev/ttyUSB1 | 2   | H54-100-S500-R | 2.0      | l_arm_sh_p1  | present_position, present_voltage
+dynamixel | /dev/ttyUSB0 | 1   | H54-200-S500-R | 2.0      | r_arm_sh_p1  | present_position, present_voltage
+dynamixel | /dev/ttyUSB1 | 2   | H54-200-S500-R | 2.0      | l_arm_sh_p1  | present_position, present_voltage
 dynamixel | /dev/ttyUSB0 | 3   | H54-100-S500-R | 2.0      | r_arm_sh_r   | present_position, present_voltage
 dynamixel | /dev/ttyUSB1 | 4   | H54-100-S500-R | 2.0      | l_arm_sh_r   | present_position, present_voltage
 dynamixel | /dev/ttyUSB0 | 5   | H54-100-S500-R | 2.0      | r_arm_sh_p2  | present_position, present_voltage
