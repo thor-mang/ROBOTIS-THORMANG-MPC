@@ -12,8 +12,6 @@
 
 using namespace ROBOTIS;
 
-WalkingMotionModule *WalkingMotionModule::unique_instance_ = new WalkingMotionModule();
-
 WalkingMotionModule::WalkingMotionModule()
     : control_cycle_msec_(8)
 {
@@ -211,6 +209,7 @@ void	WalkingMotionModule::QueueThread()
     while(_ros_node.ok())
     {
         _callback_queue.callAvailable();
+        usleep(100);
     }
 }
 

@@ -10,8 +10,6 @@
 
 using namespace ROBOTIS;
 
-ManipulationModule *ManipulationModule::unique_instance_ = new ManipulationModule();
-
 ManipulationModule::ManipulationModule()
     : control_cycle_msec_(0)
 {
@@ -168,6 +166,7 @@ void ManipulationModule::QueueThread()
     while(_ros_node.ok())
     {
         _callback_queue.callAvailable();
+        usleep(100);
     }
 }
 
