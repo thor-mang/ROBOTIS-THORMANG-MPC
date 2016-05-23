@@ -480,39 +480,39 @@ void PreviewControlWalking::Initialize()
 	//Initialize Time
 	m_WalkingTime = 0; m_ReferenceTime = 0;
 
-	//Initializing m_ZMP_X Init
-	matd matRotationGtoROrigin, inv_matRotationGtoOrigin;
-	matd inv_matTranslationGtoROrigin;
-	double g_to_robot_origin_x, g_to_robot_origin_y, g_to_robot_origin_z;
-
-	matRotationGtoROrigin.resize(4,4);
-	matRotationGtoROrigin = GetOrientationMatrix(0.0, 0.0, m_PresentBodyPosition.yaw);
-
-	inv_matRotationGtoOrigin = matRotationGtoROrigin.transpose();
-
-	g_to_robot_origin_x = 0.5*(m_PreviousStepRightFootPosition.x + m_PreviousStepLeftFootPosition.x);
-	g_to_robot_origin_y = 0.5*(m_PreviousStepRightFootPosition.y + m_PreviousStepLeftFootPosition.y);
-	g_to_robot_origin_z = 0.5*(m_PreviousStepRightFootPosition.z + m_PreviousStepLeftFootPosition.z);
-
-	inv_matTranslationGtoROrigin = GetTranslationMatrix(-g_to_robot_origin_x, -g_to_robot_origin_y, -g_to_robot_origin_z);
-
-
-
-	m_PreviousStepLeftFootPosition = GetPose3DfromTransformMatrix(inv_matRotationGtoOrigin*inv_matTranslationGtoROrigin*GetTransformMatrix(m_PreviousStepLeftFootPosition.x, m_PreviousStepLeftFootPosition.y, m_PreviousStepLeftFootPosition.z,
-			m_PreviousStepLeftFootPosition.roll, m_PreviousStepLeftFootPosition.pitch, m_PreviousStepLeftFootPosition.yaw));
-
-	m_PreviousStepRightFootPosition = GetPose3DfromTransformMatrix(inv_matRotationGtoOrigin*inv_matTranslationGtoROrigin*GetTransformMatrix(m_PreviousStepRightFootPosition.x, m_PreviousStepRightFootPosition.y, m_PreviousStepRightFootPosition.z,
-			m_PreviousStepRightFootPosition.roll, m_PreviousStepRightFootPosition.pitch, m_PreviousStepRightFootPosition.yaw));
-
-	m_PreviousStepBodyPosition = GetPose3DfromTransformMatrix(inv_matRotationGtoOrigin*inv_matTranslationGtoROrigin*GetTransformMatrix(m_PreviousStepBodyPosition.x, m_PreviousStepBodyPosition.y, m_PreviousStepBodyPosition.z,
-			m_PreviousStepBodyPosition.roll, m_PreviousStepBodyPosition.pitch, m_PreviousStepBodyPosition.yaw));
+//	//Initializing m_ZMP_X Init
+//	matd matRotationGtoROrigin, inv_matRotationGtoOrigin;
+//	matd inv_matTranslationGtoROrigin;
+//	double g_to_robot_origin_x, g_to_robot_origin_y, g_to_robot_origin_z;
+//
+//	matRotationGtoROrigin.resize(4,4);
+//	matRotationGtoROrigin = GetOrientationMatrix(0.0, 0.0, m_PresentBodyPosition.yaw);
+//
+//	inv_matRotationGtoOrigin = matRotationGtoROrigin.transpose();
+//
+//	g_to_robot_origin_x = 0.5*(m_PreviousStepRightFootPosition.x + m_PreviousStepLeftFootPosition.x);
+//	g_to_robot_origin_y = 0.5*(m_PreviousStepRightFootPosition.y + m_PreviousStepLeftFootPosition.y);
+//	g_to_robot_origin_z = 0.5*(m_PreviousStepRightFootPosition.z + m_PreviousStepLeftFootPosition.z);
+//
+//	inv_matTranslationGtoROrigin = GetTranslationMatrix(-g_to_robot_origin_x, -g_to_robot_origin_y, -g_to_robot_origin_z);
+//
+//
+//
+//	m_PreviousStepLeftFootPosition = GetPose3DfromTransformMatrix(inv_matRotationGtoOrigin*inv_matTranslationGtoROrigin*GetTransformMatrix(m_PreviousStepLeftFootPosition.x, m_PreviousStepLeftFootPosition.y, m_PreviousStepLeftFootPosition.z,
+//			m_PreviousStepLeftFootPosition.roll, m_PreviousStepLeftFootPosition.pitch, m_PreviousStepLeftFootPosition.yaw));
+//
+//	m_PreviousStepRightFootPosition = GetPose3DfromTransformMatrix(inv_matRotationGtoOrigin*inv_matTranslationGtoROrigin*GetTransformMatrix(m_PreviousStepRightFootPosition.x, m_PreviousStepRightFootPosition.y, m_PreviousStepRightFootPosition.z,
+//			m_PreviousStepRightFootPosition.roll, m_PreviousStepRightFootPosition.pitch, m_PreviousStepRightFootPosition.yaw));
+//
+//	m_PreviousStepBodyPosition = GetPose3DfromTransformMatrix(inv_matRotationGtoOrigin*inv_matTranslationGtoROrigin*GetTransformMatrix(m_PreviousStepBodyPosition.x, m_PreviousStepBodyPosition.y, m_PreviousStepBodyPosition.z,
+//			m_PreviousStepBodyPosition.roll, m_PreviousStepBodyPosition.pitch, m_PreviousStepBodyPosition.yaw));
 
 
 	m_PresentRightFootPosition = m_PreviousStepRightFootPosition;
 	m_PresentLeftFootPosition  = m_PreviousStepLeftFootPosition;
 	m_PresentBodyPosition      = m_PreviousStepBodyPosition;
 
-	matd CurrentCOMList;
+	//matd CurrentCOMList;
 	matGtoCOB = GetTransformMatrix(m_PreviousStepBodyPosition.x, m_PreviousStepBodyPosition.y, m_PreviousStepBodyPosition.z,
 			m_PreviousStepBodyPosition.roll, m_PreviousStepBodyPosition.pitch, m_PreviousStepBodyPosition.yaw);
 

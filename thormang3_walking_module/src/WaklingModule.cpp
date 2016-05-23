@@ -823,6 +823,8 @@ void	WalkingMotionModule::Process(std::map<std::string, Dynamixel *> dxls, std::
 	desired_matrix_g_to_lfoot_ = prev_walking->matGtoLF;
 	publish_mutex_.unlock();
 
+	PublishRobotPose();
+
     result["r_leg_hip_y"]->goal_position = prev_walking->m_OutAngleRad[0];
     result["r_leg_hip_r"]->goal_position = prev_walking->m_OutAngleRad[1];
     result["r_leg_hip_p"]->goal_position = prev_walking->m_OutAngleRad[2];

@@ -16,14 +16,11 @@
 #include <fstream>
 
 #include "robotis_math/RobotisMath.h"
-
-#include "thormang3_feet_ft_module_msgs/BothWrench.h"
-
-
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "robotis_framework_common/SensorModule.h"
 
+#include "thormang3_feet_ft_module_msgs/BothWrench.h"
+#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
 #include "ati_ft_sensor/ATIForceTorqueSensor.h"
 
 
