@@ -2,11 +2,9 @@ cmake_minimum_required(VERSION 2.8.3)
 project(thormang3_manipulation_module)
 
 find_package(catkin REQUIRED COMPONENTS
-  dynamixel_sdk
   robotis_device
   robotis_math
   robotis_controller_msgs
-  robotis_framework_common
   roscpp
   std_msgs
   geometry_msgs

@@ -3,9 +3,7 @@ project(motion_module_tutorial)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  dynamixel_sdk
   robotis_device
-  robotis_framework_common
 )
 
 catkin_package(

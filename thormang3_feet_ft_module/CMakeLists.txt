@@ -10,10 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   message_generation
   
-  dynamixel_sdk
   robotis_math
   robotis_device
-  robotis_framework_common
   thormang3_kinematics_dynamics
   
   thormang3_feet_ft_module_msgs
