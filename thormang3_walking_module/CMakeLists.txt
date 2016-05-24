@@ -3,10 +3,8 @@ project(thormang3_walking_module)
 
 
 find_package(catkin REQUIRED COMPONENTS
-  dynamixel_sdk
   robotis_device
   robotis_controller_msgs
-  robotis_framework_common
   robotis_math
   roscpp
   std_msgs

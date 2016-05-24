@@ -5,11 +5,9 @@ project(thormang3_head_control_module)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  dynamixel_sdk
   robotis_device
   robotis_math
   robotis_controller_msgs
-  robotis_framework_common
   roscpp
   std_msgs
   cmake_modules
