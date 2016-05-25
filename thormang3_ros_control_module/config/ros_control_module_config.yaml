@@ -1,0 +1,18 @@
+joints:
+  ["head_p",
+   "head_y",
+   "torso_y", 
+   "l_arm_sh_p1",
+   "l_arm_sh_r",
+   "l_arm_sh_p2",
+   "l_arm_el_y",
+   "l_arm_wr_r",
+   "l_arm_wr_y",
+   "l_arm_wr_p",
+   "r_arm_sh_p1",
+   "r_arm_sh_r",
+   "r_arm_sh_p2",
+   "r_arm_el_y",
+   "r_arm_wr_r",
+   "r_arm_wr_y",
+   "r_arm_wr_p"]
