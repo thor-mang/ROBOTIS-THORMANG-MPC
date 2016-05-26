@@ -3,10 +3,11 @@
 <launch>    
     <arg name="use_imu" default="true"/>
     <arg name="use_lidar" default="true" />  
-    <arg name="gazebo" default="false" />
+    <arg name="gazebo" default="false" />  
+    <arg name="robot_name" default="thormang3" />
     
     <param name="gazebo"                   value="$(arg gazebo)"    type="bool"/>
-    <param name="gazebo_robot_name"        value="thormang3"/>
+    <param name="gazebo_robot_name"        value="$(arg robot_name)"/>
     
     <param name="offset_file_path"         value="$(find thormang3_manager)/config/offset.yaml"/>
     <param name="robot_file_path"          value="$(find thormang3_manager)/config/THORMANG3.robot"/>
