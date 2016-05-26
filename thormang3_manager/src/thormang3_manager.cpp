@@ -65,14 +65,13 @@ int main(int argc, char **argv)
 
     std::string init_file   = nh.param<std::string>("init_file_path", "");
 
+    controller->gazebo_robot_name_ = nh.param<std::string>("gazebo_robot_name", controller->gazebo_robot_name_);
+
     /* gazebo simulation */
     controller->gazebo_mode_ = nh.param<bool>("gazebo", false);
     if(controller->gazebo_mode_ == true)
     {
         ROS_WARN("SET TO GAZEBO MODE!");
-        std::string robot_name = nh.param<std::string>("gazebo_robot_name", "");
-        if(robot_name != "")
-            controller->gazebo_robot_name_ = robot_name;
     }
 
     if(robot_file == "")
