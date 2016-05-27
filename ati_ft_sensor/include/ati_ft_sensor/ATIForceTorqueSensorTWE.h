@@ -28,8 +28,9 @@ private:
 	Eigen::MatrixXd ft_null_;
 	Eigen::MatrixXd ft_raw_;
 	Eigen::MatrixXd ft_scaled_;
-
-	boost::mutex    ft_scale_param_mutex_;
+  
+  boost::mutex    ft_scale_param_mutex_;
+  boost::mutex    ft_sensor_mutex_;
 
 
 	double ft_scale_factor_;
@@ -66,6 +67,8 @@ public:
 	void SetCurrentVoltageOutput(double voltage0, double voltage1, double voltage2,
 								 double voltage3, double voltage4, double voltage5);
 	void SetCurrentVoltageOutput(Eigen::MatrixXd voltage);
+  
+  void SetCurrentForceTorqueRaw(const geometry_msgs::Wrench& ft_msg);
 
 	Eigen::MatrixXd GetCurrentForceTorqueRaw();
 	Eigen::MatrixXd GetCurrentForceTorqueScaled();
@@ -78,6 +81,8 @@ public:
 	void SetCurrentVoltageOutputPublishForceTorque(double voltage0, double voltage1, double voltage2,
 			 	 	 	 	 	 	 	 	 	   double voltage3, double voltage4, double voltage5);
 	void SetCurrentVoltageOutputPublish(Eigen::MatrixXd voltage);
+  
+  void PublishForceTorque();
 };
 
 }
