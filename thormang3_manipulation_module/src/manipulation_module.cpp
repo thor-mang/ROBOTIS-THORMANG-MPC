@@ -109,7 +109,7 @@ void ManipulationModule::initialize(const int control_cycle_msec, robotis_framew
   /* publish topics */
 
   // for gui
-  status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
+  status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
   std::string _path = ros::package::getPath("thormang3_manipulation_module") + "/config/ik_weight.yaml";
   parseData(_path);
@@ -179,17 +179,17 @@ void ManipulationModule::queueThread()
   ros_node.setCallbackQueue(&callback_queue);
 
   /* subscribe topics */
-  ros::Subscriber ini_pose_msg_sub        = ros_node.subscribe("/robotis/manipulation/ini_pose_msg", 5,
+  ros::Subscriber ini_pose_msg_sub        = ros_node.subscribe("robotis/manipulation/ini_pose_msg", 5,
                                                                &ManipulationModule::initPoseMsgCallback, this);
-  ros::Subscriber joint_pose_msg_sub      = ros_node.subscribe("/robotis/manipulation/joint_pose_msg", 5,
+  ros::Subscriber joint_pose_msg_sub      = ros_node.subscribe("robotis/manipulation/joint_pose_msg", 5,
                                                                &ManipulationModule::jointPoseMsgCallback, this);
-  ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/manipulation/kinematics_pose_msg", 5,
+  ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("robotis/manipulation/kinematics_pose_msg", 5,
                                                                &ManipulationModule::kinematicsPoseMsgCallback, this);
 
   /* service */
-  ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/manipulation/get_joint_pose",
+  ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("robotis/manipulation/get_joint_pose",
                                                                        &ManipulationModule::getJointPoseCallback, this);
-  ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/manipulation/get_kinematics_pose",
+  ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("robotis/manipulation/get_kinematics_pose",
                                                                             &ManipulationModule::getKinematicsPoseCallback, this);
 
   while (ros_node.ok())

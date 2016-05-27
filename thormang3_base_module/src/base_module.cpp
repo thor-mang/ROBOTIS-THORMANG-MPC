@@ -154,8 +154,8 @@ void BaseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
   ros::NodeHandle ros_node;
 
   /* publish topics */
-  status_msg_pub_       = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
-  set_ctrl_module_pub_  = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
+  status_msg_pub_       = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
+  set_ctrl_module_pub_  = ros_node.advertise<std_msgs::String>("robotis/enable_ctrl_module", 1);
 }
 
 void BaseModule::parseIniPoseData(const std::string &path)
@@ -240,7 +240,7 @@ void BaseModule::queueThread()
   /* subscribe topics */
 
   // for gui
-  ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/base/ini_pose", 5, &BaseModule::initPoseMsgCallback, this);
+  ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("robotis/base/ini_pose", 5, &BaseModule::initPoseMsgCallback, this);
 
   while (ros_node.ok())
   {
