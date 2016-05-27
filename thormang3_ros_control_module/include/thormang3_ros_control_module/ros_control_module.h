@@ -33,7 +33,6 @@
 
 #include <boost/thread.hpp>
 #include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
 
 // robotis
 #include <robotis_framework_common/MotionModule.h>
@@ -41,6 +40,8 @@
 // ros control
 #include <controller_manager/controller_manager.h>
 #include <hardware_interface/robot_hw.h>
+#include <hardware_interface/imu_sensor_interface.h>
+#include <hardware_interface/force_torque_sensor_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 
@@ -71,10 +72,22 @@ private:
   boost::thread queue_thread_;
   ros::Time last_time_stamp_;
   
-  // ros control
+  /** ROS CONTROL PART */
+  boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
   
-  boost::shared_ptr<controller_manager::ControllerManager> controller_manager;
+  // IMU
+  hardware_interface::ImuSensorInterface imu_sensor_interface_;
+  hardware_interface::ImuSensorHandle::Data imu_data;
+  double imu_orientation[4];
+  double imu_angular_velocity[3];
+  double imu_linear_acceleration[3];
+
+  // FT-Sensors
+  hardware_interface::ForceTorqueSensorInterface force_torque_sensor_interface_;
+  std::map<std::string, double[3]> force_;
+  std::map<std::string, double[3]> torque_;
   
+  // joint interfaces
   hardware_interface::JointStateInterface jnt_state_interface_;
   hardware_interface::PositionJointInterface jnt_pos_interface_;
   std::map<std::string, double> cmd_;
