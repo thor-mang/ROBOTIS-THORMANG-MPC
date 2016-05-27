@@ -70,6 +70,8 @@ public:
                                double voltage3, double voltage4, double voltage5);
   void setCurrentVoltageOutput(Eigen::MatrixXd voltage);
 
+  void setCurrentForceTorqueRaw(const geometry_msgs::Wrench& ft_msg);
+
   Eigen::MatrixXd getCurrentForceTorqueRaw();
   Eigen::MatrixXd getCurrentForceTorqueScaled();
 
@@ -82,6 +84,8 @@ public:
                                       double voltage3, double voltage4, double voltage5);
   void setCurrentVoltageOutputPublish(Eigen::MatrixXd voltage);
 
+  void publishForceTorque();
+
 private:
   bool parseFTData(const std::string& ft_data_path, const std::string& ft_data_key);
 
@@ -93,6 +97,7 @@ private:
   Eigen::MatrixXd ft_scaled_;
 
   boost::mutex    ft_scale_param_mutex_;
+  boost::mutex    ft_sensor_mutex_;
 
 
   double ft_scale_factor_;

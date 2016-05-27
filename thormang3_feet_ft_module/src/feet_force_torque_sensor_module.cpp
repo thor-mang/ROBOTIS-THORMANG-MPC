@@ -144,6 +144,8 @@ void FeetForceTorqueSensor::initialize(const int control_cycle_msec, robotis_fra
 
 void FeetForceTorqueSensor::initializeFeetForceTorqueSensor()
 {
+  boost::mutex::scoped_lock lock(ft_sensor_mutex_);
+
   ros::NodeHandle ros_node;
 
   std::string foot_ft_data_path  = ros_node.param<std::string>("ft_data_path", "");
@@ -224,6 +226,8 @@ void FeetForceTorqueSensor::saveFTCalibrationData(const std::string &path)
 
 void  FeetForceTorqueSensor::ftSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg)
 {
+  boost::mutex::scoped_lock lock(ft_sensor_mutex_);
+
   if( (ft_command_ == FT_NONE) && (ft_period_ == ft_get_count_) )
   {
     std::string command = msg->data;
@@ -280,6 +284,30 @@ void  FeetForceTorqueSensor::ftSensorCalibrationCommandCallback(const std_msgs::
     ROS_INFO("previous task is alive");
 }
 
+void FeetForceTorqueSensor::gazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg)
+{
+  boost::mutex::scoped_lock lock(ft_sensor_mutex_);
+
+  geometry_msgs::Wrench msg_transformed;
+  msg_transformed.force.x =  msg->wrench.force.x;
+  msg_transformed.force.y = -msg->wrench.force.y;
+  msg_transformed.force.z = -msg->wrench.force.z;
+
+  if (msg->header.frame_id == "l_leg_an_r_link")
+  {
+    l_foot_ft_sensor_.setCurrentForceTorqueRaw(msg_transformed);
+  }
+  else if (msg->header.frame_id == "r_leg_an_r_link")
+  {
+    r_foot_ft_sensor_.setCurrentForceTorqueRaw(msg_transformed);
+  }
+  else
+  {
+    ROS_ERROR_ONCE_NAMED(msg->header.frame_id.c_str(), "[FeetForceTorqueSensor] Unknown ft sensor callback with frame_id '%s'.", msg->header.frame_id.c_str());
+    return;
+  }
+}
+
 void FeetForceTorqueSensor::publishStatusMsg(unsigned int type, std::string msg)
 {
   robotis_controller_msgs::StatusMsg status_msg;
@@ -328,6 +356,8 @@ void FeetForceTorqueSensor::queueThread()
 
   /* subscriber */
   ros::Subscriber ft_calib_command_sub = ros_node.subscribe("/robotis/feet_ft/ft_calib_command", 1, &FeetForceTorqueSensor::ftSensorCalibrationCommandCallback, this);
+  ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/" + gazebo_robot_name + "/ft_left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/" + gazebo_robot_name + "/ft_right_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
 
   /* publisher */
   thormang3_foot_ft_status_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
@@ -342,67 +372,76 @@ void FeetForceTorqueSensor::queueThread()
 
 void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors)
 {
+  boost::mutex::scoped_lock lock(ft_sensor_mutex_);
+
   exist_r_leg_an_r_ = false;
   exist_r_leg_an_p_ = false;
   exist_l_leg_an_r_ = false;
   exist_l_leg_an_p_ = false;
 
-  std::map<std::string, robotis_framework::Dynamixel*>::iterator dxls_it = dxls.find("r_leg_an_r");
-
-
-  if(dxls_it != dxls.end())
+  if (!gazebo_mode)
   {
-    r_foot_ft_current_voltage_[0] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
-    r_foot_ft_current_voltage_[1] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
-    r_foot_ft_current_voltage_[2] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
-    r_foot_ft_current_voltage_[3] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
-    exist_r_leg_an_r_ = true;
-  }
-  else
-    return;
+    std::map<std::string, robotis_framework::Dynamixel*>::iterator dxls_it = dxls.find("r_leg_an_r");
+    if(dxls_it != dxls.end())
+    {
+      r_foot_ft_current_voltage_[0] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+      r_foot_ft_current_voltage_[1] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
+      r_foot_ft_current_voltage_[2] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
+      r_foot_ft_current_voltage_[3] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
+      exist_r_leg_an_r_ = true;
+    }
+    else
+      return;
 
-  dxls_it = dxls.find("r_leg_an_p");
-  if(dxls_it != dxls.end())
+    dxls_it = dxls.find("r_leg_an_p");
+    if(dxls_it != dxls.end())
+    {
+      r_foot_ft_current_voltage_[4] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+      r_foot_ft_current_voltage_[5] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
+      exist_r_leg_an_p_ = true;
+    }
+    else
+      return;
+
+    dxls_it = dxls.find("l_leg_an_r");
+    if(dxls_it != dxls.end())
+    {
+      l_foot_ft_current_voltage_[0] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+      l_foot_ft_current_voltage_[1] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
+      l_foot_ft_current_voltage_[2] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
+      l_foot_ft_current_voltage_[3] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
+      exist_l_leg_an_r_ = true;
+    }
+    else
+      return;
+
+    dxls_it = dxls.find("l_leg_an_p");
+    if(dxls_it != dxls.end())
+    {
+      l_foot_ft_current_voltage_[4] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+      l_foot_ft_current_voltage_[5] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
+      exist_l_leg_an_p_ = true;
+    }
+    else
+      return;
+  }
+
+
+  if (gazebo_mode || (exist_r_leg_an_r_ && exist_r_leg_an_p_))
   {
-    r_foot_ft_current_voltage_[4] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
-    r_foot_ft_current_voltage_[5] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
-    exist_r_leg_an_p_ = true;
-  }
-  else
-    return;
-
-  dxls_it = dxls.find("l_leg_an_r");
-  if(dxls_it != dxls.end())
-  {
-    l_foot_ft_current_voltage_[0] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
-    l_foot_ft_current_voltage_[1] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
-    l_foot_ft_current_voltage_[2] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
-    l_foot_ft_current_voltage_[3] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
-    exist_l_leg_an_r_ = true;
-  }
-  else
-    return;
-
-  dxls_it = dxls.find("l_leg_an_p");
-  if(dxls_it != dxls.end())
-  {
-    l_foot_ft_current_voltage_[4] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
-    l_foot_ft_current_voltage_[5] = (dxls_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
-    exist_l_leg_an_p_ = true;
-  }
-  else
-    return;
-
-
-
-  if( exist_r_leg_an_r_ && exist_r_leg_an_p_) {
-
-    r_foot_ft_sensor_.setCurrentVoltageOutputPublish( r_foot_ft_current_voltage_[0],
+    if (!gazebo_mode)
+    {
+      r_foot_ft_sensor_.setCurrentVoltageOutputPublish( r_foot_ft_current_voltage_[0],
         r_foot_ft_current_voltage_[1],
         r_foot_ft_current_voltage_[2],
         r_foot_ft_current_voltage_[3],
         r_foot_ft_current_voltage_[4],
         r_foot_ft_current_voltage_[5]);
+    }
+    else
+    {
+      r_foot_ft_sensor_.publishForceTorque();
+    }
 
     r_foot_ft_sensor_.getCurrentForceTorqueRaw(&r_foot_fx_raw_N_,  &r_foot_fy_raw_N_,  &r_foot_fz_raw_N_,
         &r_foot_tx_raw_Nm_, &r_foot_ty_raw_Nm_, &r_foot_tz_raw_Nm_);
@@ -426,13 +465,21 @@ void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dyn
 
   }
 
-  if( exist_l_leg_an_r_ && exist_l_leg_an_p_) {
-    l_foot_ft_sensor_.setCurrentVoltageOutputPublish(l_foot_ft_current_voltage_[0],
+  if (gazebo_mode || (exist_l_leg_an_r_ && exist_l_leg_an_p_))
+  {
+    if (!gazebo_mode)
+    {
+      l_foot_ft_sensor_.setCurrentVoltageOutputPublish(l_foot_ft_current_voltage_[0],
         l_foot_ft_current_voltage_[1],
         l_foot_ft_current_voltage_[2],
         l_foot_ft_current_voltage_[3],
         l_foot_ft_current_voltage_[4],
         l_foot_ft_current_voltage_[5]);
+    }
+    else
+    {
+      r_foot_ft_sensor_.publishForceTorque();
+    }
 
     l_foot_ft_sensor_.getCurrentForceTorqueRaw(&l_foot_fx_raw_N_,  &l_foot_fy_raw_N_,  &l_foot_fz_raw_N_,
         &l_foot_tx_raw_Nm_, &l_foot_ty_raw_Nm_, &l_foot_tz_raw_Nm_);
