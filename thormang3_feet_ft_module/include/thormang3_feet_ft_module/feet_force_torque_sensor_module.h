@@ -42,6 +42,7 @@
 #include <ros/callback_queue.h>
 #include <boost/thread.hpp>
 #include <std_msgs/String.h>
+#include <geometry_msgs/WrenchStamped.h>
 
 #include <fstream>
 
@@ -64,6 +65,8 @@ public:
   FeetForceTorqueSensor();
   ~FeetForceTorqueSensor();
 
+  bool gazebo_mode;
+  std::string gazebo_robot_name;
 
   double r_foot_fx_raw_N_,  r_foot_fy_raw_N_,  r_foot_fz_raw_N_;
   double r_foot_tx_raw_Nm_, r_foot_ty_raw_Nm_, r_foot_tz_raw_Nm_;
@@ -85,6 +88,8 @@ private:
   void saveFTCalibrationData(const std::string &path);
 
   void ftSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
+  void gazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg);
+
   void publishStatusMsg(unsigned int type, std::string msg);
   void publishBothFTData(int type, Eigen::MatrixXd &ft_right, Eigen::MatrixXd &ft_left);
 
@@ -92,6 +97,7 @@ private:
   int             control_cycle_msec_;
   boost::thread   queue_thread_;
   boost::mutex    publish_mutex_;
+  boost::mutex    ft_sensor_mutex_;
 
 
   KinematicsDynamics* thormang3_kd_;
