@@ -1,3 +1,4 @@
+# defines joints to be controlled by ros control module
 joints:
   ["head_p",
    "head_y",
@@ -16,3 +17,8 @@ joints:
    "r_arm_wr_r",
    "r_arm_wr_y",
    "r_arm_wr_p"]
+
+# defines which ft sensors to be interfaced
+ft_sensors:
+  l_foot: ["l_foot", "l_foot_ft_link"]
+  r_foot: ["r_foot", "r_foot_ft_link"]
