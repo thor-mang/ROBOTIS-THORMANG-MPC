@@ -1,33 +1,25 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(thormang3_manager)
+project(thormang3_wrist_ft_module)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  dynamixel_sdk
-  robotis_framework_common
-  robotis_device
-  robotis_controller
-  robotis_controller_msgs
-  robotis_math
-
+  geometry_msgs
   cmake_modules
-  ati_ft_sensor
+  message_generation
+  
+  robotis_math
+  robotis_device
   thormang3_kinematics_dynamics
 
-  thormang3_feet_ft_module
-  thormang3_wrist_ft_module
-
-  thormang3_head_control_module
-  thormang3_manipulation_module
-  thormang3_walking_module
-  thormang3_base_module
-  thormang3_ros_control_module
+  ati_ft_sensor
 )
 
-## System dependencies are found with CMake's conventions
 find_package(Eigen REQUIRED)
+
+
 
 ###################################
 ## catkin specific configuration ##
@@ -39,9 +31,9 @@ find_package(Eigen REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-  LIBRARIES thormang3_manager
-#  CATKIN_DEPENDS robotis_controller roscpp
+  INCLUDE_DIRS include
+  LIBRARIES thormang3_wrist_ft_module
+#  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
@@ -49,23 +41,33 @@ catkin_package(
 ## Build ##
 ###########
 
+set(HEADERS
+  include/${PROJECT_NAME}/ThorMang3WristForceTorqueSensorModule.h
+)
+
+set(SOURCES
+  src/ThorMang3WristForceTorqueSensorModule.cpp
+)
+
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
   include
-  ${Eigen_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
 )
 
-## Declare a C++ executable
-add_executable(thormang3_manager src/thormang3_manager.cpp)
+# Declare a C++ library
+add_library(thormang3_wrist_ft_module ${SOURCES} ${HEADERS})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(thormang3_manager ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+## Add cmake target dependencies of the library
+## as an example, code may need to be generated before libraries
+## either from message generation or dynamic reconfigure
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(thormang3_manager
-  ${catkin_LIBRARIES}
-)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+

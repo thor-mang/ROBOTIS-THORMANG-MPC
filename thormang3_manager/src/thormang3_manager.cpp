@@ -9,6 +9,7 @@
 
 /* Sensor Module Header */
 #include "thormang3_feet_ft_module/ThorMang3FeetForceTorqueSensorModule.h"
+#include "thormang3_wrist_ft_module/ThorMang3WristForceTorqueSensorModule.h"
 
 /* Motion Module Header */
 #include "thormang3_base_module/BaseModule.h"
@@ -37,12 +38,14 @@ int main(int argc, char **argv)
     std::string gazebo_robot_name       = _nh.param<std::string>("gazebo_robot_name", _controller->gazebo_robot_name);
     _controller->gazebo_robot_name = gazebo_robot_name;
     ThorMang3FeetForceTorqueSensor::GetInstance()->gazebo_robot_name = gazebo_robot_name;
-    
+    ThorMang3WristForceTorqueSensor::GetInstance()->gazebo_robot_name = gazebo_robot_name;
+
     /* gazebo simulation */
     if(_nh.param<bool>("gazebo", false))
     {
         _controller->gazebo_mode = true;
         ThorMang3FeetForceTorqueSensor::GetInstance()->gazebo_mode = true;
+        ThorMang3WristForceTorqueSensor::GetInstance()->gazebo_mode = true;
         ROS_INFO("SET TO GAZEBO MODE!");
     }
 
@@ -65,6 +68,7 @@ int main(int argc, char **argv)
 
     /* Add Sensor Module */
     _controller->AddSensorModule((SensorModule*)ThorMang3FeetForceTorqueSensor::GetInstance());
+    _controller->AddSensorModule((SensorModule*)ThorMang3WristForceTorqueSensor::GetInstance());
 
     /* Add Motion Module */
     _controller->AddMotionModule((MotionModule*)BaseModule::GetInstance());
