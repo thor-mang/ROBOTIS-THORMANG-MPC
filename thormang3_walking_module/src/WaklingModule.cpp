@@ -188,23 +188,23 @@ void	WalkingMotionModule::QueueThread()
     _ros_node.setCallbackQueue(&_callback_queue);
 
     /* publish topics */
-    robot_pose_pub_	= _ros_node.advertise<thormang3_walking_module_msgs::RobotPose>("/robotis/walking/robot_pose", 1);
-    //status_msg_pub_	= _ros_node.advertise<std_msgs::String>("/robotis/walking/status_message", 1);
+    robot_pose_pub_	= _ros_node.advertise<thormang3_walking_module_msgs::RobotPose>("robotis/walking/robot_pose", 1);
+    //status_msg_pub_	= _ros_node.advertise<std_msgs::String>("robotis/walking/status_message", 1);
     status_msg_pub_ = _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
 
     /* ROS Service Callback Functions */
-    ros::ServiceServer get_ref_step_data_server	 = _ros_node.advertiseService("/robotis/walking/get_reference_step_data",
+    ros::ServiceServer get_ref_step_data_server	 = _ros_node.advertiseService("robotis/walking/get_reference_step_data",
     																			&WalkingMotionModule::GetReferenceStepDataServiceCallback, this);
-    ros::ServiceServer add_step_data_array_sever = _ros_node.advertiseService("/robotis/walking/add_step_data",		&WalkingMotionModule::AddStepDataServiceCallback,  		this);
-    ros::ServiceServer walking_start_server      = _ros_node.advertiseService("/robotis/walking/walking_start",		&WalkingMotionModule::WalkingStartServiceCallback,		this);
-    ros::ServiceServer is_running_server   		 = _ros_node.advertiseService("/robotis/walking/is_running",   		&WalkingMotionModule::IsRunningServiceCallback, 		this);
-    ros::ServiceServer set_balance_param_server	 = _ros_node.advertiseService("/robotis/walking/set_balance_param",	&WalkingMotionModule::SetBalanceParamServiceCallback,	this);
-    ros::ServiceServer remove_existing_step_data = _ros_node.advertiseService("/robotis/walking/remove_existing_step_data",
+    ros::ServiceServer add_step_data_array_sever = _ros_node.advertiseService("robotis/walking/add_step_data",		&WalkingMotionModule::AddStepDataServiceCallback,  		this);
+    ros::ServiceServer walking_start_server      = _ros_node.advertiseService("robotis/walking/walking_start",		&WalkingMotionModule::WalkingStartServiceCallback,		this);
+    ros::ServiceServer is_running_server   		 = _ros_node.advertiseService("robotis/walking/is_running",   		&WalkingMotionModule::IsRunningServiceCallback, 		this);
+    ros::ServiceServer set_balance_param_server	 = _ros_node.advertiseService("robotis/walking/set_balance_param",	&WalkingMotionModule::SetBalanceParamServiceCallback,	this);
+    ros::ServiceServer remove_existing_step_data = _ros_node.advertiseService("robotis/walking/remove_existing_step_data",
     																			&WalkingMotionModule::RemoveExistingStepDataServiceCallback, this);
 
     /* sensor topic subscribe */
-    ros::Subscriber imu_data_sub	= _ros_node.subscribe("/robotis/sensor/imu/imu",	3, &WalkingMotionModule::IMUDataOutputCallback,		this);
+    ros::Subscriber imu_data_sub	= _ros_node.subscribe("robotis/sensor/imu/imu",	3, &WalkingMotionModule::IMUDataOutputCallback,		this);
 
     while(_ros_node.ok())
     {

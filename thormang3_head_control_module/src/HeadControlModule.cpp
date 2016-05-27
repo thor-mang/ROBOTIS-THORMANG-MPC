@@ -53,8 +53,8 @@ void HeadControlModule::Initialize(const int control_cycle_msec, Robot *robot)
     ros::NodeHandle     _ros_node;
 
     /* publish topics */
-    moving_head_pub_ = _ros_node.advertise<std_msgs::String>("/robotis/sensor/move_lidar", 0);		// todo : change topic name
-    status_msg_pub_ = _ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 0);
+    moving_head_pub_ = _ros_node.advertise<std_msgs::String>("robotis/sensor/move_lidar", 0);		// todo : change topic name
+    status_msg_pub_ = _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 0);
 }
 
 void HeadControlModule::QueueThread()
@@ -65,8 +65,8 @@ void HeadControlModule::QueueThread()
     _ros_node.setCallbackQueue(&_callback_queue);
 
     /* subscribe topics */
-    ros::Subscriber get_3d_lidar_sub = _ros_node.subscribe("/robotis/head_control/move_lidar", 1, &HeadControlModule::Get3DLidarCallback, this);
-    ros::Subscriber set_head_joint_sub = _ros_node.subscribe("/robotis/head_control/set_joint_states", 1, &HeadControlModule::SetHeadJointCallback, this);
+    ros::Subscriber get_3d_lidar_sub = _ros_node.subscribe("robotis/head_control/move_lidar", 1, &HeadControlModule::Get3DLidarCallback, this);
+    ros::Subscriber set_head_joint_sub = _ros_node.subscribe("robotis/head_control/set_joint_states", 1, &HeadControlModule::SetHeadJointCallback, this);
 
     while(_ros_node.ok())
     {
