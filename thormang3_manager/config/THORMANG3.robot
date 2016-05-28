@@ -1,9 +1,9 @@
 [ port info ]
 # PORT NAME  | BAUDRATE | DEFAULT JOINT
-/dev/ttyUSB0 | 2000000  | r_arm_sh_p1
-/dev/ttyUSB1 | 2000000  | l_arm_sh_p1
-/dev/ttyUSB2 | 2000000  | r_leg_hip_y
-/dev/ttyUSB3 | 2000000  | l_leg_hip_y
+/dev/ttyUSB0 | 3000000  | r_arm_sh_p1
+/dev/ttyUSB1 | 3000000  | l_arm_sh_p1
+/dev/ttyUSB2 | 3000000  | r_leg_hip_y
+/dev/ttyUSB3 | 3000000  | l_leg_hip_y
 
 [ device info ]
 # TYPE    | PORT NAME    | ID  | MODEL          | PROTOCOL | DEV NAME     | BULK READ ITEMS
