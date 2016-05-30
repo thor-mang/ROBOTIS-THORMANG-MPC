@@ -4,8 +4,8 @@ StepData[] step_data_array
 ---
 int32 result
 
-int32 NO_ERROR					 = 0
+int32 NO_ERROR                   = 0
 int32 NOT_ENABLED_WALKING_MODULE = 2
-int32 PROBLEM_IN_POSITION_DATA	 = 4
-int32 PROBLEM_IN_TIME_DATA		 = 8
-int32 ROBOT_IS_WALKING_NOW 		 = 1024
+int32 PROBLEM_IN_POSITION_DATA   = 4
+int32 PROBLEM_IN_TIME_DATA       = 8
+int32 ROBOT_IS_WALKING_NOW       = 1024
