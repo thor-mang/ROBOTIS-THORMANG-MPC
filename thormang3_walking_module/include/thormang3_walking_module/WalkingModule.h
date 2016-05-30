@@ -18,7 +18,6 @@
 
 
 #include "PreviewControlWalking.h"
-#include "WalkingModuleCommon.h"
 
 #include "robotis_framework_common/MotionModule.h"
 
@@ -32,10 +31,6 @@
 #include "thormang3_walking_module_msgs/SetBalanceParam.h"
 #include "thormang3_walking_module_msgs/IsRunning.h"
 #include "thormang3_walking_module_msgs/RemoveExistingStepData.h"
-//#include "thormang3_base_module_msgs/CalibrationWrench.h"
-
-
-//#include "imu_3dm_gx4/FilterOutput.h"
 
 
 namespace ROBOTIS

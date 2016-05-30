@@ -1,3 +1,6 @@
 
 ---
 int32 result
+
+int32 NO_ERROR				= 0
+int32 ROBOT_IS_WALKING_NOW	= 1024
