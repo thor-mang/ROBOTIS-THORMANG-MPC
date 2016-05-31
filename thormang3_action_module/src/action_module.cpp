@@ -42,94 +42,6 @@ ActionModule::ActionModule()
 	previous_running_ = false;
 	present_running_  = false;
 
-
-    /* arm */
-    result["r_arm_sh_p1"]   = new DynamixelState();
-    result["l_arm_sh_p1"]   = new DynamixelState();
-    result["r_arm_sh_r"]    = new DynamixelState();
-    result["l_arm_sh_r"]    = new DynamixelState();
-    result["r_arm_sh_p2"]   = new DynamixelState();
-    result["l_arm_sh_p2"]   = new DynamixelState();
-    result["r_arm_el_y"]    = new DynamixelState();
-    result["l_arm_el_y"]    = new DynamixelState();
-    result["r_arm_wr_r"]    = new DynamixelState();
-    result["l_arm_wr_r"]    = new DynamixelState();
-    result["r_arm_wr_y"]    = new DynamixelState();
-    result["l_arm_wr_y"]    = new DynamixelState();
-    result["r_arm_wr_p"]    = new DynamixelState();
-    result["l_arm_wr_p"]    = new DynamixelState();
-
-    /* gripper */
-    result["r_arm_grip"]    = new DynamixelState();
-    result["l_arm_grip"]    = new DynamixelState();
-
-    /* body */
-    result["torso_y"]       = new DynamixelState();
-
-    /* leg */
-    result["r_leg_hip_y"]   = new DynamixelState();
-    result["r_leg_hip_r"]   = new DynamixelState();
-    result["r_leg_hip_p"]   = new DynamixelState();
-    result["r_leg_kn_p"]    = new DynamixelState();
-    result["r_leg_an_p"]    = new DynamixelState();
-    result["r_leg_an_r"]    = new DynamixelState();
-
-    result["l_leg_hip_y"]   = new DynamixelState();
-    result["l_leg_hip_r"]   = new DynamixelState();
-    result["l_leg_hip_p"]   = new DynamixelState();
-    result["l_leg_kn_p"]    = new DynamixelState();
-    result["l_leg_an_p"]    = new DynamixelState();
-    result["l_leg_an_r"]    = new DynamixelState();
-
-    /* head */
-    result["head_y"]        = new DynamixelState();
-    result["head_p"]        = new DynamixelState();
-
-    /* arm */
-    joint_name_to_id_["r_arm_sh_p1"] = 1;
-    joint_name_to_id_["l_arm_sh_p1"] = 2;
-    joint_name_to_id_["r_arm_sh_r"]  = 3;
-    joint_name_to_id_["l_arm_sh_r"]  = 4;
-    joint_name_to_id_["r_arm_sh_p2"] = 5;
-    joint_name_to_id_["l_arm_sh_p2"] = 6;
-    joint_name_to_id_["r_arm_el_y"]  = 7;
-    joint_name_to_id_["l_arm_el_y"]  = 8;
-    joint_name_to_id_["r_arm_wr_r"]  = 9;
-    joint_name_to_id_["l_arm_wr_r"]  = 10;
-    joint_name_to_id_["r_arm_wr_y"]  = 11;
-    joint_name_to_id_["l_arm_wr_y"]  = 12;
-    joint_name_to_id_["r_arm_wr_p"]  = 13;
-    joint_name_to_id_["l_arm_wr_p"]  = 14;
-
-    /* leg */
-    joint_name_to_id_["r_leg_hip_y"] = 15;
-    joint_name_to_id_["l_leg_hip_y"] = 16;
-    joint_name_to_id_["r_leg_hip_r"] = 17;
-    joint_name_to_id_["l_leg_hip_r"] = 18;
-    joint_name_to_id_["r_leg_hip_p"] = 19;
-    joint_name_to_id_["l_leg_hip_p"] = 20;
-    joint_name_to_id_["r_leg_kn_p"]  = 21;
-    joint_name_to_id_["l_leg_kn_p"]  = 22;
-    joint_name_to_id_["r_leg_an_p"]  = 23;
-    joint_name_to_id_["l_leg_an_p"]  = 24;
-    joint_name_to_id_["r_leg_an_r"]  = 25;
-    joint_name_to_id_["l_leg_an_r"]  = 26;
-
-    /* body */
-    joint_name_to_id_["torso_y"]     = 27;
-
-    /* head */
-    joint_name_to_id_["head_y"]      = 28;
-    joint_name_to_id_["head_p"]      = 29;
-
-    /* gripper */
-    joint_name_to_id_["r_arm_grip"]  = 31;
-    joint_name_to_id_["l_arm_grip"]  = 30;
-
-    for(std::map<std::string, int>::iterator _it = joint_name_to_id_.begin(); _it != joint_name_to_id_.end(); _it++) {
-    	joint_id_to_name_[_it->second] = _it->first;
-    }
-
 }
 
 ActionModule::~ActionModule()
@@ -146,19 +58,16 @@ void ActionModule::Initialize(const int control_cycle_msec, Robot *robot)
     control_cycle_msec_ = control_cycle_msec;
     queue_thread_       = boost::thread(boost::bind(&ActionModule::QueueThread, this));
 
-//    for(std::map<std::string, Dynamixel*>::iterator it; it != robot->dxls.end(); it++)
-//    {
-//        std::string joint_name = it->first;
-//        Dynamixel*  dxl_info   = it->second;
-//
-////        //joint_name_to_id_[joint_name]   = dxl_info->id;
-////        ROS_INFO("---0-1---");
-////        //joint_id_to_name_[dxl_info->id] = joint_name;
-////        ROS_INFO("---0-2---");
-////        //result[joint_name] = new DynamixelState();
-////        ROS_INFO("---0-3---");
-////        //result[joint_name]->goal_position = dxl_info->dxl_state->goal_position;
-//    }
+    for(std::map<std::string, Dynamixel*>::iterator it; it != robot->dxls.end(); it++)
+    {
+        std::string joint_name = it->first;
+        Dynamixel*  dxl_info   = it->second;
+
+        joint_name_to_id_[joint_name]   = dxl_info->id;
+        joint_id_to_name_[dxl_info->id] = joint_name;
+        result[joint_name] = new DynamixelState();
+        result[joint_name]->goal_position = dxl_info->dxl_state->goal_position;
+    }
 
 
     ros::NodeHandle ros_node;
