@@ -699,7 +699,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 							}
 						}
 					}
-					result[_joint_name]->position_p_gain = ( 256 >> (play_page_.header.pgain[bID] >> 4) ) << 2 ;
+					//result[_joint_name]->position_p_gain = ( 256 >> (play_page_.header.pgain[bID] >> 4) ) << 2 ;
 				}
 			}
 		}
