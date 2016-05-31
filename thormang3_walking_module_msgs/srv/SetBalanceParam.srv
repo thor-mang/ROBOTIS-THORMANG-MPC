@@ -2,3 +2,8 @@ float32      updating_duration
 BalanceParam balance_param
 ---
 int32 result
+
+int32 NO_ERROR                       = 0
+int32 NOT_ENABLED_WALKING_MODULE     = 2
+int32 PREV_REQUEST_IS_NOT_FINISHED   = 32
+int32 TIME_CONST_IS_ZERO_OR_NEGATIVE = 64

@@ -12,6 +12,26 @@
 
 using namespace ROBOTIS;
 
+class WALKING_STATUS_MSG {
+public:
+    static const std::string FAILED_TO_ADD_STEP_DATA_MSG;
+    static const std::string BALANCE_PARAM_SETTING_START_MSG;
+    static const std::string BALANCE_PARAM_SETTING_FINISH_MSG;
+    static const std::string WALKING_MODULE_IS_ENABLED_MSG;
+    static const std::string WALKING_MODULE_IS_DISABLED_MSG;
+    static const std::string WALKING_START_MSG;
+    static const std::string WALKING_FINISH_MSG;
+};
+
+const std::string WALKING_STATUS_MSG::FAILED_TO_ADD_STEP_DATA_MSG = "Failed_to_add_Step_Data";
+const std::string WALKING_STATUS_MSG::BALANCE_PARAM_SETTING_START_MSG = "Balance_Param_Setting_Started";
+const std::string WALKING_STATUS_MSG::BALANCE_PARAM_SETTING_FINISH_MSG = "Balance_Param_Setting_Finished";
+const std::string WALKING_STATUS_MSG::WALKING_MODULE_IS_ENABLED_MSG = "Walking_Module_is_enabled";
+const std::string WALKING_STATUS_MSG::WALKING_MODULE_IS_DISABLED_MSG = "Walking_Module_is_enabled";
+const std::string WALKING_STATUS_MSG::WALKING_START_MSG = "Walking_Started";
+const std::string WALKING_STATUS_MSG::WALKING_FINISH_MSG = "Walking_Finished";
+
+
 WalkingMotionModule::WalkingMotionModule()
     : control_cycle_msec_(8)
 {
@@ -256,7 +276,7 @@ void	WalkingMotionModule::PublishStatusMsg(unsigned int type, std::string msg)
 
 int		WalkingMotionModule::StepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, StepData& des)
 {
-	int copy_result = STEP_DATA_ERR::NO_ERROR;
+	int copy_result = thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR;
 	des.TimeData.bWalkingState			= src.time_data.walking_state;
 	des.TimeData.dAbsStepTime			= src.time_data.abs_step_time;
 	des.TimeData.dDSPratio				= src.time_data.dsp_ratio;
@@ -300,10 +320,10 @@ int		WalkingMotionModule::StepDataMsgToStepData(thormang3_walking_module_msgs::S
 	des.PositionData.stLeftFootPosition.pitch	= src.position_data.left_foot_pose.pitch;
 	des.PositionData.stLeftFootPosition.yaw		= src.position_data.left_foot_pose.yaw;
 
-	if((src.time_data.walking_state != WalkingStateFlag::InWalkingStarting)
-		&& (src.time_data.walking_state != WalkingStateFlag::InWalking)
-		&& (src.time_data.walking_state != WalkingStateFlag::InWalkingEnding) )
-		copy_result |= STEP_DATA_ERR::PROBLEM_IN_TIME_DATA;
+	if((src.time_data.walking_state != thormang3_walking_module_msgs::StepTimeData::InWalkingStarting)
+		&& (src.time_data.walking_state != thormang3_walking_module_msgs::StepTimeData::InWalking)
+		&& (src.time_data.walking_state != thormang3_walking_module_msgs::StepTimeData::InWalkingEnding) )
+		copy_result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
 
 	if((src.time_data.start_time_delay_ratio_x < 0)
 		|| (src.time_data.start_time_delay_ratio_y < 0)
@@ -311,7 +331,7 @@ int		WalkingMotionModule::StepDataMsgToStepData(thormang3_walking_module_msgs::S
 		|| (src.time_data.start_time_delay_ratio_roll < 0)
 		|| (src.time_data.start_time_delay_ratio_pitch < 0)
 		|| (src.time_data.start_time_delay_ratio_yaw < 0) )
-		copy_result |= STEP_DATA_ERR::PROBLEM_IN_TIME_DATA;
+		copy_result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
 
 	if((src.time_data.finish_time_advance_ratio_x < 0)
 		|| (src.time_data.finish_time_advance_ratio_y < 0)
@@ -319,7 +339,7 @@ int		WalkingMotionModule::StepDataMsgToStepData(thormang3_walking_module_msgs::S
 		|| (src.time_data.finish_time_advance_ratio_roll < 0)
 		|| (src.time_data.finish_time_advance_ratio_pitch < 0)
 		|| (src.time_data.finish_time_advance_ratio_yaw < 0) )
-		copy_result |= STEP_DATA_ERR::PROBLEM_IN_TIME_DATA;
+		copy_result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
 
 	if(((src.time_data.start_time_delay_ratio_x + src.time_data.finish_time_advance_ratio_x) > 1.0)
 		|| ((src.time_data.start_time_delay_ratio_y		+ src.time_data.finish_time_advance_ratio_y		) > 1.0)
@@ -327,15 +347,15 @@ int		WalkingMotionModule::StepDataMsgToStepData(thormang3_walking_module_msgs::S
 		|| ((src.time_data.start_time_delay_ratio_roll	+ src.time_data.finish_time_advance_ratio_roll	) > 1.0)
 		|| ((src.time_data.start_time_delay_ratio_pitch	+ src.time_data.finish_time_advance_ratio_pitch	) > 1.0)
 		|| ((src.time_data.start_time_delay_ratio_yaw	+ src.time_data.finish_time_advance_ratio_yaw	) > 1.0) )
-		copy_result |= STEP_DATA_ERR::PROBLEM_IN_TIME_DATA;
+		copy_result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
 
-	if((src.position_data.moving_foot != MovingFootFlag::NFootMove)
-		&& (src.position_data.moving_foot != MovingFootFlag::RFootMove)
-		&& (src.position_data.moving_foot != MovingFootFlag::LFootMove))
-		copy_result |= STEP_DATA_ERR::PROBLEM_IN_POSITION_DATA;
+	if((src.position_data.moving_foot != thormang3_walking_module_msgs::StepPositionData::NFootMove)
+		&& (src.position_data.moving_foot != thormang3_walking_module_msgs::StepPositionData::RFootMove)
+		&& (src.position_data.moving_foot != thormang3_walking_module_msgs::StepPositionData::LFootMove))
+		copy_result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_POSITION_DATA;
 
 	if(src.position_data.foot_z_swap < 0)
-		copy_result |= STEP_DATA_ERR::PROBLEM_IN_POSITION_DATA;
+		copy_result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_POSITION_DATA;
 
 	return copy_result;
 }
@@ -400,10 +420,10 @@ bool 	WalkingMotionModule::AddStepDataServiceCallback(thormang3_walking_module_m
 														thormang3_walking_module_msgs::AddStepDataArray::Response &res)
 {
 	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
-	res.result = STEP_DATA_ERR::NO_ERROR;
+	res.result = thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR;
 
 	if(enable == false) {
-		res.result |= STEP_DATA_ERR::NOT_ENABLED_WALKING_MODULE;
+		res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::NOT_ENABLED_WALKING_MODULE;
 		std::string _status_msg = WALKING_STATUS_MSG::FAILED_TO_ADD_STEP_DATA_MSG;
 		PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
 		//status_msg_pub_.publish(status_msg);
@@ -411,7 +431,7 @@ bool 	WalkingMotionModule::AddStepDataServiceCallback(thormang3_walking_module_m
 	}
 
 	if(prev_walking->IsRunning() == true) {
-		res.result |= STEP_DATA_ERR::ROBOT_IS_WALKING_NOW;
+		res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::ROBOT_IS_WALKING_NOW;
 		std::string _status_msg  = WALKING_STATUS_MSG::FAILED_TO_ADD_STEP_DATA_MSG;
 		PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
 		return true;
@@ -427,21 +447,21 @@ bool 	WalkingMotionModule::AddStepDataServiceCallback(thormang3_walking_module_m
 		res.result |= StepDataMsgToStepData(req.step_data_array[i], _stepData);
 
 		if(_stepData.TimeData.dAbsStepTime <= 0) {
-			res.result |= STEP_DATA_ERR::PROBLEM_IN_TIME_DATA;
+			res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
 		}
 
 		if(i != 0) {
 			if(_stepData.TimeData.dAbsStepTime <= _req_stp_data_array[_req_stp_data_array.size() - 1].TimeData.dAbsStepTime) {
-				res.result |= STEP_DATA_ERR::PROBLEM_IN_TIME_DATA;
+				res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
 			}
 		}
 		else {
 			if(_stepData.TimeData.dAbsStepTime <= _refStepData.TimeData.dAbsStepTime) {
-				res.result |= STEP_DATA_ERR::PROBLEM_IN_TIME_DATA;
+				res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
 			}
 		}
 
-		if(res.result != STEP_DATA_ERR::NO_ERROR) {
+		if(res.result != thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR) {
 			std::string _status_msg = WALKING_STATUS_MSG::FAILED_TO_ADD_STEP_DATA_MSG;
 			PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
 			return true;
@@ -472,21 +492,21 @@ bool	WalkingMotionModule::WalkingStartServiceCallback(thormang3_walking_module_m
 														thormang3_walking_module_msgs::WalkingStart::Response &res)
 {
 	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
-	res.result = WALKING_START_ERR::NO_ERROR;
+	res.result = thormang3_walking_module_msgs::WalkingStart::Response::NO_ERROR;
 
 	if(enable == false) {
-		res.result |= WALKING_START_ERR::NOT_ENABLED_WALKING_MODULE;
+		res.result |= thormang3_walking_module_msgs::WalkingStart::Response::NOT_ENABLED_WALKING_MODULE;
 	}
 
 	if(prev_walking->IsRunning() == true){
-		res.result |= WALKING_START_ERR::ROBOT_IS_WALKING_NOW;
+		res.result |= thormang3_walking_module_msgs::WalkingStart::Response::ROBOT_IS_WALKING_NOW;
 	}
 
 	if(prev_walking->GetNumofRemainingUnreservedStepData() == 0){
-		res.result |= WALKING_START_ERR::NO_STEP_DATA;
+		res.result |= thormang3_walking_module_msgs::WalkingStart::Response::NO_STEP_DATA;
 	}
 
-	if(res.result == WALKING_START_ERR::NO_ERROR) {
+	if(res.result == thormang3_walking_module_msgs::WalkingStart::Response::NO_ERROR) {
 		prev_walking->Start();
 	}
 
@@ -511,13 +531,13 @@ bool	WalkingMotionModule::SetBalanceParamServiceCallback(thormang3_walking_modul
 															thormang3_walking_module_msgs::SetBalanceParam::Response &res)
 {
 	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
-	res.result = BALANCE_PARAM_ERR::NO_ERROR;
+	res.result = thormang3_walking_module_msgs::SetBalanceParam::Response::NO_ERROR;
 
 	if( enable == false)
-		res.result |= BALANCE_PARAM_ERR::NOT_ENABLED_WALKING_MODULE;
+		res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::NOT_ENABLED_WALKING_MODULE;
 
 	if( balance_update_with_loop_ == true)	{
-		res.result |= BALANCE_PARAM_ERR::PREV_REQUEST_IS_NOT_FINISHED;
+		res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::PREV_REQUEST_IS_NOT_FINISHED;
 	}
 
 	if( ( req.balance_param.foot_roll_angle_time_constant  <= 0.0 )
@@ -528,10 +548,10 @@ bool	WalkingMotionModule::SetBalanceParamServiceCallback(thormang3_walking_modul
 			|| ( req.balance_param.foot_roll_torque_time_constant  <= 0.0 )
 			|| ( req.balance_param.foot_pitch_torque_time_constant <= 0.0 ) )
 	{
-		res.result |= BALANCE_PARAM_ERR::TIME_CONST_IS_ZERO_OR_NEGATIVE;
+		res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::TIME_CONST_IS_ZERO_OR_NEGATIVE;
 	}
 
-	if(res.result == BALANCE_PARAM_ERR::NO_ERROR) {
+	if(res.result == thormang3_walking_module_msgs::SetBalanceParam::Response::NO_ERROR) {
 		if( req.updating_duration < 0.0 )
 		{
 			// under 8ms apply immediately
@@ -642,10 +662,10 @@ bool	WalkingMotionModule::RemoveExistingStepDataServiceCallback(thormang3_walkin
 {
 	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
 
-	res.result = REMOVE_STEP_DATA_ERR::NO_ERROR;
+	res.result = thormang3_walking_module_msgs::RemoveExistingStepData::Response::NO_ERROR;
 
 	if(IsRunning())
-		res.result |= REMOVE_STEP_DATA_ERR::ROBOT_IS_WALKING_NOW;
+		res.result |= thormang3_walking_module_msgs::RemoveExistingStepData::Response::ROBOT_IS_WALKING_NOW;
 	else {
 		int _exist_num_of_step_data = prev_walking->GetNumofRemainingUnreservedStepData();
 		if(_exist_num_of_step_data != 0)
