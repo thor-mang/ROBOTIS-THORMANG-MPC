@@ -58,7 +58,7 @@ void ActionModule::Initialize(const int control_cycle_msec, Robot *robot)
     control_cycle_msec_ = control_cycle_msec;
     queue_thread_       = boost::thread(boost::bind(&ActionModule::QueueThread, this));
 
-    for(std::map<std::string, Dynamixel*>::iterator it; it != robot->dxls.end(); it++)
+    for(std::map<std::string, Dynamixel*>::iterator it = robot->dxls.begin(); it != robot->dxls.end(); it++)
     {
         std::string joint_name = it->first;
         Dynamixel*  dxl_info   = it->second;
