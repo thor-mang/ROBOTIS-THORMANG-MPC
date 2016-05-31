@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   
   thormang3_feet_ft_module
   
+  thormang3_action_module
   thormang3_head_control_module
   thormang3_manipulation_module
   thormang3_walking_module

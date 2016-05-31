@@ -12,6 +12,7 @@
 
 /* Motion Module Header */
 #include "thormang3_base_module/BaseModule.h"
+#include "thormang3_action_module/action_module.h"
 #include "thormang3_head_control_module/HeadControlModule.h"
 #include "thormang3_manipulation_module/ManipulationModule.h"
 #include "thormang3_walking_module/WalkingModule.h"
@@ -65,6 +66,7 @@ int main(int argc, char **argv)
 
     /* Add Motion Module */
     _controller->AddMotionModule((MotionModule*)BaseModule::GetInstance());
+    _controller->AddMotionModule((MotionModule*)ActionModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)ManipulationModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)HeadControlModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)WalkingMotionModule::GetInstance());
