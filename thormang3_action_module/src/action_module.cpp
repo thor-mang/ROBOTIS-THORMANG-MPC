@@ -94,6 +94,9 @@ void ActionModule::QueueThread()
     /* publisher */
     status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 0);
 
+    /* ROS Service Callback Functions */
+    ros::ServiceServer is_running_server = ros_node.advertiseService("/robotis/action/is_running", &ActionModule::IsRunningServiceCallback, this);
+
     while(ros_node.ok())
     {
         callback_queue.callAvailable();
@@ -101,6 +104,14 @@ void ActionModule::QueueThread()
     }
 }
 
+bool ActionModule::IsRunningServiceCallback(thormang3_action_module_msgs::IsRunning::Request  &req,
+                                            thormang3_action_module_msgs::IsRunning::Response &res)
+{
+    bool is_running = IsRunning();
+    res.is_running = is_running;
+
+    return true;
+}
 
 void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
 {

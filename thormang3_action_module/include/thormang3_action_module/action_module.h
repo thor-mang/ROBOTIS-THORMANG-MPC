@@ -21,6 +21,9 @@
 
 #include "robotis_framework_common/MotionModule.h"
 #include "robotis_controller_msgs/StatusMsg.h"
+
+#include "thormang3_action_module_msgs/IsRunning.h"
+
 #include "action_file_define.h"
 
 namespace ROBOTIS
@@ -65,6 +68,11 @@ private:
 
 	void publishStatusMsg(unsigned int type, std::string msg);
 
+	bool IsRunningServiceCallback(thormang3_action_module_msgs::IsRunning::Request  &req,
+	                              thormang3_action_module_msgs::IsRunning::Response &res);
+
+    void pageNumberCallback(const std_msgs::Int32::ConstPtr& msg);
+
 	std::string convertIntToString(int n);
 
 	bool previous_enable_;
@@ -82,11 +90,6 @@ public:
 
     void	Stop();
     bool	IsRunning();
-
-
-    ////////////////////////////////////////////////////////////////
-    void pageNumberCallback(const std_msgs::Int32::ConstPtr& msg);
-
 
 	bool loadFile(std::string file_name);
 	bool createFile(std::string file_name);

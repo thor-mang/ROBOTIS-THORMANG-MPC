@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_device
   robotis_controller_msgs
   robotis_framework_common
+  thormang3_action_module_msgs
 )
 
 catkin_package(
