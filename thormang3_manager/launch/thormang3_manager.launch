@@ -6,7 +6,7 @@
   <arg name="use_lidar" default="true" />
   <arg name="gazebo" default="false" />
   <arg name="robot_name" default="thormang3" />
-  <arg name="use_hands" default="true" />
+  <arg name="use_hands" default="false" />
   <arg name="pinned" default="false"/>
    
   <param name="gazebo"                   value="$(arg gazebo)"    type="bool"/>
