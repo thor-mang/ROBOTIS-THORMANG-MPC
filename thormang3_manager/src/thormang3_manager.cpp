@@ -38,6 +38,7 @@
 #include "robotis_controller/robotis_controller.h"
 
 /* Sensor Module Header */
+#include "thormang3_imu_module/imu_sensor_module.h"
 #include "thormang3_feet_ft_module/feet_force_torque_sensor_module.h"
 
 /* Motion Module Header */
@@ -65,14 +66,16 @@ int main(int argc, char **argv)
 
     std::string init_file   = nh.param<std::string>("init_file_path", "");
 
+    std::string gazebo_robot_name = nh.param<std::string>("gazebo_robot_name", controller->gazebo_robot_name_);
+    controller->gazebo_robot_name_ = gazebo_robot_name;
+    ImuSensor::getInstance()->gazebo_robot_name_ = gazebo_robot_name;
+
     /* gazebo simulation */
-    controller->gazebo_mode_ = nh.param<bool>("gazebo", false);
-    if(controller->gazebo_mode_ == true)
+    if(nh.param<bool>("gazebo", false))
     {
+        controller->gazebo_mode_ = true;
+        ImuSensor::getInstance()->gazebo_mode_ = true;
         ROS_WARN("SET TO GAZEBO MODE!");
-        std::string robot_name = nh.param<std::string>("gazebo_robot_name", "");
-        if(robot_name != "")
-            controller->gazebo_robot_name_ = robot_name;
     }
 
     if(robot_file == "")
@@ -88,11 +91,12 @@ int main(int argc, char **argv)
     }
 
     if(offset_file != "")
-        controller->loadOffset(offset_file);
+        controller->loadOffsets(offset_file);
 
     sleep(1);
 
     /* Add Sensor Module */
+    controller->addSensorModule((robotis_framework::SensorModule*)ImuSensor::getInstance());
     controller->addSensorModule((robotis_framework::SensorModule*)FeetForceTorqueSensor::getInstance());
 
     /* Add Motion Module */
