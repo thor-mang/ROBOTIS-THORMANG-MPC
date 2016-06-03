@@ -22,6 +22,7 @@
   <!-- Robot Model & TF -->
   <include file="$(find thormang3_description)/launch/thormang3_mpc.launch">
     <arg name="robot_name" value="$(arg robot_name)" />
+    <arg name="use_hands" value="$(arg use_hands)" />
     <arg name="pinned" value="$(arg pinned)" />
   </include>
 
