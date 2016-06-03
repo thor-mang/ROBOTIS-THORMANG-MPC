@@ -16,6 +16,8 @@ using namespace ROBOTIS;
 
 ThorMang3FeetForceTorqueSensor::ThorMang3FeetForceTorqueSensor()
     : control_cycle_msec_(8)
+    , gazebo_robot_name("robotis")
+    , gazebo_mode(false)
 {
 
     module_name     = "thormang3_foot_force_torque_sensor_module"; // set unique module name
@@ -119,8 +121,8 @@ void ThorMang3FeetForceTorqueSensor::FootForceTorqueSensorInitialize()
     std::string _foot_ft_data_path  = _ros_node.param<std::string>("ft_data_path", "");
     std::string _ft_calib_data_path = _ros_node.param<std::string>("ft_calibration_data_path", "");
 
-    r_foot_ft_sensor_.Initialize(_foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "robotis/sensor/ft_right_foot/raw", "robotis/sensor/ft_right_foot/scaled");
-    l_foot_ft_sensor_.Initialize(_foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "robotis/sensor/ft_left_foot/raw",  "robotis/sensor/ft_left_foot/scaled");
+    r_foot_ft_sensor_.Initialize(_foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "sensor/ft/right_foot/raw", "sensor/ft/right_foot/scaled");
+    l_foot_ft_sensor_.Initialize(_foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "sensor/ft/left_foot/raw",  "sensor/ft/left_foot/scaled");
 
 
 	YAML::Node doc;
@@ -301,6 +303,9 @@ void ThorMang3FeetForceTorqueSensor::PublishBothFTData(int type, Eigen::MatrixXd
 
 void ThorMang3FeetForceTorqueSensor::GazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg)
 {
+  if (!gazebo_mode)
+    return;
+  
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
   
   geometry_msgs::Wrench msg_transformed;
@@ -332,8 +337,8 @@ void ThorMang3FeetForceTorqueSensor::QueueThread()
 
     /* subscriber */
     ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/feet_ft/ft_calib_command",	1, &ThorMang3FeetForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
-    ros::Subscriber ft_left_foot_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft_left_foot",	1, &ThorMang3FeetForceTorqueSensor::GazeboFTSensorCallback, this);
-    ros::Subscriber ft_right_foot_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft_right_foot",	1, &ThorMang3FeetForceTorqueSensor::GazeboFTSensorCallback, this);
+    ros::Subscriber ft_left_foot_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/left_foot",	1, &ThorMang3FeetForceTorqueSensor::GazeboFTSensorCallback, this);
+    ros::Subscriber ft_right_foot_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/right_foot",	1, &ThorMang3FeetForceTorqueSensor::GazeboFTSensorCallback, this);
 
     /* publisher */
     thormang3_foot_ft_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
