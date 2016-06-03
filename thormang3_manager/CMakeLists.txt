@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   ati_ft_sensor
   thormang3_kinematics_dynamics
 
+  thormang3_imu_module
   thormang3_feet_ft_module
   thormang3_wrist_ft_module
 
