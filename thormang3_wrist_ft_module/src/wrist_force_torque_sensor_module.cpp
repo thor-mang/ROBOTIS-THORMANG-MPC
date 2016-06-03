@@ -70,8 +70,8 @@ void WristForceTorqueSensor::wristForceTorqueSensorInitialize()
   std::string _wrist_ft_data_path  = _ros_node.param<std::string>("ft_data_path", "");
   std::string _ft_calib_data_path = _ros_node.param<std::string>("ft_calibration_data_path", "");
 
-  r_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_right_wrist", "r_arm_wr_p_link" , "robotis/sensor/ft_right_wrist/raw", "robotis/sensor/ft_right_wrist/scaled");
-  l_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_left_wrist",  "l_arm_wr_p_link",  "robotis/sensor/ft_left_wrist/raw",  "robotis/sensor/ft_left_wrist/scaled");
+  r_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_right_wrist", "r_arm_wr_p_link" , "sensor/ft/right_wrist/raw", "sensor/ft/right_wrist/scaled");
+  l_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_left_wrist",  "l_arm_wr_p_link",  "sensor/ft/left_wrist/raw",  "sensor/ft/left_wrist/scaled");
 }
 
 
@@ -110,6 +110,9 @@ void WristForceTorqueSensor::publishStatusMsg(unsigned int type, std::string msg
 
 void WristForceTorqueSensor::gazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg)
 {
+  if (!gazebo_mode_)
+    return;
+
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
   geometry_msgs::Wrench msg_transformed;
@@ -141,8 +144,8 @@ void WristForceTorqueSensor::msgQueueThread()
 
   /* subscriber */
   ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &WristForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
-  ros::Subscriber ft_left_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft_left_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
-  ros::Subscriber ft_right_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft_right_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_left_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/left_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/right_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
 
   /* publisher */
   thormang3_wrist_ft_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);

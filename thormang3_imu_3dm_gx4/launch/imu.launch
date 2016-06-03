@@ -37,7 +37,9 @@
         <param name="enable_filter" type="bool" value="$(arg enable_filter)"/>
         <param name="enable_accel_update" type="bool" value="$(arg enable_accel_update)"/>
         <param name="enable_mag_update" type="bool" value="$(arg enable_mag_update)"/>
-        <remap from="/imu/imu"    to="/robotis/sensor/imu/imu"/>
-        <remap from="/imu/filter" to="/robotis/sensor/imu/filter"/>
+        <remap from="imu/imu"    to="sensor/imu/raw"/>
+        <remap from="imu/filter" to="sensor/imu/filtered"/>
+        <remap from="imu/magnetic_field" to="sensor/imu/magnetic_field"/>
+        <remap from="imu/pressure" to="sensor/imu/pressure"/>
     </node>
 </launch>

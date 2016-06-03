@@ -216,7 +216,7 @@ void    WalkingMotionModule::queueThread()
   ros::ServiceServer remove_existing_step_data = ros_node.advertiseService("robotis/walking/remove_existing_step_data", &WalkingMotionModule::removeExistingStepDataServiceCallback, this);
 
   /* sensor topic subscribe */
-  ros::Subscriber imu_data_sub    = ros_node.subscribe("robotis/sensor/imu/imu",    3, &WalkingMotionModule::imuDataOutputCallback,        this);
+  ros::Subscriber imu_data_sub    = ros_node.subscribe("sensor/imu/raw",    3, &WalkingMotionModule::imuDataOutputCallback,        this);
 
   while(ros_node.ok())
   {

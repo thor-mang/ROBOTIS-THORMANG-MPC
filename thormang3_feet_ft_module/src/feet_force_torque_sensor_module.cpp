@@ -153,8 +153,8 @@ void FeetForceTorqueSensor::initializeFeetForceTorqueSensor()
   std::string foot_ft_data_path  = ros_node.param<std::string>("ft_data_path", "");
   std::string ft_calib_data_path = ros_node.param<std::string>("ft_calibration_data_path", "");
 
-  r_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "robotis/sensor/ft_right_foot/raw", "robotis/sensor/ft_right_foot/scaled");
-  l_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "robotis/sensor/ft_left_foot/raw",  "robotis/sensor/ft_left_foot/scaled");
+  r_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "sensor/ft/right_foot/raw", "sensor/ft/right_foot/scaled");
+  l_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "sensor/ft/left_foot/raw",  "sensor/ft/left_foot/scaled");
 
 
   YAML::Node doc;
@@ -361,8 +361,8 @@ void FeetForceTorqueSensor::queueThread()
 
   /* subscriber */
   ros::Subscriber ft_calib_command_sub = ros_node.subscribe("robotis/feet_ft/ft_calib_command", 1, &FeetForceTorqueSensor::ftSensorCalibrationCommandCallback, this);
-  ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/ft_left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
-  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/ft_right_foot", 1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/right_foot", 1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
 
   /* publisher */
   thormang3_foot_ft_status_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
