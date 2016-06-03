@@ -66,6 +66,47 @@
       l_arm_wr_p:
         goal: *goal_pos_constraint
         trajectory: *trajectory_pos_constraint
+
+# -------------------- left arm with torso controller -------------------
+ left_arm_with_torso_traj_controller:
+    type: "position_controllers/JointTrajectoryController"
+    joints:
+      - l_arm_sh_p1
+      - l_arm_sh_r
+      - l_arm_sh_p2
+      - l_arm_el_y
+      - l_arm_wr_r
+      - l_arm_wr_y
+      - l_arm_wr_p
+      - torso_y
+      
+    constraints:
+      goal_time: *goal_time_constraint
+      stopped_velocity_tolerance: 1.0
+      l_arm_sh_p1:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      l_arm_sh_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      l_arm_sh_p2:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      l_arm_el_y:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      l_arm_wr_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      l_arm_wr_y:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      l_arm_wr_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      torso_y:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
         
 # -------------------- right arm controller -------------------
  right_arm_traj_controller:
@@ -101,5 +142,46 @@
         goal: *goal_pos_constraint
         trajectory: *trajectory_pos_constraint
       r_arm_wr_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+
+# -------------------- right arm with torso controller -------------------
+ right_arm_with_torso_traj_controller:
+    type: "position_controllers/JointTrajectoryController"
+    joints:
+      - r_arm_sh_p1
+      - r_arm_sh_r
+      - r_arm_sh_p2
+      - r_arm_el_y
+      - r_arm_wr_r
+      - r_arm_wr_y
+      - r_arm_wr_p
+      - torso_y
+      
+    constraints:
+      goal_time: *goal_time_constraint
+      stopped_velocity_tolerance: 1.0
+      r_arm_sh_p1:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      r_arm_sh_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      r_arm_sh_p2:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      r_arm_el_y:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      r_arm_wr_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      r_arm_wr_y:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      r_arm_wr_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      torso_y:
         goal: *goal_pos_constraint
         trajectory: *trajectory_pos_constraint
