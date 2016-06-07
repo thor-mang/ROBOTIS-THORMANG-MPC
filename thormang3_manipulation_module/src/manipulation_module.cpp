@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include "thormang3_manipulation_module/ManipulationModule.h"
+#include "thormang3_manipulation_module/manipulation_module.h"
 
 using namespace thormang3;
 

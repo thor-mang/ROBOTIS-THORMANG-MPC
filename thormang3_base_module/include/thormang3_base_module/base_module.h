@@ -29,7 +29,7 @@
 #include "robotis_math/robotis_math.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
-#include "RobotisState.h"
+#include "robotis_state.h"
 
 namespace thormang3
 {

@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include "thormang3_base_module/BaseModule.h"
+#include "thormang3_base_module/base_module.h"
 
 #define EXT_PORT_DATA_1 "external_port_data_1"
 #define EXT_PORT_DATA_2 "external_port_data_2"

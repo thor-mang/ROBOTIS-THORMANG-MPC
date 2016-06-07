@@ -5,7 +5,7 @@
  *      Author: jay
  */
 
-#include "thormang3_feet_ft_module/ThorMang3FeetForceTorqueSensorModule.h"
+#include "thormang3_feet_ft_module/thormang3_feet_force_torque_sensor_module.h"
 
 #define EXT_PORT_DATA_1 "external_port_data_1"
 #define EXT_PORT_DATA_2 "external_port_data_2"

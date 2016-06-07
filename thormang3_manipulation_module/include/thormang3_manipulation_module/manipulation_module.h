@@ -25,7 +25,7 @@
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 
-#include "RobotisState.h"
+#include "robotis_state.h"
 
 #include "thormang3_manipulation_module_msgs/JointPose.h"
 #include "thormang3_manipulation_module_msgs/KinematicsPose.h"

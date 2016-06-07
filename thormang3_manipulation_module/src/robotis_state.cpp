@@ -5,7 +5,7 @@
  *      Author: sch
  */
 
-#include "thormang3_manipulation_module/RobotisState.h"
+#include "thormang3_manipulation_module/robotis_state.h"
 
 using namespace thormang3;
 

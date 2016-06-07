@@ -38,14 +38,14 @@
 #include "robotis_controller/robotis_controller.h"
 
 /* Sensor Module Header */
-#include "thormang3_feet_ft_module/ThorMang3FeetForceTorqueSensorModule.h"
+#include "thormang3_feet_ft_module/thormang3_feet_force_torque_sensor_module.h"
 
 /* Motion Module Header */
-#include "thormang3_base_module/BaseModule.h"
+#include "thormang3_base_module/base_module.h"
 #include "thormang3_action_module/action_module.h"
-#include "thormang3_head_control_module/HeadControlModule.h"
-#include "thormang3_manipulation_module/ManipulationModule.h"
-#include "thormang3_walking_module/WalkingModule.h"
+#include "thormang3_head_control_module/head_control_module.h"
+#include "thormang3_manipulation_module/manipulation_module.h"
+#include "thormang3_walking_module/walking_module.h"
 
 
 using namespace thormang3;

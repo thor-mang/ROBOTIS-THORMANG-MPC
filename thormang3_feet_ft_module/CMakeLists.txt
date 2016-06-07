@@ -55,7 +55,7 @@ include_directories(
 
 # Declare a C++ library
 add_library(thormang3_feet_ft_module
-  src/ThorMang3FeetForceTorqueSensorModule.cpp
+  src/thormang3_feet_force_torque_sensor_module.cpp
 )
 
 ## Add cmake target dependencies of the library

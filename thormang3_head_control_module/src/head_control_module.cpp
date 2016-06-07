@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include "thormang3_head_control_module/HeadControlModule.h"
+#include "thormang3_head_control_module/head_control_module.h"
 
 using namespace thormang3;
 

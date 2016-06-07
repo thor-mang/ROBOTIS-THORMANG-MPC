@@ -42,7 +42,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(thormang3_head_control_module
-  src/HeadControlModule.cpp
+  src/head_control_module.cpp
 )
 
 ## Add cmake target dependencies of the library
