@@ -193,11 +193,11 @@ void RosControlModule::ControllerManagerThread()
   {
     usleep(control_cycle_msec_);
     
+    boost::mutex::scoped_lock lock(ros_control_mutex_);
+    
     // skip if enabled as Process will update controller
     if (enable)
       continue;
-    
-    boost::mutex::scoped_lock lock(ros_control_mutex_);
     
     // time measurements
     ros::Time current_time = ros::Time::now();
