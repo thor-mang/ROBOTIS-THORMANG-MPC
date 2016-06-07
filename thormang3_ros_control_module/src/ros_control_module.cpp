@@ -6,16 +6,12 @@ namespace thormang3
 {
 RosControlModule::RosControlModule()
   : control_cycle_msec_(8)
+  , last_time_stamp_(ros::Time::now())
+  , reset_controllers_(false)
 {
-  enable_          = false;
-  module_name_     = "ros_control_module"; // set unique module name
-  control_mode_    = robotis_framework::PositionControl;
-  
-  // (pre-)register interfaces
-  registerInterface(&imu_sensor_interface_);
-  registerInterface(&force_torque_sensor_interface_);
-  registerInterface(&jnt_state_interface_);
-  registerInterface(&jnt_pos_interface_);
+  enable_ = false;
+  module_name_ = "ros_control_module"; // set unique module name
+  control_mode_ = robotis_framework::PositionControl;
 }
 
 RosControlModule::~RosControlModule()
@@ -28,13 +24,11 @@ RosControlModule::~RosControlModule()
 
 void RosControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* robot)
 {
-  control_cycle_msec_ = control_cycle_msec;
-  
-  last_time_stamp_ = ros::Time::now();
-  
-  queue_thread_ = boost::thread(boost::bind(&RosControlModule::queueThread, this));
+  boost::mutex::scoped_lock lock(ros_control_mutex_);
 
-  ros::NodeHandle nh;
+  control_cycle_msec_ = control_cycle_msec;
+
+  ros::NodeHandle nh("joints/ros_control_module");
 
   // clear already exisiting outputs
   for (auto& kv : result_)
@@ -45,13 +39,15 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
 
   imu_sensor_interface_ = hardware_interface::ImuSensorInterface();
 
-  imu_data.name = "waist_imu";
-  imu_data.frame_id = "imu_link";
-  imu_data.orientation = imu_orientation;
-  imu_data.angular_velocity = imu_angular_velocity;
-  imu_data.linear_acceleration = imu_linear_acceleration;
-  hardware_interface::ImuSensorHandle imu_sensor_handle(imu_data);
+  imu_data_.name = "waist_imu";
+  imu_data_.frame_id = "imu_link";
+  imu_data_.orientation = imu_orientation_;
+  imu_data_.angular_velocity = imu_angular_velocity_;
+  imu_data_.linear_acceleration = imu_linear_acceleration_;
+  hardware_interface::ImuSensorHandle imu_sensor_handle(imu_data_);
   imu_sensor_interface_.registerHandle(imu_sensor_handle);
+
+  registerInterface(&imu_sensor_interface_);
 
   /** initialize FT-Sensors */
 
@@ -84,6 +80,8 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
   else
     ROS_ERROR("[RosControlModule] FT-Sensors config malformed.");
 
+  registerInterface(&force_torque_sensor_interface_);
+
   /** initialize joints */
 
   // read joints from ros param server
@@ -112,24 +110,22 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
     hardware_interface::JointHandle pos_handle(state_handle, &cmd_[joint_name]);
     jnt_pos_interface_.registerHandle(pos_handle);
   }
+
+  registerInterface(&jnt_state_interface_);
+  registerInterface(&jnt_pos_interface_);
+
+  /** start secondary controller manager and ros thread */
+  controller_manager_thread_ = boost::thread(boost::bind(&RosControlModule::controllerManagerThread, this));
+  queue_thread_ = boost::thread(boost::bind(&RosControlModule::queueThread, this));
 }
 
 void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors)
 {
-  // time measurements
-  ros::Time current_time = ros::Time::now();
-  ros::Duration elapsed_time = current_time - last_time_stamp_;
-  last_time_stamp_ = current_time;
-  
-  if (!enable_)
-  {
-    controller_manager_->update(ros::Time::now(), elapsed_time);
-    return;
-  }
+  boost::mutex::scoped_lock lock(ros_control_mutex_);
 
   /** update IMU */
 
-  // TODO
+  /// TODO: Handle covariance matrices
 
   /** update FT-Sensors */
 
@@ -159,7 +155,16 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
 
   /** call controllers */
 
-  controller_manager_->update(ros::Time::now(), elapsed_time);
+  // time measurements
+  ros::Time current_time = ros::Time::now();
+  ros::Duration elapsed_time = current_time - last_time_stamp_;
+  last_time_stamp_ = current_time;
+
+  if (controller_manager_)
+  {
+    controller_manager_->update(current_time, elapsed_time, reset_controllers_);
+    reset_controllers_ = false;
+  }
 
   /** write back commands */
   
@@ -173,7 +178,7 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
 
 bool RosControlModule::isRunning()
 {
-  return false;
+  return false; // hacky, return always false to signal release of resources
 }
 
 void RosControlModule::stop()
@@ -181,15 +186,46 @@ void RosControlModule::stop()
   return;
 }
 
+void RosControlModule::controllerManagerThread()
+{
+  // this thread keeps the controller manager active for loading and unloading controllers
+  while (ros::ok())
+  {
+    usleep(control_cycle_msec_);
+
+    // skip if enabled as Process will update controller
+    if (enable_)
+      continue;
+
+    boost::mutex::scoped_lock lock(ros_control_mutex_);
+
+    // time measurements
+    ros::Time current_time = ros::Time::now();
+    ros::Duration elapsed_time = current_time - last_time_stamp_;
+    last_time_stamp_ = current_time;
+
+    if (controller_manager_)
+    {
+      controller_manager_->update(current_time, elapsed_time);
+      reset_controllers_ = true; // set flag for resetting controllers when manager becomes enabled again
+    }
+  }
+}
+
 void RosControlModule::queueThread()
 {
-  ros::NodeHandle nh;
+  ros_control_mutex_.lock();
+
+  ros::NodeHandle nh("joints");
   ros::CallbackQueue callback_queue;
 
   nh.setCallbackQueue(&callback_queue);
   
   // Initialize ros control
+  last_time_stamp_ = ros::Time::now();
   controller_manager_.reset(new controller_manager::ControllerManager(this, nh));
+
+  ros_control_mutex_.unlock();
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(nh.ok())
