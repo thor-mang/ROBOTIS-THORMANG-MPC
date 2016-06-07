@@ -114,7 +114,7 @@ void ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback(const geometry_msgs
 {
   if (!gazebo_mode)
     return;
-  
+
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
   geometry_msgs::Wrench msg_transformed;
@@ -152,11 +152,9 @@ void ThorMang3WristForceTorqueSensor::QueueThread()
   /* publisher */
   thormang3_wrist_ft_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
+  ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(_ros_node.ok())
-  {
-    _callback_queue.callAvailable();
-    usleep(100);
-  }
+    _callback_queue.callAvailable(duration);
 }
 
 void ThorMang3WristForceTorqueSensor::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors)
