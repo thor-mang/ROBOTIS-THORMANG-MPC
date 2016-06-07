@@ -261,12 +261,12 @@ void ManipulationModule::KinematicsPoseMsgCallback( const thormang3_manipulation
     }
     else if ( Robotis->goal_kinematics_pose_msg.name == "left_arm_with_torso" )
     {
-        Robotis->ik_id_start = id_torso;
+        Robotis->ik_id_start = ID_TORSO;
         Robotis->ik_id_end = id_l_arm_end;
     }
     else if ( Robotis->goal_kinematics_pose_msg.name == "right_arm_with_torso" )
     {
-        Robotis->ik_id_start = id_torso;
+        Robotis->ik_id_start = ID_TORSO;
         Robotis->ik_id_end = id_r_arm_end;
     }
 
