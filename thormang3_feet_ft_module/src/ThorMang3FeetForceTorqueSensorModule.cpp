@@ -12,15 +12,15 @@
 #define EXT_PORT_DATA_3 "external_port_data_3"
 #define EXT_PORT_DATA_4 "external_port_data_4"
 
-using namespace ROBOTIS;
+using namespace thormang3;
 
 ThorMang3FeetForceTorqueSensor::ThorMang3FeetForceTorqueSensor()
     : control_cycle_msec_(8)
 {
 
-    module_name     = "thormang3_foot_force_torque_sensor_module"; // set unique module name
+    module_name_     = "thormang3_foot_force_torque_sensor_module"; // set unique module name
 
-    thormang3_kd_ = new ROBOTIS::ThorMang3KinematicsDynamics(ROBOTIS::WHOLE_BODY);
+    thormang3_kd_ = new KinematicsDynamics(WholeBody);
 
     r_foot_ft_air_.resize(6, 1); r_foot_ft_air_.fill(0.0);
     l_foot_ft_air_.resize(6, 1); l_foot_ft_air_.fill(0.0);
@@ -29,7 +29,7 @@ ThorMang3FeetForceTorqueSensor::ThorMang3FeetForceTorqueSensor()
     l_foot_ft_gnd_.resize(6, 1); l_foot_ft_gnd_.fill(0.0);
 
     r_foot_ft_scale_factor_ = l_foot_ft_scale_factor_ = 1.0;
-    total_mass_ = thormang3_kd_ -> TotalMass(0);
+    total_mass_ = thormang3_kd_->calcTotalMass(0);
 
     for(int _idx = 0; _idx < 6; _idx++) {
     	r_foot_ft_current_voltage_[_idx] = 3.3*0.5;
@@ -47,34 +47,34 @@ ThorMang3FeetForceTorqueSensor::ThorMang3FeetForceTorqueSensor()
 	l_foot_tx_scaled_Nm = l_foot_ty_scaled_Nm = l_foot_tz_scaled_Nm = 0;
 
 
-	result["r_foot_fx_raw_N"]	= r_foot_fx_raw_N;
-	result["r_foot_fy_raw_N"]	= r_foot_fy_raw_N;
-	result["r_foot_fz_raw_N"]	= r_foot_fz_raw_N;
-	result["r_foot_tx_raw_Nm"]	= r_foot_tx_raw_Nm;
-	result["r_foot_ty_raw_Nm"]	= r_foot_ty_raw_Nm;
-	result["r_foot_tz_raw_Nm"]	= r_foot_tz_raw_Nm;
+	result_["r_foot_fx_raw_N"]	= r_foot_fx_raw_N;
+	result_["r_foot_fy_raw_N"]	= r_foot_fy_raw_N;
+	result_["r_foot_fz_raw_N"]	= r_foot_fz_raw_N;
+	result_["r_foot_tx_raw_Nm"]	= r_foot_tx_raw_Nm;
+	result_["r_foot_ty_raw_Nm"]	= r_foot_ty_raw_Nm;
+	result_["r_foot_tz_raw_Nm"]	= r_foot_tz_raw_Nm;
 
-	result["l_foot_fx_raw_N"]	= l_foot_fx_raw_N;
-	result["l_foot_fy_raw_N"]	= l_foot_fy_raw_N;
-	result["l_foot_fz_raw_N"]	= l_foot_fz_raw_N;
-	result["l_foot_tx_raw_Nm"]	= l_foot_tx_raw_Nm;
-	result["l_foot_ty_raw_Nm"]	= l_foot_ty_raw_Nm;
-	result["l_foot_tz_raw_Nm"]	= l_foot_tz_raw_Nm;
+	result_["l_foot_fx_raw_N"]	= l_foot_fx_raw_N;
+	result_["l_foot_fy_raw_N"]	= l_foot_fy_raw_N;
+	result_["l_foot_fz_raw_N"]	= l_foot_fz_raw_N;
+	result_["l_foot_tx_raw_Nm"]	= l_foot_tx_raw_Nm;
+	result_["l_foot_ty_raw_Nm"]	= l_foot_ty_raw_Nm;
+	result_["l_foot_tz_raw_Nm"]	= l_foot_tz_raw_Nm;
 
 
-	result["r_foot_fx_scaled_N"]	= r_foot_fx_scaled_N;
-	result["r_foot_fy_scaled_N"]	= r_foot_fy_scaled_N;
-	result["r_foot_fz_scaled_N"]	= r_foot_fz_scaled_N;
-	result["r_foot_tx_scaled_Nm"]	= r_foot_tx_scaled_Nm;
-	result["r_foot_ty_scaled_Nm"]	= r_foot_ty_scaled_Nm;
-	result["r_foot_tz_scaled_Nm"]	= r_foot_tz_scaled_Nm;
+	result_["r_foot_fx_scaled_N"]	= r_foot_fx_scaled_N;
+	result_["r_foot_fy_scaled_N"]	= r_foot_fy_scaled_N;
+	result_["r_foot_fz_scaled_N"]	= r_foot_fz_scaled_N;
+	result_["r_foot_tx_scaled_Nm"]	= r_foot_tx_scaled_Nm;
+	result_["r_foot_ty_scaled_Nm"]	= r_foot_ty_scaled_Nm;
+	result_["r_foot_tz_scaled_Nm"]	= r_foot_tz_scaled_Nm;
 
-	result["l_foot_fx_scaled_N"]	= l_foot_fx_scaled_N;
-	result["l_foot_fy_scaled_N"]	= l_foot_fy_scaled_N;
-	result["l_foot_fz_scaled_N"]	= l_foot_fz_scaled_N;
-	result["l_foot_tx_scaled_Nm"]	= l_foot_tx_scaled_Nm;
-	result["l_foot_ty_scaled_Nm"]	= l_foot_ty_scaled_Nm;
-	result["l_foot_tz_scaled_Nm"]	= l_foot_tz_scaled_Nm;
+	result_["l_foot_fx_scaled_N"]	= l_foot_fx_scaled_N;
+	result_["l_foot_fy_scaled_N"]	= l_foot_fy_scaled_N;
+	result_["l_foot_fz_scaled_N"]	= l_foot_fz_scaled_N;
+	result_["l_foot_tx_scaled_Nm"]	= l_foot_tx_scaled_Nm;
+	result_["l_foot_ty_scaled_Nm"]	= l_foot_ty_scaled_Nm;
+	result_["l_foot_tz_scaled_Nm"]	= l_foot_tz_scaled_Nm;
 
 
 	exist_r_leg_an_r_ = false;
@@ -96,7 +96,7 @@ ThorMang3FeetForceTorqueSensor::~ThorMang3FeetForceTorqueSensor()
     queue_thread_.join();
 }
 
-void ThorMang3FeetForceTorqueSensor::Initialize(const int control_cycle_msec, Robot *robot)
+void ThorMang3FeetForceTorqueSensor::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
     control_cycle_msec_ = control_cycle_msec;
 
@@ -117,8 +117,8 @@ void ThorMang3FeetForceTorqueSensor::FootForceTorqueSensorInitialize()
     std::string _foot_ft_data_path  = _ros_node.param<std::string>("ft_data_path", "");
     std::string _ft_calib_data_path = _ros_node.param<std::string>("ft_calibration_data_path", "");
 
-    r_foot_ft_sensor_.Initialize(_foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "/robotis/sensor/ft_right_foot/raw", "/robotis/sensor/ft_right_foot/scaled");
-    l_foot_ft_sensor_.Initialize(_foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "/robotis/sensor/ft_left_foot/raw",  "/robotis/sensor/ft_left_foot/scaled");
+    r_foot_ft_sensor_.initialize(_foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "/robotis/sensor/ft_right_foot/raw", "/robotis/sensor/ft_right_foot/scaled");
+    l_foot_ft_sensor_.initialize(_foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "/robotis/sensor/ft_left_foot/raw",  "/robotis/sensor/ft_left_foot/scaled");
 
 
 	YAML::Node doc;
@@ -155,8 +155,8 @@ void ThorMang3FeetForceTorqueSensor::FootForceTorqueSensorInitialize()
 	double scale = ( r_foot_ft_gnd_.coeff(2, 0) + l_foot_ft_gnd_.coeff(2, 0) - r_foot_ft_air_.coeff(2, 0) - l_foot_ft_air_.coeff(2, 0) ) / (total_mass_ * GRAVITY_ACCELERATION);
 	r_foot_ft_scale_factor_ = l_foot_ft_scale_factor_ = scale;
 
-	r_foot_ft_sensor_.SetScaleParam(r_foot_ft_scale_factor_, r_foot_ft_air_);
-	l_foot_ft_sensor_.SetScaleParam(l_foot_ft_scale_factor_, l_foot_ft_air_);
+	r_foot_ft_sensor_.setScaleParam(r_foot_ft_scale_factor_, r_foot_ft_air_);
+	l_foot_ft_sensor_.setScaleParam(l_foot_ft_scale_factor_, l_foot_ft_air_);
 }
 
 void ThorMang3FeetForceTorqueSensor::SaveFTCalibrationData(const std::string &path)
@@ -237,8 +237,8 @@ void 	ThorMang3FeetForceTorqueSensor::FTSensorCalibrationCommandCallback(const s
         		PRINT_VAR(l_foot_ft_scale_factor_);
         		PRINT_MAT(r_foot_ft_air_) ;
         		PRINT_MAT(l_foot_ft_air_) ;
-        		r_foot_ft_sensor_.SetScaleParam(r_foot_ft_scale_factor_, r_foot_ft_air_);
-        		l_foot_ft_sensor_.SetScaleParam(l_foot_ft_scale_factor_, l_foot_ft_air_);
+        		r_foot_ft_sensor_.setScaleParam(r_foot_ft_scale_factor_, r_foot_ft_air_);
+        		l_foot_ft_sensor_.setScaleParam(l_foot_ft_scale_factor_, l_foot_ft_air_);
 
         		PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Applied FT Calibration");
         	}
@@ -318,22 +318,22 @@ void ThorMang3FeetForceTorqueSensor::QueueThread()
 }
 
 
-void ThorMang3FeetForceTorqueSensor::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors)
+void ThorMang3FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors)
 {
 	exist_r_leg_an_r_ = false;
 	exist_r_leg_an_p_ = false;
 	exist_l_leg_an_r_ = false;
 	exist_l_leg_an_p_ = false;
 
-	std::map<std::string, Dynamixel*>::iterator _dxl_it = dxls.find("r_leg_an_r");
+	std::map<std::string, robotis_framework::Dynamixel*>::iterator _dxl_it = dxls.find("r_leg_an_r");
 
 
 	if(_dxl_it != dxls.end()) {
 
-		r_foot_ft_current_voltage_[0] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_1])*3.3/4095.0;
-		r_foot_ft_current_voltage_[1] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_2])*3.3/4095.0;
-		r_foot_ft_current_voltage_[2] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_3])*3.3/4095.0;
-		r_foot_ft_current_voltage_[3] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_4])*3.3/4095.0;
+		r_foot_ft_current_voltage_[0] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+		r_foot_ft_current_voltage_[1] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
+		r_foot_ft_current_voltage_[2] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
+		r_foot_ft_current_voltage_[3] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
 		exist_r_leg_an_r_ = true;
 	}
 	else
@@ -342,8 +342,8 @@ void ThorMang3FeetForceTorqueSensor::Process(std::map<std::string, Dynamixel *> 
 
 	_dxl_it = dxls.find("r_leg_an_p");
 	if(_dxl_it != dxls.end()) {
-		r_foot_ft_current_voltage_[4] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_1])*3.3/4095.0;
-		r_foot_ft_current_voltage_[5] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_2])*3.3/4095.0;
+		r_foot_ft_current_voltage_[4] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+		r_foot_ft_current_voltage_[5] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
 		exist_r_leg_an_p_ = true;
 	}
 	else
@@ -351,10 +351,10 @@ void ThorMang3FeetForceTorqueSensor::Process(std::map<std::string, Dynamixel *> 
 
 	_dxl_it = dxls.find("l_leg_an_r");
 	if(_dxl_it != dxls.end()) {
-		l_foot_ft_current_voltage_[0] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_1])*3.3/4095.0;
-		l_foot_ft_current_voltage_[1] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_2])*3.3/4095.0;
-		l_foot_ft_current_voltage_[2] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_3])*3.3/4095.0;
-		l_foot_ft_current_voltage_[3] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_4])*3.3/4095.0;
+		l_foot_ft_current_voltage_[0] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+		l_foot_ft_current_voltage_[1] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
+		l_foot_ft_current_voltage_[2] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
+		l_foot_ft_current_voltage_[3] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
 		exist_l_leg_an_r_ = true;
 	}
 	else
@@ -362,8 +362,8 @@ void ThorMang3FeetForceTorqueSensor::Process(std::map<std::string, Dynamixel *> 
 
 	_dxl_it = dxls.find("l_leg_an_p");
 	if(_dxl_it != dxls.end())	{
-		l_foot_ft_current_voltage_[4] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_1])*3.3/4095.0;
-		l_foot_ft_current_voltage_[5] = (_dxl_it->second->dxl_state->bulk_read_table[EXT_PORT_DATA_2])*3.3/4095.0;
+		l_foot_ft_current_voltage_[4] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
+		l_foot_ft_current_voltage_[5] = (_dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
 		exist_l_leg_an_p_ = true;
 	}
 	else
@@ -373,62 +373,62 @@ void ThorMang3FeetForceTorqueSensor::Process(std::map<std::string, Dynamixel *> 
 
 	if( exist_r_leg_an_r_ && exist_r_leg_an_p_) {
 
-	    r_foot_ft_sensor_.SetCurrentVoltageOutputPublishForceTorque(	r_foot_ft_current_voltage_[0],
+	    r_foot_ft_sensor_.setCurrentVoltageOutputPublish(	r_foot_ft_current_voltage_[0],
 	    																r_foot_ft_current_voltage_[1],
 	    																r_foot_ft_current_voltage_[2],
 	    																r_foot_ft_current_voltage_[3],
 	    																r_foot_ft_current_voltage_[4],
 	    																r_foot_ft_current_voltage_[5]);
 
-	    r_foot_ft_sensor_.GetCurrentForceTorqueRaw(&r_foot_fx_raw_N,  &r_foot_fy_raw_N,  &r_foot_fz_raw_N,
+	    r_foot_ft_sensor_.getCurrentForceTorqueRaw(&r_foot_fx_raw_N,  &r_foot_fy_raw_N,  &r_foot_fz_raw_N,
     											   &r_foot_tx_raw_Nm, &r_foot_ty_raw_Nm, &r_foot_tz_raw_Nm);
-	    r_foot_ft_sensor_.GetCurrentForceTorqueScaled(&r_foot_fx_scaled_N,  &r_foot_fy_scaled_N,  &r_foot_fz_scaled_N,
+	    r_foot_ft_sensor_.getCurrentForceTorqueScaled(&r_foot_fx_scaled_N,  &r_foot_fy_scaled_N,  &r_foot_fz_scaled_N,
 	    											  &r_foot_tx_scaled_Nm, &r_foot_ty_scaled_Nm, &r_foot_tz_scaled_Nm);
 
-		result["r_foot_fx_raw_N"]	= r_foot_fx_raw_N;
-		result["r_foot_fy_raw_N"]	= r_foot_fy_raw_N;
-		result["r_foot_fz_raw_N"]	= r_foot_fz_raw_N;
-		result["r_foot_tx_raw_Nm"]	= r_foot_tx_raw_Nm;
-		result["r_foot_ty_raw_Nm"]	= r_foot_ty_raw_Nm;
-		result["r_foot_tz_raw_Nm"]	= r_foot_tz_raw_Nm;
+		result_["r_foot_fx_raw_N"]	= r_foot_fx_raw_N;
+		result_["r_foot_fy_raw_N"]	= r_foot_fy_raw_N;
+		result_["r_foot_fz_raw_N"]	= r_foot_fz_raw_N;
+		result_["r_foot_tx_raw_Nm"]	= r_foot_tx_raw_Nm;
+		result_["r_foot_ty_raw_Nm"]	= r_foot_ty_raw_Nm;
+		result_["r_foot_tz_raw_Nm"]	= r_foot_tz_raw_Nm;
 
 
-		result["r_foot_fx_scaled_N"]	= r_foot_fx_scaled_N;
-		result["r_foot_fy_scaled_N"]	= r_foot_fy_scaled_N;
-		result["r_foot_fz_scaled_N"]	= r_foot_fz_scaled_N;
-		result["r_foot_tx_scaled_Nm"]	= r_foot_tx_scaled_Nm;
-		result["r_foot_ty_scaled_Nm"]	= r_foot_ty_scaled_Nm;
-		result["r_foot_tz_scaled_Nm"]	= r_foot_tz_scaled_Nm;
+		result_["r_foot_fx_scaled_N"]	= r_foot_fx_scaled_N;
+		result_["r_foot_fy_scaled_N"]	= r_foot_fy_scaled_N;
+		result_["r_foot_fz_scaled_N"]	= r_foot_fz_scaled_N;
+		result_["r_foot_tx_scaled_Nm"]	= r_foot_tx_scaled_Nm;
+		result_["r_foot_ty_scaled_Nm"]	= r_foot_ty_scaled_Nm;
+		result_["r_foot_tz_scaled_Nm"]	= r_foot_tz_scaled_Nm;
 
 	}
 
 	if( exist_l_leg_an_r_ && exist_l_leg_an_p_) {
-		l_foot_ft_sensor_.SetCurrentVoltageOutputPublishForceTorque(l_foot_ft_current_voltage_[0],
+		l_foot_ft_sensor_.setCurrentVoltageOutputPublish(l_foot_ft_current_voltage_[0],
 																	l_foot_ft_current_voltage_[1],
 																	l_foot_ft_current_voltage_[2],
 																	l_foot_ft_current_voltage_[3],
 																	l_foot_ft_current_voltage_[4],
 																	l_foot_ft_current_voltage_[5]);
 
-		l_foot_ft_sensor_.GetCurrentForceTorqueRaw(&l_foot_fx_raw_N,  &l_foot_fy_raw_N,  &l_foot_fz_raw_N,
+		l_foot_ft_sensor_.getCurrentForceTorqueRaw(&l_foot_fx_raw_N,  &l_foot_fy_raw_N,  &l_foot_fz_raw_N,
 												   &l_foot_tx_raw_Nm, &l_foot_ty_raw_Nm, &l_foot_tz_raw_Nm);
-		l_foot_ft_sensor_.GetCurrentForceTorqueScaled(&l_foot_fx_scaled_N,  &l_foot_fy_scaled_N,  &l_foot_fz_scaled_N,
+		l_foot_ft_sensor_.getCurrentForceTorqueScaled(&l_foot_fx_scaled_N,  &l_foot_fy_scaled_N,  &l_foot_fz_scaled_N,
 													  &l_foot_tx_scaled_Nm, &l_foot_ty_scaled_Nm, &l_foot_tz_scaled_Nm);
 
 
-		result["l_foot_fx_raw_N"]	= l_foot_fx_raw_N;
-		result["l_foot_fy_raw_N"]	= l_foot_fy_raw_N;
-		result["l_foot_fz_raw_N"]	= l_foot_fz_raw_N;
-		result["l_foot_tx_raw_Nm"]	= l_foot_tx_raw_Nm;
-		result["l_foot_ty_raw_Nm"]	= l_foot_ty_raw_Nm;
-		result["l_foot_tz_raw_Nm"]	= l_foot_tz_raw_Nm;
+		result_["l_foot_fx_raw_N"]	= l_foot_fx_raw_N;
+		result_["l_foot_fy_raw_N"]	= l_foot_fy_raw_N;
+		result_["l_foot_fz_raw_N"]	= l_foot_fz_raw_N;
+		result_["l_foot_tx_raw_Nm"]	= l_foot_tx_raw_Nm;
+		result_["l_foot_ty_raw_Nm"]	= l_foot_ty_raw_Nm;
+		result_["l_foot_tz_raw_Nm"]	= l_foot_tz_raw_Nm;
 
-		result["l_foot_fx_scaled_N"]	= l_foot_fx_scaled_N;
-		result["l_foot_fy_scaled_N"]	= l_foot_fy_scaled_N;
-		result["l_foot_fz_scaled_N"]	= l_foot_fz_scaled_N;
-		result["l_foot_tx_scaled_Nm"]	= l_foot_tx_scaled_Nm;
-		result["l_foot_ty_scaled_Nm"]	= l_foot_ty_scaled_Nm;
-		result["l_foot_tz_scaled_Nm"]	= l_foot_tz_scaled_Nm;
+		result_["l_foot_fx_scaled_N"]	= l_foot_fx_scaled_N;
+		result_["l_foot_fy_scaled_N"]	= l_foot_fy_scaled_N;
+		result_["l_foot_fz_scaled_N"]	= l_foot_fz_scaled_N;
+		result_["l_foot_tx_scaled_Nm"]	= l_foot_tx_scaled_Nm;
+		result_["l_foot_ty_scaled_Nm"]	= l_foot_ty_scaled_Nm;
+		result_["l_foot_tz_scaled_Nm"]	= l_foot_tz_scaled_Nm;
 	}
 
 

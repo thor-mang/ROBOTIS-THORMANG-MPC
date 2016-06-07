@@ -17,25 +17,25 @@
 
 #include "robotis_math/robotis_math.h"
 #include "robotis_controller_msgs/StatusMsg.h"
-#include "robotis_framework_common/SensorModule.h"
+#include "robotis_framework_common/sensor_module.h"
 
 #include "thormang3_feet_ft_module_msgs/BothWrench.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
-#include "ati_ft_sensor/ATIForceTorqueSensor.h"
+#include "ati_ft_sensor/ati_force_torque_sensor.h"
 
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 
-class ThorMang3FeetForceTorqueSensor : public SensorModule, public robotis_framework::Singleton<ThorMang3FeetForceTorqueSensor>
+class ThorMang3FeetForceTorqueSensor : public robotis_framework::SensorModule, public robotis_framework::Singleton<ThorMang3FeetForceTorqueSensor>
 {
 private:
     int             control_cycle_msec_;
     boost::thread   queue_thread_;
     boost::mutex    publish_mutex_;
 
-    ThorMang3KinematicsDynamics* thormang3_kd_;
+    KinematicsDynamics* thormang3_kd_;
 
 	bool exist_r_leg_an_r_;
 	bool exist_r_leg_an_p_;
@@ -101,11 +101,11 @@ public:
     /* ROS Topic Callback Functions */
     //void    TopicCallback(const std_msgs::Int16::ConstPtr &msg);
 
-    void    Initialize(const int control_cycle_msec, Robot *robot);
-    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors);
+    void    initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
+    void    process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors);
 
-    void	Stop();
-    bool	IsRunning();
+    void	stop();
+    bool	isRunning();
 
 
 };
