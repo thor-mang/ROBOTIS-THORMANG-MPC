@@ -63,18 +63,20 @@ void ImuSensor::initialize(const int control_cycle_msec, robotis_framework::Robo
 
 void ImuSensor::publishStatusMsg(unsigned int type, std::string msg)
 {
-  robotis_controller_msgs::StatusMsg _status;
-  _status.header.stamp = ros::Time::now();
-  _status.type = type;
-  _status.module_name = "IMU";
-  _status.status_msg = msg;
+  robotis_controller_msgs::StatusMsg status;
+  status.header.stamp = ros::Time::now();
+  status.type = type;
+  status.module_name = "IMU";
+  status.status_msg = msg;
 
-  thormang3_imu_status_pub_.publish(_status);
+  imu_status_pub_.publish(status);
 }
 
 void ImuSensor::imuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag)
 {
   boost::mutex::scoped_lock lock(imu_sensor_mutex_);
+
+  /// TODO: Handle covariance matrices
 
   result_["imu_orientation_q_x_" + tag] = msg->orientation.x;
   result_["imu_orientation_q_y_" + tag] = msg->orientation.y;
@@ -96,24 +98,24 @@ void ImuSensor::imuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const st
 
 void ImuSensor::msgQueueThread()
 {
-  ros::NodeHandle     _ros_node;
-  ros::CallbackQueue  _callback_queue;
+  ros::NodeHandle ros_node;
+  ros::CallbackQueue callback_queue;
 
-  _ros_node.setCallbackQueue(&_callback_queue);
+  ros_node.setCallbackQueue(&callback_queue);
 
   /* subscriber */
   //ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &ThorMang3ImuSensor::FTSensorCalibrationCommandCallback, this);
-  ros::Subscriber imu_raw_sub = _ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode_ ? "/gazebo/" + gazebo_robot_name_ + "/sensor/imu" : "sensor/imu/raw",	1,
+  ros::Subscriber imu_raw_sub = ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode_ ? "/gazebo/" + gazebo_robot_name_ + "/sensor/imu" : "sensor/imu/raw",	1,
                                                     boost::bind(&ImuSensor::imuSensorCallback, this, _1, std::string("raw")));
-  ros::Subscriber imu_filtered_sub = _ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode_ ? "/gazebo/" + gazebo_robot_name_ + "/sensor/imu" : "sensor/imu/filtered",	1,
+  ros::Subscriber imu_filtered_sub = ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode_ ? "/gazebo/" + gazebo_robot_name_ + "/sensor/imu" : "sensor/imu/filtered",	1,
                                                     boost::bind(&ImuSensor::imuSensorCallback, this, _1, std::string("filtered")));
 
   /* publisher */
-  thormang3_imu_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
+  imu_status_pub_	= ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
-  while(_ros_node.ok())
-    _callback_queue.callAvailable(duration);
+  while(ros_node.ok())
+    callback_queue.callAvailable(duration);
 }
 
 void ImuSensor::process(std::map<std::string, robotis_framework::Dynamixel*> /*dxls*/, std::map<std::string, robotis_framework::Sensor*> /*sensors*/)
