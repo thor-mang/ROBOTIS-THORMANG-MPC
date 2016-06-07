@@ -1,14 +1,44 @@
+/*******************************************************************************
+ * Copyright (c) 2016, ROBOTIS CO., LTD.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of ROBOTIS nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+
 /*
  * ForceTorqueSensor.cpp
  *
- *  Created on: 2016. 2. 17.
+ *  Created on: 2016. 3. 23.
  *      Author: HJSONG
  */
 
 
 
 
-#include "ati_ft_sensor/ATIForceTorqueSensorTWE.h"
+#include "ati_ft_sensor/ati_force_torque_sensor_twe.h"
 
 namespace ROBOTIS
 {
@@ -47,11 +77,10 @@ ATIForceTorqueSensorTWE::~ATIForceTorqueSensorTWE()
 }
 
 
-bool ATIForceTorqueSensorTWE::Initialize(const std::string& ft_data_path, const std::string& ft_data_key,
+bool ATIForceTorqueSensorTWE::initialize(const std::string& ft_data_path, const std::string& ft_data_key,
 								   const std::string& ft_frame_id,
 								   const std::string& ft_raw_publish_name, const std::string& ft_scaled_publish_name)
 {
-
 	ft_frame_id_			= ft_frame_id;
 	ft_raw_publish_name_	= ft_raw_publish_name;
 	ft_scaled_publish_name_	= ft_scaled_publish_name;
@@ -74,14 +103,14 @@ bool ATIForceTorqueSensorTWE::Initialize(const std::string& ft_data_path, const 
 	return parseFTData(ft_data_path, ft_data_key);;
 }
 
-void ATIForceTorqueSensorTWE::SetScaleFactror(double ft_scale_factor)
+void ATIForceTorqueSensorTWE::setScaleFactror(double ft_scale_factor)
 {
 	ft_scale_param_mutex_.lock();
 	ft_scale_factor_ = ft_scale_factor;
 	ft_scale_param_mutex_.unlock();
 }
 
-void ATIForceTorqueSensorTWE::SetNullForceTorque(Eigen::MatrixXd ft_null)
+void ATIForceTorqueSensorTWE::setNullForceTorque(Eigen::MatrixXd ft_null)
 {
 	if( (ft_null.rows() != 6) || (ft_null.cols() != 1) ){
 		ROS_ERROR("Invalid ft null size");
@@ -93,10 +122,10 @@ void ATIForceTorqueSensorTWE::SetNullForceTorque(Eigen::MatrixXd ft_null)
 	ft_scale_param_mutex_.unlock();
 }
 
-void ATIForceTorqueSensorTWE::SetScaleParam(double ft_scale_factor, Eigen::MatrixXd ft_null)
+void ATIForceTorqueSensorTWE::setScaleParam(double ft_scale_factor, Eigen::MatrixXd ft_null)
 {
-	SetScaleFactror(ft_scale_factor);
-	SetNullForceTorque(ft_null);
+	setScaleFactror(ft_scale_factor);
+	setNullForceTorque(ft_null);
 }
 
 bool ATIForceTorqueSensorTWE::parseFTData(const std::string& ft_data_path, const std::string& ft_data_key)
@@ -105,22 +134,11 @@ bool ATIForceTorqueSensorTWE::parseFTData(const std::string& ft_data_path, const
 	std::string _ft_unload_key	= ft_data_key + "_unload";
 
 	YAML::Node doc;
-//	try
-//	{
-//		// load yaml
-//		doc = YAML::LoadFile(_ft_data_path.c_str());
-//	}
-//	catch(const std::exception& e)
-//	{
-//		ROS_ERROR("ATIForceTorqueSensorTWE : Fail to load ft_data yaml file.");
-//		return false;
-//	}
 
 	doc = YAML::LoadFile(ft_data_path.c_str());
 
 	std::vector<double> _ft;
 
-	//todo : check the key is availabe or not
 	_ft = doc[_ft_mat_key].as< std::vector<double> >();
 	ft_coeff_mat_ = Eigen::Map<Eigen::MatrixXd>(_ft.data(), 6, 6);
 	ft_coeff_mat_.transposeInPlace();
@@ -128,7 +146,6 @@ bool ATIForceTorqueSensorTWE::parseFTData(const std::string& ft_data_path, const
 	std::cout << ft_coeff_mat_ <<std::endl;
 
 	_ft.clear();
-	//todo : check the key is availabe or not
 	_ft = doc[_ft_unload_key].as< std::vector<double> >();
 	ft_unload_volatge_ = Eigen::Map<Eigen::MatrixXd>(_ft.data(), 6, 1);
 	std::cout << "[" <<_ft_unload_key << "]"	<< std::endl;
@@ -138,7 +155,7 @@ bool ATIForceTorqueSensorTWE::parseFTData(const std::string& ft_data_path, const
 }
 
 
-void ATIForceTorqueSensorTWE::SetCurrentVoltageOutput(double voltage0, double voltage1, double voltage2,
+void ATIForceTorqueSensorTWE::setCurrentVoltageOutput(double voltage0, double voltage1, double voltage2,
 							 	 	 	 	 	 	  double voltage3, double voltage4, double voltage5)
 {
 	ft_current_volatge_.coeffRef(0, 0) = voltage0;
@@ -172,28 +189,28 @@ void ATIForceTorqueSensorTWE::SetCurrentVoltageOutput(double voltage0, double vo
 	ft_scaled_msg_.wrench.torque.z	= ft_scaled_.coeff(5,0);
 }
 
-void ATIForceTorqueSensorTWE::SetCurrentVoltageOutput(Eigen::MatrixXd voltage)
+void ATIForceTorqueSensorTWE::setCurrentVoltageOutput(Eigen::MatrixXd voltage)
 {
 	if((voltage.rows() != 6) || (voltage.cols() != 1)) {
 		ROS_ERROR("Invalid voltage size");
 		return;
 	}
 
-	SetCurrentVoltageOutput(voltage.coeff(0,0), voltage.coeff(1,0), voltage.coeff(2,0),
+	setCurrentVoltageOutput(voltage.coeff(0,0), voltage.coeff(1,0), voltage.coeff(2,0),
 							voltage.coeff(3,0), voltage.coeff(4,0), voltage.coeff(5,0));
 }
 
-Eigen::MatrixXd ATIForceTorqueSensorTWE::GetCurrentForceTorqueRaw()
+Eigen::MatrixXd ATIForceTorqueSensorTWE::getCurrentForceTorqueRaw()
 {
 	return ft_raw_;
 }
 
-Eigen::MatrixXd ATIForceTorqueSensorTWE::GetCurrentForceTorqueScaled()
+Eigen::MatrixXd ATIForceTorqueSensorTWE::getCurrentForceTorqueScaled()
 {
 	return ft_scaled_;
 }
 
-void ATIForceTorqueSensorTWE::GetCurrentForceTorqueRaw(double* force_x_N,   double* force_y_N,   double* force_z_N,
+void ATIForceTorqueSensorTWE::getCurrentForceTorqueRaw(double* force_x_N,   double* force_y_N,   double* force_z_N,
 						      	  	  	  	  	 double* torque_x_Nm, double* torque_y_Nm, double* torque_z_Nm)
 {
 	*force_x_N   = ft_raw_.coeff(0,0);
@@ -204,7 +221,7 @@ void ATIForceTorqueSensorTWE::GetCurrentForceTorqueRaw(double* force_x_N,   doub
 	*torque_z_Nm = ft_raw_.coeff(5,0);
 }
 
-void ATIForceTorqueSensorTWE::GetCurrentForceTorqueScaled(double* force_x_N,   double* force_y_N,   double* force_z_N,
+void ATIForceTorqueSensorTWE::getCurrentForceTorqueScaled(double* force_x_N,   double* force_y_N,   double* force_z_N,
 						     	 	 	 	 	 	   double* torque_x_Nm, double* torque_y_Nm, double* torque_z_Nm)
 {
 	*force_x_N   = ft_scaled_.coeff(0,0);
@@ -215,10 +232,10 @@ void ATIForceTorqueSensorTWE::GetCurrentForceTorqueScaled(double* force_x_N,   d
 	*torque_z_Nm = ft_scaled_.coeff(5,0);
 }
 
-void ATIForceTorqueSensorTWE::SetCurrentVoltageOutputPublishForceTorque(double voltage0, double voltage1, double voltage2,
+void ATIForceTorqueSensorTWE::setCurrentVoltageOutputPublish(double voltage0, double voltage1, double voltage2,
 		 	 	 	 	 	 	 	 	 	   	   	   	   	   	  double voltage3, double voltage4, double voltage5)
 {
-	SetCurrentVoltageOutput(voltage0, voltage1, voltage2, voltage3, voltage4, voltage5);
+	setCurrentVoltageOutput(voltage0, voltage1, voltage2, voltage3, voltage4, voltage5);
 
 	if(is_ft_raw_published_)
 		ft_raw_pub_.publish(ft_raw_msg_);
@@ -227,14 +244,14 @@ void ATIForceTorqueSensorTWE::SetCurrentVoltageOutputPublishForceTorque(double v
 		ft_scaled_pub_.publish(ft_scaled_msg_);
 }
 
-void ATIForceTorqueSensorTWE::SetCurrentVoltageOutputPublish(Eigen::MatrixXd voltage)
+void ATIForceTorqueSensorTWE::setCurrentVoltageOutputPublish(Eigen::MatrixXd voltage)
 {
 	if((voltage.rows() != 6) || (voltage.cols() != 1)) {
 		ROS_ERROR("Invalid voltage size");
 		return;
 	}
 
-	SetCurrentVoltageOutput(voltage);
+	setCurrentVoltageOutput(voltage);
 
 	if(is_ft_raw_published_)
 		ft_raw_pub_.publish(ft_raw_msg_);
