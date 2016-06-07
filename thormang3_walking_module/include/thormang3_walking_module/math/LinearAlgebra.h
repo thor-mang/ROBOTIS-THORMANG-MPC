@@ -9,7 +9,7 @@
 #define LINEAR_ALGEBRA_H_
 
 #include <stdio.h>
-#include "robotis_math/RobotisMath.h"
+#include "robotis_math/robotis_math.h"
 #include "StepDataDefine.h"
 
 namespace ROBOTIS

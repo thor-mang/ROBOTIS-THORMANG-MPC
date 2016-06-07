@@ -1,5 +1,5 @@
 /*
- * TestMotionModule.h
+ * Testmotion_module.h
  *
  *  Created on: 2016. 1. 25.
  *      Author: zerom
@@ -19,7 +19,7 @@
 
 #include "PreviewControlWalking.h"
 
-#include "robotis_framework_common/MotionModule.h"
+#include "robotis_framework_common/motion_module.h"
 
 
 #include "robotis_controller_msgs/StatusMsg.h"
@@ -36,7 +36,7 @@
 namespace ROBOTIS
 {
 
-class WalkingMotionModule : public MotionModule, public Singleton<WalkingMotionModule>
+class WalkingMotionModule : public robotis_framework::MotionModule, public robotis_framework::Singleton<WalkingMotionModule>
 {
 private:
     int             control_cycle_msec_;

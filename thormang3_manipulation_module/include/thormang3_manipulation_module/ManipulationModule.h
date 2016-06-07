@@ -19,10 +19,10 @@
 #include <boost/thread.hpp>
 #include <yaml-cpp/yaml.h>
 
-#include "robotis_framework_common/MotionModule.h"
+#include "robotis_framework_common/motion_module.h"
 
-#include "robotis_math/RobotisMath.h"
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
+#include "robotis_math/robotis_math.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 
 #include "RobotisState.h"
@@ -60,7 +60,7 @@ public:
 
 };
 
-class ManipulationModule : public MotionModule, public Singleton<ManipulationModule>
+class ManipulationModule : public robotis_framework::MotionModule, public robotis_framework::Singleton<ManipulationModule>
 {
 private:
     int                 control_cycle_msec_;

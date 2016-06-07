@@ -13,58 +13,58 @@
 #define EXT_PORT_DATA_3 "external_port_data_3"
 #define EXT_PORT_DATA_4 "external_port_data_4"
 
-using namespace ROBOTIS;
+using namespace thormang3;
 
 BaseModule::BaseModule()
     : control_cycle_msec_(0),
       has_goal_joints_(false),
       ini_pose_only_(false)
 {
-    enable          = false;
-    module_name     = "base_module";
-    control_mode    = POSITION_CONTROL;
+    enable_         = false;
+    module_name_    = "base_module";
+    control_mode_   = robotis_framework::PositionControl;
 
     /* arm */
-    result["r_arm_sh_p1"]   = new DynamixelState();
-    result["l_arm_sh_p1"]   = new DynamixelState();
-    result["r_arm_sh_r"]    = new DynamixelState();
-    result["l_arm_sh_r"]    = new DynamixelState();
-    result["r_arm_sh_p2"]   = new DynamixelState();
-    result["l_arm_sh_p2"]   = new DynamixelState();
-    result["r_arm_el_y"]    = new DynamixelState();
-    result["l_arm_el_y"]    = new DynamixelState();
-    result["r_arm_wr_r"]    = new DynamixelState();
-    result["l_arm_wr_r"]    = new DynamixelState();
-    result["r_arm_wr_y"]    = new DynamixelState();
-    result["l_arm_wr_y"]    = new DynamixelState();
-    result["r_arm_wr_p"]    = new DynamixelState();
-    result["l_arm_wr_p"]    = new DynamixelState();
+    result_["r_arm_sh_p1"]  = new robotis_framework::DynamixelState();
+    result_["l_arm_sh_p1"]  = new robotis_framework::DynamixelState();
+    result_["r_arm_sh_r"]   = new robotis_framework::DynamixelState();
+    result_["l_arm_sh_r"]   = new robotis_framework::DynamixelState();
+    result_["r_arm_sh_p2"]  = new robotis_framework::DynamixelState();
+    result_["l_arm_sh_p2"]  = new robotis_framework::DynamixelState();
+    result_["r_arm_el_y"]   = new robotis_framework::DynamixelState();
+    result_["l_arm_el_y"]   = new robotis_framework::DynamixelState();
+    result_["r_arm_wr_r"]   = new robotis_framework::DynamixelState();
+    result_["l_arm_wr_r"]   = new robotis_framework::DynamixelState();
+    result_["r_arm_wr_y"]   = new robotis_framework::DynamixelState();
+    result_["l_arm_wr_y"]   = new robotis_framework::DynamixelState();
+    result_["r_arm_wr_p"]   = new robotis_framework::DynamixelState();
+    result_["l_arm_wr_p"]   = new robotis_framework::DynamixelState();
 
     /* gripper */
-    result["r_arm_grip"]    = new DynamixelState();
-    result["l_arm_grip"]    = new DynamixelState();
+    result_["r_arm_grip"]   = new robotis_framework::DynamixelState();
+    result_["l_arm_grip"]   = new robotis_framework::DynamixelState();
 
     /* body */
-    result["torso_y"]       = new DynamixelState();
+    result_["torso_y"]      = new robotis_framework::DynamixelState();
 
     /* leg */
-    result["r_leg_hip_y"]   = new DynamixelState();
-    result["r_leg_hip_r"]   = new DynamixelState();
-    result["r_leg_hip_p"]   = new DynamixelState();
-    result["r_leg_kn_p"]    = new DynamixelState();
-    result["r_leg_an_p"]    = new DynamixelState();
-    result["r_leg_an_r"]    = new DynamixelState();
+    result_["r_leg_hip_y"]  = new robotis_framework::DynamixelState();
+    result_["r_leg_hip_r"]  = new robotis_framework::DynamixelState();
+    result_["r_leg_hip_p"]  = new robotis_framework::DynamixelState();
+    result_["r_leg_kn_p"]   = new robotis_framework::DynamixelState();
+    result_["r_leg_an_p"]   = new robotis_framework::DynamixelState();
+    result_["r_leg_an_r"]   = new robotis_framework::DynamixelState();
 
-    result["l_leg_hip_y"]   = new DynamixelState();
-    result["l_leg_hip_r"]   = new DynamixelState();
-    result["l_leg_hip_p"]   = new DynamixelState();
-    result["l_leg_kn_p"]    = new DynamixelState();
-    result["l_leg_an_p"]    = new DynamixelState();
-    result["l_leg_an_r"]    = new DynamixelState();
+    result_["l_leg_hip_y"]  = new robotis_framework::DynamixelState();
+    result_["l_leg_hip_r"]  = new robotis_framework::DynamixelState();
+    result_["l_leg_hip_p"]  = new robotis_framework::DynamixelState();
+    result_["l_leg_kn_p"]   = new robotis_framework::DynamixelState();
+    result_["l_leg_an_p"]   = new robotis_framework::DynamixelState();
+    result_["l_leg_an_r"]   = new robotis_framework::DynamixelState();
 
     /* head */
-    result["head_y"]        = new DynamixelState();
-    result["head_p"]        = new DynamixelState();
+    result_["head_y"]       = new robotis_framework::DynamixelState();
+    result_["head_p"]       = new robotis_framework::DynamixelState();
 
     /* arm */
     joint_name_to_id["r_arm_sh_p1"] = 1;
@@ -107,7 +107,7 @@ BaseModule::BaseModule()
     joint_name_to_id["r_arm_grip"]  = 31;
     joint_name_to_id["l_arm_grip"]  = 30;
 
-    Robotis = new ROBOTIS_BASE::RobotisState();
+    Robotis = new RobotisState();
     JointState = new BaseJointState();
 }
 
@@ -116,7 +116,7 @@ BaseModule::~BaseModule()
     queue_thread_.join();
 }
 
-void BaseModule::Initialize(const int control_cycle_msec, Robot *robot)
+void BaseModule::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
     control_cycle_msec_ = control_cycle_msec;
     queue_thread_ = boost::thread(boost::bind(&BaseModule::QueueThread, this));
@@ -181,7 +181,7 @@ void BaseModule::ParseIniPoseData( const std::string &path )
         _value = _it->second.as< std::vector<double> >();
 
         for( int num = 0; num < _via_num; num++ )
-            Robotis->joint_via_pose.coeffRef( num , _id ) = _value[ num ] * deg2rad;
+            Robotis->joint_via_pose.coeffRef( num , _id ) = _value[ num ] * DEGREE2RADIAN;
     }
 
     // parse target pose
@@ -194,7 +194,7 @@ void BaseModule::ParseIniPoseData( const std::string &path )
         _id = _it->first.as<int>();
         _value = _it->second.as<double>();
 
-        Robotis->joint_ini_pose.coeffRef( _id , 0 ) = _value * deg2rad;
+        Robotis->joint_ini_pose.coeffRef( _id , 0 ) = _value * DEGREE2RADIAN;
     }
 
     Robotis->all_time_steps = int( Robotis->mov_time / Robotis->smp_time ) + 1;
@@ -227,10 +227,10 @@ void BaseModule::IniPoseMsgCallback( const std_msgs::String::ConstPtr& msg )
         if ( msg->data == "ini_pose")
         {
             // set module of all joints -> this module
-            SetCtrlModule(module_name);
+            SetCtrlModule(module_name_);
 
             // wait to change module and to get goal position for init
-            while(enable == false || has_goal_joints_ == false) usleep(8 * 1000);
+            while(enable_ == false || has_goal_joints_ == false) usleep(8 * 1000);
 
             // parse initial pose
             std::string _ini_pose_path = ros::package::getPath("thormang3_base_module") + "/data/ini_pose.yaml";
@@ -257,9 +257,9 @@ void BaseModule::IniposeTraGeneProc()
 
         if ( Robotis->via_num == 0 )
         {
-            tra = minimum_jerk_tra( ini_value , 0.0 , 0.0 ,
-                                    tar_value , 0.0 , 0.0 ,
-                                    Robotis->smp_time , Robotis->mov_time );
+            tra = robotis_framework::calcMinimumJerkTra(ini_value , 0.0 , 0.0 ,
+                                                        tar_value , 0.0 , 0.0 ,
+                                                        Robotis->smp_time , Robotis->mov_time );
         }
         else
         {
@@ -267,11 +267,11 @@ void BaseModule::IniposeTraGeneProc()
             Eigen::MatrixXd d_via_value = Robotis->joint_via_dpose.col( id );
             Eigen::MatrixXd dd_via_value = Robotis->joint_via_ddpose.col( id );
 
-            tra = minimum_jerk_tra_via_n_qdqddq( Robotis->via_num,
-                                                 ini_value , 0.0 , 0.0 ,
-                                                 via_value , d_via_value, dd_via_value,
-                                                 tar_value , 0.0 , 0.0 ,
-                                                 Robotis->smp_time , Robotis->via_time , Robotis->mov_time );
+            tra = robotis_framework::calcMinimumJerkTraWithViaPoints(Robotis->via_num,
+                                                                     ini_value , 0.0 , 0.0 ,
+                                                                     via_value , d_via_value, dd_via_value,
+                                                                     tar_value , 0.0 , 0.0 ,
+                                                                     Robotis->smp_time , Robotis->via_time , Robotis->mov_time );
         }
 
         Robotis->calc_joint_tra.block( 0 , id , Robotis->all_time_steps , 1 ) = tra;
@@ -284,8 +284,8 @@ void BaseModule::IniposeTraGeneProc()
 
 void BaseModule::PoseGenProc(Eigen::MatrixXd _joint_angle_pose)
 {
-    SetCtrlModule(module_name);
-    while(enable == false || has_goal_joints_ == false) usleep(8 * 1000);
+    SetCtrlModule(module_name_);
+    while(enable_ == false || has_goal_joints_ == false) usleep(8 * 1000);
 
     Robotis->mov_time = 5.0;
     Robotis->all_time_steps = int( Robotis->mov_time / Robotis->smp_time ) + 1;
@@ -302,9 +302,9 @@ void BaseModule::PoseGenProc(Eigen::MatrixXd _joint_angle_pose)
         ROS_INFO_STREAM("[ID : " << id << "] ini_value : " << ini_value << "  tar_value : " << tar_value);
 
 
-        Eigen::MatrixXd tra = minimum_jerk_tra( ini_value , 0.0 , 0.0 ,
-                tar_value , 0.0 , 0.0 ,
-                Robotis->smp_time , Robotis->mov_time );
+        Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value , 0.0 , 0.0 ,
+                                                                    tar_value , 0.0 , 0.0 ,
+                                                                    Robotis->smp_time , Robotis->mov_time );
 
 
         Robotis->calc_joint_tra.block( 0 , id , Robotis->all_time_steps , 1 ) = tra;
@@ -318,8 +318,8 @@ void BaseModule::PoseGenProc(Eigen::MatrixXd _joint_angle_pose)
 
 void 	BaseModule::PoseGenProc(std::map<std::string, double>& joint_angle_pose)
 {
-    SetCtrlModule(module_name);
-    while(enable == false || has_goal_joints_ == false) usleep(8 * 1000);
+    SetCtrlModule(module_name_);
+    while(enable_ == false || has_goal_joints_ == false) usleep(8 * 1000);
 
 	Eigen::MatrixXd _target_pose = Eigen::MatrixXd::Zero( MAX_JOINT_ID + 1 , 1 );
 
@@ -349,9 +349,9 @@ void 	BaseModule::PoseGenProc(std::map<std::string, double>& joint_angle_pose)
         ROS_INFO_STREAM("[ID : " << id << "] ini_value : " << ini_value << "  tar_value : " << tar_value);
 
 
-        Eigen::MatrixXd tra = minimum_jerk_tra( ini_value , 0.0 , 0.0 ,
-                tar_value , 0.0 , 0.0 ,
-                Robotis->smp_time , Robotis->mov_time );
+        Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value , 0.0 , 0.0 ,
+                                                                    tar_value , 0.0 , 0.0 ,
+                                                                    Robotis->smp_time , Robotis->mov_time );
 
 
         Robotis->calc_joint_tra.block( 0 , id , Robotis->all_time_steps , 1 ) = tra;
@@ -363,30 +363,30 @@ void 	BaseModule::PoseGenProc(std::map<std::string, double>& joint_angle_pose)
     ROS_INFO("[start] send trajectory");
 }
 
-bool BaseModule::IsRunning()
+bool BaseModule::isRunning()
 {
     return Robotis->is_moving;
 }
 
-void BaseModule::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors)
+void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
-    if(enable == false)
+    if(enable_ == false)
         return;
 
     /*----- write curr position -----*/
-    for(std::map<std::string, DynamixelState *>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+    for(std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
     {
         std::string _joint_name = state_iter->first;
 
-        Dynamixel *_dxl = NULL;
-        std::map<std::string, Dynamixel*>::iterator _dxl_it = dxls.find(_joint_name);
+        robotis_framework::Dynamixel *_dxl = NULL;
+        std::map<std::string, robotis_framework::Dynamixel*>::iterator _dxl_it = dxls.find(_joint_name);
         if(_dxl_it != dxls.end())
             _dxl = _dxl_it->second;
         else
             continue;
 
-        double _joint_curr_position = _dxl->dxl_state->present_position;
-        double _joint_goal_position = _dxl->dxl_state->goal_position;
+        double _joint_curr_position = _dxl->dxl_state_->present_position_;
+        double _joint_goal_position = _dxl->dxl_state_->goal_position_;
 
         JointState->curr_joint_state[ joint_name_to_id[_joint_name] ].position = _joint_curr_position;
         JointState->goal_joint_state[ joint_name_to_id[_joint_name] ].position = _joint_goal_position;
@@ -410,11 +410,11 @@ void BaseModule::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::
 
     /*----- set joint data -----*/
 
-    for(std::map<std::string, DynamixelState *>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+    for(std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
     {
         std::string _joint_name = state_iter->first;
 
-        result[ _joint_name ]->goal_position = JointState->goal_joint_state[ joint_name_to_id[_joint_name] ].position;
+        result_[ _joint_name ]->goal_position_ = JointState->goal_joint_state[ joint_name_to_id[_joint_name] ].position;
     }
 
     /*---------- initialize count number ----------*/
@@ -437,7 +437,7 @@ void BaseModule::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::
     }
 }
 
-void BaseModule::Stop()
+void BaseModule::stop()
 {
     return;
 }
@@ -445,7 +445,7 @@ void BaseModule::Stop()
 void BaseModule::SetCtrlModule(std::string module)
 {
     std_msgs::String _control_msg;
-    _control_msg.data = module_name;
+    _control_msg.data = module_name_;
 
     set_ctrl_module_pub_.publish(_control_msg);
 }

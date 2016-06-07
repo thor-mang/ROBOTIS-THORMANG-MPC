@@ -19,17 +19,17 @@
 #include <std_msgs/Int32.h>
 #include <boost/thread.hpp>
 
-#include "robotis_framework_common/MotionModule.h"
+#include "robotis_framework_common/motion_module.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 
 #include "thormang3_action_module_msgs/IsRunning.h"
 
 #include "action_file_define.h"
 
-namespace ROBOTIS
+namespace thormang3
 {
 
-class ActionModule : public MotionModule, public Singleton<ActionModule>
+class ActionModule : public robotis_framework::MotionModule, public robotis_framework::Singleton<ActionModule>
 {
 private:
     int             control_cycle_msec_;
@@ -85,11 +85,11 @@ public:
     ActionModule();
     virtual ~ActionModule();
 
-    void    Initialize(const int control_cycle_msec, Robot *robot);
-    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors);
+    void    initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
+    void    process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
 
-    void	Stop();
-    bool	IsRunning();
+    void	stop();
+    bool	isRunning();
 
 	bool loadFile(std::string file_name);
 	bool createFile(std::string file_name);
@@ -107,7 +107,7 @@ public:
     bool savePage(int page_number, action_file_define::Page* page);
     void resetPage(action_file_define::Page* page);
 
-	void actionPlayProcess(std::map<std::string, Dynamixel *> dxls);
+	void actionPlayProcess(std::map<std::string, robotis_framework::Dynamixel *> dxls);
 };
 
 }

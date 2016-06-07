@@ -16,14 +16,14 @@
 #include <sensor_msgs/JointState.h>
 #include <boost/thread.hpp>
 
-#include "robotis_framework_common/MotionModule.h"
-#include "robotis_math/RobotisMath.h"
+#include "robotis_framework_common/motion_module.h"
+#include "robotis_math/robotis_math.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 
 namespace ROBOTIS
 {
 
-class HeadControlModule : public MotionModule, public Singleton<HeadControlModule>
+class HeadControlModule : public robotis_framework::MotionModule, public robotis_framework::Singleton<HeadControlModule>
 {
 private:
     int             control_cycle_msec_;

@@ -15,12 +15,12 @@
 
 #include <fstream>
 
-#include "robotis_math/RobotisMath.h"
+#include "robotis_math/robotis_math.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "robotis_framework_common/SensorModule.h"
 
 #include "thormang3_feet_ft_module_msgs/BothWrench.h"
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 #include "ati_ft_sensor/ATIForceTorqueSensor.h"
 
 
@@ -28,7 +28,7 @@
 namespace ROBOTIS
 {
 
-class ThorMang3FeetForceTorqueSensor : public SensorModule, public Singleton<ThorMang3FeetForceTorqueSensor>
+class ThorMang3FeetForceTorqueSensor : public SensorModule, public robotis_framework::Singleton<ThorMang3FeetForceTorqueSensor>
 {
 private:
     int             control_cycle_msec_;

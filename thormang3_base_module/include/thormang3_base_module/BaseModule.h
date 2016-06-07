@@ -22,16 +22,16 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
-#include "robotis_framework_common/MotionModule.h"
+#include "robotis_framework_common/motion_module.h"
 
 #include "robotis_controller_msgs/StatusMsg.h"
 
-#include "robotis_math/RobotisMath.h"
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
+#include "robotis_math/robotis_math.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
 #include "RobotisState.h"
 
-namespace ROBOTIS
+namespace thormang3
 {
 
 //using namespace ROBOTIS_BASE;
@@ -60,7 +60,7 @@ public:
 
 };
 
-class BaseModule : public MotionModule, public Singleton<BaseModule>
+class BaseModule : public robotis_framework::MotionModule, public robotis_framework::Singleton<BaseModule>
 {
 private:
     int                 control_cycle_msec_;
@@ -98,14 +98,14 @@ public:
     void 	PoseGenProc(std::map<std::string, double>& joint_angle_pose);
 
     /* ROS Framework Functions */
-    void    Initialize(const int control_cycle_msec, Robot *robot);
-    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors);
+    void    initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
+    void    process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
 
-    void	Stop();
-    bool	IsRunning();
+    void	stop();
+    bool	isRunning();
 
     /* Parameter */
-    ROBOTIS_BASE::RobotisState *Robotis;
+    RobotisState *Robotis;
     BaseJointState *JointState;
 
 };

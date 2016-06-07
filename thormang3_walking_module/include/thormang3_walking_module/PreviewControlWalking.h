@@ -13,7 +13,7 @@
 
 #include "robotis_framework_common/Singleton.h"
 #include "math/WalkingModuleMath.h"
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
 
 namespace ROBOTIS

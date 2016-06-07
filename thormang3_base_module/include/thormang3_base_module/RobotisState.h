@@ -2,10 +2,10 @@
 #ifndef BASE_MODULE_ROBOTISSTATE_H_
 #define BASE_MODULE_ROBOTISSTATE_H_
 
-#include "robotis_math/RobotisMath.h"
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
+#include "robotis_math/robotis_math.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
-namespace ROBOTIS_BASE
+namespace thormang3
 {
 
 class RobotisState

@@ -7,7 +7,7 @@
 
 #include "thormang3_base_module/RobotisState.h"
 
-namespace ROBOTIS_BASE
+namespace thormang3
 {
 
 RobotisState::RobotisState()

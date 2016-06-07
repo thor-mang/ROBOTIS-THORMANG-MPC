@@ -8,8 +8,8 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
 
-#include "robotis_math/RobotisMath.h"
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
+#include "robotis_math/robotis_math.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
 #include "thormang3_manipulation_module_msgs/JointPose.h"
 #include "thormang3_manipulation_module_msgs/KinematicsPose.h"

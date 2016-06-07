@@ -8,7 +8,7 @@
 #ifndef ACTION_FILE_DEFINE_H_
 #define ACTION_FILE_DEFINE_H_
 
-namespace ROBOTIS
+namespace thormang3
 {
 
 namespace action_file_define

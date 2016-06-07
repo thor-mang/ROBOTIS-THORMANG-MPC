@@ -11,7 +11,7 @@
 #include "thormang3_action_module/action_module.h"
 
 
-using namespace ROBOTIS;
+using namespace thormang3;
 
 std::string ActionModule::convertIntToString(int _n) {
 	std::ostringstream ostr;
@@ -24,9 +24,9 @@ std::string ActionModule::convertIntToString(int _n) {
 ActionModule::ActionModule()
     : control_cycle_msec_(8)
 {
-    enable          = false;
-    module_name     = "action_module"; // set unique module name
-    control_mode    = POSITION_CONTROL;
+    enable_          = false;
+    module_name_     = "action_module"; // set unique module name
+    control_mode_    = robotis_framework::PositionControl;
 
     //////////////////////////////////
 	action_file_ = 0;
@@ -53,20 +53,20 @@ ActionModule::~ActionModule()
 		fclose( action_file_ );
 }
 
-void ActionModule::Initialize(const int control_cycle_msec, Robot *robot)
+void ActionModule::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
     control_cycle_msec_ = control_cycle_msec;
     queue_thread_       = boost::thread(boost::bind(&ActionModule::QueueThread, this));
 
-    for(std::map<std::string, Dynamixel*>::iterator it = robot->dxls.begin(); it != robot->dxls.end(); it++)
+    for(std::map<std::string, robotis_framework::Dynamixel*>::iterator it = robot->dxls_.begin(); it != robot->dxls_.end(); it++)
     {
         std::string joint_name = it->first;
-        Dynamixel*  dxl_info   = it->second;
+        robotis_framework::Dynamixel*  dxl_info   = it->second;
 
-        joint_name_to_id_[joint_name]   = dxl_info->id;
-        joint_id_to_name_[dxl_info->id] = joint_name;
-        result[joint_name] = new DynamixelState();
-        result[joint_name]->goal_position = dxl_info->dxl_state->goal_position;
+        joint_name_to_id_[joint_name]   = dxl_info->id_;
+        joint_id_to_name_[dxl_info->id_] = joint_name;
+        result_[joint_name] = new robotis_framework::DynamixelState();
+        result_[joint_name]->goal_position_ = dxl_info->dxl_state_->goal_position_;
     }
 
 
@@ -107,7 +107,7 @@ void ActionModule::QueueThread()
 bool ActionModule::IsRunningServiceCallback(thormang3_action_module_msgs::IsRunning::Request  &req,
                                             thormang3_action_module_msgs::IsRunning::Response &res)
 {
-    bool is_running = IsRunning();
+    bool is_running = isRunning();
     res.is_running = is_running;
 
     return true;
@@ -117,7 +117,7 @@ void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
 {
 
 	if(msg->data == -1) {
-		Stop();
+		stop();
 	}
 	else if(msg->data == -2) {
 		brake();
@@ -137,30 +137,30 @@ void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
 }
 
 
-void ActionModule::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors)
+void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
 	previous_enable_ = present_enable_;
-	present_enable_  = enable;
+	present_enable_  = enable_;
 
-    if(enable == false)
+    if(enable_ == false)
         return;
 
     if((present_enable_ == true) && (present_enable_ != previous_enable_)) {
-    	for(std::map<std::string, Dynamixel *>::iterator it = dxls.begin() ; it != dxls.end(); it++)
+    	for(std::map<std::string, robotis_framework::Dynamixel *>::iterator it = dxls.begin() ; it != dxls.end(); it++)
     	{
     		std::string joint_name = it->first;
 
-    		if(result.find(joint_name) == result.end())
+    		if(result_.find(joint_name) == result_.end())
     			continue;
     		else {
-    			result[joint_name]->goal_position = it->second->dxl_state->goal_position;
+    			result_[joint_name]->goal_position_ = it->second->dxl_state_->goal_position_;
     		}
     	}
     }
 
 
 	previous_running_ = present_running_;
-	present_running_  = IsRunning();
+	present_running_  = isRunning();
 
 	if(present_running_ != previous_running_) {
 		if(present_running_ == true) {
@@ -192,12 +192,12 @@ void ActionModule::OnModuleDisable()
 }
 
 
-void ActionModule::Stop()
+void ActionModule::stop()
 {
 	stop_playing_ = true;
 }
 
-bool ActionModule::IsRunning()
+bool ActionModule::isRunning()
 {
 	return playing_;
 }
@@ -346,7 +346,7 @@ bool ActionModule::start(std::string page_name)
 
 bool ActionModule::start(int page_number, action_file_define::Page* page)
 {
-	if(enable == false)	{
+	if(enable_ == false)	{
 		std::string status_msg = "Action Module is disabled";
 		ROS_ERROR_STREAM(status_msg);
 		publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
@@ -391,7 +391,7 @@ bool ActionModule::isRunning(int* playing_page_num, int* playing_step_num)
 	if(playing_step_num != 0)
 		*playing_step_num = page_step_count_ - 1;
 
-	return IsRunning();
+	return isRunning();
 }
 
 bool ActionModule::loadPage(int page_number, action_file_define::Page* page)
@@ -456,7 +456,7 @@ void ActionModule::resetPage(action_file_define::Page* page)
     setChecksum( page );
 }
 
-void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
+void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dynamixel *> dxls)
 {
     //////////////////// local Variable
     uint8_t bID;
@@ -538,7 +538,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 			if(dxls.find(_joint_name) == dxls.end())
 				continue;
 			else {
-				double _goal_joint_angle_rad = dxls[joint_id_to_name_[bID]]->dxl_state->goal_position;
+				double _goal_joint_angle_rad = dxls[joint_id_to_name_[bID]]->dxl_state_->goal_position_;
 				wpTargetAngle1024[bID] = convertRadTow4095(_goal_joint_angle_rad);
 				ipLastOutSpeed1024[bID] = 0;
 				ipMovingAngle1024[bID] = 0;
@@ -571,7 +571,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 				else {
 					if( ipMovingAngle1024[bID] == 0 )
 					{
-						result[_joint_name]->goal_position = convertw4095ToRad(wpStartAngle1024[bID]);
+						result_[_joint_name]->goal_position_ = convertw4095ToRad(wpStartAngle1024[bID]);
 					}
 					else
 					{
@@ -581,11 +581,11 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 							ipGoalSpeed1024[bID] = ipLastOutSpeed1024[bID] + iSpeedN;
 							ipAccelAngle1024[bID] =  (short)( ( ( (long)( ipLastOutSpeed1024[bID] + (iSpeedN >> 1) ) * wUnitTimeCount * 144 ) / 15 ) >> 9);
 
-							result[_joint_name]->goal_position = convertw4095ToRad(wpStartAngle1024[bID] + ipAccelAngle1024[bID]);
+							result_[_joint_name]->goal_position_ = convertw4095ToRad(wpStartAngle1024[bID] + ipAccelAngle1024[bID]);
 						}
 						else if( bSection == MAIN_SECTION )
 						{
-							result[_joint_name]->goal_position	= convertw4095ToRad(wpStartAngle1024[bID] + (short int)(((long)(ipMainAngle1024[bID])*wUnitTimeCount) / wUnitTimeNum));
+							result_[_joint_name]->goal_position_	= convertw4095ToRad(wpStartAngle1024[bID] + (short int)(((long)(ipMainAngle1024[bID])*wUnitTimeCount) / wUnitTimeNum));
 
 							ipGoalSpeed1024[bID] = ipMainSpeed1024[bID];
 						}
@@ -594,7 +594,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 							if( wUnitTimeCount == (wUnitTimeNum-1) )
 							{
 							    // use target angle in order to reduce the last step error
-								result[_joint_name]->goal_position	= convertw4095ToRad(wpTargetAngle1024[bID]);
+								result_[_joint_name]->goal_position_	= convertw4095ToRad(wpTargetAngle1024[bID]);
 							}
 							else
 							{
@@ -603,7 +603,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 									iSpeedN = (short int)(((long)(0 - ipLastOutSpeed1024[bID]) * wUnitTimeCount) / wUnitTimeNum);
 									ipGoalSpeed1024[bID] = ipLastOutSpeed1024[bID] + iSpeedN;
 
-									result[_joint_name]->goal_position
+									result_[_joint_name]->goal_position_
 									= convertw4095ToRad(wpStartAngle1024[bID] +  (short)((((long)(ipLastOutSpeed1024[bID] + (iSpeedN>>1)) * wUnitTimeCount * 144) / 15) >> 9));
 
 								}
@@ -611,7 +611,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 								{
 									// Same as MAIN Section
 									// because some servos need to be rotate, others do not.
-									result[_joint_name]->goal_position
+									result_[_joint_name]->goal_position_
 									= convertw4095ToRad(wpStartAngle1024[bID] + (short int)(((long)(ipMainAngle1024[bID]) * wUnitTimeCount) / wUnitTimeNum));
 
 									ipGoalSpeed1024[bID] = ipMainSpeed1024[bID];
@@ -619,7 +619,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 							}
 						}
 					}
-					//result[_joint_name]->position_p_gain = ( 256 >> (play_page_.header.pgain[bID] >> 4) ) << 2 ;
+					//result_[_joint_name]->position_p_gain = ( 256 >> (play_page_.header.pgain[bID] >> 4) ) << 2 ;
 				}
 			}
 		}
@@ -641,7 +641,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, Dynamixel *> dxls)
 			if(dxls.find(_joint_name) == dxls.end())
 				continue;
 			else {
-				double _goal_joint_angle_rad = dxls[joint_id_to_name_[bID]]->dxl_state->goal_position;
+				double _goal_joint_angle_rad = dxls[joint_id_to_name_[bID]]->dxl_state_->goal_position_;
 				wpStartAngle1024[bID] = convertRadTow4095(_goal_joint_angle_rad);
 				ipLastOutSpeed1024[bID] = ipGoalSpeed1024[bID];
 			}
