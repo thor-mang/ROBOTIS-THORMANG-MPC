@@ -69,12 +69,14 @@ void ThorMang3ImuSensor::PublishStatusMsg(unsigned int type, std::string msg)
   _status.module_name = "IMU";
   _status.status_msg = msg;
 
-  thormang3_imu_status_pub_.publish(_status);
+  imu_status_pub_.publish(_status);
 }
 
 void ThorMang3ImuSensor::ImuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag)
 {
   boost::mutex::scoped_lock lock(imu_sensor_mutex_);
+
+  /// TODO: Handle covariance matrices
 
   result["imu_orientation_q_x_" + tag] = msg->orientation.x;
   result["imu_orientation_q_y_" + tag] = msg->orientation.y;
@@ -109,13 +111,11 @@ void ThorMang3ImuSensor::QueueThread()
                                                     boost::bind(&ThorMang3ImuSensor::ImuSensorCallback, this, _1, std::string("filtered")));
 
   /* publisher */
-  thormang3_imu_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
+  imu_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
+  ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(_ros_node.ok())
-  {
-    _callback_queue.callAvailable();
-    usleep(100);
-  }
+    _callback_queue.callAvailable(duration);
 }
 
 void ThorMang3ImuSensor::Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, Sensor*> sensors)

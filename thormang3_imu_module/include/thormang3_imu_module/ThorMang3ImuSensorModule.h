@@ -67,11 +67,11 @@ private:
 
   void PublishStatusMsg(unsigned int type, std::string msg);
 
-  int             control_cycle_msec_;
-  boost::thread   queue_thread_;
-  boost::mutex    imu_sensor_mutex_;
+  int control_cycle_msec_;
+  boost::thread queue_thread_;
+  boost::mutex imu_sensor_mutex_;
 
-  ros::Publisher  thormang3_imu_status_pub_;
+  ros::Publisher imu_status_pub_;
 };
 }
 
