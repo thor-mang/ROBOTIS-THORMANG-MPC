@@ -70,21 +70,27 @@ public:
   bool isRunning() override;
 
 private:
+  void controllerManagerThread();
   void queueThread();
 
   int control_cycle_msec_;
+  boost::thread controller_manager_thread_;
   boost::thread queue_thread_;
   ros::Time last_time_stamp_;
+
+  bool reset_controllers_;
+
+  boost::mutex ros_control_mutex_;
   
   /** ROS CONTROL PART */
   boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
   // IMU
   hardware_interface::ImuSensorInterface imu_sensor_interface_;
-  hardware_interface::ImuSensorHandle::Data imu_data;
-  double imu_orientation[4];
-  double imu_angular_velocity[3];
-  double imu_linear_acceleration[3];
+  hardware_interface::ImuSensorHandle::Data imu_data_;
+  double imu_orientation_[4];
+  double imu_angular_velocity_[3];
+  double imu_linear_acceleration_[3];
 
   // FT-Sensors
   hardware_interface::ForceTorqueSensorInterface force_torque_sensor_interface_;
