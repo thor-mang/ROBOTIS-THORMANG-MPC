@@ -14,7 +14,7 @@
 #include <boost/thread.hpp>
 #include <geometry_msgs/WrenchStamped.h>
 #include <yaml-cpp/yaml.h>
-#include "robotis_math/RobotisMath.h"
+#include "robotis_math/robotis_math.h"
 
 namespace ROBOTIS
 {
