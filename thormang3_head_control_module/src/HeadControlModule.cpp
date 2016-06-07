@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "thormang3_head_control_module/HeadControlModule.h"
 
-using namespace ROBOTIS;
+using namespace thormang3;
 
 HeadControlModule::HeadControlModule()
 : control_cycle_msec_(0)
@@ -22,21 +22,21 @@ HeadControlModule::HeadControlModule()
 , moving_time_(3.0)
 , DEBUG(false)
 {
-    enable = false;
-    module_name = "head_control_module";
-    control_mode = POSITION_CONTROL;
+    enable_ = false;
+    module_name_ = "head_control_module";
+    control_mode_ = robotis_framework::PositionControl;
 
-    result["head_y"]   	= new DynamixelState();
-    result["head_p"]   	= new DynamixelState();
+    result_["head_y"]   	= new robotis_framework::DynamixelState();
+    result_["head_p"]   	= new robotis_framework::DynamixelState();
 
     using_joint_name_["head_y"] = 0;
     using_joint_name_["head_p"] = 1;
 
-    target_position_ 	= Eigen::MatrixXd::Zero(1, result.size());
-    current_position_ 	= Eigen::MatrixXd::Zero(1, result.size());
-    goal_position_ 		= Eigen::MatrixXd::Zero(1, result.size());
-    goal_velocity_ 		= Eigen::MatrixXd::Zero(1, result.size());
-    goal_acceleration_ 	= Eigen::MatrixXd::Zero(1, result.size());
+    target_position_ 	= Eigen::MatrixXd::Zero(1, result_.size());
+    current_position_ 	= Eigen::MatrixXd::Zero(1, result_.size());
+    goal_position_ 		= Eigen::MatrixXd::Zero(1, result_.size());
+    goal_velocity_ 		= Eigen::MatrixXd::Zero(1, result_.size());
+    goal_acceleration_ 	= Eigen::MatrixXd::Zero(1, result_.size());
 }
 
 HeadControlModule::~HeadControlModule()
@@ -44,7 +44,7 @@ HeadControlModule::~HeadControlModule()
     queue_thread_.join();
 }
 
-void HeadControlModule::Initialize(const int control_cycle_msec, Robot *robot)
+void HeadControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
     queue_thread_ = boost::thread(boost::bind(&HeadControlModule::QueueThread, this));
 
@@ -77,7 +77,7 @@ void HeadControlModule::QueueThread()
 
 void HeadControlModule::Get3DLidarCallback(const std_msgs::String::ConstPtr &msg)
 {
-    if(enable == false || is_moving_ == true)
+    if(enable_ == false || is_moving_ == true)
     {
         PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Fail to move Lidar");
         return;
@@ -102,7 +102,7 @@ void HeadControlModule::Get3DLidarCallback(const std_msgs::String::ConstPtr &msg
 
 void HeadControlModule::SetHeadJointCallback(const sensor_msgs::JointState::ConstPtr &msg)
 {
-    if(enable == false)
+    if(enable_ == false)
     {
         ROS_INFO("Head module is not enable.");
         PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Not Enable");
@@ -141,13 +141,13 @@ void HeadControlModule::SetHeadJointCallback(const sensor_msgs::JointState::Cons
     }
 
     // set init joint vel, accel
-    goal_velocity_ = Eigen::MatrixXd::Zero(1, result.size());
-    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result.size());
+    goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
+    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
 
     if(is_moving_ == true && is_direct_control_ == true)
     {
-        goal_velocity_ = calc_joint_vel_tra_.block(tra_count_, 0, 1, result.size());
-        goal_acceleration_ = calc_joint_accel_tra_.block(tra_count_, 0, 1, result.size());
+        goal_velocity_ = calc_joint_vel_tra_.block(tra_count_, 0, 1, result_.size());
+        goal_acceleration_ = calc_joint_accel_tra_.block(tra_count_, 0, 1, result_.size());
     }
 
     // set mode
@@ -158,27 +158,27 @@ void HeadControlModule::SetHeadJointCallback(const sensor_msgs::JointState::Cons
     delete tra_gene_thread_;
 }
 
-void HeadControlModule::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors)
+void HeadControlModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
-    if(enable == false) return;
+    if(enable_ == false) return;
 
     tra_lock_.lock();
 
     // get joint data
-    for(std::map<std::string, DynamixelState *>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+    for(std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
     {
         std::string _joint_name = state_iter->first;
         int _index = using_joint_name_[_joint_name];
 
-        Dynamixel *_dxl = NULL;
-        std::map<std::string, Dynamixel*>::iterator _dxl_it = dxls.find(_joint_name);
+        robotis_framework::Dynamixel *_dxl = NULL;
+        std::map<std::string, robotis_framework::Dynamixel*>::iterator _dxl_it = dxls.find(_joint_name);
         if(_dxl_it != dxls.end())
             _dxl = _dxl_it->second;
         else
             continue;
 
-        current_position_.coeffRef(0, _index) 	= _dxl->dxl_state->present_position;
-        goal_position_.coeffRef(0, _index)		= _dxl->dxl_state->goal_position;
+        current_position_.coeffRef(0, _index) 	= _dxl->dxl_state_->present_position_;
+        goal_position_.coeffRef(0, _index)		= _dxl->dxl_state_->goal_position_;
     }
 
     // check to stop
@@ -204,7 +204,7 @@ void HeadControlModule::Process(std::map<std::string, Dynamixel *> dxls, std::ma
             }
             else
             {
-                goal_position_ = calc_joint_tra_.block(tra_count_, 0, 1, result.size());
+                goal_position_ = calc_joint_tra_.block(tra_count_, 0, 1, result_.size());
                 tra_count_ += 1;
             }
         }
@@ -212,16 +212,16 @@ void HeadControlModule::Process(std::map<std::string, Dynamixel *> dxls, std::ma
     tra_lock_.unlock();
 
     // set joint data
-    for(std::map<std::string, DynamixelState *>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+    for(std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
     {
         std::string _joint_name = state_iter->first;
         int _index = using_joint_name_[_joint_name];
 
-        result[_joint_name]->goal_position = goal_position_.coeff(0, _index);
+        result_[_joint_name]->goal_position_ = goal_position_.coeff(0, _index);
     }
 }
 
-void HeadControlModule::Stop()
+void HeadControlModule::stop()
 {
     tra_lock_.lock();
 
@@ -233,7 +233,7 @@ void HeadControlModule::Stop()
     return;
 }
 
-bool HeadControlModule::IsRunning()
+bool HeadControlModule::isRunning()
 {
     return is_moving_;
 }
@@ -330,8 +330,8 @@ void HeadControlModule::BeforeMoveLidar()
     target_position_.coeffRef(0, using_joint_name_["head_p"]) = _start_angle;
 
     // set init joint vel, accel
-    goal_velocity_ = Eigen::MatrixXd::Zero(1, result.size());
-    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result.size());
+    goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
+    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
 
     // generate trajectory
     tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::JointTraGeneThread, this));
@@ -351,8 +351,8 @@ void HeadControlModule::StartMoveLidar()
     target_position_.coeffRef(0, using_joint_name_["head_p"]) = _target_angle;
 
     // set init joint vel, accel
-    goal_velocity_ = Eigen::MatrixXd::Zero(1, result.size());
-    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result.size());
+    goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
+    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
 
     // generate trajectory
     tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::JointTraGeneThread, this));
@@ -371,8 +371,8 @@ void HeadControlModule::AfterMoveLidar()
     target_position_.coeffRef(0, using_joint_name_["head_p"]) = original_position_lidar_;
 
     // set init joint vel, accel
-    goal_velocity_ = Eigen::MatrixXd::Zero(1, result.size());
-    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result.size());
+    goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
+    goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
 
     // generate trajectory
     tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::JointTraGeneThread, this));
@@ -411,9 +411,9 @@ Eigen::MatrixXd HeadControlModule::MinimumJerkTraPVA( double pos_start , double 
 	Eigen::MatrixXd ___C( 3 , 3 );
 	Eigen::MatrixXd __C( 3 , 1 );
 
-	___C << powDI( mov_time , 3 )			, powDI( mov_time , 4 )      , powDI( mov_time , 5 ),
-			3 * powDI( mov_time , 2 ) 		, 4 * powDI( mov_time , 3 )  , 5 * powDI( mov_time , 4 ),
-			6 * mov_time              		, 12 * powDI( mov_time , 2 ) , 20 * powDI( mov_time , 3 );
+	___C << robotis_framework::powDI( mov_time , 3 )			, robotis_framework::powDI( mov_time , 4 )      , robotis_framework::powDI( mov_time , 5 ),
+			3 * robotis_framework::powDI( mov_time , 2 ) 		, 4 * robotis_framework::powDI( mov_time , 3 )  , 5 * robotis_framework::powDI( mov_time , 4 ),
+			6 * mov_time              		, 12 * robotis_framework::powDI( mov_time , 2 ) , 20 * robotis_framework::powDI( mov_time , 3 );
 
 	__C << pos_end - pos_start - vel_start * mov_time - accel_start * pow( mov_time , 2 ) / 2,
 			vel_end - vel_start - accel_start * mov_time,
@@ -438,23 +438,23 @@ Eigen::MatrixXd HeadControlModule::MinimumJerkTraPVA( double pos_start , double 
 		_tra.coeffRef( step , 0 ) =
 				pos_start +
 				vel_start * _time.coeff( step , 0 ) +
-				0.5 * accel_start * powDI( _time.coeff( step , 0 ) , 2 ) +
-				_A.coeff( 0 , 0 ) * powDI( _time.coeff( step , 0 ) , 3 ) +
-				_A.coeff( 1 , 0 ) * powDI( _time.coeff( step , 0 ) , 4 ) +
-				_A.coeff( 2 , 0 ) * powDI( _time.coeff( step , 0 ) , 5 );
+				0.5 * accel_start * robotis_framework::powDI( _time.coeff( step , 0 ) , 2 ) +
+				_A.coeff( 0 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 3 ) +
+				_A.coeff( 1 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 4 ) +
+				_A.coeff( 2 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 5 );
 		// velocity
 		_tra.coeffRef( step , 1 ) =
 				vel_start +
 				accel_start * _time.coeff( step , 0 ) +
-				3 * _A.coeff( 0 , 0 ) * powDI( _time.coeff( step , 0 ) , 2 ) +
-				4 * _A.coeff( 1 , 0 ) * powDI( _time.coeff( step , 0 ) , 3 ) +
-				5 * _A.coeff( 2 , 0 ) * powDI( _time.coeff( step , 0 ) , 4 );
+				3 * _A.coeff( 0 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 2 ) +
+				4 * _A.coeff( 1 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 3 ) +
+				5 * _A.coeff( 2 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 4 );
 		// accel
 		_tra.coeffRef( step , 2 ) =
 				accel_start +
 				6 * _A.coeff( 0 , 0 ) * _time.coeff( step , 0 ) +
-				12 * _A.coeff( 1 , 0 ) * powDI( _time.coeff( step , 0 ) , 2 ) +
-				20 * _A.coeff( 2 , 0 ) * powDI( _time.coeff( step , 0 ) , 3 );
+				12 * _A.coeff( 1 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 2 ) +
+				20 * _A.coeff( 2 , 0 ) * robotis_framework::powDI( _time.coeff( step , 0 ) , 3 );
 	}
 
 	return _tra;
@@ -467,11 +467,11 @@ void HeadControlModule::JointTraGeneThread()
     double _smp_time = control_cycle_msec_ * 0.001;		// ms -> s
     int _all_time_steps = int( moving_time_ / _smp_time ) + 1;
 
-    calc_joint_tra_.resize( _all_time_steps , result.size() );
-    calc_joint_vel_tra_.resize( _all_time_steps , result.size() );
-    calc_joint_accel_tra_.resize( _all_time_steps , result.size() );
+    calc_joint_tra_.resize( _all_time_steps , result_.size() );
+    calc_joint_vel_tra_.resize( _all_time_steps , result_.size() );
+    calc_joint_accel_tra_.resize( _all_time_steps , result_.size() );
 
-    for(std::map<std::string, DynamixelState *>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+    for(std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
     {
         std::string _joint_name = state_iter->first;
         int _index = using_joint_name_[_joint_name];
