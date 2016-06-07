@@ -40,8 +40,7 @@
 
 #include "ati_ft_sensor/ati_force_torque_sensor_twe.h"
 
-namespace ROBOTIS
-{
+using namespace thormang3;
 
 
 ATIForceTorqueSensorTWE::ATIForceTorqueSensorTWE()
@@ -258,8 +257,4 @@ void ATIForceTorqueSensorTWE::setCurrentVoltageOutputPublish(Eigen::MatrixXd vol
 
 	if(is_ft_scaled_published_)
 		ft_scaled_pub_.publish(ft_scaled_msg_);
-}
-
-
-
 }

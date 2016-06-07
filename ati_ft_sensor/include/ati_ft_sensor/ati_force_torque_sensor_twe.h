@@ -48,7 +48,7 @@
 
 #include "robotis_math/robotis_math.h"
 
-namespace ROBOTIS
+namespace thormang3
 {
 
 class ATIForceTorqueSensorTWE
