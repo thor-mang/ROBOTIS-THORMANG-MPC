@@ -5,9 +5,9 @@
  *      AuROBOTIS: hjsong
  */
 #include <iostream>
-#include "../include/thormang3_walking_module/math/LinearAlgebra.h"
+#include "../include/thormang3_walking_module/math/linear_algebra.h"
 
-namespace ROBOTIS
+namespace thormang3
 {
 
 
@@ -74,7 +74,7 @@ matd GetTransformMatrix(double x, double y, double z, double Roll, double Pitch,
 	//return matTransform;
 
 
-	return transformationXYZRPY(x, y, z, Roll, Pitch, Yaw);
+	return robotis_framework::getTransformationXYZRPY(x, y, z, Roll, Pitch, Yaw);
 }
 
 matd GetTransformMatrixInverse(matd T)
@@ -94,9 +94,9 @@ matd GetTransformMatrixInverse(matd T)
 	//       [   z'   | -AtoB��z ]
 	//       [  0 0 0  |       1 ]
 
-	invT << vec_x(0), vec_x(1), vec_x(2), dot(vecBOA, vec_x),
-			vec_y(0), vec_y(1), vec_y(2), dot(vecBOA, vec_y),
-			vec_z(0), vec_z(1), vec_z(2), dot(vecBOA, vec_z),
+	invT << vec_x(0), vec_x(1), vec_x(2), robotis_framework::calcInner(vecBOA, vec_x),
+			vec_y(0), vec_y(1), vec_y(2), robotis_framework::calcInner(vecBOA, vec_y),
+			vec_z(0), vec_z(1), vec_z(2), robotis_framework::calcInner(vecBOA, vec_z),
 			      0,        0,        0,                   1;
 
 	return invT;

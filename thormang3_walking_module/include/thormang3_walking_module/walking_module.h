@@ -17,7 +17,7 @@
 #include <boost/thread.hpp>
 
 
-#include "PreviewControlWalking.h"
+#include "preview_control_walking.h"
 
 #include "robotis_framework_common/motion_module.h"
 
@@ -33,7 +33,7 @@
 #include "thormang3_walking_module_msgs/RemoveExistingStepData.h"
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 
 class WalkingMotionModule : public robotis_framework::MotionModule, public robotis_framework::Singleton<WalkingMotionModule>
@@ -108,12 +108,12 @@ public:
     double l_foot_fx_N,  l_foot_fy_N,  l_foot_fz_N;
     double l_foot_Tx_Nm, l_foot_Ty_Nm, l_foot_Tz_Nm;
 
-    void    Initialize(const int control_cycle_msec, Robot *robot);
+    void    initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
     //void	ForceTorqueSensorInitialize();
-    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors);
+    void    process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
 
-    void	Stop();
-    bool	IsRunning();
+    void	stop();
+    bool	isRunning();
 };
 
 }

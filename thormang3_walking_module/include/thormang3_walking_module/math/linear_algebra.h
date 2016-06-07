@@ -10,9 +10,9 @@
 
 #include <stdio.h>
 #include "robotis_math/robotis_math.h"
-#include "StepDataDefine.h"
+#include "step_data_define.h"
 
-namespace ROBOTIS
+namespace thormang3
 {
 	typedef Eigen::MatrixXd matd;
 	typedef Eigen::MatrixXi mati;

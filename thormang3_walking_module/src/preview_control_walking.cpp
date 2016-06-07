@@ -1,9 +1,9 @@
-#include "thormang3_walking_module/PreviewControlWalking.h"
+#include "thormang3_walking_module/preview_control_walking.h"
 #include <cmath>
 #include <iostream>
 
 
-using namespace ROBOTIS;
+using namespace thormang3;
 
 
 static const double MMtoM = 0.001;
@@ -55,7 +55,7 @@ PreviewControlWalking::PreviewControlWalking()
 
 	//uID = (char*)"PreviewControlWalking";
 
-	thormang3_kd_ = new ROBOTIS::ThorMang3KinematicsDynamics(ROBOTIS::WHOLE_BODY);
+	thormang3_kd_ = new KinematicsDynamics(WholeBody);
 
 	m_PresentRightFootPosition.x = 0.0;    m_PresentRightFootPosition.y = -0.5*186.0*MMtoM;  m_PresentRightFootPosition.z = -0.630*MMtoM;
 	m_PresentRightFootPosition.roll = 0.0; m_PresentRightFootPosition.pitch = 0.0; m_PresentRightFootPosition.yaw = 0.0;
@@ -152,20 +152,20 @@ PreviewControlWalking::PreviewControlWalking()
 
 
 	//for thor 3.0
-	dir_output[0] = thormang3_kd_->thormang3_link_data[ID_R_LEG_START + 2*0]->joint_axis.coeff(2, 0);
-	dir_output[1] = thormang3_kd_->thormang3_link_data[ID_R_LEG_START + 2*1]->joint_axis.coeff(0, 0);
-	dir_output[2] = thormang3_kd_->thormang3_link_data[ID_R_LEG_START + 2*2]->joint_axis.coeff(1, 0);
-	dir_output[3] = thormang3_kd_->thormang3_link_data[ID_R_LEG_START + 2*3]->joint_axis.coeff(1, 0);
-	dir_output[4] = thormang3_kd_->thormang3_link_data[ID_R_LEG_START + 2*4]->joint_axis.coeff(1, 0);
-	dir_output[5] = thormang3_kd_->thormang3_link_data[ID_R_LEG_START + 2*5]->joint_axis.coeff(0, 0);
+	dir_output[0] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*0]->joint_axis.coeff(2, 0);
+	dir_output[1] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*1]->joint_axis.coeff(0, 0);
+	dir_output[2] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*2]->joint_axis.coeff(1, 0);
+	dir_output[3] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*3]->joint_axis.coeff(1, 0);
+	dir_output[4] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*4]->joint_axis.coeff(1, 0);
+	dir_output[5] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*5]->joint_axis.coeff(0, 0);
 
 
-	dir_output[6]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*0]->joint_axis.coeff(2, 0);
-	dir_output[7]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*1]->joint_axis.coeff(0, 0);
-	dir_output[8]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*2]->joint_axis.coeff(1, 0);
-	dir_output[9]  = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*3]->joint_axis.coeff(1, 0);
-	dir_output[10] = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*4]->joint_axis.coeff(1, 0);
-	dir_output[11] = thormang3_kd_->thormang3_link_data[id_l_leg_start + 2*5]->joint_axis.coeff(0, 0);
+	dir_output[6]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*0]->joint_axis.coeff(2, 0);
+	dir_output[7]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*1]->joint_axis.coeff(0, 0);
+	dir_output[8]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*2]->joint_axis.coeff(1, 0);
+	dir_output[9]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*3]->joint_axis.coeff(1, 0);
+	dir_output[10] = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*4]->joint_axis.coeff(1, 0);
+	dir_output[11] = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*5]->joint_axis.coeff(0, 0);
 
 	dir_output[12] = -1; dir_output[13] = 1;  dir_output[14] = -1; dir_output[15] =  1;
 
@@ -367,7 +367,7 @@ PreviewControlWalking::PreviewControlWalking()
 	m_left_ft_scale_factor = 1.0;
 
 
-	double _total_mass_of_robot = thormang3_kd_->TotalMass(0);
+	double _total_mass_of_robot = thormang3_kd_->calcTotalMass(0);
 //	printf("ROBOT TOTAL MASS : %f \n", _total_mass_of_robot);
 //	m_right_dsp_fz_N = -1.0*(42.0)*9.8*0.5;
 //	m_right_ssp_fz_N = -1.0*(42.0)*9.8;
@@ -466,7 +466,7 @@ void PreviewControlWalking::SetInitalWaistYawAngle(double waist_yaw_angle_rad)
 
 
 
-void PreviewControlWalking::Initialize()
+void PreviewControlWalking::initialize()
 {
 	if(m_Real_Running)
 		return;
@@ -533,12 +533,12 @@ void PreviewControlWalking::Initialize()
 	epr.x -=  COB_X_MANUAL_ADJUSTMENT_M;
 	epl.x -=  COB_X_MANUAL_ADJUSTMENT_M;
 	double angle[12];
-	if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false) {
+	if(thormang3_kd_->calcInverseKinematicsForRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false) {
 		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
 		return;
 	}
 
-	if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false) {
+	if(thormang3_kd_->calcInverseKinematicsForLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false) {
 		printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
 		return;
 	}
@@ -765,12 +765,12 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
 
 
 	double angle[12];
-	if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
+	if(thormang3_kd_->calcInverseKinematicsForRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
 		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
 		return;
 	}
 
-	if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
+	if(thormang3_kd_->calcInverseKinematicsForLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
 		printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
 		return;
 	}
@@ -858,18 +858,18 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
 
 }
 //
-void PreviewControlWalking::Start()
+void PreviewControlWalking::start()
 {
 	m_Ctrl_Running = true;
 	m_Real_Running = true;
 }
 
-void PreviewControlWalking::Stop()
+void PreviewControlWalking::stop()
 {
 	m_Ctrl_Running = false;
 }
 
-bool PreviewControlWalking::IsRunning()
+bool PreviewControlWalking::isRunning()
 {
 	return m_Real_Running;
 }
@@ -1422,7 +1422,7 @@ double PreviewControlWalking::GetLeftAnklePitchMomentDampingControllerOutput(dou
 //}
 //
 //
-void PreviewControlWalking::Process()
+void PreviewControlWalking::process()
 {
 	static Pose3D epr, epl;
 	static Pose3D epr_for_balance, epl_for_balance;
@@ -2310,19 +2310,19 @@ void PreviewControlWalking::Process()
 
 
 
-			hip_roll_adjustment_deg = sign(hip_roll_adjustment_deg)*fmin(fabs(hip_roll_adjustment_deg), 5.0);
-			hip_pitch_adjustment_deg = sign(hip_pitch_adjustment_deg)*fmin(fabs(hip_pitch_adjustment_deg), 5.0);
-			epr_for_balance.x 	  = sign(epr_for_balance.x    )*fmin(fabs(epr_for_balance.x),     X_ADJUSTMENT_ABS_MAX_MM*MMtoM);
-			epr_for_balance.y 	  = sign(epr_for_balance.y    )*fmin(fabs(epr_for_balance.y),     Y_ADJUSTMENT_ABS_MAX_MM*MMtoM);
-			epr_for_balance.z     = sign(epr_for_balance.z    )*fmin(fabs(epr_for_balance.z),     Z_ADJUSTMENT_ABS_MAX_MM*MMtoM);
-			epr_for_balance.roll  = sign(epr_for_balance.roll )*fmin(fabs(epr_for_balance.roll),  ROLL_ADJUSTMENT_ABS_MAX_RAD);
-			epr_for_balance.pitch = sign(epr_for_balance.pitch)*fmin(fabs(epr_for_balance.pitch), PITCH_ADJUSTMENT_ABS_MAX_RAD);
+			hip_roll_adjustment_deg = robotis_framework::sign(hip_roll_adjustment_deg)*fmin(fabs(hip_roll_adjustment_deg), 5.0);
+			hip_pitch_adjustment_deg = robotis_framework::sign(hip_pitch_adjustment_deg)*fmin(fabs(hip_pitch_adjustment_deg), 5.0);
+			epr_for_balance.x 	  = robotis_framework::sign(epr_for_balance.x    )*fmin(fabs(epr_for_balance.x),     X_ADJUSTMENT_ABS_MAX_MM*MMtoM);
+			epr_for_balance.y 	  = robotis_framework::sign(epr_for_balance.y    )*fmin(fabs(epr_for_balance.y),     Y_ADJUSTMENT_ABS_MAX_MM*MMtoM);
+			epr_for_balance.z     = robotis_framework::sign(epr_for_balance.z    )*fmin(fabs(epr_for_balance.z),     Z_ADJUSTMENT_ABS_MAX_MM*MMtoM);
+			epr_for_balance.roll  = robotis_framework::sign(epr_for_balance.roll )*fmin(fabs(epr_for_balance.roll),  ROLL_ADJUSTMENT_ABS_MAX_RAD);
+			epr_for_balance.pitch = robotis_framework::sign(epr_for_balance.pitch)*fmin(fabs(epr_for_balance.pitch), PITCH_ADJUSTMENT_ABS_MAX_RAD);
 			epr_for_balance.yaw   = 0;
-			epl_for_balance.x 	  = sign(epl_for_balance.x    )*fmin(fabs(epl_for_balance.x),     X_ADJUSTMENT_ABS_MAX_MM*MMtoM);
-			epl_for_balance.y 	  = sign(epl_for_balance.y    )*fmin(fabs(epl_for_balance.y),     Y_ADJUSTMENT_ABS_MAX_MM*MMtoM);
-			epl_for_balance.z     = sign(epl_for_balance.z    )*fmin(fabs(epl_for_balance.z),     Z_ADJUSTMENT_ABS_MAX_MM*MMtoM);
-			epl_for_balance.roll  = sign(epl_for_balance.roll )*fmin(fabs(epl_for_balance.roll),  ROLL_ADJUSTMENT_ABS_MAX_RAD);
-			epl_for_balance.pitch = sign(epl_for_balance.pitch)*fmin(fabs(epl_for_balance.pitch), PITCH_ADJUSTMENT_ABS_MAX_RAD);
+			epl_for_balance.x 	  = robotis_framework::sign(epl_for_balance.x    )*fmin(fabs(epl_for_balance.x),     X_ADJUSTMENT_ABS_MAX_MM*MMtoM);
+			epl_for_balance.y 	  = robotis_framework::sign(epl_for_balance.y    )*fmin(fabs(epl_for_balance.y),     Y_ADJUSTMENT_ABS_MAX_MM*MMtoM);
+			epl_for_balance.z     = robotis_framework::sign(epl_for_balance.z    )*fmin(fabs(epl_for_balance.z),     Z_ADJUSTMENT_ABS_MAX_MM*MMtoM);
+			epl_for_balance.roll  = robotis_framework::sign(epl_for_balance.roll )*fmin(fabs(epl_for_balance.roll),  ROLL_ADJUSTMENT_ABS_MAX_RAD);
+			epl_for_balance.pitch = robotis_framework::sign(epl_for_balance.pitch)*fmin(fabs(epl_for_balance.pitch), PITCH_ADJUSTMENT_ABS_MAX_RAD);
 			epl_for_balance.yaw   = 0;
 
 
@@ -2442,12 +2442,12 @@ void PreviewControlWalking::Process()
 //		}
 
 		double angle[12] = { 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0,};
-		if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
+		if(thormang3_kd_->calcInverseKinematicsForRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
 			printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
 			return;
 		}
 
-		if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
+		if(thormang3_kd_->calcInverseKinematicsForLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
 			printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
 			return;
 		}

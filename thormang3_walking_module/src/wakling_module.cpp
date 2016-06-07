@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <eigen_conversions/eigen_msg.h>
 
-#include "thormang3_walking_module/WalkingModule.h"
+#include "thormang3_walking_module/walking_module.h"
 
-using namespace ROBOTIS;
+using namespace thormang3;
 
 class WALKING_STATUS_MSG {
 public:
@@ -35,22 +35,22 @@ const std::string WALKING_STATUS_MSG::WALKING_FINISH_MSG = "Walking_Finished";
 WalkingMotionModule::WalkingMotionModule()
     : control_cycle_msec_(8)
 {
-    enable          = false;
-    module_name     = "walking_module";
-    control_mode    = POSITION_CONTROL;
-    result["r_leg_hip_y"] = new DynamixelState();
-    result["r_leg_hip_r"] = new DynamixelState();
-    result["r_leg_hip_p"] = new DynamixelState();
-    result["r_leg_kn_p"] = new DynamixelState();
-    result["r_leg_an_p"] = new DynamixelState();
-    result["r_leg_an_r"] = new DynamixelState();
+    enable_          = false;
+    module_name_     = "walking_module";
+    control_mode_    = robotis_framework::PositionControl;
+    result_["r_leg_hip_y"] = new robotis_framework::DynamixelState();
+    result_["r_leg_hip_r"] = new robotis_framework::DynamixelState();
+    result_["r_leg_hip_p"] = new robotis_framework::DynamixelState();
+    result_["r_leg_kn_p"] = new robotis_framework::DynamixelState();
+    result_["r_leg_an_p"] = new robotis_framework::DynamixelState();
+    result_["r_leg_an_r"] = new robotis_framework::DynamixelState();
 
-    result["l_leg_hip_y"] = new DynamixelState();
-    result["l_leg_hip_r"] = new DynamixelState();
-    result["l_leg_hip_p"] = new DynamixelState();
-    result["l_leg_kn_p" ] = new DynamixelState();
-    result["l_leg_an_p" ] = new DynamixelState();
-    result["l_leg_an_r" ] = new DynamixelState();
+    result_["l_leg_hip_y"] = new robotis_framework::DynamixelState();
+    result_["l_leg_hip_r"] = new robotis_framework::DynamixelState();
+    result_["l_leg_hip_p"] = new robotis_framework::DynamixelState();
+    result_["l_leg_kn_p" ] = new robotis_framework::DynamixelState();
+    result_["l_leg_an_p" ] = new robotis_framework::DynamixelState();
+    result_["l_leg_an_r" ] = new robotis_framework::DynamixelState();
 
     previous_enable		= present_enable	= false;
     previous_running	= present_running	= false;
@@ -107,12 +107,12 @@ WalkingMotionModule::~WalkingMotionModule()
     queue_thread_.join();
 }
 
-void WalkingMotionModule::Initialize(const int control_cycle_msec, Robot *robot)
+void WalkingMotionModule::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
     queue_thread_ = boost::thread(boost::bind(&WalkingMotionModule::QueueThread, this));
     control_cycle_msec_ = control_cycle_msec;
 
-    PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+    PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
     prev_walking->SetInitialPose(0, -93.0*0.001, -630*0.001, 0, 0, 0,
     		0, 93.0*0.001, -630*0.001,   0, 0, 0,
 			0,  0,   0, 0, 0, 0);
@@ -169,7 +169,7 @@ void WalkingMotionModule::Initialize(const int control_cycle_msec, Robot *robot)
 
 	prev_walking->COB_X_MANUAL_ADJUSTMENT_M	= -10.0*0.001;
 
-	prev_walking->Initialize();
+	prev_walking->initialize();
 
 	prev_walking->BALANCE_ENABLE = true;
 
@@ -179,25 +179,25 @@ void WalkingMotionModule::Initialize(const int control_cycle_msec, Robot *robot)
 	desired_matrix_g_to_lfoot_ = prev_walking->matGtoLF;
 	publish_mutex_.unlock();
 
-    result["r_leg_hip_y"]->goal_position = prev_walking->m_OutAngleRad[0];
-    result["r_leg_hip_r"]->goal_position = prev_walking->m_OutAngleRad[1];
-    result["r_leg_hip_p"]->goal_position = prev_walking->m_OutAngleRad[2];
-    result["r_leg_kn_p"]->goal_position  = prev_walking->m_OutAngleRad[3];
-    result["r_leg_an_p"]->goal_position  = prev_walking->m_OutAngleRad[4];
-    result["r_leg_an_r"]->goal_position  = prev_walking->m_OutAngleRad[5];
+    result_["r_leg_hip_y"]->goal_position_ = prev_walking->m_OutAngleRad[0];
+    result_["r_leg_hip_r"]->goal_position_ = prev_walking->m_OutAngleRad[1];
+    result_["r_leg_hip_p"]->goal_position_ = prev_walking->m_OutAngleRad[2];
+    result_["r_leg_kn_p"]->goal_position_  = prev_walking->m_OutAngleRad[3];
+    result_["r_leg_an_p"]->goal_position_  = prev_walking->m_OutAngleRad[4];
+    result_["r_leg_an_r"]->goal_position_  = prev_walking->m_OutAngleRad[5];
 
-    result["l_leg_hip_y"]->goal_position = prev_walking->m_OutAngleRad[6];
-    result["l_leg_hip_r"]->goal_position = prev_walking->m_OutAngleRad[7];
-    result["l_leg_hip_p"]->goal_position = prev_walking->m_OutAngleRad[8];
-    result["l_leg_kn_p" ]->goal_position = prev_walking->m_OutAngleRad[9];
-    result["l_leg_an_p" ]->goal_position = prev_walking->m_OutAngleRad[10];
-    result["l_leg_an_r" ]->goal_position = prev_walking->m_OutAngleRad[11];
+    result_["l_leg_hip_y"]->goal_position_ = prev_walking->m_OutAngleRad[6];
+    result_["l_leg_hip_r"]->goal_position_ = prev_walking->m_OutAngleRad[7];
+    result_["l_leg_hip_p"]->goal_position_ = prev_walking->m_OutAngleRad[8];
+    result_["l_leg_kn_p" ]->goal_position_ = prev_walking->m_OutAngleRad[9];
+    result_["l_leg_an_p" ]->goal_position_ = prev_walking->m_OutAngleRad[10];
+    result_["l_leg_an_r" ]->goal_position_ = prev_walking->m_OutAngleRad[11];
 
-    prev_walking->Start();
-    prev_walking->Process();
+    prev_walking->start();
+    prev_walking->process();
 
-    previous_enable = enable;
-    previous_running = IsRunning();
+    previous_enable = enable_;
+    previous_running = isRunning();
 }
 
 void	WalkingMotionModule::QueueThread()
@@ -402,7 +402,7 @@ int		WalkingMotionModule::StepDataToStepDataMsg(StepData& src, thormang3_walking
 bool 	WalkingMotionModule::GetReferenceStepDataServiceCallback(thormang3_walking_module_msgs::GetReferenceStepData::Request &req,
 																thormang3_walking_module_msgs::GetReferenceStepData::Response &res)
 {
-	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+	PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
 
 	StepData _refStepData;
 
@@ -419,10 +419,10 @@ bool 	WalkingMotionModule::GetReferenceStepDataServiceCallback(thormang3_walking
 bool 	WalkingMotionModule::AddStepDataServiceCallback(thormang3_walking_module_msgs::AddStepDataArray::Request &req,
 														thormang3_walking_module_msgs::AddStepDataArray::Response &res)
 {
-	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+	PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
 	res.result = thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR;
 
-	if(enable == false) {
+	if(enable_ == false) {
 		res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::NOT_ENABLED_WALKING_MODULE;
 		std::string _status_msg = WALKING_STATUS_MSG::FAILED_TO_ADD_STEP_DATA_MSG;
 		PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
@@ -430,7 +430,7 @@ bool 	WalkingMotionModule::AddStepDataServiceCallback(thormang3_walking_module_m
 		return true;
 	}
 
-	if(prev_walking->IsRunning() == true) {
+	if(prev_walking->isRunning() == true) {
 		res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::ROBOT_IS_WALKING_NOW;
 		std::string _status_msg  = WALKING_STATUS_MSG::FAILED_TO_ADD_STEP_DATA_MSG;
 		PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
@@ -482,7 +482,7 @@ bool 	WalkingMotionModule::AddStepDataServiceCallback(thormang3_walking_module_m
 		prev_walking->AddStepData(_req_stp_data_array[_i]);
 
 	if( req.auto_start == true)	{
-		prev_walking->Start();
+		prev_walking->start();
 	}
 
 	return true;
@@ -491,14 +491,14 @@ bool 	WalkingMotionModule::AddStepDataServiceCallback(thormang3_walking_module_m
 bool	WalkingMotionModule::WalkingStartServiceCallback(thormang3_walking_module_msgs::WalkingStart::Request &req,
 														thormang3_walking_module_msgs::WalkingStart::Response &res)
 {
-	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+	PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
 	res.result = thormang3_walking_module_msgs::WalkingStart::Response::NO_ERROR;
 
-	if(enable == false) {
+	if(enable_ == false) {
 		res.result |= thormang3_walking_module_msgs::WalkingStart::Response::NOT_ENABLED_WALKING_MODULE;
 	}
 
-	if(prev_walking->IsRunning() == true){
+	if(prev_walking->isRunning() == true){
 		res.result |= thormang3_walking_module_msgs::WalkingStart::Response::ROBOT_IS_WALKING_NOW;
 	}
 
@@ -507,7 +507,7 @@ bool	WalkingMotionModule::WalkingStartServiceCallback(thormang3_walking_module_m
 	}
 
 	if(res.result == thormang3_walking_module_msgs::WalkingStart::Response::NO_ERROR) {
-		prev_walking->Start();
+		prev_walking->start();
 	}
 
 	return true;
@@ -516,24 +516,24 @@ bool	WalkingMotionModule::WalkingStartServiceCallback(thormang3_walking_module_m
 bool	WalkingMotionModule::IsRunningServiceCallback(thormang3_walking_module_msgs::IsRunning::Request &req,
 														thormang3_walking_module_msgs::IsRunning::Response &res)
 {
-	bool is_running = IsRunning();
+	bool is_running = isRunning();
 	res.is_running = is_running;
 
 	return true;
 }
 
-bool	WalkingMotionModule::IsRunning()
+bool	WalkingMotionModule::isRunning()
 {
-	return PreviewControlWalking::GetInstance()->IsRunning();
+	return PreviewControlWalking::getInstance()->isRunning();
 }
 
 bool	WalkingMotionModule::SetBalanceParamServiceCallback(thormang3_walking_module_msgs::SetBalanceParam::Request  &req,
 															thormang3_walking_module_msgs::SetBalanceParam::Response &res)
 {
-	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+	PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
 	res.result = thormang3_walking_module_msgs::SetBalanceParam::Response::NO_ERROR;
 
-	if( enable == false)
+	if( enable_ == false)
 		res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::NOT_ENABLED_WALKING_MODULE;
 
 	if( balance_update_with_loop_ == true)	{
@@ -620,7 +620,7 @@ bool	WalkingMotionModule::SetBalanceParamServiceCallback(thormang3_walking_modul
 //
 void	WalkingMotionModule::SetBalanceParam(thormang3_walking_module_msgs::BalanceParam& balance_param_msg)
 {
-	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+	PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
 
 	prev_walking->COB_X_MANUAL_ADJUSTMENT_M = balance_param_msg.cob_x_offset_m;
 	prev_walking->COB_Y_MANUAL_ADJUSTMENT_M = balance_param_msg.cob_y_offset_m;
@@ -660,11 +660,11 @@ void	WalkingMotionModule::SetBalanceParam(thormang3_walking_module_msgs::Balance
 bool	WalkingMotionModule::RemoveExistingStepDataServiceCallback(thormang3_walking_module_msgs::RemoveExistingStepData::Request  &req,
 																	thormang3_walking_module_msgs::RemoveExistingStepData::Response &res)
 {
-	PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+	PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
 
 	res.result = thormang3_walking_module_msgs::RemoveExistingStepData::Response::NO_ERROR;
 
-	if(IsRunning())
+	if(isRunning())
 		res.result |= thormang3_walking_module_msgs::RemoveExistingStepData::Response::ROBOT_IS_WALKING_NOW;
 	else {
 		int _exist_num_of_step_data = prev_walking->GetNumofRemainingUnreservedStepData();
@@ -678,8 +678,8 @@ bool	WalkingMotionModule::RemoveExistingStepDataServiceCallback(thormang3_walkin
 
 void	WalkingMotionModule::IMUDataOutputCallback(const sensor_msgs::Imu::ConstPtr &msg)
 {
-	PreviewControlWalking::GetInstance()->current_gyro_roll_rad_per_sec  = -1.0*(msg->angular_velocity.x);
-	PreviewControlWalking::GetInstance()->current_gyro_pitch_rad_per_sec = -1.0*(msg->angular_velocity.y);
+	PreviewControlWalking::getInstance()->current_gyro_roll_rad_per_sec  = -1.0*(msg->angular_velocity.x);
+	PreviewControlWalking::getInstance()->current_gyro_pitch_rad_per_sec = -1.0*(msg->angular_velocity.y);
 
 
 	Eigen::Quaterniond imu_quat;
@@ -688,17 +688,17 @@ void	WalkingMotionModule::IMUDataOutputCallback(const sensor_msgs::Imu::ConstPtr
 	Eigen::MatrixXd imu_mat = (RX_PI_3x3*(imu_quat.toRotationMatrix()))*RZ_PI_3x3;
 
 	double roll  = atan2( imu_mat.coeff(2,1), imu_mat.coeff(2,2));
-	double pitch = atan2(-imu_mat.coeff(2,0), sqrt(powDI(imu_mat.coeff(2,1), 2) + powDI(imu_mat.coeff(2,2), 2)));
+	double pitch = atan2(-imu_mat.coeff(2,0), sqrt(robotis_framework::powDI(imu_mat.coeff(2,1), 2) + robotis_framework::powDI(imu_mat.coeff(2,2), 2)));
 	double yaw   = atan2( imu_mat.coeff(1,0), imu_mat.coeff(0,0));
 
-	PreviewControlWalking::GetInstance()->current_imu_roll_rad = roll;
-	PreviewControlWalking::GetInstance()->current_imu_pitch_rad = pitch;
+	PreviewControlWalking::getInstance()->current_imu_roll_rad = roll;
+	PreviewControlWalking::getInstance()->current_imu_pitch_rad = pitch;
 }
 
-void	WalkingMotionModule::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors)
+void	WalkingMotionModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
-	present_enable = enable;
-    PreviewControlWalking *prev_walking = PreviewControlWalking::GetInstance();
+	present_enable = enable_;
+    PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
 
 	if(previous_enable != present_enable)
 	{
@@ -753,22 +753,22 @@ void	WalkingMotionModule::Process(std::map<std::string, Dynamixel *> dxls, std::
 	l_foot_Tz_Nm = sensors["l_foot_tz_scaled_Nm"];
 
 
-	r_foot_fx_N = sign(r_foot_fx_N) * fmin( fabs(r_foot_fx_N), 2000.0);
-	r_foot_fy_N = sign(r_foot_fy_N) * fmin( fabs(r_foot_fy_N), 2000.0);
-	r_foot_fz_N = sign(r_foot_fz_N) * fmin( fabs(r_foot_fz_N), 2000.0);
-	r_foot_Tx_Nm = sign(r_foot_Tx_Nm) *fmin(fabs(r_foot_Tx_Nm), 300.0);
-	r_foot_Ty_Nm = sign(r_foot_Ty_Nm) *fmin(fabs(r_foot_Ty_Nm), 300.0);
-	r_foot_Tz_Nm = sign(r_foot_Tz_Nm) *fmin(fabs(r_foot_Tz_Nm), 300.0);
+	r_foot_fx_N = robotis_framework::sign(r_foot_fx_N) * fmin( fabs(r_foot_fx_N), 2000.0);
+	r_foot_fy_N = robotis_framework::sign(r_foot_fy_N) * fmin( fabs(r_foot_fy_N), 2000.0);
+	r_foot_fz_N = robotis_framework::sign(r_foot_fz_N) * fmin( fabs(r_foot_fz_N), 2000.0);
+	r_foot_Tx_Nm = robotis_framework::sign(r_foot_Tx_Nm) *fmin(fabs(r_foot_Tx_Nm), 300.0);
+	r_foot_Ty_Nm = robotis_framework::sign(r_foot_Ty_Nm) *fmin(fabs(r_foot_Ty_Nm), 300.0);
+	r_foot_Tz_Nm = robotis_framework::sign(r_foot_Tz_Nm) *fmin(fabs(r_foot_Tz_Nm), 300.0);
 
-	l_foot_fx_N = sign(l_foot_fx_N) * fmin( fabs(l_foot_fx_N), 2000.0);
-	l_foot_fy_N = sign(l_foot_fy_N) * fmin( fabs(l_foot_fy_N), 2000.0);
-	l_foot_fz_N = sign(l_foot_fz_N) * fmin( fabs(l_foot_fz_N), 2000.0);
-	l_foot_Tx_Nm = sign(l_foot_Tx_Nm) *fmin(fabs(l_foot_Tx_Nm), 300.0);
-	l_foot_Ty_Nm = sign(l_foot_Ty_Nm) *fmin(fabs(l_foot_Ty_Nm), 300.0);
-	l_foot_Tz_Nm = sign(l_foot_Tz_Nm) *fmin(fabs(l_foot_Tz_Nm), 300.0);
+	l_foot_fx_N = robotis_framework::sign(l_foot_fx_N) * fmin( fabs(l_foot_fx_N), 2000.0);
+	l_foot_fy_N = robotis_framework::sign(l_foot_fy_N) * fmin( fabs(l_foot_fy_N), 2000.0);
+	l_foot_fz_N = robotis_framework::sign(l_foot_fz_N) * fmin( fabs(l_foot_fz_N), 2000.0);
+	l_foot_Tx_Nm = robotis_framework::sign(l_foot_Tx_Nm) *fmin(fabs(l_foot_Tx_Nm), 300.0);
+	l_foot_Ty_Nm = robotis_framework::sign(l_foot_Ty_Nm) *fmin(fabs(l_foot_Ty_Nm), 300.0);
+	l_foot_Tz_Nm = robotis_framework::sign(l_foot_Tz_Nm) *fmin(fabs(l_foot_Tz_Nm), 300.0);
 
 
-    if(enable == false)
+    if(enable_ == false)
         return;
 
 
@@ -783,11 +783,11 @@ void	WalkingMotionModule::Process(std::map<std::string, Dynamixel *> dxls, std::
     		PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, _status_msg);
     	}
     	else {
-    		double current_update_gain =  balance_update_polynomial_coeff_.coeff(0,0) * powDI(balance_update_sys_time_ , 5)
-    									+ balance_update_polynomial_coeff_.coeff(1,0) * powDI(balance_update_sys_time_ , 4)
-										+ balance_update_polynomial_coeff_.coeff(2,0) * powDI(balance_update_sys_time_ , 3)
-										+ balance_update_polynomial_coeff_.coeff(3,0) * powDI(balance_update_sys_time_ , 2)
-										+ balance_update_polynomial_coeff_.coeff(4,0) * powDI(balance_update_sys_time_ , 1)
+    		double current_update_gain =  balance_update_polynomial_coeff_.coeff(0,0) * robotis_framework::powDI(balance_update_sys_time_ , 5)
+    									+ balance_update_polynomial_coeff_.coeff(1,0) * robotis_framework::powDI(balance_update_sys_time_ , 4)
+										+ balance_update_polynomial_coeff_.coeff(2,0) * robotis_framework::powDI(balance_update_sys_time_ , 3)
+										+ balance_update_polynomial_coeff_.coeff(3,0) * robotis_framework::powDI(balance_update_sys_time_ , 2)
+										+ balance_update_polynomial_coeff_.coeff(4,0) * robotis_framework::powDI(balance_update_sys_time_ , 1)
 										+ balance_update_polynomial_coeff_.coeff(5,0) ;
 
     		current_balance_param_.cob_x_offset_m                  = current_update_gain*(desired_balance_param_.cob_x_offset_m      			 - previous_balance_param_.cob_x_offset_m			      ) + previous_balance_param_.cob_x_offset_m;
@@ -835,7 +835,7 @@ void	WalkingMotionModule::Process(std::map<std::string, Dynamixel *> dxls, std::
     prev_walking->current_left_Tz_Nm = l_foot_Tz_Nm;
 
 
-	prev_walking->Process();
+	prev_walking->process();
 
 	publish_mutex_.lock();
 	desired_matrix_g_to_cob_   = prev_walking->matGtoCOB;
@@ -845,21 +845,21 @@ void	WalkingMotionModule::Process(std::map<std::string, Dynamixel *> dxls, std::
 
 	PublishRobotPose();
 
-    result["r_leg_hip_y"]->goal_position = prev_walking->m_OutAngleRad[0];
-    result["r_leg_hip_r"]->goal_position = prev_walking->m_OutAngleRad[1];
-    result["r_leg_hip_p"]->goal_position = prev_walking->m_OutAngleRad[2];
-    result["r_leg_kn_p" ]->goal_position = prev_walking->m_OutAngleRad[3];
-    result["r_leg_an_p" ]->goal_position = prev_walking->m_OutAngleRad[4];
-    result["r_leg_an_r" ]->goal_position = prev_walking->m_OutAngleRad[5];
+    result_["r_leg_hip_y"]->goal_position_ = prev_walking->m_OutAngleRad[0];
+    result_["r_leg_hip_r"]->goal_position_ = prev_walking->m_OutAngleRad[1];
+    result_["r_leg_hip_p"]->goal_position_ = prev_walking->m_OutAngleRad[2];
+    result_["r_leg_kn_p" ]->goal_position_ = prev_walking->m_OutAngleRad[3];
+    result_["r_leg_an_p" ]->goal_position_ = prev_walking->m_OutAngleRad[4];
+    result_["r_leg_an_r" ]->goal_position_ = prev_walking->m_OutAngleRad[5];
 
-    result["l_leg_hip_y"]->goal_position = prev_walking->m_OutAngleRad[6];
-    result["l_leg_hip_r"]->goal_position = prev_walking->m_OutAngleRad[7];
-    result["l_leg_hip_p"]->goal_position = prev_walking->m_OutAngleRad[8];
-    result["l_leg_kn_p" ]->goal_position = prev_walking->m_OutAngleRad[9];
-    result["l_leg_an_p" ]->goal_position = prev_walking->m_OutAngleRad[10];
-    result["l_leg_an_r" ]->goal_position = prev_walking->m_OutAngleRad[11];
+    result_["l_leg_hip_y"]->goal_position_ = prev_walking->m_OutAngleRad[6];
+    result_["l_leg_hip_r"]->goal_position_ = prev_walking->m_OutAngleRad[7];
+    result_["l_leg_hip_p"]->goal_position_ = prev_walking->m_OutAngleRad[8];
+    result_["l_leg_kn_p" ]->goal_position_ = prev_walking->m_OutAngleRad[9];
+    result_["l_leg_an_p" ]->goal_position_ = prev_walking->m_OutAngleRad[10];
+    result_["l_leg_an_r" ]->goal_position_ = prev_walking->m_OutAngleRad[11];
 
-    present_running = IsRunning();
+    present_running = isRunning();
     if(previous_running != present_running) {
     	if(present_running == true) {
     		std::string _status_msg = WALKING_STATUS_MSG::WALKING_START_MSG;
@@ -873,7 +873,7 @@ void	WalkingMotionModule::Process(std::map<std::string, Dynamixel *> dxls, std::
     previous_running = present_running;
 }
 
-void WalkingMotionModule::Stop()
+void WalkingMotionModule::stop()
 {
 	return;
 }

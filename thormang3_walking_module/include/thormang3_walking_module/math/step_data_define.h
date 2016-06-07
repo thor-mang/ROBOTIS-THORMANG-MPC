@@ -8,7 +8,7 @@
 #ifndef STEPDATADEFINE_H_
 #define STEPDATADEFINE_H_
 
-namespace ROBOTIS
+namespace thormang3
 {
 	typedef struct
 	{

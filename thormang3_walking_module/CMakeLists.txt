@@ -43,9 +43,9 @@ include_directories(
 
 ## Declare a C++ library
 add_library(thormang3_walking_module
-  src/LinearAlgebra.cpp
-  src/WaklingModule.cpp
-  src/PreviewControlWalking.cpp
+  src/linear_algebra.cpp
+  src/wakling_module.cpp
+  src/preview_control_walking.cpp
 )
 
 ## Add cmake target dependencies of the library

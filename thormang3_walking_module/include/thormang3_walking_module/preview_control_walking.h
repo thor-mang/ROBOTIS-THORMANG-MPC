@@ -11,18 +11,18 @@
 #include <vector>
 #include <pthread.h>
 
-#include "robotis_framework_common/Singleton.h"
-#include "math/WalkingModuleMath.h"
+#include "robotis_framework_common/singleton.h"
+#include "math/walking_module_math.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 
-	class PreviewControlWalking : public Singleton<PreviewControlWalking>
+	class PreviewControlWalking : public robotis_framework::Singleton<PreviewControlWalking>
 	{
 	private:
-		ThorMang3KinematicsDynamics* thormang3_kd_;
+		KinematicsDynamics* thormang3_kd_;
 
 		std::vector<StepData> m_StepData;
 
@@ -285,12 +285,12 @@ namespace ROBOTIS
 		double m_iu_roll_init_rad, m_iu_pitch_init_rad, m_iu_yaw_init_rad;
 
 	public:
-		void Initialize();
+		void initialize();
 		void LocalizeAllWalkingParameter();
-		void Start();
-		void Stop();
-		void Process();
-		bool IsRunning();
+		void start();
+		void stop();
+		void process();
+		bool isRunning();
 
 		bool AddStepData(StepData step_data);
 		void EraseLastStepData();
