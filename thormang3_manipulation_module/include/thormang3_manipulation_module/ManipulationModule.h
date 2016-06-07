@@ -33,20 +33,20 @@
 #include "thormang3_manipulation_module_msgs/GetJointPose.h"
 #include "thormang3_manipulation_module_msgs/GetKinematicsPose.h"
 
-namespace ROBOTIS
+namespace thormang3
 {
 
 class ManipulationJointData
 {
 
 public:
-    double position;
-    double velocity;
-    double effort;
+  double position;
+  double velocity;
+  double effort;
 
-    int p_gain;
-    int i_gain;
-    int d_gain;
+  int p_gain;
+  int i_gain;
+  int d_gain;
 
 };
 
@@ -54,60 +54,62 @@ class ManipulationJointState
 {
 
 public:
-    ManipulationJointData curr_joint_state[ MAX_JOINT_ID + 1 ];
-    ManipulationJointData goal_joint_state[ MAX_JOINT_ID + 1 ];
-    ManipulationJointData fake_joint_state[ MAX_JOINT_ID + 1 ];
+  ManipulationJointData curr_joint_state[ MAX_JOINT_ID + 1];
+  ManipulationJointData goal_joint_state[ MAX_JOINT_ID + 1];
+  ManipulationJointData fake_joint_state[ MAX_JOINT_ID + 1];
 
 };
 
-class ManipulationModule : public robotis_framework::MotionModule, public robotis_framework::Singleton<ManipulationModule>
+class ManipulationModule: public robotis_framework::MotionModule,
+    public robotis_framework::Singleton<ManipulationModule>
 {
 private:
-    int                 control_cycle_msec_;
-    boost::thread       queue_thread_;
-    boost::thread*       tra_gene_tread_;
+  int control_cycle_msec_;
+  boost::thread queue_thread_;
+  boost::thread* tra_gene_tread_;
 
-    ros::Publisher      status_msg_pub_;
+  ros::Publisher status_msg_pub_;
 
-    std::map<std::string, int> joint_name_to_id;
+  std::map<std::string, int> joint_name_to_id;
 
-    void QueueThread();
+  void QueueThread();
 
-    void parseData( const std::string &path );
-    void parseIniPoseData( const std::string &path );
+  void parseData(const std::string &path);
+  void parseIniPoseData(const std::string &path);
 
 public:
-    ManipulationModule();
-    virtual ~ManipulationModule();
+  ManipulationModule();
+  virtual ~ManipulationModule();
 
-    /* ROS Topic Callback Functions */
-    void    IniPoseMsgCallback( const std_msgs::String::ConstPtr& msg );
-    void    JointPoseMsgCallback( const thormang3_manipulation_module_msgs::JointPose::ConstPtr& msg );
-    void    KinematicsPoseMsgCallback( const thormang3_manipulation_module_msgs::KinematicsPose::ConstPtr& msg );
+  /* ROS Topic Callback Functions */
+  void IniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
+  void JointPoseMsgCallback(const thormang3_manipulation_module_msgs::JointPose::ConstPtr& msg);
+  void KinematicsPoseMsgCallback(const thormang3_manipulation_module_msgs::KinematicsPose::ConstPtr& msg);
 
-    bool    GetJointPoseCallback( thormang3_manipulation_module_msgs::GetJointPose::Request &req , thormang3_manipulation_module_msgs::GetJointPose::Response &res );
-    bool    GetKinematicsPoseCallback( thormang3_manipulation_module_msgs::GetKinematicsPose::Request &req , thormang3_manipulation_module_msgs::GetKinematicsPose::Response &res );
+  bool GetJointPoseCallback(thormang3_manipulation_module_msgs::GetJointPose::Request &req,
+      thormang3_manipulation_module_msgs::GetJointPose::Response &res);
+  bool GetKinematicsPoseCallback(thormang3_manipulation_module_msgs::GetKinematicsPose::Request &req,
+      thormang3_manipulation_module_msgs::GetKinematicsPose::Response &res);
 
-    /* ROS Calculation Functions */
-    void    IniposeTraGeneProc( );
-    void    JointTraGeneProc( );
-    void    TaskTraGeneProc( );
+  /* ROS Calculation Functions */
+  void IniposeTraGeneProc();
+  void JointTraGeneProc();
+  void TaskTraGeneProc();
 
-    /* ROS Framework Functions */
-    void    Initialize(const int control_cycle_msec, Robot *robot);
-    void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, double> sensors);
-    void	Stop();
-    bool	IsRunning();
+  /* ROS Framework Functions */
+  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
+  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+  void stop();
+  bool isRunning();
 
-    void    PublishStatusMsg(unsigned int type, std::string msg);
+  void PublishStatusMsg(unsigned int type, std::string msg);
 
-    /* Parameter */
-    ThorMang3KinematicsDynamics *Humanoid;
-    ROBOTIS_MANIPULATION::RobotisState *Robotis;
-    ManipulationJointState *JointState;
+  /* Parameter */
+  KinematicsDynamics *Humanoid;
+  ROBOTIS_MANIPULATION::RobotisState *Robotis;
+  ManipulationJointState *JointState;
 };
 
 }
-
 
 #endif /* MANIPULATIONMODULE_H_ */

@@ -7,7 +7,7 @@
 
 #include "thormang3_manipulation_module/RobotisState.h"
 
-using namespace ROBOTIS;
+using namespace thormang3;
 
 namespace ROBOTIS_MANIPULATION
 {
@@ -31,10 +31,10 @@ RobotisState::RobotisState()
     /* ik */
     ik_solve = false;
 
-    ik_target_position = transitionXYZ( 0.0 , 0.0 , 0.0 );
+    ik_target_position = robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
 
-    ik_start_rotation = rpy2rotation( 0.0 , 0.0 , 0.0 );
-    ik_target_rotation = rpy2rotation( 0.0 , 0.0 , 0.0 );
+    ik_start_rotation = robotis_framework::getRotation4d( 0.0 , 0.0 , 0.0 );
+    ik_target_rotation = robotis_framework::getRotation4d( 0.0 , 0.0 , 0.0 );
 
     ik_id_start = 0;
     ik_id_end = 0;
@@ -50,7 +50,7 @@ void RobotisState::setInverseKinematics( int cnt ,Eigen::MatrixXd start_rotation
     for ( int dim = 0; dim < 3; dim++ )
         ik_target_position.coeffRef( dim , 0 ) = calc_task_tra.coeff( cnt , dim );
 
-    Eigen::Quaterniond _start_quaternion = rotation2quaternion( start_rotation );
+    Eigen::Quaterniond _start_quaternion = robotis_framework::convertRotationToQuaternion( start_rotation );
 
     Eigen::Quaterniond _target_quaternion( goal_kinematics_pose_msg.pose.orientation.w ,
                                            goal_kinematics_pose_msg.pose.orientation.x ,
@@ -61,7 +61,7 @@ void RobotisState::setInverseKinematics( int cnt ,Eigen::MatrixXd start_rotation
 
     Eigen::Quaterniond _quaternion = _start_quaternion.slerp( _cnt , _target_quaternion );
 
-    ik_target_rotation = quaternion2rotation( _quaternion );
+    ik_target_rotation = robotis_framework::convertQuaternionToRotation( _quaternion );
 }
 
 }
