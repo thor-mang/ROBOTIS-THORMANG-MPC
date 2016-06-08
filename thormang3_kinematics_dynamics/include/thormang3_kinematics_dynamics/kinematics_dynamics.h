@@ -78,69 +78,7 @@ public:
 
   // with weight
   bool calcInverseKinematics(int to, Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation, int max_iter, double ik_err , Eigen::MatrixXd weight);
-  bool calcInverseKinematics(int from, int to, Eigen::MatrixXd tar_position,
-      Eigen::MatrixXd tar_orientation, int max_iter, double ik_err,
-      Eigen::MatrixXd weight) {
-    bool ik_success = false;
-    bool limit_success = false;
-    //  calcForwardKinematics(0);
-    std::vector<int> idx = findRoute(from, to);
-    /* weight */
-    Eigen::MatrixXd weight_matrix = Eigen::MatrixXd::Identity(idx.size(),
-        idx.size());
-    for (int ix = 0; ix < idx.size(); ix++)
-      weight_matrix.coeffRef(ix, ix) = weight.coeff(idx[ix], 0);
-    /* damping */
-    Eigen::MatrixXd eval = Eigen::MatrixXd::Zero(6, 6);
-    double p_damping = 1e-5;
-    double R_damping = 1e-5;
-    for (int ix = 0; ix < 3; ix++) {
-      eval.coeffRef(ix, ix) = p_damping;
-      eval.coeffRef(ix + 3, ix + 3) = R_damping;
-    }
-    /* ik */
-    for (int iter = 0; iter < max_iter; iter++) {
-      Eigen::MatrixXd jacobian = calcJacobian(idx);
-      Eigen::MatrixXd curr_position = thormang3_link_data_[to]->position;
-      Eigen::MatrixXd curr_orientation = thormang3_link_data_[to]->orientation;
-      Eigen::MatrixXd err = calcVWerr(tar_position, curr_position,
-          tar_orientation, curr_orientation);
-      if (err.norm() < ik_err) {
-        ik_success = true;
-        break;
-      } else
-        ik_success = false;
-
-      Eigen::MatrixXd jacobian_trans = (jacobian * weight_matrix
-          * jacobian.transpose() + eval);
-      Eigen::MatrixXd jacobian_inv = weight_matrix * jacobian.transpose()
-          * jacobian_trans.inverse();
-      Eigen::MatrixXd delta_angle = jacobian_inv * err;
-      for (int id = 0; id < idx.size(); id++) {
-        int joint_id = idx[id];
-        thormang3_link_data_[joint_id]->joint_angle += delta_angle.coeff(id);
-      }
-      calcForwardKinematics(0);
-    }
-    /* check joint limit */
-    for (int id = 0; id < idx.size(); id++) {
-      int _joint_num = idx[id];
-      if (thormang3_link_data_[_joint_num]->joint_angle
-          >= thormang3_link_data_[_joint_num]->joint_limit_max) {
-        limit_success = false;
-        break;
-      } else if (thormang3_link_data_[_joint_num]->joint_angle
-          <= thormang3_link_data_[_joint_num]->joint_limit_min) {
-        limit_success = false;
-        break;
-      } else
-        limit_success = true;
-    }
-    if (ik_success == true && limit_success == true)
-      return true;
-    else
-      return false;
-  }
+  bool calcInverseKinematics(int from, int to, Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation, int max_iter, double ik_err, Eigen::MatrixXd weight);
 
   bool calcInverseKinematicsForLeg(double *out, double x, double y, double z, double roll, double pitch, double yaw);
   bool calcInverseKinematicsForRightLeg(double *out, double x, double y, double z, double roll, double pitch, double yaw);

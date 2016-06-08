@@ -49,29 +49,29 @@ public:
   LinkData();
   ~LinkData();
 
-  std::string name;
+  std::string name_;
 
-  int parent;
-  int sibling;
-  int child;
+  int parent_;
+  int sibling_;
+  int child_;
 
-  double mass;
+  double mass_;
 
-  Eigen::MatrixXd relative_position;
-  Eigen::MatrixXd joint_axis;
-  Eigen::MatrixXd center_of_mass;
-  Eigen::MatrixXd inertia;
+  Eigen::MatrixXd relative_position_;
+  Eigen::MatrixXd joint_axis_;
+  Eigen::MatrixXd center_of_mass_;
+  Eigen::MatrixXd inertia_;
 
-  double joint_limit_max;
-  double joint_limit_min;
+  double joint_limit_max_;
+  double joint_limit_min_;
 
-  double joint_angle;
-  double joint_velocity;
-  double joint_acceleration;
+  double joint_angle_;
+  double joint_velocity_;
+  double joint_acceleration_;
 
-  Eigen::MatrixXd position;
-  Eigen::MatrixXd orientation;
-  Eigen::MatrixXd transformation;
+  Eigen::MatrixXd position_;
+  Eigen::MatrixXd orientation_;
+  Eigen::MatrixXd transformation_;
 };
 
 }
