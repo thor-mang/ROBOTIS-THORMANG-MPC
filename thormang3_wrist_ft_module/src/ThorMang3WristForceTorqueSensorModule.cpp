@@ -9,6 +9,8 @@ using namespace ROBOTIS;
 
 ThorMang3WristForceTorqueSensor::ThorMang3WristForceTorqueSensor()
   : control_cycle_msec_(8)
+  , gazebo_robot_name("robotis")
+  , gazebo_mode(false)
 {
   module_name = "thormang3_wrist_force_torque_sensor_module"; // set unique module name
 
@@ -70,8 +72,8 @@ void ThorMang3WristForceTorqueSensor::WristForceTorqueSensorInitialize()
   std::string _wrist_ft_data_path  = _ros_node.param<std::string>("ft_data_path", "");
   std::string _ft_calib_data_path = _ros_node.param<std::string>("ft_calibration_data_path", "");
 
-  r_wrist_ft_sensor_.Initialize(_wrist_ft_data_path, "ft_right_wrist", "r_arm_wr_p_link" , "robotis/sensor/ft_right_wrist/raw", "robotis/sensor/ft_right_wrist/scaled");
-  l_wrist_ft_sensor_.Initialize(_wrist_ft_data_path, "ft_left_wrist",  "l_arm_wr_p_link",  "robotis/sensor/ft_left_wrist/raw",  "robotis/sensor/ft_left_wrist/scaled");
+  r_wrist_ft_sensor_.Initialize(_wrist_ft_data_path, "ft_right_wrist", "r_arm_wr_p_link" , "sensor/ft/right_wrist/raw", "sensor/ft/right_wrist/scaled");
+  l_wrist_ft_sensor_.Initialize(_wrist_ft_data_path, "ft_left_wrist",  "l_arm_wr_p_link",  "sensor/ft/left_wrist/raw",  "sensor/ft/left_wrist/scaled");
 }
 
 
@@ -110,6 +112,9 @@ void ThorMang3WristForceTorqueSensor::PublishStatusMsg(unsigned int type, std::s
 
 void ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg)
 {
+  if (!gazebo_mode)
+    return;
+
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
   geometry_msgs::Wrench msg_transformed;
@@ -141,17 +146,15 @@ void ThorMang3WristForceTorqueSensor::QueueThread()
 
   /* subscriber */
   ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &ThorMang3WristForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
-  ros::Subscriber ft_left_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft_left_wrist",	1, &ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback, this);
-  ros::Subscriber ft_right_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft_right_wrist",	1, &ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback, this);
+  ros::Subscriber ft_left_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/left_wrist",	1, &ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/right_wrist",	1, &ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback, this);
 
   /* publisher */
   thormang3_wrist_ft_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
+  ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(_ros_node.ok())
-  {
-    _callback_queue.callAvailable();
-    usleep(100);
-  }
+    _callback_queue.callAvailable(duration);
 }
 
 void ThorMang3WristForceTorqueSensor::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors)

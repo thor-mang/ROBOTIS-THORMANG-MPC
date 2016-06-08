@@ -26,81 +26,54 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#ifndef ROS_CONTROL_MODULE_H_
-#define ROS_CONTROL_MODULE_H_
+#ifndef THORMANG3_IMU_SENSOR_MODULE_H_
+#define THORMANG3_IMU_SENSOR_MODULE_H_
 
 #include <ros/ros.h>
-
-#include <boost/thread.hpp>
 #include <ros/callback_queue.h>
 
-// robotis
-#include <robotis_framework_common/MotionModule.h>
+#include <boost/thread.hpp>
 
-// ros control
-#include <controller_manager/controller_manager.h>
-#include <hardware_interface/robot_hw.h>
-#include <hardware_interface/imu_sensor_interface.h>
-#include <hardware_interface/force_torque_sensor_interface.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <hardware_interface/joint_state_interface.h>
+#include <sensor_msgs/Imu.h>
+
+#include <robotis_framework_common/SensorModule.h>
 
 
 
 namespace ROBOTIS
 {
-class RosControlModule
-  : public Singleton<RosControlModule>
-  , public MotionModule
-  , public hardware_interface::RobotHW
+class ThorMang3ImuSensor : public SensorModule, public Singleton<ThorMang3ImuSensor>
 {
 public:
-  RosControlModule();
-  virtual ~RosControlModule();
+  ThorMang3ImuSensor();
+  ~ThorMang3ImuSensor();
 
-  void Initialize(const int control_cycle_msec, Robot* robot) override;
+  /* ROS Topic Callback Functions */
+  void ImuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag);
 
-  void Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, double> sensors) override;
+  void Initialize(const int control_cycle_msec, Robot* robot);
+  void Process(std::map<std::string, Dynamixel* > dxls, std::map<std::string, Sensor*> sensors);
 
-  void Stop() override;
-  bool IsRunning() override;
+  void Stop();
+  bool IsRunning();
+
+  bool gazebo_mode;
+  std::string gazebo_robot_name;
 
 private:
-  void ControllerManagerThread();
+  void WristForceTorqueSensorInitialize();
+
   void QueueThread();
 
+  void PublishStatusMsg(unsigned int type, std::string msg);
+
   int control_cycle_msec_;
-  boost::thread controller_manager_thread_;
   boost::thread queue_thread_;
-  ros::Time last_time_stamp_;
-  bool reset_controllers_;
+  boost::mutex imu_sensor_mutex_;
 
-  boost::mutex ros_control_mutex_;
-
-  /** ROS CONTROL PART */
-  boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
-
-  // IMU
-  hardware_interface::ImuSensorInterface imu_sensor_interface_;
-  hardware_interface::ImuSensorHandle::Data imu_data_;
-  double imu_orientation_[4];
-  double imu_angular_velocity_[3];
-  double imu_linear_acceleration_[3];
-
-  // FT-Sensors
-  hardware_interface::ForceTorqueSensorInterface force_torque_sensor_interface_;
-  std::map<std::string, double[3]> force_;
-  std::map<std::string, double[3]> torque_;
-
-  // joint interfaces
-  hardware_interface::JointStateInterface jnt_state_interface_;
-  hardware_interface::PositionJointInterface jnt_pos_interface_;
-  std::map<std::string, double> cmd_;
-  std::map<std::string, double> pos_;
-  std::map<std::string, double> vel_;
-  std::map<std::string, double> eff_;
+  ros::Publisher imu_status_pub_;
 };
 }
 
-#endif
 
+#endif /* THORMANG3_FEET_FORCE_TORQUE_SENSOR_MODULE_H_ */
