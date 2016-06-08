@@ -156,7 +156,7 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
       eff_[joint_name] = dynamixel->dxl_state_->present_torque_;
     }
     else
-      ROS_ERROR_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
+      ROS_WARN_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
   }
 
   /** call controllers */
