@@ -148,9 +148,15 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
   {
     const std::string& joint_name = state_iter->first;
     
-    pos_[joint_name] = dxls[state_iter->first]->dxl_state_->present_position_;
-    vel_[joint_name] = dxls[state_iter->first]->dxl_state_->present_velocity_;
-    eff_[joint_name] = dxls[state_iter->first]->dxl_state_->present_torque_;
+    const robotis_framework::Dynamixel* dynamixel = dxls[joint_name];
+    if (dynamixel)
+    {
+      pos_[joint_name] = dynamixel->dxl_state_->present_position_;
+      vel_[joint_name] = dynamixel->dxl_state_->present_velocity_;
+      eff_[joint_name] = dynamixel->dxl_state_->present_torque_;
+    }
+    else
+      ROS_ERROR_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
   }
 
   /** call controllers */
