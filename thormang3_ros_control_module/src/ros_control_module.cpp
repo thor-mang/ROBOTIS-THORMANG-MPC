@@ -148,9 +148,15 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
   {
     const std::string& joint_name = state_iter->first;
 
-    pos_[joint_name] = dxls[state_iter->first]->dxl_state->present_position;
-    vel_[joint_name] = dxls[state_iter->first]->dxl_state->present_velocity;
-    eff_[joint_name] = dxls[state_iter->first]->dxl_state->present_current;
+    const Dynamixel* dynamixel = dxls[joint_name];
+    if (dynamixel)
+    {
+      pos_[joint_name] = dynamixel->dxl_state->present_position;
+      vel_[joint_name] = dynamixel->dxl_state->present_velocity;
+      eff_[joint_name] = dynamixel->dxl_state->present_current;
+    }
+    else
+      ROS_ERROR_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
   }
 
   /** call controllers */
