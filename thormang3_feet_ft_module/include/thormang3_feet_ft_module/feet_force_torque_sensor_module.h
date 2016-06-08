@@ -1,8 +1,38 @@
-/*
- * ThorMang3FootForceTorqueSensorModule.h
+/*******************************************************************************
+ * Copyright (c) 2016, ROBOTIS CO., LTD.
+ * All rights reserved.
  *
- *  Created on: Mar 22, 2016
- *      Author: jay
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of ROBOTIS nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+
+/*
+ * feet_force_torque_sensor_module.h
+ *
+ *  Created on: 2016. 3. 22.
+ *      Author: Jay Song
  */
 
 #ifndef THORMANG3_FEET_FORCE_TORQUE_SENSOR_MODULE_H_
@@ -28,86 +58,75 @@
 namespace thormang3
 {
 
-class ThorMang3FeetForceTorqueSensor : public robotis_framework::SensorModule, public robotis_framework::Singleton<ThorMang3FeetForceTorqueSensor>
+class FeetForceTorqueSensor : public robotis_framework::SensorModule, public robotis_framework::Singleton<FeetForceTorqueSensor>
 {
-private:
-    int             control_cycle_msec_;
-    boost::thread   queue_thread_;
-    boost::mutex    publish_mutex_;
-
-    KinematicsDynamics* thormang3_kd_;
-
-	bool exist_r_leg_an_r_;
-	bool exist_r_leg_an_p_;
-	bool exist_l_leg_an_r_;
-	bool exist_l_leg_an_p_;
-
-    void QueueThread();
-
-
-    ATIForceTorqueSensorTWE r_foot_ft_sensor_;
-    ATIForceTorqueSensorTWE l_foot_ft_sensor_;
-
-    Eigen::MatrixXd r_foot_ft_air_, l_foot_ft_air_;
-    Eigen::MatrixXd r_foot_ft_gnd_, l_foot_ft_gnd_;
-
-    double r_foot_ft_current_voltage_[6];
-    double l_foot_ft_current_voltage_[6];
-
-    double total_mass_;
-    double r_foot_ft_scale_factor_, l_foot_ft_scale_factor_;
-
-
-	ros::Publisher  thormang3_foot_ft_status_pub_;
-	ros::Publisher  thormang3_foot_ft_both_ft_pub_;
-
-	void FootForceTorqueSensorInitialize();
-	void SaveFTCalibrationData(const std::string &path);
-
-	void FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
-    void PublishStatusMsg(unsigned int type, std::string msg);
-    void PublishBothFTData(int type, Eigen::MatrixXd &ft_right, Eigen::MatrixXd &ft_left);
-
-    bool	has_ft_air_;
-    bool	has_ft_gnd_;
-    int 	ft_command_;
-    int		ft_period_;
-    int		ft_get_count_;
-
-    enum
-	{
-    	FT_NONE = 0,
-    	FT_AIR = 1,
-		FT_GND = 2,
-		FT_CALC = 3,
-	};
-
 public:
-    ThorMang3FeetForceTorqueSensor();
-    ~ThorMang3FeetForceTorqueSensor();
+  FeetForceTorqueSensor();
+  ~FeetForceTorqueSensor();
 
 
-	double r_foot_fx_raw_N,  r_foot_fy_raw_N,  r_foot_fz_raw_N;
-	double r_foot_tx_raw_Nm, r_foot_ty_raw_Nm, r_foot_tz_raw_Nm;
-	double l_foot_fx_raw_N,  l_foot_fy_raw_N,  l_foot_fz_raw_N;
-	double l_foot_tx_raw_Nm, l_foot_ty_raw_Nm, l_foot_tz_raw_Nm;
+  double r_foot_fx_raw_N_,  r_foot_fy_raw_N_,  r_foot_fz_raw_N_;
+  double r_foot_tx_raw_Nm_, r_foot_ty_raw_Nm_, r_foot_tz_raw_Nm_;
+  double l_foot_fx_raw_N_,  l_foot_fy_raw_N_,  l_foot_fz_raw_N_;
+  double l_foot_tx_raw_Nm_, l_foot_ty_raw_Nm_, l_foot_tz_raw_Nm_;
 
-	double r_foot_fx_scaled_N,  r_foot_fy_scaled_N,  r_foot_fz_scaled_N;
-	double r_foot_tx_scaled_Nm, r_foot_ty_scaled_Nm, r_foot_tz_scaled_Nm;
-	double l_foot_fx_scaled_N,  l_foot_fy_scaled_N,  l_foot_fz_scaled_N;
-	double l_foot_tx_scaled_Nm, l_foot_ty_scaled_Nm, l_foot_tz_scaled_Nm;
+  double r_foot_fx_scaled_N_,  r_foot_fy_scaled_N_,  r_foot_fz_scaled_N_;
+  double r_foot_tx_scaled_Nm_, r_foot_ty_scaled_Nm_, r_foot_tz_scaled_Nm_;
+  double l_foot_fx_scaled_N_,  l_foot_fy_scaled_N_,  l_foot_fz_scaled_N_;
+  double l_foot_tx_scaled_Nm_, l_foot_ty_scaled_Nm_, l_foot_tz_scaled_Nm_;
+
+  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
+  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors);
+
+private:
+  void queueThread();
+
+  void initializeFeetForceTorqueSensor();
+  void saveFTCalibrationData(const std::string &path);
+
+  void ftSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
+  void publishStatusMsg(unsigned int type, std::string msg);
+  void publishBothFTData(int type, Eigen::MatrixXd &ft_right, Eigen::MatrixXd &ft_left);
 
 
-    /* ROS Topic Callback Functions */
-    //void    TopicCallback(const std_msgs::Int16::ConstPtr &msg);
-
-    void    initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-    void    process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors);
-
-    void	stop();
-    bool	isRunning();
+  int             control_cycle_msec_;
+  boost::thread   queue_thread_;
+  boost::mutex    publish_mutex_;
 
 
+  KinematicsDynamics* thormang3_kd_;
+
+
+  bool exist_r_leg_an_r_, exist_r_leg_an_p_;
+  bool exist_l_leg_an_r_, exist_l_leg_an_p_;
+
+  ATIForceTorqueSensorTWE r_foot_ft_sensor_;
+  ATIForceTorqueSensorTWE l_foot_ft_sensor_;
+
+  Eigen::MatrixXd r_foot_ft_air_, l_foot_ft_air_;
+  Eigen::MatrixXd r_foot_ft_gnd_, l_foot_ft_gnd_;
+
+  double r_foot_ft_current_voltage_[6];
+  double l_foot_ft_current_voltage_[6];
+
+
+  double total_mass_;
+  double r_foot_ft_scale_factor_, l_foot_ft_scale_factor_;
+
+  bool  has_ft_air_;
+  bool  has_ft_gnd_;
+  int   ft_command_;
+  int   ft_period_;
+  int   ft_get_count_;
+
+  const int FT_NONE;
+  const int FT_AIR;
+  const int FT_GND;
+  const int FT_CALC;
+
+
+  ros::Publisher  thormang3_foot_ft_status_pub_;
+  ros::Publisher  thormang3_foot_ft_both_ft_pub_;
 };
 
 
