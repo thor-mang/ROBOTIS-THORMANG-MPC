@@ -152,20 +152,20 @@ PreviewControlWalking::PreviewControlWalking()
 
 
 	//for thor 3.0
-	dir_output[0] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*0]->joint_axis.coeff(2, 0);
-	dir_output[1] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*1]->joint_axis.coeff(0, 0);
-	dir_output[2] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*2]->joint_axis.coeff(1, 0);
-	dir_output[3] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*3]->joint_axis.coeff(1, 0);
-	dir_output[4] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*4]->joint_axis.coeff(1, 0);
-	dir_output[5] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*5]->joint_axis.coeff(0, 0);
+	dir_output[0] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*0]->joint_axis_.coeff(2, 0);
+	dir_output[1] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*1]->joint_axis_.coeff(0, 0);
+	dir_output[2] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*2]->joint_axis_.coeff(1, 0);
+	dir_output[3] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*3]->joint_axis_.coeff(1, 0);
+	dir_output[4] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*4]->joint_axis_.coeff(1, 0);
+	dir_output[5] = thormang3_kd_->thormang3_link_data_[ID_R_LEG_START + 2*5]->joint_axis_.coeff(0, 0);
 
 
-	dir_output[6]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*0]->joint_axis.coeff(2, 0);
-	dir_output[7]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*1]->joint_axis.coeff(0, 0);
-	dir_output[8]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*2]->joint_axis.coeff(1, 0);
-	dir_output[9]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*3]->joint_axis.coeff(1, 0);
-	dir_output[10] = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*4]->joint_axis.coeff(1, 0);
-	dir_output[11] = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*5]->joint_axis.coeff(0, 0);
+	dir_output[6]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*0]->joint_axis_.coeff(2, 0);
+	dir_output[7]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*1]->joint_axis_.coeff(0, 0);
+	dir_output[8]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*2]->joint_axis_.coeff(1, 0);
+	dir_output[9]  = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*3]->joint_axis_.coeff(1, 0);
+	dir_output[10] = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*4]->joint_axis_.coeff(1, 0);
+	dir_output[11] = thormang3_kd_->thormang3_link_data_[ID_L_LEG_START + 2*5]->joint_axis_.coeff(0, 0);
 
 	dir_output[12] = -1; dir_output[13] = 1;  dir_output[14] = -1; dir_output[15] =  1;
 
