@@ -84,7 +84,6 @@ public:
   bool calcInverseKinematicsForRightLeg(double *out, double x, double y, double z, double roll, double pitch, double yaw);
   bool calcInverseKinematicsForLeftLeg(double *out, double x, double y, double z, double roll, double pitch, double yaw);
 
-
   LinkData *thormang3_link_data_ [ ALL_JOINT_ID + 1 ];
 
   double thigh_length_m_;

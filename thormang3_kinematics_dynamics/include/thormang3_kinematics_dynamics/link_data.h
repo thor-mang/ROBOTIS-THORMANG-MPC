@@ -46,6 +46,7 @@ namespace thormang3
 class LinkData
 {
 public:
+
   LinkData();
   ~LinkData();
 
@@ -72,6 +73,7 @@ public:
   Eigen::MatrixXd position_;
   Eigen::MatrixXd orientation_;
   Eigen::MatrixXd transformation_;
+
 };
 
 }
