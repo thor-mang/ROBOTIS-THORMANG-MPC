@@ -36,5 +36,7 @@ dynamixel | /dev/ttyUSB3 | 26  | H54-200-S500-R | 2.0      | l_leg_an_r   | pres
 dynamixel | /dev/ttyUSB0 | 27  | H54-100-S500-R | 2.0      | torso_y      | present_position, present_voltage
 dynamixel | /dev/ttyUSB1 | 28  | H42-20-S300-R  | 2.0      | head_y       | present_position, present_voltage
 dynamixel | /dev/ttyUSB1 | 29  | H42-20-S300-R  | 2.0      | head_p       | present_position, present_voltage
-dynamixel | /dev/ttyUSB1 | 30  | GRIPPER        | 2.0      | l_arm_grip   | present_position, present_voltage
-dynamixel | /dev/ttyUSB0 | 31  | GRIPPER        | 2.0      | r_arm_grip   | present_position, present_voltage
+dynamixel | /dev/ttyUSB1 | 30  | MX-106         | 2.0      | l_f0_j0      | present_position, present_voltage
+dynamixel | /dev/ttyUSB0 | 31  | MX-106         | 2.0      | r_f0_j0      | present_position, present_voltage
+dynamixel | /dev/ttyUSB1 | 32  | MX-106         | 2.0      | l_f1_j0      | present_position, present_voltage
+dynamixel | /dev/ttyUSB0 | 33  | MX-106         | 2.0      | r_f1_j0      | present_position, present_voltage

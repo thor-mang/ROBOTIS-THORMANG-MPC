@@ -16,7 +16,11 @@ joints:
    "r_arm_el_y",
    "r_arm_wr_r",
    "r_arm_wr_y",
-   "r_arm_wr_p"]
+   "r_arm_wr_p",
+   "l_f0_j0",
+   "l_f1_j0",
+   "r_f0_j0",
+   "r_f1_j0"]
 
 # defines which ft sensors to be interfaced
 ft_sensors:
