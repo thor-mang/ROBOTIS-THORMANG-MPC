@@ -204,7 +204,7 @@ bool ManipulationModule::GetJointPoseCallback(thormang3_manipulation_module_msgs
 
   for (int _name_index = 1; _name_index <= MAX_JOINT_ID; _name_index++)
   {
-    if (Humanoid->thormang3_link_data_[_name_index]->name == req.joint_name)
+    if (Humanoid->thormang3_link_data_[_name_index]->name_ == req.joint_name)
     {
       res.joint_value = JointState->goal_joint_state[_name_index].position;
       return true;
@@ -233,11 +233,11 @@ bool ManipulationModule::GetKinematicsPoseCallback(thormang3_manipulation_module
   else
     return false;
 
-  res.group_pose.position.x = Humanoid->thormang3_link_data_[_end_index]->position.coeff(0, 0);
-  res.group_pose.position.y = Humanoid->thormang3_link_data_[_end_index]->position.coeff(1, 0);
-  res.group_pose.position.z = Humanoid->thormang3_link_data_[_end_index]->position.coeff(2, 0);
+  res.group_pose.position.x = Humanoid->thormang3_link_data_[_end_index]->position_.coeff(0, 0);
+  res.group_pose.position.y = Humanoid->thormang3_link_data_[_end_index]->position_.coeff(1, 0);
+  res.group_pose.position.z = Humanoid->thormang3_link_data_[_end_index]->position_.coeff(2, 0);
 
-  Eigen::Quaterniond _quaternion = robotis_framework::convertRotationToQuaternion(Humanoid->thormang3_link_data_[_end_index]->orientation);
+  Eigen::Quaterniond _quaternion = robotis_framework::convertRotationToQuaternion(Humanoid->thormang3_link_data_[_end_index]->orientation_);
 
   res.group_pose.orientation.w = _quaternion.w();
   res.group_pose.orientation.x = _quaternion.x();
@@ -358,7 +358,7 @@ void ManipulationModule::JointTraGeneProc()
     double ini_value = JointState->goal_joint_state[id].position;
     double tar_value = JointState->goal_joint_state[id].position;
 
-    if (Humanoid->thormang3_link_data_[id]->name == Robotis->goal_joint_pose_msg.name)
+    if (Humanoid->thormang3_link_data_[id]->name_ == Robotis->goal_joint_pose_msg.name)
       tar_value = Robotis->goal_joint_pose_msg.value;
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0, Robotis->smp_time,
@@ -383,13 +383,13 @@ void ManipulationModule::TaskTraGeneProc()
 
     double _diff = sqrt(
         pow(
-            Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position.coeff(0, 0)
+            Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position_.coeff(0, 0)
                 - Robotis->goal_kinematics_pose_msg.pose.position.x, 2)
             + pow(
-                Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position.coeff(1, 0)
+                Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position_.coeff(1, 0)
                     - Robotis->goal_kinematics_pose_msg.pose.position.y, 2)
             + pow(
-                Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position.coeff(2, 0)
+                Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position_.coeff(2, 0)
                     - Robotis->goal_kinematics_pose_msg.pose.position.z, 2));
 
     Robotis->mov_time = _diff / _tol;
@@ -409,7 +409,7 @@ void ManipulationModule::TaskTraGeneProc()
   /* calculate trajectory */
   for (int dim = 0; dim < 3; dim++)
   {
-    double ini_value = Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position.coeff(dim, 0);
+    double ini_value = Humanoid->thormang3_link_data_[Robotis->ik_id_end]->position_.coeff(dim, 0);
     double tar_value;
     if (dim == 0)
       tar_value = Robotis->goal_kinematics_pose_msg.pose.position.x;
@@ -461,7 +461,7 @@ void ManipulationModule::process(std::map<std::string, robotis_framework::Dynami
   /*----- forward kinematics -----*/
 
   for (int id = 1; id <= MAX_JOINT_ID; id++)
-    Humanoid->thormang3_link_data_[id]->joint_angle = JointState->goal_joint_state[id].position;
+    Humanoid->thormang3_link_data_[id]->joint_angle_ = JointState->goal_joint_state[id].position;
 
   Humanoid->calcForwardKinematics(0);
 
@@ -473,7 +473,7 @@ void ManipulationModule::process(std::map<std::string, robotis_framework::Dynami
     {
       PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 
-      Robotis->ik_start_rotation = Humanoid->thormang3_link_data_[Robotis->ik_id_end]->orientation;
+      Robotis->ik_start_rotation = Humanoid->thormang3_link_data_[Robotis->ik_id_end]->orientation_;
     }
 
     if (Robotis->ik_solve == true)
@@ -489,7 +489,7 @@ void ManipulationModule::process(std::map<std::string, robotis_framework::Dynami
       if (ik_success == true)
       {
         for (int id = 1; id <= MAX_JOINT_ID; id++)
-          JointState->goal_joint_state[id].position = Humanoid->thormang3_link_data_[id]->joint_angle;
+          JointState->goal_joint_state[id].position = Humanoid->thormang3_link_data_[id]->joint_angle_;
       }
       else
       {
