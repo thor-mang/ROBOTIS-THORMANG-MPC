@@ -156,7 +156,7 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
       eff_[joint_name] = dynamixel->dxl_state->present_current;
     }
     else
-      ROS_ERROR_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
+      ROS_WARN_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
   }
 
   /** call controllers */
