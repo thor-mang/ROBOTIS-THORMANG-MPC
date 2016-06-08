@@ -28,6 +28,10 @@
 
   <!-- ros control interface -->
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
+
+  
+  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)"/>
+  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)"/>
     	 
   <!-- imu sensor package -->
   <include file="$(find imu_3dm_gx4)/launch/imu.launch" if="$(arg use_imu)" /> 
