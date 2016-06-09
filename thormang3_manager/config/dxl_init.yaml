@@ -4,8 +4,8 @@ r_arm_sh_p1 :   # H54-200-S500-R
    shutdown              :  58
    homing_offset         :  0
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  288475
+   min_position_limit    : -225150
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -19,8 +19,8 @@ l_arm_sh_p1 :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0     
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  225150
+   min_position_limit    : -288475
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -34,8 +34,8 @@ r_arm_sh_r  :   # H54-100-S500-R
    shutdown              :  58    
    homing_offset         :  0     
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  126636
+   min_position_limit    : -205879
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -49,8 +49,8 @@ l_arm_sh_r  :   # H54-100-S500-R
    shutdown              :  58    
    homing_offset         :  0     
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  205879
+   min_position_limit    : -126636
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -64,8 +64,8 @@ r_arm_sh_p2 :   # H54-100-S500-R
    shutdown              :  58    
    homing_offset         :  0     
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  248356
+   min_position_limit    : -180919
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -79,8 +79,8 @@ l_arm_sh_p2 :   # H54-100-S500-R
    shutdown              :  58    
    homing_offset         :  0     
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  180919
+   min_position_limit    : -248356
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -94,8 +94,8 @@ r_arm_el_y  :   # H54-100-S500-R
    shutdown              :  58    
    homing_offset         :  62738   # 45 deg
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  191230
+   min_position_limit    : -118219
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -109,8 +109,8 @@ l_arm_el_y  :   # H54-100-S500-R
    shutdown              :  58    
    homing_offset         :  -62738  # -45 deg
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  118219
+   min_position_limit    : -191230
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -124,8 +124,8 @@ r_arm_wr_r  :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 238130
+   min_position_limit    : -279459
    goal_torque           : 372
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -139,8 +139,8 @@ l_arm_wr_r  :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 279459
+   min_position_limit    : -238130
    goal_torque           : 372
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -154,8 +154,8 @@ r_arm_wr_y  :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 70421
+   min_position_limit    : -62103
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    goal_torque           : 372
@@ -171,8 +171,8 @@ l_arm_wr_y  :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 62103
+   min_position_limit    : -70421
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    goal_torque           : 372
@@ -188,8 +188,8 @@ r_arm_wr_p  :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 65111
+   min_position_limit    : -66153
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    external_port_mod_3   : 0
@@ -207,8 +207,8 @@ l_arm_wr_p  :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 66153
+   min_position_limit    : -65111
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    external_port_mod_3   : 0
@@ -226,8 +226,8 @@ r_leg_hip_y :   # H54-100-S500-R
    shutdown              :  58   
    homing_offset         :  0    
    torque_limit          :  620
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  56076
+   min_position_limit    : -77187
    goal_torque           : 620
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -241,8 +241,8 @@ l_leg_hip_y :   # H54-100-S500-R
    shutdown              :  58   
    homing_offset         :  0    
    torque_limit          :  620
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  77187
+   min_position_limit    : -56076
    goal_torque           : 620
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -256,8 +256,8 @@ r_leg_hip_r :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  48356
+   min_position_limit    : -13530
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -271,8 +271,8 @@ l_leg_hip_r :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  13530
+   min_position_limit    : -48356
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -286,8 +286,8 @@ r_leg_hip_p :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  -8365
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  133105
+   min_position_limit    : -62107
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -301,8 +301,8 @@ l_leg_hip_p :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  8365
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  57179
+   min_position_limit    : -141945
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -316,8 +316,8 @@ r_leg_kn_p  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         : -12548    # -9 deg
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  148510
+   min_position_limit    : -206291
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -331,8 +331,8 @@ l_leg_kn_p  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  12548   #9 deg
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  214844
+   min_position_limit    : -134789
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -346,8 +346,8 @@ r_leg_an_p  :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  8365  # 6 deg
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  70347
+   min_position_limit    : -120835
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    goal_torque           : 1240
@@ -363,8 +363,8 @@ l_leg_an_p  :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  -8365   # 6 deg
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  137220
+   min_position_limit    : -60323
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    goal_torque           : 1240
@@ -380,8 +380,8 @@ r_leg_an_r  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  137150
+   min_position_limit    : -47071
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    external_port_mod_3   : 0
@@ -399,8 +399,8 @@ l_leg_an_r  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  54190
+   min_position_limit    : -85288
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    external_port_mod_3   : 0
@@ -418,8 +418,8 @@ torso_y     :   # H54-100-S500-R
    shutdown              :  58    
    homing_offset         :  0     
    torque_limit          :  310
-   max_position_limit    :  250950
-   min_position_limit    : -250950
+   max_position_limit    :  118247
+   min_position_limit    : -118247
    goal_torque           : 310
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -433,8 +433,8 @@ head_y      :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 151000
+   min_position_limit    : -151000
    goal_torque           : 372
    goal_velocity         : 0
    goal_acceleration     : 0
