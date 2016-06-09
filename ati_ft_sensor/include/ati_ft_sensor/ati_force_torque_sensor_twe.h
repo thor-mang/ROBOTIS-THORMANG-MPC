@@ -32,7 +32,7 @@
  * ati_force_torque_sensor_twe.h
  *
  *  Created on: 2016. 3. 22.
- *      Author: jay-song
+ *      Author: Jay Song
  */
 
 #ifndef ATI_FT_SENSOR_ATI_FORCE_TORQUE_SENSOR_TWE_H_

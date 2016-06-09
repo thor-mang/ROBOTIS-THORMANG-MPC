@@ -32,7 +32,7 @@
  * ForceTorqueSensor.cpp
  *
  *  Created on: 2016. 3. 23.
- *      Author: HJSONG
+ *      Author: Jay Song
  */
 
 
