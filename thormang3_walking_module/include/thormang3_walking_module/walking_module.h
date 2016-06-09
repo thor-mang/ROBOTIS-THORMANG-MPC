@@ -48,7 +48,7 @@ private:
 
   void queueThread();
 
-  bool previous_running, present_running;
+  bool previous_running_, present_running;
 
   /* ROS Topic Publish Functions */
   int r_foot_ft_publish_checker_;
@@ -58,8 +58,8 @@ private:
 
   thormang3_walking_module_msgs::RobotPose  robot_pose_msg_;
   bool balance_update_with_loop_;
-  double  balance_update_duration_;
-  double  balance_update_sys_time_;
+  double balance_update_duration_;
+  double balance_update_sys_time_;
   Eigen::MatrixXd balance_update_polynomial_coeff_;
   thormang3_walking_module_msgs::BalanceParam previous_balance_param_;
   thormang3_walking_module_msgs::BalanceParam current_balance_param_;
@@ -95,12 +95,12 @@ public:
   WalkingMotionModule();
   virtual ~WalkingMotionModule();
 
-  double gyro_x, gyro_y;
-  double orientation_roll, orientation_pitch;
-  double r_foot_fx_N,  r_foot_fy_N,  r_foot_fz_N;
-  double r_foot_Tx_Nm, r_foot_Ty_Nm, r_foot_Tz_Nm;
-  double l_foot_fx_N,  l_foot_fy_N,  l_foot_fz_N;
-  double l_foot_Tx_Nm, l_foot_Ty_Nm, l_foot_Tz_Nm;
+  double gyro_roll_, gyro_pitch_;
+  double orientation_roll_, orientation_pitch_;
+  double r_foot_fx_N_,  r_foot_fy_N_,  r_foot_fz_N_;
+  double r_foot_Tx_Nm_, r_foot_Ty_Nm_, r_foot_Tz_Nm_;
+  double l_foot_fx_N_,  l_foot_fy_N_,  l_foot_fz_N_;
+  double l_foot_Tx_Nm_, l_foot_Ty_Nm_, l_foot_Tz_Nm_;
 
   void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
   void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
