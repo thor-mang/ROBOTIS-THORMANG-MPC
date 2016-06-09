@@ -15,20 +15,7 @@
 namespace thormang3
 {
 
-typedef Eigen::MatrixXd matd;
-typedef Eigen::MatrixXi mati;
-
-typedef Eigen::VectorXd vecd;
-typedef Eigen::VectorXi veci;
-
-
-matd GetOrientationMatrix(double Roll, double Pitch, double Yaw);
-matd GetTranslationMatrix(double x, double y, double z);
-matd GetTransformMatrix(double x, double y, double z, double Roll, double Pitch, double Yaw);
-matd GetTransformMatrixInverse(matd T);
-Pose3D GetPose3DfromTransformMatrix(matd matTransform);
-vecd Cross(vecd v1, vecd v2);
-vecd GetEulerRollPitchYaw(matd T);
+Pose3D getPose3DfromTransformMatrix(Eigen::MatrixXd  matTransform);
 
 }
 

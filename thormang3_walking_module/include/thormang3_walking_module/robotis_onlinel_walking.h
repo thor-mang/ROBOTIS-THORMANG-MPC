@@ -29,46 +29,38 @@ private:
   double goal_waist_yaw_angle_rad_;
   StepData current_step_data_;
   StepData reference_step_data_for_addition_;
-  Pose3D m_InitialRightFootPosition, m_InitialLeftFootPosition, m_InitialBodyPosition;
-  Pose3D m_PresentRightFootPosition, m_PresentLeftFootPosition, m_PresentBodyPosition;
-  Pose3D m_PreviousStepRightFootPosition,    m_PreviousStepLeftFootPosition,    m_PreviousStepBodyPosition;
-  double m_PresentWaistYawAngleRad;
-  double m_PreviousStepWaistYawAngleRad;
+  Pose3D initial_right_foot_pose_, initial_left_foot_pose_, initial_body_pose_;
+  Pose3D present_right_foot_pose_, present_left_foot_pose_, present_body_Pose_;
+  Pose3D previous_step_right_foot_pose_, previous_step_left_foot_pose_, previous_step_body_pose_;
+  double present_waist_yaw_angle_rad_;
+  double previous_step_waist_yaw_angle_rad_;
 
-public:
-  matd matCOBtoG, matGtoCOB;
-  matd matCOBtoRH, matRHtoCOB;
-  matd matCOBtoLH, matLHtoCOB;
-  matd matRHtoRF;
-  matd matLHtoLF;
-  matd matGtoRF, matGtoLF;
-private:
-  matd matRFtoRFT, matLFtoLFT;
+  Eigen::MatrixXd matRFtoRFT, matLFtoLFT;
 
-  veci m_StepIdxData;
+  Eigen::VectorXi step_idx_data_;
   pthread_mutex_t m_mutex_lock;
 
   //Time for Preview Control and Dynamics Regulator
-  double m_PreviewTime;
-  int m_PreviewSize;
+  double preview_time_;
+  int preview_size_;
 
 
   //These matrix and parameters are for preview control
-  matd A, b, c;
-  matd K_x_;
-  matd f_;
+  Eigen::MatrixXd A, b, c;
+  Eigen::MatrixXd K_x_;
+  Eigen::MatrixXd f_;
   double K_s_;
-  double sum_of_zmp_x ;
-  double sum_of_zmp_y ;
-  double sum_of_cx ;
-  double sum_of_cy ;
-  matd u_x, u_y;
-  matd x_LIPM, y_LIPM;
-  matd x_MPMM, y_MPMM;
+  double sum_of_zmp_x_ ;
+  double sum_of_zmp_y_ ;
+  double sum_of_cx_ ;
+  double sum_of_cy_ ;
+  Eigen::MatrixXd u_x, u_y;
+  Eigen::MatrixXd x_LIPM, y_LIPM;
+  Eigen::MatrixXd x_MPMM, y_MPMM;
   int m_CurrentStartIdxforZMPRef;
 
   double zmp_ref_x_at_this_time, zmp_ref_y_at_this_time;
-  matd m_ZMP_Reference_X, m_ZMP_Reference_Y;
+  Eigen::MatrixXd m_ZMP_Reference_X, m_ZMP_Reference_Y;
   double m_X_ZMP_CenterShift;
   double m_Y_ZMP_Convergence, m_Y_ZMP_CenterShift;
 
@@ -97,8 +89,6 @@ private:
   double GetDampingControllerOutput(double desired, double present, double previous_output, double goal_settling_time);
 
   double GetHipRollDampingControllerOutput(double desired, double present, double goal_settling_time, double gain);
-  //        double GetHipRightRollDampingControllerOutput(double desired, double present, double goal_settling_time, double gain);
-  //        double GetHipLeftRollDampingControllerOutput(double desired, double present, double goal_settling_time, double gain);
 
   double GetHipPitchDampingControllerOutput(double desired, double present, double goal_settling_time, double gain);
 
@@ -118,13 +108,14 @@ private:
   double GetLeftAnkleRollMomentDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain);
   double GetLeftAnklePitchMomentDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain);
 
-  //Pose3D GetRightLegAxisDampingControllerOutput(Pose3D epr_desired, Pose3D epr_present, double goal_time_constant, double gain);
-  //Pose3D GetLeftLegAxisDampingControllerOutput(Pose3D epl_desired, Pose3D epl_present, double goal_time_constant, double gain);
-
-  //double GetXLandingDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain);
-  //double GetYLandingDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain);
-
 public:
+  Eigen::MatrixXd matCOBtoG, matGtoCOB;
+  Eigen::MatrixXd matCOBtoRH, matRHtoCOB;
+  Eigen::MatrixXd matCOBtoLH, matLHtoCOB;
+  Eigen::MatrixXd matRHtoRF;
+  Eigen::MatrixXd matLHtoLF;
+  Eigen::MatrixXd matGtoRF, matGtoLF;
+
   double m_OutAngleRad[16];
 
   RobotisOnlineWalking();
@@ -246,8 +237,6 @@ private:
 
   ////////// Damping Controller
   double hip_roll_adjustment_deg;
-  //        double hip_right_roll_adjustment_deg;
-  //        double hip_left_roll_adjustment_deg;
   double hip_pitch_adjustment_deg;
   double r_x_adjustment_mm_by_ft, r_y_adjustment_mm_by_ft;
   double l_x_adjustment_mm_by_ft, l_y_adjustment_mm_by_ft;
@@ -270,7 +259,6 @@ private:
   double cob_y_adjustment_mm_by_landing_controller;
 
   ////////// Damping Controller
-
   double m_init_right_fx_N,  m_init_right_fy_N,  m_init_right_fz_N;
   double m_init_right_Tx_Nm, m_init_right_Ty_Nm, m_init_right_Tz_Nm;
 
@@ -315,9 +303,6 @@ public:
       double right_tx_on_gnd_N ,double right_ty_on_gnd_N , double right_tz_on_gnd_N,
       double left_fx_on_gnd_N ,  double left_fy_on_gnd_N ,  double left_fz_on_gnd_N,
       double left_tx_on_gnd_N , double left_ty_on_gnd_N ,double left_tz_on_gnd_N);
-
-  //        void SetCurrentPose(matd current_matGtoCOB, matd current_matGtoRF, matd current_matGtoLF);
-  //        void GetCurrentPose(matd *current_matGtoCOB, matd *current_matGtoRF, matd *current_matGtoLF);
 
   void SetFTScaleFactor(double right_ft_scale_factor, double left_ft_scale_factor);
 

@@ -267,48 +267,48 @@ void WalkingMotionModule::publishStatusMsg(unsigned int type, std::string msg)
 int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, StepData& des)
 {
   int copy_result = thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR;
-  des.TimeData.bWalkingState           = src.time_data.walking_state;
-  des.TimeData.dAbsStepTime            = src.time_data.abs_step_time;
-  des.TimeData.dDSPratio               = src.time_data.dsp_ratio;
-  des.TimeData.sigmoid_ratio_x         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_x;
-  des.TimeData.sigmoid_ratio_y         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_y;
-  des.TimeData.sigmoid_ratio_z         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_z;
-  des.TimeData.sigmoid_ratio_roll      = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_roll;
-  des.TimeData.sigmoid_ratio_pitch     = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_pitch;
-  des.TimeData.sigmoid_ratio_yaw       = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_yaw;
+  des.time_data.   walking_state           = src.time_data.walking_state;
+  des.time_data.abs_step_time            = src.time_data.abs_step_time;
+  des.time_data.dsp_ratio               = src.time_data.dsp_ratio;
+  des.time_data.sigmoid_ratio_x         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_x;
+  des.time_data.sigmoid_ratio_y         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_y;
+  des.time_data.sigmoid_ratio_z         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_z;
+  des.time_data.sigmoid_ratio_roll      = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_roll;
+  des.time_data.sigmoid_ratio_pitch     = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_pitch;
+  des.time_data.sigmoid_ratio_yaw       = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_yaw;
 
-  des.TimeData.sigmoid_distortion_x     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_x;
-  des.TimeData.sigmoid_distortion_y     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_y;
-  des.TimeData.sigmoid_distortion_z     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_z;
-  des.TimeData.sigmoid_distortion_roll  = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_roll;
-  des.TimeData.sigmoid_distortion_pitch = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_pitch;
-  des.TimeData.sigmoid_distortion_yaw   = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_yaw;
+  des.time_data.sigmoid_distortion_x     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_x;
+  des.time_data.sigmoid_distortion_y     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_y;
+  des.time_data.sigmoid_distortion_z     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_z;
+  des.time_data.sigmoid_distortion_roll  = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_roll;
+  des.time_data.sigmoid_distortion_pitch = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_pitch;
+  des.time_data.sigmoid_distortion_yaw   = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_yaw;
 
 
-  des.PositionData.bMovingFoot        = src.position_data.moving_foot;
-  des.PositionData.dShoulderSwingGain = 0;
-  des.PositionData.dElbowSwingGain    = 0;
-  des.PositionData.dFootHeight        = src.position_data.foot_z_swap;
-  des.PositionData.dWaistPitchAngle   = 0;
-  des.PositionData.dWaistYawAngle     = src.position_data.torso_yaw_angle_rad;
-  des.PositionData.dZ_Swap_Amplitude  = src.position_data.body_z_swap;
+  des.position_data.moving_foot        = src.position_data.moving_foot;
+  des.position_data.shoulder_swing_gain = 0;
+  des.position_data.elbow_swing_gain    = 0;
+  des.position_data.foot_z_swap        = src.position_data.foot_z_swap;
+  des.position_data.waist_pitch_angle   = 0;
+  des.position_data.waist_yaw_angle     = src.position_data.torso_yaw_angle_rad;
+  des.position_data.body_z_swap  = src.position_data.body_z_swap;
 
-  des.PositionData.stBodyPosition.z          = src.position_data.body_pose.z;
-  des.PositionData.stBodyPosition.roll       = src.position_data.body_pose.roll;
-  des.PositionData.stBodyPosition.pitch      = src.position_data.body_pose.pitch;
-  des.PositionData.stBodyPosition.yaw        = src.position_data.body_pose.yaw;
-  des.PositionData.stRightFootPosition.x     = src.position_data.right_foot_pose.x;
-  des.PositionData.stRightFootPosition.y     = src.position_data.right_foot_pose.y;
-  des.PositionData.stRightFootPosition.z     = src.position_data.right_foot_pose.z;
-  des.PositionData.stRightFootPosition.roll  = src.position_data.right_foot_pose.roll;
-  des.PositionData.stRightFootPosition.pitch = src.position_data.right_foot_pose.pitch;
-  des.PositionData.stRightFootPosition.yaw   = src.position_data.right_foot_pose.yaw;
-  des.PositionData.stLeftFootPosition.x      = src.position_data.left_foot_pose.x;
-  des.PositionData.stLeftFootPosition.y      = src.position_data.left_foot_pose.y;
-  des.PositionData.stLeftFootPosition.z      = src.position_data.left_foot_pose.z;
-  des.PositionData.stLeftFootPosition.roll   = src.position_data.left_foot_pose.roll;
-  des.PositionData.stLeftFootPosition.pitch  = src.position_data.left_foot_pose.pitch;
-  des.PositionData.stLeftFootPosition.yaw    = src.position_data.left_foot_pose.yaw;
+  des.position_data.body_pose.z          = src.position_data.body_pose.z;
+  des.position_data.body_pose.roll       = src.position_data.body_pose.roll;
+  des.position_data.body_pose.pitch      = src.position_data.body_pose.pitch;
+  des.position_data.body_pose.yaw        = src.position_data.body_pose.yaw;
+  des.position_data.right_foot_pose.x     = src.position_data.right_foot_pose.x;
+  des.position_data.right_foot_pose.y     = src.position_data.right_foot_pose.y;
+  des.position_data.right_foot_pose.z     = src.position_data.right_foot_pose.z;
+  des.position_data.right_foot_pose.roll  = src.position_data.right_foot_pose.roll;
+  des.position_data.right_foot_pose.pitch = src.position_data.right_foot_pose.pitch;
+  des.position_data.right_foot_pose.yaw   = src.position_data.right_foot_pose.yaw;
+  des.position_data.left_foot_pose.x      = src.position_data.left_foot_pose.x;
+  des.position_data.left_foot_pose.y      = src.position_data.left_foot_pose.y;
+  des.position_data.left_foot_pose.z      = src.position_data.left_foot_pose.z;
+  des.position_data.left_foot_pose.roll   = src.position_data.left_foot_pose.roll;
+  des.position_data.left_foot_pose.pitch  = src.position_data.left_foot_pose.pitch;
+  des.position_data.left_foot_pose.yaw    = src.position_data.left_foot_pose.yaw;
 
   if((src.time_data.walking_state != thormang3_walking_module_msgs::StepTimeData::IN_WALKING_STARTING)
       && (src.time_data.walking_state != thormang3_walking_module_msgs::StepTimeData::IN_WALKING)
@@ -352,9 +352,9 @@ int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_m
 
 int WalkingMotionModule::convertStepDataToStepDataMsg(StepData& src, thormang3_walking_module_msgs::StepData& des)
 {
-  des.time_data.walking_state   = src.TimeData.bWalkingState;
-  des.time_data.abs_step_time   = src.TimeData.dAbsStepTime;
-  des.time_data.dsp_ratio       = src.TimeData.dDSPratio;
+  des.time_data.walking_state   = src.time_data.   walking_state;
+  des.time_data.abs_step_time   = src.time_data.abs_step_time;
+  des.time_data.dsp_ratio       = src.time_data.dsp_ratio;
 
   des.time_data.start_time_delay_ratio_x     = des.time_data.finish_time_advance_ratio_x     = 0;
   des.time_data.start_time_delay_ratio_y     = des.time_data.finish_time_advance_ratio_y     = 0;
@@ -363,27 +363,27 @@ int WalkingMotionModule::convertStepDataToStepDataMsg(StepData& src, thormang3_w
   des.time_data.start_time_delay_ratio_pitch = des.time_data.finish_time_advance_ratio_pitch = 0;
   des.time_data.start_time_delay_ratio_yaw   = des.time_data.finish_time_advance_ratio_yaw   = 0;
 
-  des.position_data.moving_foot         = src.PositionData.bMovingFoot;
-  des.position_data.foot_z_swap         = src.PositionData.dFootHeight;
-  des.position_data.torso_yaw_angle_rad = src.PositionData.dWaistYawAngle;
-  des.position_data.body_z_swap         = src.PositionData.dZ_Swap_Amplitude;
+  des.position_data.moving_foot         = src.position_data.moving_foot;
+  des.position_data.foot_z_swap         = src.position_data.foot_z_swap;
+  des.position_data.torso_yaw_angle_rad = src.position_data.waist_yaw_angle;
+  des.position_data.body_z_swap         = src.position_data.body_z_swap;
 
-  des.position_data.body_pose.z           = src.PositionData.stBodyPosition.z;
-  des.position_data.body_pose.roll        = src.PositionData.stBodyPosition.roll;
-  des.position_data.body_pose.pitch       = src.PositionData.stBodyPosition.pitch;
-  des.position_data.body_pose.yaw         = src.PositionData.stBodyPosition.yaw;
-  des.position_data.right_foot_pose.x     = src.PositionData.stRightFootPosition.x;
-  des.position_data.right_foot_pose.y     = src.PositionData.stRightFootPosition.y;
-  des.position_data.right_foot_pose.z     = src.PositionData.stRightFootPosition.z;
-  des.position_data.right_foot_pose.roll  = src.PositionData.stRightFootPosition.roll;
-  des.position_data.right_foot_pose.pitch = src.PositionData.stRightFootPosition.pitch;
-  des.position_data.right_foot_pose.yaw   = src.PositionData.stRightFootPosition.yaw;
-  des.position_data.left_foot_pose.x      = src.PositionData.stLeftFootPosition.x;
-  des.position_data.left_foot_pose.y      = src.PositionData.stLeftFootPosition.y;
-  des.position_data.left_foot_pose.z      = src.PositionData.stLeftFootPosition.z;
-  des.position_data.left_foot_pose.roll   = src.PositionData.stLeftFootPosition.roll;
-  des.position_data.left_foot_pose.pitch  = src.PositionData.stLeftFootPosition.pitch;
-  des.position_data.left_foot_pose.yaw    = src.PositionData.stLeftFootPosition.yaw;
+  des.position_data.body_pose.z           = src.position_data.body_pose.z;
+  des.position_data.body_pose.roll        = src.position_data.body_pose.roll;
+  des.position_data.body_pose.pitch       = src.position_data.body_pose.pitch;
+  des.position_data.body_pose.yaw         = src.position_data.body_pose.yaw;
+  des.position_data.right_foot_pose.x     = src.position_data.right_foot_pose.x;
+  des.position_data.right_foot_pose.y     = src.position_data.right_foot_pose.y;
+  des.position_data.right_foot_pose.z     = src.position_data.right_foot_pose.z;
+  des.position_data.right_foot_pose.roll  = src.position_data.right_foot_pose.roll;
+  des.position_data.right_foot_pose.pitch = src.position_data.right_foot_pose.pitch;
+  des.position_data.right_foot_pose.yaw   = src.position_data.right_foot_pose.yaw;
+  des.position_data.left_foot_pose.x      = src.position_data.left_foot_pose.x;
+  des.position_data.left_foot_pose.y      = src.position_data.left_foot_pose.y;
+  des.position_data.left_foot_pose.z      = src.position_data.left_foot_pose.z;
+  des.position_data.left_foot_pose.roll   = src.position_data.left_foot_pose.roll;
+  des.position_data.left_foot_pose.pitch  = src.position_data.left_foot_pose.pitch;
+  des.position_data.left_foot_pose.yaw    = src.position_data.left_foot_pose.yaw;
 
   return 0;
 }
@@ -431,17 +431,17 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
   {
     res.result |= convertStepDataMsgToStepData(req.step_data_array[i], step_data);
 
-    if(step_data.TimeData.dAbsStepTime <= 0) {
+    if(step_data.time_data.abs_step_time <= 0) {
       res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
     }
 
     if(i != 0) {
-      if(step_data.TimeData.dAbsStepTime <= req_step_data_array[req_step_data_array.size() - 1].TimeData.dAbsStepTime) {
+      if(step_data.time_data.abs_step_time <= req_step_data_array[req_step_data_array.size() - 1].time_data.abs_step_time) {
         res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
       }
     }
     else {
-      if(step_data.TimeData.dAbsStepTime <= ref_step_data.TimeData.dAbsStepTime) {
+      if(step_data.time_data.abs_step_time <= ref_step_data.time_data.abs_step_time) {
         res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
       }
     }
