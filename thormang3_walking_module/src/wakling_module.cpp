@@ -108,7 +108,7 @@ void WalkingMotionModule::initialize(const int control_cycle_msec, robotis_frame
   queue_thread_ = boost::thread(boost::bind(&WalkingMotionModule::queueThread, this));
   control_cycle_msec_ = control_cycle_msec;
 
-  PreviewControlWalking *online_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
   online_walking->SetInitialPose(0, -0.093, -0.63, 0, 0, 0,
                                  0,  0.093, -0.63, 0, 0, 0,
                                  0,      0,     0, 0, 0, 0);
@@ -391,7 +391,7 @@ int WalkingMotionModule::convertStepDataToStepDataMsg(StepData& src, thormang3_w
 bool WalkingMotionModule::getReferenceStepDataServiceCallback(thormang3_walking_module_msgs::GetReferenceStepData::Request &req,
     thormang3_walking_module_msgs::GetReferenceStepData::Response &res)
 {
-  PreviewControlWalking *online_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
 
   StepData refStepData;
 
@@ -405,7 +405,7 @@ bool WalkingMotionModule::getReferenceStepDataServiceCallback(thormang3_walking_
 bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_msgs::AddStepDataArray::Request &req,
     thormang3_walking_module_msgs::AddStepDataArray::Response &res)
 {
-  PreviewControlWalking *online_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
   res.result = thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR;
 
   if(enable_ == false) {
@@ -476,7 +476,7 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
 bool WalkingMotionModule::startWalkingServiceCallback(thormang3_walking_module_msgs::StartWalking::Request &req,
     thormang3_walking_module_msgs::StartWalking::Response &res)
 {
-  PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *prev_walking = RobotisOnlineWalking::getInstance();
   res.result = thormang3_walking_module_msgs::StartWalking::Response::NO_ERROR;
 
   if(enable_ == false) {
@@ -509,13 +509,13 @@ bool WalkingMotionModule::IsRunningServiceCallback(thormang3_walking_module_msgs
 
 bool WalkingMotionModule::isRunning()
 {
-  return PreviewControlWalking::getInstance()->isRunning();
+  return RobotisOnlineWalking::getInstance()->isRunning();
 }
 
 bool WalkingMotionModule::setBalanceParamServiceCallback(thormang3_walking_module_msgs::SetBalanceParam::Request  &req,
     thormang3_walking_module_msgs::SetBalanceParam::Response &res)
 {
-  PreviewControlWalking *online_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
   res.result = thormang3_walking_module_msgs::SetBalanceParam::Response::NO_ERROR;
 
   if( enable_ == false)
@@ -602,7 +602,7 @@ bool WalkingMotionModule::setBalanceParamServiceCallback(thormang3_walking_modul
 
 void WalkingMotionModule::setBalanceParam(thormang3_walking_module_msgs::BalanceParam& balance_param_msg)
 {
-  PreviewControlWalking *online_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
 
   online_walking->COB_X_MANUAL_ADJUSTMENT_M = balance_param_msg.cob_x_offset_m;
   online_walking->COB_Y_MANUAL_ADJUSTMENT_M = balance_param_msg.cob_y_offset_m;
@@ -642,7 +642,7 @@ void WalkingMotionModule::setBalanceParam(thormang3_walking_module_msgs::Balance
 bool WalkingMotionModule::removeExistingStepDataServiceCallback(thormang3_walking_module_msgs::RemoveExistingStepData::Request  &req,
     thormang3_walking_module_msgs::RemoveExistingStepData::Response &res)
 {
-  PreviewControlWalking *online_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
 
   res.result = thormang3_walking_module_msgs::RemoveExistingStepData::Response::NO_ERROR;
 
@@ -660,8 +660,8 @@ bool WalkingMotionModule::removeExistingStepDataServiceCallback(thormang3_walkin
 
 void WalkingMotionModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr &msg)
 {
-  PreviewControlWalking::getInstance()->current_gyro_roll_rad_per_sec  = -1.0*(msg->angular_velocity.x);
-  PreviewControlWalking::getInstance()->current_gyro_pitch_rad_per_sec = -1.0*(msg->angular_velocity.y);
+  RobotisOnlineWalking::getInstance()->current_gyro_roll_rad_per_sec  = -1.0*(msg->angular_velocity.x);
+  RobotisOnlineWalking::getInstance()->current_gyro_pitch_rad_per_sec = -1.0*(msg->angular_velocity.y);
 
 
   Eigen::Quaterniond imu_quat;
@@ -673,8 +673,8 @@ void WalkingMotionModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   double pitch = atan2(-imu_mat.coeff(2,0), sqrt(robotis_framework::powDI(imu_mat.coeff(2,1), 2) + robotis_framework::powDI(imu_mat.coeff(2,2), 2)));
   double yaw   = atan2( imu_mat.coeff(1,0), imu_mat.coeff(0,0));
 
-  PreviewControlWalking::getInstance()->current_imu_roll_rad = roll;
-  PreviewControlWalking::getInstance()->current_imu_pitch_rad = pitch;
+  RobotisOnlineWalking::getInstance()->current_imu_roll_rad = roll;
+  RobotisOnlineWalking::getInstance()->current_imu_pitch_rad = pitch;
 }
 
 void WalkingMotionModule::onModuleEnable()
@@ -687,7 +687,7 @@ void WalkingMotionModule::onModuleDisable()
 {
   previous_running_ = present_running = false;
 
-  PreviewControlWalking *prev_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *prev_walking = RobotisOnlineWalking::getInstance();
   std::string status_msg = WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG;
   balance_update_with_loop_ = false;
   prev_walking->HIP_ROLL_FEEDFORWARD_ANGLE_RAD = 0.0;
@@ -718,7 +718,7 @@ void WalkingMotionModule::process(std::map<std::string, robotis_framework::Dynam
   if(enable_ == false)
     return;
 
-  PreviewControlWalking *online_walking = PreviewControlWalking::getInstance();
+  RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
 
   r_foot_fx_N_  = sensors["r_foot_fx_scaled_N"];
   r_foot_fy_N_  = sensors["r_foot_fy_scaled_N"];

@@ -28,7 +28,7 @@
 #include "thormang3_walking_module_msgs/IsRunning.h"
 #include "thormang3_walking_module_msgs/RemoveExistingStepData.h"
 
-#include "preview_control_walking.h"
+#include "robotis_onlinel_walking.h"
 
 namespace thormang3
 {

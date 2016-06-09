@@ -19,16 +19,16 @@
 namespace thormang3
 {
 
-class PreviewControlWalking : public robotis_framework::Singleton<PreviewControlWalking>
+class RobotisOnlineWalking : public robotis_framework::Singleton<RobotisOnlineWalking>
 {
 private:
   KinematicsDynamics* thormang3_kd_;
 
-  std::vector<StepData> m_StepData;
+  std::vector<StepData> step_data_;
 
-  double m_GoalWaistYawAngleRad;
-  StepData m_CurrentStepData;
-  StepData m_ReferenceStepDataforAddition;
+  double goal_waist_yaw_angle_rad_;
+  StepData current_step_data_;
+  StepData reference_step_data_for_addition_;
   Pose3D m_InitialRightFootPosition, m_InitialLeftFootPosition, m_InitialBodyPosition;
   Pose3D m_PresentRightFootPosition, m_PresentLeftFootPosition, m_PresentBodyPosition;
   Pose3D m_PreviousStepRightFootPosition,    m_PreviousStepLeftFootPosition,    m_PreviousStepBodyPosition;
@@ -127,8 +127,8 @@ private:
 public:
   double m_OutAngleRad[16];
 
-  PreviewControlWalking();
-  virtual ~PreviewControlWalking();
+  RobotisOnlineWalking();
+  virtual ~RobotisOnlineWalking();
 
   int P_GAIN;
   int I_GAIN;

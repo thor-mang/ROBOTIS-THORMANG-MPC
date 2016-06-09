@@ -1,4 +1,4 @@
-#include "thormang3_walking_module/preview_control_walking.h"
+#include "thormang3_walking_module/robotis_onlinel_walking.h"
 #include <cmath>
 #include <iostream>
 
@@ -49,7 +49,7 @@ enum StepDataStatus
   StepDataStatus4 = 4, //
 };
 
-PreviewControlWalking::PreviewControlWalking()
+RobotisOnlineWalking::RobotisOnlineWalking()
 {
 
   //uID = (char*)"PreviewControlWalking";
@@ -98,35 +98,35 @@ PreviewControlWalking::PreviewControlWalking()
   matLHtoLF = matLHtoCOB*matCOBtoG*matGtoLF;
 
 
-  m_GoalWaistYawAngleRad = 0.0*M_PI;
-  m_ReferenceStepDataforAddition.PositionData.bMovingFoot = STANDING;
-  m_ReferenceStepDataforAddition.PositionData.dElbowSwingGain = 0.1;
-  m_ReferenceStepDataforAddition.PositionData.dShoulderSwingGain = 0.05;
-  m_ReferenceStepDataforAddition.PositionData.dFootHeight = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dWaistPitchAngle = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dWaistYawAngle = m_GoalWaistYawAngleRad;
-  m_ReferenceStepDataforAddition.PositionData.dZ_Swap_Amplitude = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.stBodyPosition = m_PreviousStepBodyPosition;
-  m_ReferenceStepDataforAddition.PositionData.stRightFootPosition = m_PreviousStepRightFootPosition;
-  m_ReferenceStepDataforAddition.PositionData.stLeftFootPosition = m_PreviousStepLeftFootPosition;
-  m_ReferenceStepDataforAddition.TimeData.bWalkingState = IN_WALKING_ENDING;
-  m_ReferenceStepDataforAddition.TimeData.dAbsStepTime = 0.0;
-  m_ReferenceStepDataforAddition.TimeData.dDSPratio = 0.2;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_yaw = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_yaw = 1.0;
+  goal_waist_yaw_angle_rad_ = 0.0*M_PI;
+  reference_step_data_for_addition_.PositionData.bMovingFoot = STANDING;
+  reference_step_data_for_addition_.PositionData.dElbowSwingGain = 0.1;
+  reference_step_data_for_addition_.PositionData.dShoulderSwingGain = 0.05;
+  reference_step_data_for_addition_.PositionData.dFootHeight = 0.0;
+  reference_step_data_for_addition_.PositionData.dWaistPitchAngle = 0.0;
+  reference_step_data_for_addition_.PositionData.dWaistYawAngle = goal_waist_yaw_angle_rad_;
+  reference_step_data_for_addition_.PositionData.dZ_Swap_Amplitude = 0.0;
+  reference_step_data_for_addition_.PositionData.stBodyPosition = m_PreviousStepBodyPosition;
+  reference_step_data_for_addition_.PositionData.stRightFootPosition = m_PreviousStepRightFootPosition;
+  reference_step_data_for_addition_.PositionData.stLeftFootPosition = m_PreviousStepLeftFootPosition;
+  reference_step_data_for_addition_.TimeData.bWalkingState = IN_WALKING_ENDING;
+  reference_step_data_for_addition_.TimeData.dAbsStepTime = 0.0;
+  reference_step_data_for_addition_.TimeData.dDSPratio = 0.2;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_yaw = 1.0;
 
-  m_PresentWaistYawAngleRad = m_GoalWaistYawAngleRad;
-  m_PreviousStepWaistYawAngleRad = m_GoalWaistYawAngleRad;
+  m_PresentWaistYawAngleRad = goal_waist_yaw_angle_rad_;
+  m_PreviousStepWaistYawAngleRad = goal_waist_yaw_angle_rad_;
 
   m_CurrentStepDataStatus = StepDataStatus4;
 
@@ -404,14 +404,14 @@ PreviewControlWalking::PreviewControlWalking()
 
 }
 
-PreviewControlWalking::~PreviewControlWalking()
+RobotisOnlineWalking::~RobotisOnlineWalking()
 {
   //    fclose(fpBalance);
   //    fclose(fpPreviewControlWalking);
   //fclose(fpAxisController);
 }
 
-bool PreviewControlWalking::SetInitialPose(double r_foot_x, double r_foot_y, double r_foot_z, double r_foot_roll, double r_foot_pitch, double r_foot_yaw,
+bool RobotisOnlineWalking::SetInitialPose(double r_foot_x, double r_foot_y, double r_foot_z, double r_foot_roll, double r_foot_pitch, double r_foot_yaw,
     double l_foot_x, double l_foot_y, double l_foot_z, double l_foot_roll, double l_foot_pitch, double l_foot_yaw,
     double center_of_body_x, double center_of_body_y, double center_of_body_z,
     double center_of_body_roll, double center_of_body_pitch, double center_of_body_yaw)
@@ -458,14 +458,14 @@ bool PreviewControlWalking::SetInitialPose(double r_foot_x, double r_foot_y, dou
   return true;
 }
 
-void PreviewControlWalking::SetInitalWaistYawAngle(double waist_yaw_angle_rad)
+void RobotisOnlineWalking::SetInitalWaistYawAngle(double waist_yaw_angle_rad)
 {
-  m_GoalWaistYawAngleRad = waist_yaw_angle_rad;
+  goal_waist_yaw_angle_rad_ = waist_yaw_angle_rad;
 }
 
 
 
-void PreviewControlWalking::initialize()
+void RobotisOnlineWalking::initialize()
 {
   if(m_Real_Running)
     return;
@@ -473,7 +473,7 @@ void PreviewControlWalking::initialize()
 
 
   pthread_mutex_lock(&m_mutex_lock);
-  m_StepData.clear();
+  step_data_.clear();
 
 
   //Initialize Time
@@ -552,34 +552,34 @@ void PreviewControlWalking::initialize()
 
 
 
-  m_ReferenceStepDataforAddition.PositionData.bMovingFoot = STANDING;
-  m_ReferenceStepDataforAddition.PositionData.dElbowSwingGain = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dShoulderSwingGain = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dFootHeight = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dWaistPitchAngle = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dWaistYawAngle = m_GoalWaistYawAngleRad;
-  m_ReferenceStepDataforAddition.PositionData.dZ_Swap_Amplitude = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.stBodyPosition = m_PreviousStepBodyPosition;
-  m_ReferenceStepDataforAddition.PositionData.stRightFootPosition = m_PreviousStepRightFootPosition;
-  m_ReferenceStepDataforAddition.PositionData.stLeftFootPosition = m_PreviousStepLeftFootPosition;
-  m_ReferenceStepDataforAddition.TimeData.bWalkingState = IN_WALKING_ENDING;
-  m_ReferenceStepDataforAddition.TimeData.dAbsStepTime = 0.0;
-  m_ReferenceStepDataforAddition.TimeData.dDSPratio = 0.2;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_yaw = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_yaw = 1.0;
+  reference_step_data_for_addition_.PositionData.bMovingFoot = STANDING;
+  reference_step_data_for_addition_.PositionData.dElbowSwingGain = 0.0;
+  reference_step_data_for_addition_.PositionData.dShoulderSwingGain = 0.0;
+  reference_step_data_for_addition_.PositionData.dFootHeight = 0.0;
+  reference_step_data_for_addition_.PositionData.dWaistPitchAngle = 0.0;
+  reference_step_data_for_addition_.PositionData.dWaistYawAngle = goal_waist_yaw_angle_rad_;
+  reference_step_data_for_addition_.PositionData.dZ_Swap_Amplitude = 0.0;
+  reference_step_data_for_addition_.PositionData.stBodyPosition = m_PreviousStepBodyPosition;
+  reference_step_data_for_addition_.PositionData.stRightFootPosition = m_PreviousStepRightFootPosition;
+  reference_step_data_for_addition_.PositionData.stLeftFootPosition = m_PreviousStepLeftFootPosition;
+  reference_step_data_for_addition_.TimeData.bWalkingState = IN_WALKING_ENDING;
+  reference_step_data_for_addition_.TimeData.dAbsStepTime = 0.0;
+  reference_step_data_for_addition_.TimeData.dDSPratio = 0.2;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_yaw = 1.0;
 
-  m_PresentWaistYawAngleRad = m_GoalWaistYawAngleRad;
-  m_PreviousStepWaistYawAngleRad = m_GoalWaistYawAngleRad;
+  m_PresentWaistYawAngleRad = goal_waist_yaw_angle_rad_;
+  m_PreviousStepWaistYawAngleRad = goal_waist_yaw_angle_rad_;
 
   m_CurrentStepDataStatus = StepDataStatus4;
 
@@ -690,7 +690,7 @@ void PreviewControlWalking::initialize()
 
 }
 //
-void PreviewControlWalking::LocalizeAllWalkingParameter()
+void RobotisOnlineWalking::LocalizeAllWalkingParameter()
 {
   if(m_Real_Running)
     return;
@@ -698,7 +698,7 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
 
 
   pthread_mutex_lock(&m_mutex_lock);
-  m_StepData.clear();
+  step_data_.clear();
 
 
   //Initialize Time
@@ -782,34 +782,34 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
     langle[idx] = angle[idx+6]*dir[idx+6]*180.0/M_PI;
   }
 
-  m_ReferenceStepDataforAddition.PositionData.bMovingFoot = STANDING;
-  m_ReferenceStepDataforAddition.PositionData.dElbowSwingGain = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dShoulderSwingGain = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dFootHeight = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dWaistPitchAngle = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.dWaistYawAngle = m_GoalWaistYawAngleRad;
-  m_ReferenceStepDataforAddition.PositionData.dZ_Swap_Amplitude = 0.0;
-  m_ReferenceStepDataforAddition.PositionData.stBodyPosition = m_PreviousStepBodyPosition;
-  m_ReferenceStepDataforAddition.PositionData.stRightFootPosition = m_PreviousStepRightFootPosition;
-  m_ReferenceStepDataforAddition.PositionData.stLeftFootPosition = m_PreviousStepLeftFootPosition;
-  m_ReferenceStepDataforAddition.TimeData.bWalkingState = IN_WALKING_ENDING;
-  m_ReferenceStepDataforAddition.TimeData.dAbsStepTime = 0.0;
-  m_ReferenceStepDataforAddition.TimeData.dDSPratio = 0.2;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_yaw = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_yaw = 1.0;
+  reference_step_data_for_addition_.PositionData.bMovingFoot = STANDING;
+  reference_step_data_for_addition_.PositionData.dElbowSwingGain = 0.0;
+  reference_step_data_for_addition_.PositionData.dShoulderSwingGain = 0.0;
+  reference_step_data_for_addition_.PositionData.dFootHeight = 0.0;
+  reference_step_data_for_addition_.PositionData.dWaistPitchAngle = 0.0;
+  reference_step_data_for_addition_.PositionData.dWaistYawAngle = goal_waist_yaw_angle_rad_;
+  reference_step_data_for_addition_.PositionData.dZ_Swap_Amplitude = 0.0;
+  reference_step_data_for_addition_.PositionData.stBodyPosition = m_PreviousStepBodyPosition;
+  reference_step_data_for_addition_.PositionData.stRightFootPosition = m_PreviousStepRightFootPosition;
+  reference_step_data_for_addition_.PositionData.stLeftFootPosition = m_PreviousStepLeftFootPosition;
+  reference_step_data_for_addition_.TimeData.bWalkingState = IN_WALKING_ENDING;
+  reference_step_data_for_addition_.TimeData.dAbsStepTime = 0.0;
+  reference_step_data_for_addition_.TimeData.dDSPratio = 0.2;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_yaw = 1.0;
 
-  m_PresentWaistYawAngleRad = m_GoalWaistYawAngleRad;
-  m_PreviousStepWaistYawAngleRad = m_GoalWaistYawAngleRad;
+  m_PresentWaistYawAngleRad = goal_waist_yaw_angle_rad_;
+  m_PreviousStepWaistYawAngleRad = goal_waist_yaw_angle_rad_;
 
   m_CurrentStepDataStatus = StepDataStatus4;
 
@@ -857,23 +857,23 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
 
 }
 //
-void PreviewControlWalking::start()
+void RobotisOnlineWalking::start()
 {
   m_Ctrl_Running = true;
   m_Real_Running = true;
 }
 
-void PreviewControlWalking::stop()
+void RobotisOnlineWalking::stop()
 {
   m_Ctrl_Running = false;
 }
 
-bool PreviewControlWalking::isRunning()
+bool RobotisOnlineWalking::isRunning()
 {
   return m_Real_Running;
 }
 
-bool PreviewControlWalking::AddStepData(StepData step_data)
+bool RobotisOnlineWalking::AddStepData(StepData step_data)
 {
 
 
@@ -887,7 +887,7 @@ bool PreviewControlWalking::AddStepData(StepData step_data)
   }
 
   pthread_mutex_lock(&m_mutex_lock);
-  m_StepData.push_back(step_data);
+  step_data_.push_back(step_data);
 
   CalcStepIdxData();
   pthread_mutex_unlock(&m_mutex_lock);
@@ -895,13 +895,13 @@ bool PreviewControlWalking::AddStepData(StepData step_data)
   return true;
 }
 
-int PreviewControlWalking::GetNumofRemainingUnreservedStepData()
+int RobotisOnlineWalking::GetNumofRemainingUnreservedStepData()
 {
   int step_idx = m_StepIdxData(m_PreviewSize - 1);
   int remain_step_num = 0;
   if(step_idx != NO_STEP_IDX)
   {
-    remain_step_num = (m_StepData.size() - 1 - step_idx);
+    remain_step_num = (step_data_.size() - 1 - step_idx);
   }
   else {
     remain_step_num = 0;
@@ -909,17 +909,17 @@ int PreviewControlWalking::GetNumofRemainingUnreservedStepData()
   return remain_step_num;
 }
 
-void PreviewControlWalking::EraseLastStepData()
+void RobotisOnlineWalking::EraseLastStepData()
 {
   pthread_mutex_lock(&m_mutex_lock);
   if(GetNumofRemainingUnreservedStepData() != 0)
   {
-    m_StepData.pop_back();
+    step_data_.pop_back();
   }
   pthread_mutex_unlock(&m_mutex_lock);
 }
 
-void PreviewControlWalking::GetReferenceStepDatafotAddition(StepData *ref_step_data_for_addition)
+void RobotisOnlineWalking::GetReferenceStepDatafotAddition(StepData *ref_step_data_for_addition)
 {
   //    if(m_CurrentStepDataStatus == StepDataStatus1) {
   //        int step_idx = m_StepIdxData(m_StepIdxData.size() - 1);
@@ -937,42 +937,42 @@ void PreviewControlWalking::GetReferenceStepDatafotAddition(StepData *ref_step_d
   //    }
   //    else
   //        return;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_ratio_yaw = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_x = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_y = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_z = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_roll = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_pitch = 1.0;
-  m_ReferenceStepDataforAddition.TimeData.sigmoid_distortion_yaw = 1.0;
-  (*ref_step_data_for_addition) = m_ReferenceStepDataforAddition;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_x = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_y = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_z = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_roll = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_pitch = 1.0;
+  reference_step_data_for_addition_.TimeData.sigmoid_distortion_yaw = 1.0;
+  (*ref_step_data_for_addition) = reference_step_data_for_addition_;
 }
 
-void PreviewControlWalking::CalcStepIdxData()
+void RobotisOnlineWalking::CalcStepIdxData()
 {
   unsigned int step_idx = 0, previous_step_idx = 0;
-  unsigned int step_data_size = m_StepData.size();
-  if(m_StepData.size() == 0) {
+  unsigned int step_data_size = step_data_.size();
+  if(step_data_.size() == 0) {
     m_StepIdxData.fill(NO_STEP_IDX);
     m_CurrentStepDataStatus = StepDataStatus4;
     m_Real_Running = false;
     //return;
   }
   else {
-    if(m_WalkingTime >= m_StepData[0].TimeData.dAbsStepTime - 0.5*MStoS) {
-      m_PreviousStepWaistYawAngleRad = m_StepData[0].PositionData.dWaistYawAngle;
-      m_PreviousStepLeftFootPosition = m_StepData[0].PositionData.stLeftFootPosition;
-      m_PreviousStepRightFootPosition = m_StepData[0].PositionData.stRightFootPosition;
-      m_PreviousStepBodyPosition = m_StepData[0].PositionData.stBodyPosition;
+    if(m_WalkingTime >= step_data_[0].TimeData.dAbsStepTime - 0.5*MStoS) {
+      m_PreviousStepWaistYawAngleRad = step_data_[0].PositionData.dWaistYawAngle;
+      m_PreviousStepLeftFootPosition = step_data_[0].PositionData.stLeftFootPosition;
+      m_PreviousStepRightFootPosition = step_data_[0].PositionData.stRightFootPosition;
+      m_PreviousStepBodyPosition = step_data_[0].PositionData.stBodyPosition;
       m_PreviousStepBodyPosition.x = m_PresentBodyPosition.x;
       m_PreviousStepBodyPosition.y = m_PresentBodyPosition.y;
-      m_ReferenceTime = m_StepData[0].TimeData.dAbsStepTime;
-      m_StepData.erase(m_StepData.begin());
-      if(m_StepData.size() == 0) {
+      m_ReferenceTime = step_data_[0].TimeData.dAbsStepTime;
+      step_data_.erase(step_data_.begin());
+      if(step_data_.size() == 0) {
         m_StepIdxData.fill(NO_STEP_IDX);
         m_CurrentStepDataStatus = StepDataStatus4;
         m_Real_Running = false;
@@ -981,11 +981,11 @@ void PreviewControlWalking::CalcStepIdxData()
       else {
         for(int idx = 0; idx < m_PreviewSize;  idx++)    {
           //Get STepIDx
-          if(m_WalkingTime + (idx+1)*TIME_UNIT > m_StepData[step_data_size -1].TimeData.dAbsStepTime)
+          if(m_WalkingTime + (idx+1)*TIME_UNIT > step_data_[step_data_size -1].TimeData.dAbsStepTime)
             m_StepIdxData(idx) = NO_STEP_IDX;
           else {
             for(step_idx = previous_step_idx; step_idx < step_data_size; step_idx++) {
-              if(m_WalkingTime + (idx+1)*TIME_UNIT <= m_StepData[step_idx].TimeData.dAbsStepTime)
+              if(m_WalkingTime + (idx+1)*TIME_UNIT <= step_data_[step_idx].TimeData.dAbsStepTime)
                 break;
             }//for end
             m_StepIdxData(idx) = step_idx;
@@ -999,11 +999,11 @@ void PreviewControlWalking::CalcStepIdxData()
     else {
       for(int idx = 0; idx < m_PreviewSize;  idx++)    {
         //Get STepIDx
-        if(m_WalkingTime + (idx+1)*TIME_UNIT > m_StepData[step_data_size -1].TimeData.dAbsStepTime)
+        if(m_WalkingTime + (idx+1)*TIME_UNIT > step_data_[step_data_size -1].TimeData.dAbsStepTime)
           m_StepIdxData(idx) = NO_STEP_IDX;
         else {
           for(step_idx = previous_step_idx; step_idx < step_data_size; step_idx++) {
-            if(m_WalkingTime + (idx+1)*TIME_UNIT <= m_StepData[step_idx].TimeData.dAbsStepTime)
+            if(m_WalkingTime + (idx+1)*TIME_UNIT <= step_data_[step_idx].TimeData.dAbsStepTime)
               break;
           }//for end
           m_StepIdxData(idx) = step_idx;
@@ -1019,32 +1019,32 @@ void PreviewControlWalking::CalcStepIdxData()
   if(m_StepIdxData(m_PreviewSize - 1) != NO_STEP_IDX) {
     if(GetNumofRemainingUnreservedStepData() != 0) {
       m_CurrentStepDataStatus = StepDataStatus1;
-      m_ReferenceStepDataforAddition = m_StepData[m_StepIdxData(m_PreviewSize-1)];
+      reference_step_data_for_addition_ = step_data_[m_StepIdxData(m_PreviewSize-1)];
       //m_ReferenceStepDataforAddition.TimeData.bWalkingState = InWalking;
     }
     else {
       m_CurrentStepDataStatus = StepDataStatus2;
-      m_ReferenceStepDataforAddition = m_StepData[m_StepIdxData(m_PreviewSize-1)];
+      reference_step_data_for_addition_ = step_data_[m_StepIdxData(m_PreviewSize-1)];
       //m_ReferenceStepDataforAddition.TimeData.bWalkingState = InWalking;
     }
   }
   else {
     if(m_StepIdxData(0) != NO_STEP_IDX) {
-      m_ReferenceStepDataforAddition = m_StepData[m_StepIdxData(0)];
-      m_ReferenceStepDataforAddition.TimeData.bWalkingState = IN_WALKING_ENDING;
-      m_ReferenceStepDataforAddition.TimeData.dAbsStepTime += m_PreviewTime;
+      reference_step_data_for_addition_ = step_data_[m_StepIdxData(0)];
+      reference_step_data_for_addition_.TimeData.bWalkingState = IN_WALKING_ENDING;
+      reference_step_data_for_addition_.TimeData.dAbsStepTime += m_PreviewTime;
 
       m_CurrentStepDataStatus = StepDataStatus3;
     }
     else {
-      m_ReferenceStepDataforAddition.TimeData.bWalkingState = IN_WALKING_ENDING;
-      m_ReferenceStepDataforAddition.TimeData.dAbsStepTime = m_WalkingTime + m_PreviewTime;
+      reference_step_data_for_addition_.TimeData.bWalkingState = IN_WALKING_ENDING;
+      reference_step_data_for_addition_.TimeData.dAbsStepTime = m_WalkingTime + m_PreviewTime;
       m_CurrentStepDataStatus = StepDataStatus4;
     }
   }
 }
 
-void PreviewControlWalking::CalcRefZMP()
+void RobotisOnlineWalking::CalcRefZMP()
 {
   int ref_zmp_idx = 0;
   int step_idx = 0;
@@ -1066,36 +1066,36 @@ void PreviewControlWalking::CalcRefZMP()
       }
       else
       {
-        if(m_StepData[step_idx].TimeData.bWalkingState == IN_WALKING)
+        if(step_data_[step_idx].TimeData.bWalkingState == IN_WALKING)
         {
-          if( m_StepData[step_idx].PositionData.bMovingFoot == RIGHT_FOOT_SWING ) {
-            m_ZMP_Reference_X(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_X_ZMP_CenterShift;
-            m_ZMP_Reference_Y(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_Y_ZMP_CenterShift - m_Y_ZMP_Convergence;
+          if( step_data_[step_idx].PositionData.bMovingFoot == RIGHT_FOOT_SWING ) {
+            m_ZMP_Reference_X(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stLeftFootPosition.x + m_X_ZMP_CenterShift;
+            m_ZMP_Reference_Y(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stLeftFootPosition.y + m_Y_ZMP_CenterShift - m_Y_ZMP_Convergence;
           }
-          else if( m_StepData[step_idx].PositionData.bMovingFoot == LEFT_FOOT_SWING ) {
-            m_ZMP_Reference_X(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stRightFootPosition.x + m_X_ZMP_CenterShift;
-            m_ZMP_Reference_Y(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stRightFootPosition.y + m_Y_ZMP_CenterShift + m_Y_ZMP_Convergence;
+          else if( step_data_[step_idx].PositionData.bMovingFoot == LEFT_FOOT_SWING ) {
+            m_ZMP_Reference_X(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stRightFootPosition.x + m_X_ZMP_CenterShift;
+            m_ZMP_Reference_Y(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stRightFootPosition.y + m_Y_ZMP_CenterShift + m_Y_ZMP_Convergence;
           }
-          else if( m_StepData[step_idx].PositionData.bMovingFoot == STANDING ) {
-            m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-            m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+          else if( step_data_[step_idx].PositionData.bMovingFoot == STANDING ) {
+            m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+            m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
           }
           else {
-            m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-            m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+            m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+            m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
           }
         }
-        else if(m_StepData[step_idx].TimeData.bWalkingState == IN_WALKING_STARTING) {
-          m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+        else if(step_data_[step_idx].TimeData.bWalkingState == IN_WALKING_STARTING) {
+          m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
         }
-        else if(m_StepData[step_idx].TimeData.bWalkingState == IN_WALKING_ENDING) {
-          m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+        else if(step_data_[step_idx].TimeData.bWalkingState == IN_WALKING_ENDING) {
+          m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
         }
         else {
-          m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+          m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
         }
       }
     }
@@ -1119,47 +1119,47 @@ void PreviewControlWalking::CalcRefZMP()
       //                m_ZMP_Reference_X(ref_zmp_idx, 0) = m_ZMP_Reference_X(ref_zmp_idx - 1, 0);
       //                m_ZMP_Reference_Y(ref_zmp_idx, 0) = m_ZMP_Reference_Y(ref_zmp_idx - 1, 0);
       //            }
-      m_ZMP_Reference_X(ref_zmp_idx, 0) = 0.5*(m_ReferenceStepDataforAddition.PositionData.stRightFootPosition.x + m_ReferenceStepDataforAddition.PositionData.stLeftFootPosition.x);
-      m_ZMP_Reference_Y(ref_zmp_idx, 0) = 0.5*(m_ReferenceStepDataforAddition.PositionData.stRightFootPosition.y + m_ReferenceStepDataforAddition.PositionData.stLeftFootPosition.y);
+      m_ZMP_Reference_X(ref_zmp_idx, 0) = 0.5*(reference_step_data_for_addition_.PositionData.stRightFootPosition.x + reference_step_data_for_addition_.PositionData.stLeftFootPosition.x);
+      m_ZMP_Reference_Y(ref_zmp_idx, 0) = 0.5*(reference_step_data_for_addition_.PositionData.stRightFootPosition.y + reference_step_data_for_addition_.PositionData.stLeftFootPosition.y);
     }
     else
     {
-      if(m_StepData[step_idx].TimeData.bWalkingState == IN_WALKING)
+      if(step_data_[step_idx].TimeData.bWalkingState == IN_WALKING)
       {
-        if( m_StepData[step_idx].PositionData.bMovingFoot == RIGHT_FOOT_SWING ) {
-          m_ZMP_Reference_X(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_X_ZMP_CenterShift;
-          m_ZMP_Reference_Y(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_Y_ZMP_CenterShift - m_Y_ZMP_Convergence;
+        if( step_data_[step_idx].PositionData.bMovingFoot == RIGHT_FOOT_SWING ) {
+          m_ZMP_Reference_X(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stLeftFootPosition.x + m_X_ZMP_CenterShift;
+          m_ZMP_Reference_Y(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stLeftFootPosition.y + m_Y_ZMP_CenterShift - m_Y_ZMP_Convergence;
         }
-        else if( m_StepData[step_idx].PositionData.bMovingFoot == LEFT_FOOT_SWING ) {
-          m_ZMP_Reference_X(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stRightFootPosition.x + m_X_ZMP_CenterShift;
-          m_ZMP_Reference_Y(ref_zmp_idx, 0) = m_StepData[step_idx].PositionData.stRightFootPosition.y + m_Y_ZMP_CenterShift + m_Y_ZMP_Convergence;
+        else if( step_data_[step_idx].PositionData.bMovingFoot == LEFT_FOOT_SWING ) {
+          m_ZMP_Reference_X(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stRightFootPosition.x + m_X_ZMP_CenterShift;
+          m_ZMP_Reference_Y(ref_zmp_idx, 0) = step_data_[step_idx].PositionData.stRightFootPosition.y + m_Y_ZMP_CenterShift + m_Y_ZMP_Convergence;
         }
-        else if( m_StepData[step_idx].PositionData.bMovingFoot == STANDING ) {
-          m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+        else if( step_data_[step_idx].PositionData.bMovingFoot == STANDING ) {
+          m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
         }
         else {
-          m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+          m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+          m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
         }
       }
-      else if(m_StepData[step_idx].TimeData.bWalkingState == IN_WALKING_STARTING) {
-        m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-        m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+      else if(step_data_[step_idx].TimeData.bWalkingState == IN_WALKING_STARTING) {
+        m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+        m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
       }
-      else if(m_StepData[step_idx].TimeData.bWalkingState == IN_WALKING_ENDING) {
-        m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-        m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+      else if(step_data_[step_idx].TimeData.bWalkingState == IN_WALKING_ENDING) {
+        m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+        m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
       }
       else {
-        m_ZMP_Reference_X(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.x + m_StepData[step_idx].PositionData.stRightFootPosition.x)*0.5;
-        m_ZMP_Reference_Y(ref_zmp_idx, 0) = (m_StepData[step_idx].PositionData.stLeftFootPosition.y + m_StepData[step_idx].PositionData.stRightFootPosition.y)*0.5;
+        m_ZMP_Reference_X(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.x + step_data_[step_idx].PositionData.stRightFootPosition.x)*0.5;
+        m_ZMP_Reference_Y(ref_zmp_idx, 0) = (step_data_[step_idx].PositionData.stLeftFootPosition.y + step_data_[step_idx].PositionData.stRightFootPosition.y)*0.5;
       }
     }
   }
 }
 
-void PreviewControlWalking::SetRefZMPDecisionParameter(double X_ZMP_CenterShift, double Y_ZMP_CenterShift, double Y_ZMP_Convergence)
+void RobotisOnlineWalking::SetRefZMPDecisionParameter(double X_ZMP_CenterShift, double Y_ZMP_CenterShift, double Y_ZMP_Convergence)
 {
   m_X_ZMP_CenterShift = X_ZMP_CenterShift;
   m_Y_ZMP_CenterShift = Y_ZMP_CenterShift;
@@ -1167,7 +1167,7 @@ void PreviewControlWalking::SetRefZMPDecisionParameter(double X_ZMP_CenterShift,
 }
 
 
-void PreviewControlWalking::SetInitForceTorque(double init_right_fx_N,  double init_right_fy_N,  double init_right_fz_N,
+void RobotisOnlineWalking::SetInitForceTorque(double init_right_fx_N,  double init_right_fy_N,  double init_right_fz_N,
     double init_right_Tx_Nm,double init_right_Ty_Nm,double  init_right_Tz_Nm,
     double init_left_fx_N, double init_left_fy_N, double init_left_fz_N,
     double init_left_Tx_Nm, double init_left_Ty_Nm, double init_left_Tz_Nm)
@@ -1179,7 +1179,7 @@ void PreviewControlWalking::SetInitForceTorque(double init_right_fx_N,  double i
   m_init_left_Tx_Nm = init_left_Tx_Nm; m_init_left_Ty_Nm = init_left_Ty_Nm; m_init_left_Tz_Nm = init_left_Tz_Nm;
 }
 
-void PreviewControlWalking::SetInitForceOntheGround(double right_fx_on_gnd_N, double  right_fy_on_gnd_N,double  right_fz_on_gnd_N,
+void RobotisOnlineWalking::SetInitForceOntheGround(double right_fx_on_gnd_N, double  right_fy_on_gnd_N,double  right_fz_on_gnd_N,
     double right_tx_on_gnd_N ,double right_ty_on_gnd_N , double right_tz_on_gnd_N,
     double left_fx_on_gnd_N ,  double left_fy_on_gnd_N ,  double left_fz_on_gnd_N,
     double left_tx_on_gnd_N , double left_ty_on_gnd_N ,double left_tz_on_gnd_N)
@@ -1216,7 +1216,7 @@ void PreviewControlWalking::SetInitForceOntheGround(double right_fx_on_gnd_N, do
 }
 
 
-double PreviewControlWalking::GetDampingControllerOutput(double desired, double present, double previous_output, double goal_settling_time)
+double RobotisOnlineWalking::GetDampingControllerOutput(double desired, double present, double previous_output, double goal_settling_time)
 {
   double cut_off_freq = 1.0/goal_settling_time;
   double alpha = 1.0;
@@ -1248,7 +1248,7 @@ double PreviewControlWalking::GetDampingControllerOutput(double desired, double 
 //    return gain*previous_hip_left_roll_modification;
 //}
 
-double PreviewControlWalking::GetHipRollDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetHipRollDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_hip_roll_modification = 0.0;
 
@@ -1258,7 +1258,7 @@ double PreviewControlWalking::GetHipRollDampingControllerOutput(double desired, 
 }
 
 
-double PreviewControlWalking::GetHipPitchDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetHipPitchDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_hip_pitch_modification = 0.0;
 
@@ -1267,7 +1267,7 @@ double PreviewControlWalking::GetHipPitchDampingControllerOutput(double desired,
   return gain*previous_hip_pitch_modification;
 }
 
-double PreviewControlWalking::GetAnkleRollDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetAnkleRollDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_ankle_roll_modification = 0.0;
 
@@ -1276,7 +1276,7 @@ double PreviewControlWalking::GetAnkleRollDampingControllerOutput(double desired
   return gain*previous_ankle_roll_modification;
 }
 
-double PreviewControlWalking::GetAnklePitchDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetAnklePitchDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_ankle_pitch_modification = 0.0;
 
@@ -1285,7 +1285,7 @@ double PreviewControlWalking::GetAnklePitchDampingControllerOutput(double desire
   return gain*previous_ankle_pitch_modification;
 }
 
-double PreviewControlWalking::GetZDampingControllOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetZDampingControllOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_z_modification = 0.0;
   previous_z_modification = GetDampingControllerOutput(desired, present, previous_z_modification, goal_settling_time);
@@ -1293,28 +1293,28 @@ double PreviewControlWalking::GetZDampingControllOutput(double desired, double p
 }
 
 
-double PreviewControlWalking::GetRightXDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetRightXDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_r_x_modification = 0.0;
   previous_r_x_modification = GetDampingControllerOutput(desired, present, previous_r_x_modification, goal_settling_time);
   return gain*previous_r_x_modification;
 }
 
-double PreviewControlWalking::GetRightYDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetRightYDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_r_y_modification = 0.0;
   previous_r_y_modification = GetDampingControllerOutput(desired, present, previous_r_y_modification, goal_settling_time);
   return gain*previous_r_y_modification;
 }
 
-double PreviewControlWalking::GetLeftXDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetLeftXDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_l_x_modification = 0.0;
   previous_l_x_modification = GetDampingControllerOutput(desired, present, previous_l_x_modification, goal_settling_time);
   return gain*previous_l_x_modification;
 }
 
-double PreviewControlWalking::GetLeftYDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetLeftYDampingControlOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_l_y_modification = 0.0;
   previous_l_y_modification = GetDampingControllerOutput(desired, present, previous_l_y_modification, goal_settling_time);
@@ -1322,28 +1322,28 @@ double PreviewControlWalking::GetLeftYDampingControlOutput(double desired, doubl
 }
 
 
-double PreviewControlWalking::GetRightAnkleRollMomentDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetRightAnkleRollMomentDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_right_ankle_roll_moment_modification = 0.0;
   previous_right_ankle_roll_moment_modification = GetDampingControllerOutput(desired, present, previous_right_ankle_roll_moment_modification, goal_settling_time);
   return gain*previous_right_ankle_roll_moment_modification;
 }
 
-double PreviewControlWalking::GetRightAnklePitchMomentDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetRightAnklePitchMomentDampingControllerOutput(double desired, double present, double goal_settling_time, double gain)
 {
   static double previous_right_ankle_pitch_moment_modification = 0.0;
   previous_right_ankle_pitch_moment_modification = GetDampingControllerOutput(desired, present, previous_right_ankle_pitch_moment_modification, goal_settling_time);
   return gain*previous_right_ankle_pitch_moment_modification;
 }
 
-double PreviewControlWalking::GetLeftAnkleRollMomentDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetLeftAnkleRollMomentDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain)
 {
   static double previous_left_ankle_roll_moment_modification = 0.0;
   previous_left_ankle_roll_moment_modification = GetDampingControllerOutput(desired, present, previous_left_ankle_roll_moment_modification, goal_settling_time);
   return gain*previous_left_ankle_roll_moment_modification;
 }
 
-double PreviewControlWalking::GetLeftAnklePitchMomentDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain)
+double RobotisOnlineWalking::GetLeftAnklePitchMomentDampingControllerOutput(double desired, double present,  double goal_settling_time, double gain)
 {
   static double previous_left_ankle_pitch_moment_modification = 0.0;
   previous_left_ankle_pitch_moment_modification = GetDampingControllerOutput(desired, present, previous_left_ankle_pitch_moment_modification, goal_settling_time);
@@ -1421,7 +1421,7 @@ double PreviewControlWalking::GetLeftAnklePitchMomentDampingControllerOutput(dou
 //}
 //
 //
-void PreviewControlWalking::process()
+void RobotisOnlineWalking::process()
 {
   static Pose3D epr, epl;
   static Pose3D epr_for_balance, epl_for_balance;
@@ -1480,8 +1480,8 @@ void PreviewControlWalking::process()
     m_PresentBodyPosition.x = x_LIPM(0,0);
     m_PresentBodyPosition.y = y_LIPM(0,0);
 
-    m_ReferenceStepDataforAddition.PositionData.stBodyPosition.x = x_LIPM(0,0);
-    m_ReferenceStepDataforAddition.PositionData.stBodyPosition.y = y_LIPM(0,0);
+    reference_step_data_for_addition_.PositionData.stBodyPosition.x = x_LIPM(0,0);
+    reference_step_data_for_addition_.PositionData.stBodyPosition.y = y_LIPM(0,0);
 
     m_CurrentStartIdxforZMPRef++;
     if(m_CurrentStartIdxforZMPRef == (m_PreviewSize))
@@ -1490,24 +1490,24 @@ void PreviewControlWalking::process()
     double body_roll_swap = 0;
 
     int detail_balance_time_idx = 0;
-    if((m_StepData.size() != 0) && m_Real_Running) {
-      double body_move_periodTime = m_StepData[0].TimeData.dAbsStepTime - m_ReferenceTime;
-      double wp_move_amp = m_StepData[0].PositionData.dWaistYawAngle - m_PreviousStepWaistYawAngleRad;
+    if((step_data_.size() != 0) && m_Real_Running) {
+      double body_move_periodTime = step_data_[0].TimeData.dAbsStepTime - m_ReferenceTime;
+      double wp_move_amp = step_data_[0].PositionData.dWaistYawAngle - m_PreviousStepWaistYawAngleRad;
       double wp_move_amp_shift = m_PreviousStepWaistYawAngleRad;
 
-      double bz_move_amp = m_StepData[0].PositionData.stBodyPosition.z - m_PreviousStepBodyPosition.z;
+      double bz_move_amp = step_data_[0].PositionData.stBodyPosition.z - m_PreviousStepBodyPosition.z;
       double bz_move_amp_shift = m_PreviousStepBodyPosition.z;
 
-      double ba_move_amp = m_StepData[0].PositionData.stBodyPosition.roll - m_PreviousStepBodyPosition.roll;
+      double ba_move_amp = step_data_[0].PositionData.stBodyPosition.roll - m_PreviousStepBodyPosition.roll;
       double ba_move_amp_shift = m_PreviousStepBodyPosition.roll;
 
-      double bb_move_amp = m_StepData[0].PositionData.stBodyPosition.pitch - m_PreviousStepBodyPosition.pitch;
+      double bb_move_amp = step_data_[0].PositionData.stBodyPosition.pitch - m_PreviousStepBodyPosition.pitch;
       double bb_move_amp_shift = m_PreviousStepBodyPosition.pitch;
 
-      double bc_move_amp = m_StepData[0].PositionData.stBodyPosition.yaw - m_PreviousStepBodyPosition.yaw;
+      double bc_move_amp = step_data_[0].PositionData.stBodyPosition.yaw - m_PreviousStepBodyPosition.yaw;
       double bc_move_amp_shift = m_PreviousStepBodyPosition.yaw;
 
-      double z_swap_amp = 0.5*(m_StepData[0].PositionData.dZ_Swap_Amplitude);
+      double z_swap_amp = 0.5*(step_data_[0].PositionData.dZ_Swap_Amplitude);
       double z_swap_amp_shift = z_swap_amp;
       double z_swap_phase_shift = M_PI*0.5;
 
@@ -1546,60 +1546,60 @@ void PreviewControlWalking::process()
       double z_vibe_phase_shift;
       double x_move, y_move, z_move, a_move, b_move, c_move, z_vibe;
 
-      period_time = m_StepData[0].TimeData.dAbsStepTime - m_ReferenceTime;
-      dsp_ratio = m_StepData[0].TimeData.dDSPratio;
+      period_time = step_data_[0].TimeData.dAbsStepTime - m_ReferenceTime;
+      dsp_ratio = step_data_[0].TimeData.dDSPratio;
       ssp_ratio = 1 - dsp_ratio;
       foot_move_period_time = ssp_ratio*period_time;
 
       ssp_time_start = dsp_ratio*period_time/2.0;
       ssp_time_end = (1 + ssp_ratio)*period_time / 2.0;
 
-      if(m_StepData[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
+      if(step_data_[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
       {
-        x_move_amp = (m_StepData[0].PositionData.stRightFootPosition.x - m_PreviousStepRightFootPosition.x);
+        x_move_amp = (step_data_[0].PositionData.stRightFootPosition.x - m_PreviousStepRightFootPosition.x);
         x_move_amp_shift = m_PreviousStepRightFootPosition.x;
 
-        y_move_amp = (m_StepData[0].PositionData.stRightFootPosition.y - m_PreviousStepRightFootPosition.y);
+        y_move_amp = (step_data_[0].PositionData.stRightFootPosition.y - m_PreviousStepRightFootPosition.y);
         y_move_amp_shift = m_PreviousStepRightFootPosition.y;
 
-        z_move_amp = (m_StepData[0].PositionData.stRightFootPosition.z - m_PreviousStepRightFootPosition.z);
+        z_move_amp = (step_data_[0].PositionData.stRightFootPosition.z - m_PreviousStepRightFootPosition.z);
         z_move_amp_shift = m_PreviousStepRightFootPosition.z;
 
-        a_move_amp = (m_StepData[0].PositionData.stRightFootPosition.roll - m_PreviousStepRightFootPosition.roll);
+        a_move_amp = (step_data_[0].PositionData.stRightFootPosition.roll - m_PreviousStepRightFootPosition.roll);
         a_move_amp_shift = m_PreviousStepRightFootPosition.roll;
 
-        b_move_amp = (m_StepData[0].PositionData.stRightFootPosition.pitch - m_PreviousStepRightFootPosition.pitch);
+        b_move_amp = (step_data_[0].PositionData.stRightFootPosition.pitch - m_PreviousStepRightFootPosition.pitch);
         b_move_amp_shift = m_PreviousStepRightFootPosition.pitch;
 
-        c_move_amp = (m_StepData[0].PositionData.stRightFootPosition.yaw - m_PreviousStepRightFootPosition.yaw);
+        c_move_amp = (step_data_[0].PositionData.stRightFootPosition.yaw - m_PreviousStepRightFootPosition.yaw);
         c_move_amp_shift = m_PreviousStepRightFootPosition.yaw;
 
-        z_vibe_amp = m_StepData[0].PositionData.dFootHeight*0.5;
+        z_vibe_amp = step_data_[0].PositionData.dFootHeight*0.5;
         z_vibe_amp_shift = z_vibe_amp;
         z_vibe_phase_shift = M_PI*0.5;
 
         body_roll_swap_dir = -1.0;
       }
-      else if(m_StepData[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
-        x_move_amp = (m_StepData[0].PositionData.stLeftFootPosition.x - m_PreviousStepLeftFootPosition.x);
+      else if(step_data_[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
+        x_move_amp = (step_data_[0].PositionData.stLeftFootPosition.x - m_PreviousStepLeftFootPosition.x);
         x_move_amp_shift = m_PreviousStepLeftFootPosition.x;
 
-        y_move_amp = (m_StepData[0].PositionData.stLeftFootPosition.y - m_PreviousStepLeftFootPosition.y);
+        y_move_amp = (step_data_[0].PositionData.stLeftFootPosition.y - m_PreviousStepLeftFootPosition.y);
         y_move_amp_shift = m_PreviousStepLeftFootPosition.y;
 
-        z_move_amp = (m_StepData[0].PositionData.stLeftFootPosition.z - m_PreviousStepLeftFootPosition.z);
+        z_move_amp = (step_data_[0].PositionData.stLeftFootPosition.z - m_PreviousStepLeftFootPosition.z);
         z_move_amp_shift = m_PreviousStepLeftFootPosition.z;
 
-        a_move_amp = (m_StepData[0].PositionData.stLeftFootPosition.roll - m_PreviousStepLeftFootPosition.roll);
+        a_move_amp = (step_data_[0].PositionData.stLeftFootPosition.roll - m_PreviousStepLeftFootPosition.roll);
         a_move_amp_shift = m_PreviousStepLeftFootPosition.roll;
 
-        b_move_amp = (m_StepData[0].PositionData.stLeftFootPosition.pitch - m_PreviousStepLeftFootPosition.pitch);
+        b_move_amp = (step_data_[0].PositionData.stLeftFootPosition.pitch - m_PreviousStepLeftFootPosition.pitch);
         b_move_amp_shift = m_PreviousStepLeftFootPosition.pitch;
 
-        c_move_amp = (m_StepData[0].PositionData.stLeftFootPosition.yaw - m_PreviousStepLeftFootPosition.yaw);
+        c_move_amp = (step_data_[0].PositionData.stLeftFootPosition.yaw - m_PreviousStepLeftFootPosition.yaw);
         c_move_amp_shift = m_PreviousStepLeftFootPosition.yaw;
 
-        z_vibe_amp = m_StepData[0].PositionData.dFootHeight*0.5;
+        z_vibe_amp = step_data_[0].PositionData.dFootHeight*0.5;
         z_vibe_amp_shift = z_vibe_amp;
         z_vibe_phase_shift = M_PI*0.5;
 
@@ -1639,20 +1639,20 @@ void PreviewControlWalking::process()
 
       if( time <= ssp_time_start)
       {
-        x_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_x,     m_StepData[0].TimeData.sigmoid_distortion_x);
-        y_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_y,     m_StepData[0].TimeData.sigmoid_distortion_y);
-        z_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_z,     m_StepData[0].TimeData.sigmoid_distortion_z);
-        a_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_roll,  m_StepData[0].TimeData.sigmoid_distortion_roll);
-        b_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_pitch, m_StepData[0].TimeData.sigmoid_distortion_pitch);
-        c_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_yaw,   m_StepData[0].TimeData.sigmoid_distortion_yaw);
+        x_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_x,     step_data_[0].TimeData.sigmoid_distortion_x);
+        y_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_y,     step_data_[0].TimeData.sigmoid_distortion_y);
+        z_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_z,     step_data_[0].TimeData.sigmoid_distortion_z);
+        a_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_roll,  step_data_[0].TimeData.sigmoid_distortion_roll);
+        b_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_pitch, step_data_[0].TimeData.sigmoid_distortion_pitch);
+        c_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_yaw,   step_data_[0].TimeData.sigmoid_distortion_yaw);
 
         z_vibe         = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp, z_vibe_amp_shift);
         body_roll_swap = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
-        if(m_StepData[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
+        if(step_data_[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
         {
           m_Balancing_Index = 1;
         }
-        else if(m_StepData[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
+        else if(step_data_[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
           m_Balancing_Index = 5;
         }
         else {
@@ -1660,24 +1660,24 @@ void PreviewControlWalking::process()
         }
       }
       else if(time <= ssp_time_end) {
-        x_move = wsigmoid(time, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_x,     m_StepData[0].TimeData.sigmoid_distortion_x);
-        y_move = wsigmoid(time, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_y,     m_StepData[0].TimeData.sigmoid_distortion_y);
-        z_move = wsigmoid(time, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_z,     m_StepData[0].TimeData.sigmoid_distortion_z);
-        a_move = wsigmoid(time, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_roll,  m_StepData[0].TimeData.sigmoid_distortion_roll);
-        b_move = wsigmoid(time, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_pitch, m_StepData[0].TimeData.sigmoid_distortion_pitch);
-        c_move = wsigmoid(time, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_yaw,   m_StepData[0].TimeData.sigmoid_distortion_yaw);
+        x_move = wsigmoid(time, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_x,     step_data_[0].TimeData.sigmoid_distortion_x);
+        y_move = wsigmoid(time, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_y,     step_data_[0].TimeData.sigmoid_distortion_y);
+        z_move = wsigmoid(time, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_z,     step_data_[0].TimeData.sigmoid_distortion_z);
+        a_move = wsigmoid(time, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_roll,  step_data_[0].TimeData.sigmoid_distortion_roll);
+        b_move = wsigmoid(time, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_pitch, step_data_[0].TimeData.sigmoid_distortion_pitch);
+        c_move = wsigmoid(time, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_yaw,   step_data_[0].TimeData.sigmoid_distortion_yaw);
 
         z_vibe         = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
         body_roll_swap = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
 
-        if(m_StepData[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
+        if(step_data_[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
         {
           if(time <= (ssp_time_end + ssp_time_start)*0.5)
             m_Balancing_Index = 2;
           else
             m_Balancing_Index = 3;
         }
-        else if(m_StepData[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
+        else if(step_data_[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
           if(time <= (ssp_time_end + ssp_time_start)*0.5)
             m_Balancing_Index = 6;
           else
@@ -1688,20 +1688,20 @@ void PreviewControlWalking::process()
         }
       }
       else {
-        x_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_x,     m_StepData[0].TimeData.sigmoid_distortion_x);
-        y_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_y,     m_StepData[0].TimeData.sigmoid_distortion_y);
-        z_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_z,     m_StepData[0].TimeData.sigmoid_distortion_z);
-        a_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_roll,  m_StepData[0].TimeData.sigmoid_distortion_roll);
-        b_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_pitch, m_StepData[0].TimeData.sigmoid_distortion_pitch);
-        c_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, m_StepData[0].TimeData.sigmoid_ratio_yaw,   m_StepData[0].TimeData.sigmoid_distortion_yaw);
+        x_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_x,     step_data_[0].TimeData.sigmoid_distortion_x);
+        y_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_y,     step_data_[0].TimeData.sigmoid_distortion_y);
+        z_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_z,     step_data_[0].TimeData.sigmoid_distortion_z);
+        a_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_roll,  step_data_[0].TimeData.sigmoid_distortion_roll);
+        b_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_pitch, step_data_[0].TimeData.sigmoid_distortion_pitch);
+        c_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, step_data_[0].TimeData.sigmoid_ratio_yaw,   step_data_[0].TimeData.sigmoid_distortion_yaw);
 
         z_vibe         = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
         body_roll_swap = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
-        if(m_StepData[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
+        if(step_data_[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
         {
           m_Balancing_Index = 4;
         }
-        else if(m_StepData[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
+        else if(step_data_[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
           m_Balancing_Index = 8;
         }
         else {
@@ -1713,7 +1713,7 @@ void PreviewControlWalking::process()
 
       //            printf("m_Stepdata.size :  %d, time : %f, Foot : %d  x_move: %f %f\n",
           //                    m_StepData.size(), m_StepData[0].TimeData.dAbsStepTime, m_StepData[0].PositionData.bMovingFoot, x_move, time);
-      if(m_StepData[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
+      if(step_data_[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
       {
         m_PresentRightFootPosition.x = x_move;
         m_PresentRightFootPosition.y = y_move;
@@ -1722,10 +1722,10 @@ void PreviewControlWalking::process()
         m_PresentRightFootPosition.pitch = b_move;
         m_PresentRightFootPosition.yaw = c_move;
 
-        m_PresentLeftFootPosition = m_StepData[0].PositionData.stLeftFootPosition;
+        m_PresentLeftFootPosition = step_data_[0].PositionData.stLeftFootPosition;
       }
-      else if(m_StepData[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
-        m_PresentRightFootPosition = m_StepData[0].PositionData.stRightFootPosition;
+      else if(step_data_[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)    {
+        m_PresentRightFootPosition = step_data_[0].PositionData.stRightFootPosition;
 
         m_PresentLeftFootPosition.x = x_move;
         m_PresentLeftFootPosition.y = y_move;
@@ -1737,17 +1737,17 @@ void PreviewControlWalking::process()
       }
       else {
         //printf("%d %f\n", m_WalkingTime, m_PresentLeftFootPosition.x );
-        m_PresentRightFootPosition = m_StepData[0].PositionData.stRightFootPosition;
-        m_PresentLeftFootPosition = m_StepData[0].PositionData.stLeftFootPosition;
+        m_PresentRightFootPosition = step_data_[0].PositionData.stRightFootPosition;
+        m_PresentLeftFootPosition = step_data_[0].PositionData.stLeftFootPosition;
       }
 
-      m_ShoulerSwingGain = m_StepData[0].PositionData.dShoulderSwingGain;
-      m_ElbowSwingGain = m_StepData[0].PositionData.dElbowSwingGain;
+      m_ShoulerSwingGain = step_data_[0].PositionData.dShoulderSwingGain;
+      m_ElbowSwingGain = step_data_[0].PositionData.dElbowSwingGain;
 
       m_WalkingTime += TIME_UNIT;
 
       //fprintf(stderr, "%d, %f\n", m_WalkingTime, m_StepData[m_StepData.size() - 1].TimeData.dAbsStepTime);
-      if(m_WalkingTime > m_StepData[m_StepData.size() - 1].TimeData.dAbsStepTime - 0.5) {
+      if(m_WalkingTime > step_data_[step_data_.size() - 1].TimeData.dAbsStepTime - 0.5) {
         //                m_WalkingTime = m_StepData[m_StepData.size() - 1].TimeData.dAbsStepTime;
         m_Real_Running = false;
         CalcStepIdxData();
@@ -1772,24 +1772,24 @@ void PreviewControlWalking::process()
       {
         m_Left_Fz_Sigmoid_StartTime = ssp_time_end + m_ReferenceTime;
         m_Left_Fz_Sigmoid_Shift = m_left_ssp_fz_N;
-        if(m_StepData.size() > 1)
+        if(step_data_.size() > 1)
         {
-          if(m_StepData[1].PositionData.bMovingFoot == STANDING) {
+          if(step_data_[1].PositionData.bMovingFoot == STANDING) {
             m_Left_Fz_Sigmoid_Target = m_left_dsp_fz_N;
-            m_Left_Fz_Sigmoid_EndTime = m_StepData[0].TimeData.dAbsStepTime;
+            m_Left_Fz_Sigmoid_EndTime = step_data_[0].TimeData.dAbsStepTime;
           }
-          else if(m_StepData[1].PositionData.bMovingFoot == LEFT_FOOT_SWING) {
+          else if(step_data_[1].PositionData.bMovingFoot == LEFT_FOOT_SWING) {
             m_Left_Fz_Sigmoid_Target = 0.0;
-            m_Left_Fz_Sigmoid_EndTime = (m_StepData[1].TimeData.dAbsStepTime - m_StepData[0].TimeData.dAbsStepTime)*0.5*m_StepData[1].TimeData.dDSPratio + m_StepData[0].TimeData.dAbsStepTime;
+            m_Left_Fz_Sigmoid_EndTime = (step_data_[1].TimeData.dAbsStepTime - step_data_[0].TimeData.dAbsStepTime)*0.5*step_data_[1].TimeData.dDSPratio + step_data_[0].TimeData.dAbsStepTime;
           }
           else {
             m_Left_Fz_Sigmoid_Target = m_left_ssp_fz_N;
-            m_Left_Fz_Sigmoid_EndTime = (m_StepData[1].TimeData.dAbsStepTime - m_StepData[0].TimeData.dAbsStepTime)*0.5*m_StepData[1].TimeData.dDSPratio + m_StepData[0].TimeData.dAbsStepTime;
+            m_Left_Fz_Sigmoid_EndTime = (step_data_[1].TimeData.dAbsStepTime - step_data_[0].TimeData.dAbsStepTime)*0.5*step_data_[1].TimeData.dDSPratio + step_data_[0].TimeData.dAbsStepTime;
           }
         }
         else {
           m_Left_Fz_Sigmoid_Target = m_left_dsp_fz_N;
-          m_Left_Fz_Sigmoid_EndTime = m_StepData[0].TimeData.dAbsStepTime;
+          m_Left_Fz_Sigmoid_EndTime = step_data_[0].TimeData.dAbsStepTime;
         }
 
       }
@@ -1802,24 +1802,24 @@ void PreviewControlWalking::process()
       {
         m_Left_Fz_Sigmoid_StartTime = ssp_time_end + m_ReferenceTime;
         m_Left_Fz_Sigmoid_Shift = 0.0;
-        if(m_StepData.size() > 1)
+        if(step_data_.size() > 1)
         {
-          if(m_StepData[1].PositionData.bMovingFoot == STANDING) {
+          if(step_data_[1].PositionData.bMovingFoot == STANDING) {
             m_Left_Fz_Sigmoid_Target = m_left_dsp_fz_N;
-            m_Left_Fz_Sigmoid_EndTime = m_StepData[0].TimeData.dAbsStepTime;
+            m_Left_Fz_Sigmoid_EndTime = step_data_[0].TimeData.dAbsStepTime;
           }
-          else if(m_StepData[1].PositionData.bMovingFoot == LEFT_FOOT_SWING) {
+          else if(step_data_[1].PositionData.bMovingFoot == LEFT_FOOT_SWING) {
             m_Left_Fz_Sigmoid_Target = 0.0;
-            m_Left_Fz_Sigmoid_EndTime = (m_StepData[1].TimeData.dAbsStepTime - m_StepData[0].TimeData.dAbsStepTime)*0.5*m_StepData[1].TimeData.dDSPratio + m_StepData[0].TimeData.dAbsStepTime;
+            m_Left_Fz_Sigmoid_EndTime = (step_data_[1].TimeData.dAbsStepTime - step_data_[0].TimeData.dAbsStepTime)*0.5*step_data_[1].TimeData.dDSPratio + step_data_[0].TimeData.dAbsStepTime;
           }
           else {
             m_Left_Fz_Sigmoid_Target = m_left_ssp_fz_N;
-            m_Left_Fz_Sigmoid_EndTime = (m_StepData[1].TimeData.dAbsStepTime - m_StepData[0].TimeData.dAbsStepTime)*0.5*m_StepData[1].TimeData.dDSPratio + m_StepData[0].TimeData.dAbsStepTime;
+            m_Left_Fz_Sigmoid_EndTime = (step_data_[1].TimeData.dAbsStepTime - step_data_[0].TimeData.dAbsStepTime)*0.5*step_data_[1].TimeData.dDSPratio + step_data_[0].TimeData.dAbsStepTime;
           }
         }
         else {
           m_Left_Fz_Sigmoid_Target = m_left_dsp_fz_N;
-          m_Left_Fz_Sigmoid_EndTime = m_StepData[0].TimeData.dAbsStepTime;
+          m_Left_Fz_Sigmoid_EndTime = step_data_[0].TimeData.dAbsStepTime;
         }
       }
       else {
@@ -2487,19 +2487,19 @@ void PreviewControlWalking::process()
     //printf("%f %f %f %f %f\n", hip_roll_adjustment_deg, HIP_PITCH_OFFSET, hip_pitch_adjustment_deg, current_imu_roll_rad, current_imu_pitch_rad);
 
 
-    if(m_StepData.size() != 0) {
-      if(m_StepData[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)
+    if(step_data_.size() != 0) {
+      if(step_data_[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)
         m_OutAngleRad[1] = m_OutAngleRad[1] + body_roll_swap;
-      else if(m_StepData[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
+      else if(step_data_[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
         m_OutAngleRad[1] = m_OutAngleRad[1] - 0.35*body_roll_swap;
     }
 
 
 
-    if(m_StepData.size() != 0) {
-      if(m_StepData[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
+    if(step_data_.size() != 0) {
+      if(step_data_[0].PositionData.bMovingFoot == RIGHT_FOOT_SWING)
         m_OutAngleRad[7] = m_OutAngleRad[7] + body_roll_swap;
-      else if(m_StepData[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)
+      else if(step_data_[0].PositionData.bMovingFoot == LEFT_FOOT_SWING)
         m_OutAngleRad[7] = m_OutAngleRad[7] - 0.35*body_roll_swap;
     }
 
@@ -2507,12 +2507,12 @@ void PreviewControlWalking::process()
 }
 
 
-double PreviewControlWalking::wsin(double time, double period, double period_shift, double mag, double mag_shift)
+double RobotisOnlineWalking::wsin(double time, double period, double period_shift, double mag, double mag_shift)
 {
   return mag * sin(2 * M_PI / period * time - period_shift) + mag_shift;
 }
 
-double PreviewControlWalking::wsigmoid(double time, double period, double time_shift, double mag, double mag_shift, double sigmoid_ratio, double distortion_ratio)
+double RobotisOnlineWalking::wsigmoid(double time, double period, double time_shift, double mag, double mag_shift, double sigmoid_ratio, double distortion_ratio)
 {
   double value = mag_shift, Amplitude = 0.0, sigmoid_distor_gain = 1.0, t = 0.0;
   if ((sigmoid_ratio >= 1.0) && (sigmoid_ratio < 2.0)) {
@@ -2557,7 +2557,7 @@ double PreviewControlWalking::wsigmoid(double time, double period, double time_s
   return value;
 }
 
-void PreviewControlWalking::SetFTScaleFactor(double right_ft_scale_factor, double left_ft_scale_factor)
+void RobotisOnlineWalking::SetFTScaleFactor(double right_ft_scale_factor, double left_ft_scale_factor)
 {
   m_right_ft_scale_factor = right_ft_scale_factor;
   m_left_ft_scale_factor = left_ft_scale_factor;

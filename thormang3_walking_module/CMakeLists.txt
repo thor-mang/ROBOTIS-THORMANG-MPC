@@ -36,7 +36,7 @@ include_directories(
 add_library(thormang3_walking_module
   src/linear_algebra.cpp
   src/wakling_module.cpp
-  src/preview_control_walking.cpp
+  src/robotis_online_walking.cpp
 )
 
 add_dependencies(thormang3_walking_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
