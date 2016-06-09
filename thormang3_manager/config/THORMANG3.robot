@@ -17,10 +17,10 @@ dynamixel | /dev/ttyUSB0 | 7   | H54-100-S500-R | 2.0      | r_arm_el_y   | pres
 dynamixel | /dev/ttyUSB1 | 8   | H54-100-S500-R | 2.0      | l_arm_el_y   | present_position, present_voltage
 dynamixel | /dev/ttyUSB0 | 9   | H42-20-S300-R  | 2.0      | r_arm_wr_r   | present_position, present_voltage
 dynamixel | /dev/ttyUSB1 | 10  | H42-20-S300-R  | 2.0      | l_arm_wr_r   | present_position, present_voltage
-dynamixel | /dev/ttyUSB0 | 11  | H42-20-S300-R  | 2.0      | r_arm_wr_y   | present_position, present_voltage
-dynamixel | /dev/ttyUSB1 | 12  | H42-20-S300-R  | 2.0      | l_arm_wr_y   | present_position, present_voltage
-dynamixel | /dev/ttyUSB0 | 13  | H42-20-S300-R  | 2.0      | r_arm_wr_p   | present_position, present_voltage
-dynamixel | /dev/ttyUSB1 | 14  | H42-20-S300-R  | 2.0      | l_arm_wr_p   | present_position, present_voltage
+dynamixel | /dev/ttyUSB0 | 11  | H42-20-S300-R  | 2.0      | r_arm_wr_y   | present_position, present_voltage, external_port_data_1, external_port_data_2
+dynamixel | /dev/ttyUSB1 | 12  | H42-20-S300-R  | 2.0      | l_arm_wr_y   | present_position, present_voltage, external_port_data_1, external_port_data_2
+dynamixel | /dev/ttyUSB0 | 13  | H42-20-S300-R  | 2.0      | r_arm_wr_p   | present_position, present_voltage, external_port_data_1, external_port_data_2, external_port_data_3, external_port_data_4
+dynamixel | /dev/ttyUSB1 | 14  | H42-20-S300-R  | 2.0      | l_arm_wr_p   | present_position, present_voltage, external_port_data_1, external_port_data_2, external_port_data_3, external_port_data_4
 dynamixel | /dev/ttyUSB2 | 15  | H54-100-S500-R | 2.0      | r_leg_hip_y  | present_position, present_voltage
 dynamixel | /dev/ttyUSB3 | 16  | H54-100-S500-R | 2.0      | l_leg_hip_y  | present_position, present_voltage
 dynamixel | /dev/ttyUSB2 | 17  | H54-200-S500-R | 2.0      | r_leg_hip_r  | present_position, present_voltage
