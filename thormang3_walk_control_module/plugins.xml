@@ -1,0 +1,7 @@
+<library path="lib/libthormang3_walk_control_module">
+  <class type="thormang3::PreviewWalkPlugin" base_class_type="vigir_walk_control::WalkControllerPlugin">
+    <description>
+      PreviewWalkPlugin: Plugin interfacing Robotis Preview Walk
+    </description>
+  </class>
+</library>

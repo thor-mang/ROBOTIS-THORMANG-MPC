@@ -1,0 +1,7 @@
+# WalkControllerPlugin
+preview_walk_plugin:
+  type_class: thormang3::PreviewWalkPlugin
+  type_class_package: thormang3_walk_control_module
+  base_class: vigir_walk_control::WalkControllerPlugin
+  base_class_package: vigir_walk_control
+

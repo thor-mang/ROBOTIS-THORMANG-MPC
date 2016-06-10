@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<launch>
+  <group ns="walk_control_module">
+    <rosparam file="$(find thor_mang_footstep_planning_plugins)/config/plugin_descriptions.yaml" command="load" />
+    <rosparam file="$(find thormang3_walk_control_module)/config/plugin_descriptions.yaml" command="load" />
+    <rosparam param="step_plan_msg_plugin">thor_mang_step_plan_msg_plugin</rosparam>
+    <rosparam param="walk_controller_plugin">preview_walk_plugin</rosparam>
+  </group>
+</launch>
+
