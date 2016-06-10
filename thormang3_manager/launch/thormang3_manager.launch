@@ -26,9 +26,8 @@
     <arg name="pinned" value="$(arg pinned)" />
   </include>
 
-  <!-- ros control interface -->
+  <!-- ros control module -->
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
-
   <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
   <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
     	 
@@ -40,5 +39,4 @@
 
   <!-- THORMANG3 Manager Node -->
   <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen" />
-
 </launch>

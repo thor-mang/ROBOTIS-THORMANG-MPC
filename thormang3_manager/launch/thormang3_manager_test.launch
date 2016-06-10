@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+
+<launch>
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="use_imu" default="false" />
+  <arg name="use_lidar" default="false" />
+  <arg name="gazebo" default="true" />
+  <arg name="robot_name" default="thormang3" />
+  <arg name="use_hands" default="false" />
+
+  <group ns="$(arg robot_name)">
+    <include file="$(find thormang3_manager)/launch/thormang3_manager.launch">
+      <arg name="robot_name" value="$(arg robot_name)" />
+      <arg name="use_hands" value="$(arg use_hands)" />
+      <arg name="gazebo" value="$(arg gazebo)" />
+      <arg name="use_imu"     if="$(arg gazebo)"      value="false" />
+      <arg name="use_imu"     unless="$(arg gazebo)"  value="$(arg use_imu)" />
+      <arg name="use_lidar"   if="$(arg gazebo)"      value="false" />
+      <arg name="use_lidar"   unless="$(arg gazebo)"  value="$(arg use_lidar)" />
+    </include>
+  </group>
+</launch>
