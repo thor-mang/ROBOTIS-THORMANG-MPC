@@ -2,8 +2,8 @@
 
 <launch>
   <group ns="joints">
-    <rosparam file="$(find thormang3_ros_control_module)/config/thor_mang_trajectory_controllers.yaml" command="load" />
     <rosparam file="$(find thormang3_ros_control_module)/config/ros_control_module_config.yaml" command="load" ns="ros_control_module" />
+    <rosparam file="$(find thormang3_ros_control_module)/config/thor_mang_trajectory_controllers.yaml" command="load" />
 
     <!-- load trajectory controllers -->
     <node name="trajectory_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
