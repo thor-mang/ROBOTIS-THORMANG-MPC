@@ -93,11 +93,11 @@ catkin_package(
 ###########
 
 set(HEADERS
-  include/${PROJECT_NAME}/ThorMang3ImuSensorModule.h
+  include/${PROJECT_NAME}/imu_sensor_module.h
 )
 
 set(SOURCES
-  src/ThorMang3ImuSensorModule.cpp
+  src/imu_sensor_module.cpp
 )
 
 
@@ -110,7 +110,7 @@ include_directories(
 )
 
 # Declare a C++ library
-add_library(thormang3_imu_module ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 ## Add cmake target dependencies of the library

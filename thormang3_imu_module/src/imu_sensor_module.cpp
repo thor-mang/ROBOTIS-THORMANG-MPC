@@ -1,4 +1,4 @@
-#include <thormang3_imu_module/ThorMang3ImuSensorModule.h>
+#include <thormang3_imu_module/imu_sensor_module.h>
 
 #include <tf/tf.h>
 #include <robotis_controller_msgs/StatusMsg.h>
@@ -7,7 +7,7 @@
 
 using namespace ROBOTIS;
 
-ThorMang3ImuSensor::ThorMang3ImuSensor()
+ImuSensor::ImuSensor()
   : control_cycle_msec_(8)
   , gazebo_robot_name("robotis")
   , gazebo_mode(false)
@@ -49,19 +49,19 @@ ThorMang3ImuSensor::ThorMang3ImuSensor()
   result["imu_angular_velocity_z_filtered"] = 0.0;
 }
 
-ThorMang3ImuSensor::~ThorMang3ImuSensor()
+ImuSensor::~ImuSensor()
 {
   queue_thread_.join();
 }
 
-void ThorMang3ImuSensor::Initialize(const int control_cycle_msec, Robot* robot)
+void ImuSensor::Initialize(const int control_cycle_msec, Robot* robot)
 {
   control_cycle_msec_ = control_cycle_msec;
 
-  queue_thread_       = boost::thread(boost::bind(&ThorMang3ImuSensor::QueueThread, this));
+  queue_thread_       = boost::thread(boost::bind(&ImuSensor::QueueThread, this));
 }
 
-void ThorMang3ImuSensor::PublishStatusMsg(unsigned int type, std::string msg)
+void ImuSensor::PublishStatusMsg(unsigned int type, std::string msg)
 {
   robotis_controller_msgs::StatusMsg _status;
   _status.header.stamp = ros::Time::now();
@@ -72,7 +72,7 @@ void ThorMang3ImuSensor::PublishStatusMsg(unsigned int type, std::string msg)
   imu_status_pub_.publish(_status);
 }
 
-void ThorMang3ImuSensor::ImuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag)
+void ImuSensor::ImuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag)
 {
   boost::mutex::scoped_lock lock(imu_sensor_mutex_);
 
@@ -96,29 +96,29 @@ void ThorMang3ImuSensor::ImuSensorCallback(const sensor_msgs::Imu::ConstPtr msg,
   result["imu_angular_velocity_z_" + tag] = msg->angular_velocity.z;
 }
 
-void ThorMang3ImuSensor::QueueThread()
+void ImuSensor::QueueThread()
 {
-  ros::NodeHandle     _ros_node;
+  ros::NodeHandle _nh;
   ros::CallbackQueue  _callback_queue;
 
-  _ros_node.setCallbackQueue(&_callback_queue);
+  _nh.setCallbackQueue(&_callback_queue);
 
   /* subscriber */
-  //ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &ThorMang3ImuSensor::FTSensorCalibrationCommandCallback, this);
-  ros::Subscriber imu_raw_sub = _ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode ? "/gazebo/" + gazebo_robot_name + "/sensor/imu" : "sensor/imu/raw",	1,
-                                                    boost::bind(&ThorMang3ImuSensor::ImuSensorCallback, this, _1, std::string("raw")));
-  ros::Subscriber imu_filtered_sub = _ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode ? "/gazebo/" + gazebo_robot_name + "/sensor/imu" : "sensor/imu/filtered",	1,
-                                                    boost::bind(&ThorMang3ImuSensor::ImuSensorCallback, this, _1, std::string("filtered")));
+  //ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &ImuSensor::FTSensorCalibrationCommandCallback, this);
+  ros::Subscriber imu_raw_sub = _nh.subscribe<sensor_msgs::Imu>(gazebo_mode ? "/gazebo/" + gazebo_robot_name + "/sensor/imu" : "sensor/imu/raw",	1,
+                                                    boost::bind(&ImuSensor::ImuSensorCallback, this, _1, std::string("raw")));
+  ros::Subscriber imu_filtered_sub = _nh.subscribe<sensor_msgs::Imu>(gazebo_mode ? "/gazebo/" + gazebo_robot_name + "/sensor/imu" : "sensor/imu/filtered",	1,
+                                                    boost::bind(&ImuSensor::ImuSensorCallback, this, _1, std::string("filtered")));
 
   /* publisher */
-  imu_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
+  imu_status_pub_	= _nh.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
-  while(_ros_node.ok())
+  while(_nh.ok())
     _callback_queue.callAvailable(duration);
 }
 
-void ThorMang3ImuSensor::Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, Sensor*> sensors)
+void ImuSensor::Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, Sensor*> sensors)
 {
   // nothing to do
 }

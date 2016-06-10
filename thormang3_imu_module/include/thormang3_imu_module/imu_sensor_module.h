@@ -42,11 +42,11 @@
 
 namespace ROBOTIS
 {
-class ThorMang3ImuSensor : public SensorModule, public Singleton<ThorMang3ImuSensor>
+class ImuSensor : public SensorModule, public Singleton<ImuSensor>
 {
 public:
-  ThorMang3ImuSensor();
-  ~ThorMang3ImuSensor();
+  ImuSensor();
+  ~ImuSensor();
 
   /* ROS Topic Callback Functions */
   void ImuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag);
