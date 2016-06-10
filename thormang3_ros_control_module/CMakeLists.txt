@@ -106,11 +106,11 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Specify additional locations of header files
 set(HEADERS
-    include/${PROJECT_NAME}/ros_control_module.h
+  include/${PROJECT_NAME}/ros_control_module.h
 )
 
 set(SOURCES
-    src/ros_control_module.cpp
+  src/ros_control_module.cpp
 )
 
 ## Declare a cpp library
