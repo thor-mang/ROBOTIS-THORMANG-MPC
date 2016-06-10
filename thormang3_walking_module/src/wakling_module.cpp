@@ -1,8 +1,38 @@
+/*******************************************************************************
+ * Copyright (c) 2016, ROBOTIS CO., LTD.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of ROBOTIS nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+
 /*
- * TestMotionModule.cpp
+ * wakling_module.cpp
  *
  *  Created on: 2016. 1. 25.
- *      Author: zerom
+ *      Author: Jay Song
  */
 
 #include <stdio.h>
@@ -109,12 +139,12 @@ void WalkingMotionModule::initialize(const int control_cycle_msec, robotis_frame
   control_cycle_msec_ = control_cycle_msec;
 
   RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
-  online_walking->SetInitialPose(0, -0.093, -0.63, 0, 0, 0,
+  online_walking->setInitialPose(0, -0.093, -0.63, 0, 0, 0,
                                  0,  0.093, -0.63, 0, 0, 0,
                                  0,      0,     0, 0, 0, 0);
 
-  online_walking->SetFTScaleFactor(1.0, 1.0);
-  online_walking->SetInitForceTorque(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  online_walking->setFTScaleFactor(1.0, 1.0);
+  online_walking->setInitForceTorque(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
   online_walking->WALK_STABILIZER_GAIN_RATIO = 0;
   online_walking->IMU_GYRO_GAIN_RATIO = 0.0;//7.31*0.01;
@@ -174,19 +204,19 @@ void WalkingMotionModule::initialize(const int control_cycle_msec, robotis_frame
   desired_matrix_g_to_lfoot_ = online_walking->matGtoLF;
   publish_mutex_.unlock();
 
-  result_["r_leg_hip_y"]->goal_position_ = online_walking->m_OutAngleRad[0];
-  result_["r_leg_hip_r"]->goal_position_ = online_walking->m_OutAngleRad[1];
-  result_["r_leg_hip_p"]->goal_position_ = online_walking->m_OutAngleRad[2];
-  result_["r_leg_kn_p"]->goal_position_  = online_walking->m_OutAngleRad[3];
-  result_["r_leg_an_p"]->goal_position_  = online_walking->m_OutAngleRad[4];
-  result_["r_leg_an_r"]->goal_position_  = online_walking->m_OutAngleRad[5];
+  result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
+  result_["r_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[1];
+  result_["r_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[2];
+  result_["r_leg_kn_p"]->goal_position_  = online_walking->out_angle_rad_[3];
+  result_["r_leg_an_p"]->goal_position_  = online_walking->out_angle_rad_[4];
+  result_["r_leg_an_r"]->goal_position_  = online_walking->out_angle_rad_[5];
 
-  result_["l_leg_hip_y"]->goal_position_ = online_walking->m_OutAngleRad[6];
-  result_["l_leg_hip_r"]->goal_position_ = online_walking->m_OutAngleRad[7];
-  result_["l_leg_hip_p"]->goal_position_ = online_walking->m_OutAngleRad[8];
-  result_["l_leg_kn_p" ]->goal_position_ = online_walking->m_OutAngleRad[9];
-  result_["l_leg_an_p" ]->goal_position_ = online_walking->m_OutAngleRad[10];
-  result_["l_leg_an_r" ]->goal_position_ = online_walking->m_OutAngleRad[11];
+  result_["l_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[6];
+  result_["l_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[7];
+  result_["l_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[8];
+  result_["l_leg_kn_p" ]->goal_position_ = online_walking->out_angle_rad_[9];
+  result_["l_leg_an_p" ]->goal_position_ = online_walking->out_angle_rad_[10];
+  result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
 
   online_walking->start();
   online_walking->process();
@@ -395,7 +425,7 @@ bool WalkingMotionModule::getReferenceStepDataServiceCallback(thormang3_walking_
 
   StepData refStepData;
 
-  online_walking->GetReferenceStepDatafotAddition(&refStepData);
+  online_walking->getReferenceStepDatafotAddition(&refStepData);
 
   convertStepDataToStepDataMsg(refStepData, res.reference_step_data);
 
@@ -425,7 +455,7 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
   StepData step_data, ref_step_data;
   std::vector<StepData> req_step_data_array;
 
-  online_walking->GetReferenceStepDatafotAddition(&ref_step_data);
+  online_walking->getReferenceStepDatafotAddition(&ref_step_data);
 
   for(int i = 0; i < req.step_data_array.size(); i++)
   {
@@ -457,16 +487,17 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
 
 
   if(req.remove_existing_step_data == true) {
-    int exist_num_of_step_data = online_walking->GetNumofRemainingUnreservedStepData();
+    int exist_num_of_step_data = online_walking->getNumofRemainingUnreservedStepData();
     if(exist_num_of_step_data != 0)
       for(int remove_count  = 0; remove_count < exist_num_of_step_data; remove_count++)
-        online_walking->EraseLastStepData();
+        online_walking->eraseLastStepData();
   }
 
   for(unsigned int i = 0; i < req_step_data_array.size() ; i++)
-    online_walking->AddStepData(req_step_data_array[i]);
+    online_walking->addStepData(req_step_data_array[i]);
 
-  if( req.auto_start == true)    {
+  if( req.auto_start == true)
+  {
     online_walking->start();
   }
 
@@ -487,7 +518,7 @@ bool WalkingMotionModule::startWalkingServiceCallback(thormang3_walking_module_m
     res.result |= thormang3_walking_module_msgs::StartWalking::Response::ROBOT_IS_WALKING_NOW;
   }
 
-  if(prev_walking->GetNumofRemainingUnreservedStepData() == 0){
+  if(prev_walking->getNumofRemainingUnreservedStepData() == 0){
     res.result |= thormang3_walking_module_msgs::StartWalking::Response::NO_STEP_DATA;
   }
 
@@ -649,10 +680,10 @@ bool WalkingMotionModule::removeExistingStepDataServiceCallback(thormang3_walkin
   if(isRunning())
     res.result |= thormang3_walking_module_msgs::RemoveExistingStepData::Response::ROBOT_IS_WALKING_NOW;
   else {
-    int exist_num_of_step_data = online_walking->GetNumofRemainingUnreservedStepData();
+    int exist_num_of_step_data = online_walking->getNumofRemainingUnreservedStepData();
     if(exist_num_of_step_data != 0)
       for(int remove_count  = 0; remove_count < exist_num_of_step_data; remove_count++)
-        online_walking->EraseLastStepData();
+        online_walking->eraseLastStepData();
   }
   return true;
 }
@@ -673,8 +704,8 @@ void WalkingMotionModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   double pitch = atan2(-imu_mat.coeff(2,0), sqrt(robotis_framework::powDI(imu_mat.coeff(2,1), 2) + robotis_framework::powDI(imu_mat.coeff(2,2), 2)));
   double yaw   = atan2( imu_mat.coeff(1,0), imu_mat.coeff(0,0));
 
-  RobotisOnlineWalking::getInstance()->current_imu_roll_rad = roll;
-  RobotisOnlineWalking::getInstance()->current_imu_pitch_rad = pitch;
+  RobotisOnlineWalking::getInstance()->current_imu_roll_rad_ = roll;
+  RobotisOnlineWalking::getInstance()->current_imu_pitch_rad_ = pitch;
 }
 
 void WalkingMotionModule::onModuleEnable()
@@ -799,19 +830,19 @@ void WalkingMotionModule::process(std::map<std::string, robotis_framework::Dynam
     }
   }
 
-  online_walking->current_right_fx_N  = r_foot_fx_N_;
-  online_walking->current_right_fy_N  = r_foot_fy_N_;
-  online_walking->current_right_fz_N  = r_foot_fz_N_;
-  online_walking->current_right_Tx_Nm = r_foot_Tx_Nm_;
-  online_walking->current_right_Ty_Nm = r_foot_Ty_Nm_;
-  online_walking->current_right_Tz_Nm = r_foot_Tz_Nm_;
+  online_walking->current_right_fx_N_  = r_foot_fx_N_;
+  online_walking->current_right_fy_N_  = r_foot_fy_N_;
+  online_walking->current_right_fz_N_  = r_foot_fz_N_;
+  online_walking->current_right_tx_Nm_ = r_foot_Tx_Nm_;
+  online_walking->current_right_ty_Nm_ = r_foot_Ty_Nm_;
+  online_walking->current_right_tz_Nm_ = r_foot_Tz_Nm_;
 
-  online_walking->current_left_fx_N  = l_foot_fx_N_;
-  online_walking->current_left_fy_N  = l_foot_fy_N_;
-  online_walking->current_left_fz_N  = l_foot_fz_N_;
-  online_walking->current_left_Tx_Nm = l_foot_Tx_Nm_;
-  online_walking->current_left_Ty_Nm = l_foot_Ty_Nm_;
-  online_walking->current_left_Tz_Nm = l_foot_Tz_Nm_;
+  online_walking->current_left_fx_N_  = l_foot_fx_N_;
+  online_walking->current_left_fy_N_  = l_foot_fy_N_;
+  online_walking->current_left_fz_N_  = l_foot_fz_N_;
+  online_walking->current_left_tx_Nm_ = l_foot_Tx_Nm_;
+  online_walking->current_left_ty_Nm_ = l_foot_Ty_Nm_;
+  online_walking->current_left_tz_Nm_ = l_foot_Tz_Nm_;
 
 
   online_walking->process();
@@ -824,19 +855,19 @@ void WalkingMotionModule::process(std::map<std::string, robotis_framework::Dynam
 
   publishRobotPose();
 
-  result_["r_leg_hip_y"]->goal_position_ = online_walking->m_OutAngleRad[0];
-  result_["r_leg_hip_r"]->goal_position_ = online_walking->m_OutAngleRad[1];
-  result_["r_leg_hip_p"]->goal_position_ = online_walking->m_OutAngleRad[2];
-  result_["r_leg_kn_p" ]->goal_position_ = online_walking->m_OutAngleRad[3];
-  result_["r_leg_an_p" ]->goal_position_ = online_walking->m_OutAngleRad[4];
-  result_["r_leg_an_r" ]->goal_position_ = online_walking->m_OutAngleRad[5];
+  result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
+  result_["r_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[1];
+  result_["r_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[2];
+  result_["r_leg_kn_p" ]->goal_position_ = online_walking->out_angle_rad_[3];
+  result_["r_leg_an_p" ]->goal_position_ = online_walking->out_angle_rad_[4];
+  result_["r_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[5];
 
-  result_["l_leg_hip_y"]->goal_position_ = online_walking->m_OutAngleRad[6];
-  result_["l_leg_hip_r"]->goal_position_ = online_walking->m_OutAngleRad[7];
-  result_["l_leg_hip_p"]->goal_position_ = online_walking->m_OutAngleRad[8];
-  result_["l_leg_kn_p" ]->goal_position_ = online_walking->m_OutAngleRad[9];
-  result_["l_leg_an_p" ]->goal_position_ = online_walking->m_OutAngleRad[10];
-  result_["l_leg_an_r" ]->goal_position_ = online_walking->m_OutAngleRad[11];
+  result_["l_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[6];
+  result_["l_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[7];
+  result_["l_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[8];
+  result_["l_leg_kn_p" ]->goal_position_ = online_walking->out_angle_rad_[9];
+  result_["l_leg_an_p" ]->goal_position_ = online_walking->out_angle_rad_[10];
+  result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
 
   present_running = isRunning();
   if(previous_running_ != present_running) {
