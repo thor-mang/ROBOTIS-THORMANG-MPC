@@ -15,15 +15,13 @@ PreviewWalkPlugin::~PreviewWalkPlugin()
 
 void PreviewWalkPlugin::initWalk()
 {
-  WalkControllerPlugin::initWalk();
-
   // init feedback
   msgs::ExecuteStepPlanFeedback feedback;
   feedback.header.stamp = ros::Time::now();
   feedback.last_performed_step_index = -2;
   feedback.currently_executing_step_index =-1;
   feedback.first_changeable_step_index = 0;
-  setFeedback(feedback);
+  setFeedbackState(feedback);
 
   next_step_needed_time_ = ros::Time::now();
 
@@ -40,21 +38,21 @@ void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
   // fake succesful execution of single step
   if (next_step_needed_time_ <= ros::Time::now())
   {
-    msgs::ExecuteStepPlanFeedback feedback = getFeedback();
+    msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
 
     feedback.header.stamp = ros::Time::now();
     feedback.last_performed_step_index++;
 
     // check for succesful execution of queue
-    if (walk_controller_queue_->lastStepIndex() == feedback.last_performed_step_index)
+    if (step_queue_->lastStepIndex() == feedback.last_performed_step_index)
     {
       ROS_INFO("[PreviewWalkPlugin] Fake execution finished.");
 
       feedback.currently_executing_step_index = -1;
       feedback.first_changeable_step_index = -1;
-      setFeedback(feedback);
+      setFeedbackState(feedback);
 
-      walk_controller_queue_->reset();
+      step_queue_->reset();
       updateQueueFeedback();
 
       setState(FINISHED);
@@ -64,7 +62,7 @@ void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
     {
       feedback.currently_executing_step_index++;
       feedback.first_changeable_step_index++;
-      setFeedback(feedback);
+      setFeedbackState(feedback);
 
       setNextStepIndexNeeded(feedback.currently_executing_step_index);
     }

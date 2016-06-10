@@ -30,6 +30,9 @@
     <arg name="pinned" value="$(arg pinned)" />
   </include>
 
+  <!-- walk control module -->
+  <include file="$(find thormang3_walk_control_module)/launch/load_walk_controller.launch" />
+
   <!-- ros control module -->
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
            	 

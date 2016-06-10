@@ -37,7 +37,7 @@
 #include <ros/callback_queue.h>
 
 // robotis
-#include <thormang3_walking_module/WalkingModule.h>
+#include <thormang3_walking_module/walking_module.h>
 
 // vigir walk control
 #include <vigir_walk_control/walk_controller.h>
@@ -46,28 +46,26 @@
 
 namespace thormang3
 {
-using namespace ROBOTIS;
-
 class WalkControlModule
   : public WalkingMotionModule
-  , private Singleton<WalkControlModule>
+  , private robotis_framework::Singleton<WalkControlModule>
 {
 public:
   WalkControlModule();
 
   ~WalkControlModule();
 
-  static WalkControlModule* GetInstance()
+  static WalkControlModule* getInstance()
   {
-     Singleton<WalkControlModule>::GetInstance();
+     Singleton<WalkControlModule>::getInstance();
   }
 
-  void Initialize(const int control_cycle_msec, Robot* robot) override;
+  void initialize(const int control_cycle_msec, robotis_framework::Robot* robot) override;
 
-  void Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, double> sensors) override;
+  void process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors) override;
 
 private:
-  void QueueThread();
+  void queueThread();
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
