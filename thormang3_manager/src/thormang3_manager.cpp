@@ -18,6 +18,7 @@
 #include "thormang3_manipulation_module/ManipulationModule.h"
 #include "thormang3_walking_module/WalkingModule.h"
 #include "thormang3_ros_control_module/ros_control_module.h"
+#include "thormang3_walk_control_module/walk_control_module.h"
 
 
 using namespace ROBOTIS;
@@ -78,7 +79,8 @@ int main(int argc, char **argv)
     _controller->AddMotionModule((MotionModule*)BaseModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)ManipulationModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)HeadControlModule::GetInstance());
-    _controller->AddMotionModule((MotionModule*)WalkingMotionModule::GetInstance());
+    //_controller->AddMotionModule((MotionModule*)WalkingMotionModule::GetInstance()); // Encaspulated by WalkControlModule
+    _controller->AddMotionModule((MotionModule*)thormang3::WalkControlModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)RosControlModule::GetInstance());
 
     _controller->StartTimer();

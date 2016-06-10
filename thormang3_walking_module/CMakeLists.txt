@@ -20,9 +20,8 @@ find_package(Eigen REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-#  CATKIN_DEPENDS walking_module_msgs
+  CATKIN_DEPENDS robotis_device robotis_controller_msgs robotis_math roscpp std_msgs sensor_msgs geometry_msgs cmake_modules eigen_conversions thormang3_kinematics_dynamics thormang3_walking_module_msgs
   LIBRARIES thormang3_walking_module
-#  CATKIN_DEPENDS robotis_device roscpp std_msgs
 #  DEPENDS system_lib
 )
 
