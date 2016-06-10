@@ -92,7 +92,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_ros_control_module
-  CATKIN_DEPENDS roscpp rospy actionlib_msgs actionlib std_msgs hardware_interface controller_manager robotis_device 
+  CATKIN_DEPENDS roscpp rospy actionlib_msgs actionlib std_msgs hardware_interface controller_manager robotis_device
 #  DEPENDS system_lib
 )
 
@@ -106,11 +106,11 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Specify additional locations of header files
 set(HEADERS
-    include/${PROJECT_NAME}/ros_control_module.h
+  include/${PROJECT_NAME}/ros_control_module.h
 )
 
 set(SOURCES
-    src/ros_control_module.cpp
+  src/ros_control_module.cpp
 )
 
 ## Declare a cpp library

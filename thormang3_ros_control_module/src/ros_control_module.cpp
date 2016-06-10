@@ -19,6 +19,7 @@ RosControlModule::~RosControlModule()
   for (auto& kv : result)
     delete kv.second;
 
+  controller_manager_thread_.join();
   queue_thread_.join();
 }
 
@@ -85,6 +86,7 @@ void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
   /** initialize joints */
 
   // read joints from ros param server
+  /// TODO: Check available joints with 'robot' parameter
   result.clear();
   XmlRpc::XmlRpcValue joints = nh.param("joints", XmlRpc::XmlRpcValue());
   if (joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
@@ -148,12 +150,12 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
   {
     const std::string& joint_name = state_iter->first;
 
-    const Dynamixel* dynamixel = dxls[joint_name];
-    if (dynamixel)
+    const Dynamixel* dxl = dxls[joint_name];
+    if (dxl)
     {
-      pos_[joint_name] = dynamixel->dxl_state->present_position;
-      vel_[joint_name] = dynamixel->dxl_state->present_velocity;
-      eff_[joint_name] = dynamixel->dxl_state->present_current;
+      pos_[joint_name] = dxl->dxl_state->present_position;
+      vel_[joint_name] = dxl->dxl_state->present_velocity;
+      eff_[joint_name] = dxl->dxl_state->present_current;
     }
     else
       ROS_WARN_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
