@@ -1,4 +1,4 @@
-#include "thormang3_wrist_ft_module/ThorMang3WristForceTorqueSensorModule.h"
+#include "thormang3_wrist_ft_module/wrist_ft_sensor_module.h"
 
 #define EXT_PORT_DATA_1 "external_port_data_1"
 #define EXT_PORT_DATA_2 "external_port_data_2"
@@ -7,7 +7,7 @@
 
 using namespace ROBOTIS;
 
-ThorMang3WristForceTorqueSensor::ThorMang3WristForceTorqueSensor()
+WristForceTorqueSensor::WristForceTorqueSensor()
   : control_cycle_msec_(8)
   , gazebo_robot_name("robotis")
   , gazebo_mode(false)
@@ -45,24 +45,24 @@ ThorMang3WristForceTorqueSensor::ThorMang3WristForceTorqueSensor()
   ft_get_count_	= 0;
 }
 
-ThorMang3WristForceTorqueSensor::~ThorMang3WristForceTorqueSensor()
+WristForceTorqueSensor::~WristForceTorqueSensor()
 {
   queue_thread_.join();
 }
 
-void ThorMang3WristForceTorqueSensor::Initialize(const int control_cycle_msec, Robot *robot)
+void WristForceTorqueSensor::Initialize(const int control_cycle_msec, Robot *robot)
 {
   control_cycle_msec_ = control_cycle_msec;
 
   ft_period_		 = 2 * 1000/ control_cycle_msec_;
   ft_get_count_ = ft_period_;
 
-  queue_thread_       = boost::thread(boost::bind(&ThorMang3WristForceTorqueSensor::QueueThread, this));
+  queue_thread_       = boost::thread(boost::bind(&WristForceTorqueSensor::QueueThread, this));
 
   WristForceTorqueSensorInitialize();
 }
 
-void ThorMang3WristForceTorqueSensor::WristForceTorqueSensorInitialize()
+void WristForceTorqueSensor::WristForceTorqueSensorInitialize()
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
@@ -77,7 +77,7 @@ void ThorMang3WristForceTorqueSensor::WristForceTorqueSensorInitialize()
 }
 
 
-void 	ThorMang3WristForceTorqueSensor::FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg)
+void 	WristForceTorqueSensor::FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg)
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
@@ -99,7 +99,7 @@ void 	ThorMang3WristForceTorqueSensor::FTSensorCalibrationCommandCallback(const 
     ROS_INFO("previous task is alive");
 }
 
-void ThorMang3WristForceTorqueSensor::PublishStatusMsg(unsigned int type, std::string msg)
+void WristForceTorqueSensor::PublishStatusMsg(unsigned int type, std::string msg)
 {
   robotis_controller_msgs::StatusMsg _status;
   _status.header.stamp = ros::Time::now();
@@ -110,7 +110,7 @@ void ThorMang3WristForceTorqueSensor::PublishStatusMsg(unsigned int type, std::s
   thormang3_wrist_ft_status_pub_.publish(_status);
 }
 
-void ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg)
+void WristForceTorqueSensor::GazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg)
 {
   if (!gazebo_mode)
     return;
@@ -132,32 +132,32 @@ void ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback(const geometry_msgs
   }
   else
   {
-    ROS_ERROR_ONCE_NAMED(msg->header.frame_id.c_str(), "[ThorMang3WristForceTorqueSensor] Unknown ft sensor callback with frame_id '%s'.", msg->header.frame_id.c_str());
+    ROS_ERROR_ONCE_NAMED(msg->header.frame_id.c_str(), "[WristForceTorqueSensor] Unknown ft sensor callback with frame_id '%s'.", msg->header.frame_id.c_str());
     return;
   }
 }
 
-void ThorMang3WristForceTorqueSensor::QueueThread()
+void WristForceTorqueSensor::QueueThread()
 {
-  ros::NodeHandle     _ros_node;
-  ros::CallbackQueue  _callback_queue;
+  ros::NodeHandle _nh;
+  ros::CallbackQueue _callback_queue;
 
-  _ros_node.setCallbackQueue(&_callback_queue);
+  _nh.setCallbackQueue(&_callback_queue);
 
   /* subscriber */
-  ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &ThorMang3WristForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
-  ros::Subscriber ft_left_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/left_wrist",	1, &ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback, this);
-  ros::Subscriber ft_right_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/right_wrist",	1, &ThorMang3WristForceTorqueSensor::GazeboFTSensorCallback, this);
+  ros::Subscriber ft_calib_command_sub	= _nh.subscribe("robotis/wrist_ft/ft_calib_command",	1, &WristForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
+  ros::Subscriber ft_left_wrist_sub	= _nh.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/left_wrist",	1, &WristForceTorqueSensor::GazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_wrist_sub	= _nh.subscribe("/gazebo/" + gazebo_robot_name + "/sensor/ft/right_wrist",	1, &WristForceTorqueSensor::GazeboFTSensorCallback, this);
 
   /* publisher */
-  thormang3_wrist_ft_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
+  thormang3_wrist_ft_status_pub_	= _nh.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
-  while(_ros_node.ok())
+  while(_nh.ok())
     _callback_queue.callAvailable(duration);
 }
 
-void ThorMang3WristForceTorqueSensor::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors)
+void WristForceTorqueSensor::Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors)
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 

@@ -53,7 +53,7 @@
 namespace ROBOTIS
 {
 
-class ThorMang3WristForceTorqueSensor : public SensorModule, public Singleton<ThorMang3WristForceTorqueSensor>
+class WristForceTorqueSensor : public SensorModule, public Singleton<WristForceTorqueSensor>
 {
 enum
 {
@@ -64,8 +64,8 @@ enum
 };
 
 public:
-  ThorMang3WristForceTorqueSensor();
-  ~ThorMang3WristForceTorqueSensor();
+  WristForceTorqueSensor();
+  ~WristForceTorqueSensor();
 
   /* ROS Topic Callback Functions */
   void  GazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg);
