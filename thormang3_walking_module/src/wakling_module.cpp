@@ -42,7 +42,8 @@
 
 using namespace thormang3;
 
-class WalkingStatusMSG {
+class WalkingStatusMSG
+{
 public:
   static const std::string FAILED_TO_ADD_STEP_DATA_MSG;
   static const std::string BALANCE_PARAM_SETTING_START_MSG;
@@ -438,14 +439,16 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
   RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
   res.result = thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR;
 
-  if(enable_ == false) {
+  if(enable_ == false)
+  {
     res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::NOT_ENABLED_WALKING_MODULE;
     std::string status_msg = WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG;
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
     return true;
   }
 
-  if(online_walking->isRunning() == true) {
+  if(online_walking->isRunning() == true)
+  {
     res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::ROBOT_IS_WALKING_NOW;
     std::string status_msg  = WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG;
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
@@ -461,22 +464,28 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
   {
     res.result |= convertStepDataMsgToStepData(req.step_data_array[i], step_data);
 
-    if(step_data.time_data.abs_step_time <= 0) {
+    if(step_data.time_data.abs_step_time <= 0)
+    {
       res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
     }
 
-    if(i != 0) {
-      if(step_data.time_data.abs_step_time <= req_step_data_array[req_step_data_array.size() - 1].time_data.abs_step_time) {
+    if(i != 0)
+    {
+      if(step_data.time_data.abs_step_time <= req_step_data_array[req_step_data_array.size() - 1].time_data.abs_step_time)
+      {
         res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
       }
     }
-    else {
-      if(step_data.time_data.abs_step_time <= ref_step_data.time_data.abs_step_time) {
+    else
+    {
+      if(step_data.time_data.abs_step_time <= ref_step_data.time_data.abs_step_time)
+      {
         res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::PROBLEM_IN_TIME_DATA;
       }
     }
 
-    if(res.result != thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR) {
+    if(res.result != thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR)
+    {
       std::string status_msg = WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
       return true;
@@ -486,7 +495,8 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
   }
 
 
-  if(req.remove_existing_step_data == true) {
+  if(req.remove_existing_step_data == true)
+  {
     int exist_num_of_step_data = online_walking->getNumofRemainingUnreservedStepData();
     if(exist_num_of_step_data != 0)
       for(int remove_count  = 0; remove_count < exist_num_of_step_data; remove_count++)
@@ -510,19 +520,23 @@ bool WalkingMotionModule::startWalkingServiceCallback(thormang3_walking_module_m
   RobotisOnlineWalking *prev_walking = RobotisOnlineWalking::getInstance();
   res.result = thormang3_walking_module_msgs::StartWalking::Response::NO_ERROR;
 
-  if(enable_ == false) {
+  if(enable_ == false)
+  {
     res.result |= thormang3_walking_module_msgs::StartWalking::Response::NOT_ENABLED_WALKING_MODULE;
   }
 
-  if(prev_walking->isRunning() == true){
+  if(prev_walking->isRunning() == true)
+  {
     res.result |= thormang3_walking_module_msgs::StartWalking::Response::ROBOT_IS_WALKING_NOW;
   }
 
-  if(prev_walking->getNumofRemainingUnreservedStepData() == 0){
+  if(prev_walking->getNumofRemainingUnreservedStepData() == 0)
+  {
     res.result |= thormang3_walking_module_msgs::StartWalking::Response::NO_STEP_DATA;
   }
 
-  if(res.result == thormang3_walking_module_msgs::StartWalking::Response::NO_ERROR) {
+  if(res.result == thormang3_walking_module_msgs::StartWalking::Response::NO_ERROR)
+  {
     prev_walking->start();
   }
 
@@ -552,7 +566,8 @@ bool WalkingMotionModule::setBalanceParamServiceCallback(thormang3_walking_modul
   if( enable_ == false)
     res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::NOT_ENABLED_WALKING_MODULE;
 
-  if( balance_update_with_loop_ == true)    {
+  if( balance_update_with_loop_ == true)
+  {
     res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::PREV_REQUEST_IS_NOT_FINISHED;
   }
 
@@ -576,7 +591,8 @@ bool WalkingMotionModule::setBalanceParamServiceCallback(thormang3_walking_modul
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
       return true;
     }
-    else {
+    else
+    {
       balance_update_duration_ = req.updating_duration;
     }
 
@@ -678,8 +694,11 @@ bool WalkingMotionModule::removeExistingStepDataServiceCallback(thormang3_walkin
   res.result = thormang3_walking_module_msgs::RemoveExistingStepData::Response::NO_ERROR;
 
   if(isRunning())
+  {
     res.result |= thormang3_walking_module_msgs::RemoveExistingStepData::Response::ROBOT_IS_WALKING_NOW;
-  else {
+  }
+  else
+  {
     int exist_num_of_step_data = online_walking->getNumofRemainingUnreservedStepData();
     if(exist_num_of_step_data != 0)
       for(int remove_count  = 0; remove_count < exist_num_of_step_data; remove_count++)
@@ -785,14 +804,16 @@ void WalkingMotionModule::process(std::map<std::string, robotis_framework::Dynam
   if(balance_update_with_loop_ == true)
   {
     balance_update_sys_time_ += control_cycle_msec_ * 0.001;
-    if(balance_update_sys_time_ >= balance_update_duration_ ) {
+    if(balance_update_sys_time_ >= balance_update_duration_ )
+    {
       balance_update_sys_time_ = balance_update_duration_;
       balance_update_with_loop_ = false;
       setBalanceParam(desired_balance_param_);
       std::string _status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISH_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, _status_msg);
     }
-    else {
+    else
+    {
       double current_update_gain =  balance_update_polynomial_coeff_.coeff(0,0) * robotis_framework::powDI(balance_update_sys_time_ , 5)
       + balance_update_polynomial_coeff_.coeff(1,0) * robotis_framework::powDI(balance_update_sys_time_ , 4)
       + balance_update_polynomial_coeff_.coeff(2,0) * robotis_framework::powDI(balance_update_sys_time_ , 3)
@@ -870,14 +891,17 @@ void WalkingMotionModule::process(std::map<std::string, robotis_framework::Dynam
   result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
 
   present_running = isRunning();
-  if(previous_running_ != present_running) {
-    if(present_running == true) {
-      std::string _status_msg = WalkingStatusMSG::WALKING_START_MSG;
-      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, _status_msg);
+  if(previous_running_ != present_running)
+  {
+    if(present_running == true)
+    {
+      std::string status_msg = WalkingStatusMSG::WALKING_START_MSG;
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
     }
-    else {
-      std::string _status_msg = WalkingStatusMSG::WALKING_FINISH_MSG;
-      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, _status_msg);
+    else
+    {
+      std::string status_msg = WalkingStatusMSG::WALKING_FINISH_MSG;
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
     }
   }
   previous_running_ = present_running;
