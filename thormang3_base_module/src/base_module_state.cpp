@@ -28,44 +28,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#ifndef THORMANG3_BASE_MODULE_ROBOTIS_STATE_H_
-#define THORMANG3_BASE_MODULE_ROBOTIS_STATE_H_
+/*
+ * base_module_state.cpp
+ *
+ *  Created on: Jan 11, 2016
+ *      Author: sch
+ */
 
-#include "robotis_math/robotis_math.h"
-#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
+#include "thormang3_base_module/base_module_state.h"
 
-namespace thormang3
+using namespace thormang3;
+
+BaseModuleState::BaseModuleState()
 {
+  is_moving_ = false;
 
-class RobotisState
-{
-public:
-  RobotisState();
-  ~RobotisState();
+  cnt_ = 0;
 
-  bool is_moving_;
+  mov_time_ = 1.0;
+  smp_time_ = 0.008;
+  all_time_steps_   = int(mov_time_ / smp_time_) + 1;
 
-  int cnt_; // counter number
+  calc_joint_tra_   = Eigen::MatrixXd::Zero(all_time_steps_, MAX_JOINT_ID + 1);
 
-  double mov_time_; // movement time
-  double smp_time_; // sampling time
+  joint_ini_pose_   = Eigen::MatrixXd::Zero( MAX_JOINT_ID + 1, 1);
+  joint_pose_       = Eigen::MatrixXd::Zero( MAX_JOINT_ID + 1, 1);
 
-  int all_time_steps_; // all time steps of movement time
+  via_num_ = 1;
 
-  Eigen::MatrixXd calc_joint_tra_; // calculated joint trajectory
+  joint_via_pose_   = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
+  joint_via_dpose_  = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
+  joint_via_ddpose_ = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
 
-  Eigen::MatrixXd joint_ini_pose_;
-  Eigen::MatrixXd joint_pose_;
-
-  int via_num_;
-
-  Eigen::MatrixXd joint_via_pose_;
-  Eigen::MatrixXd joint_via_dpose_;
-  Eigen::MatrixXd joint_via_ddpose_;
-
-  Eigen::MatrixXd via_time_;
-};
-
+  via_time_         = Eigen::MatrixXd::Zero(via_num_, 1);
 }
 
-#endif /* THORMANG3_BASE_MODULE_ROBOTIS_STATE_H_ */
+BaseModuleState::~BaseModuleState()
+{
+}
+

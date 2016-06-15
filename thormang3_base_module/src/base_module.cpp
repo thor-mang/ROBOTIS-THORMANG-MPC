@@ -137,7 +137,7 @@ BaseModule::BaseModule()
   joint_name_to_id_["r_arm_grip"]   = 31;
   joint_name_to_id_["l_arm_grip"]   = 30;
 
-  robotis_state_  = new RobotisState();
+  base_module_state_  = new BaseModuleState();
   joint_state_    = new BaseJointState();
 }
 
@@ -175,30 +175,30 @@ void BaseModule::parseIniPoseData(const std::string &path)
   double mov_time;
   mov_time = doc["mov_time"].as<double>();
 
-  robotis_state_->mov_time_ = mov_time;
+  base_module_state_->mov_time_ = mov_time;
 
   // parse via-point number
   int via_num;
   via_num = doc["via_num"].as<int>();
 
-  robotis_state_->via_num_ = via_num;
+  base_module_state_->via_num_ = via_num;
 
   // parse via-point time
   std::vector<double> via_time;
   via_time = doc["via_time"].as<std::vector<double> >();
 
-  robotis_state_->via_time_.resize(via_num, 1);
+  base_module_state_->via_time_.resize(via_num, 1);
   for (int num = 0; num < via_num; num++)
-    robotis_state_->via_time_.coeffRef(num, 0) = via_time[num];
+    base_module_state_->via_time_.coeffRef(num, 0) = via_time[num];
 
   // parse via-point pose
-  robotis_state_->joint_via_pose_.resize(via_num, MAX_JOINT_ID + 1);
-  robotis_state_->joint_via_dpose_.resize(via_num, MAX_JOINT_ID + 1);
-  robotis_state_->joint_via_ddpose_.resize(via_num, MAX_JOINT_ID + 1);
+  base_module_state_->joint_via_pose_.resize(via_num, MAX_JOINT_ID + 1);
+  base_module_state_->joint_via_dpose_.resize(via_num, MAX_JOINT_ID + 1);
+  base_module_state_->joint_via_ddpose_.resize(via_num, MAX_JOINT_ID + 1);
 
-  robotis_state_->joint_via_pose_.fill(0.0);
-  robotis_state_->joint_via_dpose_.fill(0.0);
-  robotis_state_->joint_via_ddpose_.fill(0.0);
+  base_module_state_->joint_via_pose_.fill(0.0);
+  base_module_state_->joint_via_dpose_.fill(0.0);
+  base_module_state_->joint_via_ddpose_.fill(0.0);
 
   YAML::Node via_pose_node = doc["via_pose"];
   for (YAML::iterator it = via_pose_node.begin(); it != via_pose_node.end(); ++it)
@@ -210,7 +210,7 @@ void BaseModule::parseIniPoseData(const std::string &path)
     value = it->second.as<std::vector<double> >();
 
     for (int num = 0; num < via_num; num++)
-      robotis_state_->joint_via_pose_.coeffRef(num, id) = value[num] * DEGREE2RADIAN;
+      base_module_state_->joint_via_pose_.coeffRef(num, id) = value[num] * DEGREE2RADIAN;
   }
 
   // parse target pose
@@ -223,11 +223,11 @@ void BaseModule::parseIniPoseData(const std::string &path)
     id = it->first.as<int>();
     value = it->second.as<double>();
 
-    robotis_state_->joint_ini_pose_.coeffRef(id, 0) = value * DEGREE2RADIAN;
+    base_module_state_->joint_ini_pose_.coeffRef(id, 0) = value * DEGREE2RADIAN;
   }
 
-  robotis_state_->all_time_steps_ = int(robotis_state_->mov_time_ / robotis_state_->smp_time_) + 1;
-  robotis_state_->calc_joint_tra_.resize(robotis_state_->all_time_steps_, MAX_JOINT_ID + 1);
+  base_module_state_->all_time_steps_ = int(base_module_state_->mov_time_ / base_module_state_->smp_time_) + 1;
+  base_module_state_->calc_joint_tra_.resize(base_module_state_->all_time_steps_, MAX_JOINT_ID + 1);
 }
 
 void BaseModule::queueThread()
@@ -251,7 +251,7 @@ void BaseModule::queueThread()
 
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg)
 {
-  if (robotis_state_->is_moving_ == false)
+  if (base_module_state_->is_moving_ == false)
   {
     if (msg->data == "ini_pose")
     {
@@ -281,32 +281,32 @@ void BaseModule::initPoseTrajGenerateProc()
   for (int id = 1; id <= MAX_JOINT_ID; id++)
   {
     double ini_value = joint_state_->goal_joint_state_[id].position_;
-    double tar_value = robotis_state_->joint_ini_pose_.coeff(id, 0);
+    double tar_value = base_module_state_->joint_ini_pose_.coeff(id, 0);
 
     Eigen::MatrixXd tra;
 
-    if (robotis_state_->via_num_ == 0)
+    if (base_module_state_->via_num_ == 0)
     {
       tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
-                                                  robotis_state_->smp_time_, robotis_state_->mov_time_);
+                                                  base_module_state_->smp_time_, base_module_state_->mov_time_);
     }
     else
     {
-      Eigen::MatrixXd via_value = robotis_state_->joint_via_pose_.col(id);
-      Eigen::MatrixXd d_via_value = robotis_state_->joint_via_dpose_.col(id);
-      Eigen::MatrixXd dd_via_value = robotis_state_->joint_via_ddpose_.col(id);
+      Eigen::MatrixXd via_value = base_module_state_->joint_via_pose_.col(id);
+      Eigen::MatrixXd d_via_value = base_module_state_->joint_via_dpose_.col(id);
+      Eigen::MatrixXd dd_via_value = base_module_state_->joint_via_ddpose_.col(id);
 
-      tra = robotis_framework::calcMinimumJerkTraWithViaPoints(robotis_state_->via_num_, ini_value, 0.0, 0.0,
+      tra = robotis_framework::calcMinimumJerkTraWithViaPoints(base_module_state_->via_num_, ini_value, 0.0, 0.0,
                                                                via_value, d_via_value, dd_via_value, tar_value,
-                                                               0.0, 0.0, robotis_state_->smp_time_,
-                                                               robotis_state_->via_time_, robotis_state_->mov_time_);
+                                                               0.0, 0.0, base_module_state_->smp_time_,
+                                                               base_module_state_->via_time_, base_module_state_->mov_time_);
     }
 
-    robotis_state_->calc_joint_tra_.block(0, id, robotis_state_->all_time_steps_, 1) = tra;
+    base_module_state_->calc_joint_tra_.block(0, id, base_module_state_->all_time_steps_, 1) = tra;
   }
 
-  robotis_state_->is_moving_ = true;
-  robotis_state_->cnt_ = 0;
+  base_module_state_->is_moving_ = true;
+  base_module_state_->cnt_ = 0;
   ROS_INFO("[start] send trajectory");
 }
 
@@ -316,28 +316,28 @@ void BaseModule::poseGenerateProc(Eigen::MatrixXd joint_angle_pose)
   while (enable_ == false || has_goal_joints_ == false)
     usleep(8 * 1000);
 
-  robotis_state_->mov_time_ = 5.0;
-  robotis_state_->all_time_steps_ = int(robotis_state_->mov_time_ / robotis_state_->smp_time_) + 1;
+  base_module_state_->mov_time_ = 5.0;
+  base_module_state_->all_time_steps_ = int(base_module_state_->mov_time_ / base_module_state_->smp_time_) + 1;
 
-  robotis_state_->calc_joint_tra_.resize(robotis_state_->all_time_steps_, MAX_JOINT_ID + 1);
+  base_module_state_->calc_joint_tra_.resize(base_module_state_->all_time_steps_, MAX_JOINT_ID + 1);
 
-  robotis_state_->joint_pose_ = joint_angle_pose;
+  base_module_state_->joint_pose_ = joint_angle_pose;
 
   for (int id = 1; id <= MAX_JOINT_ID; id++)
   {
     double ini_value = joint_state_->goal_joint_state_[id].position_;
-    double tar_value = robotis_state_->joint_pose_.coeff(id, 0);
+    double tar_value = base_module_state_->joint_pose_.coeff(id, 0);
 
     ROS_INFO_STREAM("[ID : " << id << "] ini_value : " << ini_value << "  tar_value : " << tar_value);
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
-                                                                robotis_state_->smp_time_, robotis_state_->mov_time_);
+                                                                base_module_state_->smp_time_, base_module_state_->mov_time_);
 
-    robotis_state_->calc_joint_tra_.block(0, id, robotis_state_->all_time_steps_, 1) = tra;
+    base_module_state_->calc_joint_tra_.block(0, id, base_module_state_->all_time_steps_, 1) = tra;
   }
 
-  robotis_state_->is_moving_ = true;
-  robotis_state_->cnt_ = 0;
+  base_module_state_->is_moving_ = true;
+  base_module_state_->cnt_ = 0;
   ini_pose_only_ = true;
   ROS_INFO("[start] send trajectory");
 }
@@ -362,35 +362,35 @@ void BaseModule::poseGenerateProc(std::map<std::string, double>& joint_angle_pos
     }
   }
 
-  robotis_state_->joint_pose_ = target_pose;
+  base_module_state_->joint_pose_ = target_pose;
 
-  robotis_state_->mov_time_ = 5.0;
-  robotis_state_->all_time_steps_ = int(robotis_state_->mov_time_ / robotis_state_->smp_time_) + 1;
+  base_module_state_->mov_time_ = 5.0;
+  base_module_state_->all_time_steps_ = int(base_module_state_->mov_time_ / base_module_state_->smp_time_) + 1;
 
-  robotis_state_->calc_joint_tra_.resize(robotis_state_->all_time_steps_, MAX_JOINT_ID + 1);
+  base_module_state_->calc_joint_tra_.resize(base_module_state_->all_time_steps_, MAX_JOINT_ID + 1);
 
   for (int id = 1; id <= MAX_JOINT_ID; id++)
   {
     double ini_value = joint_state_->goal_joint_state_[id].position_;
-    double tar_value = robotis_state_->joint_pose_.coeff(id, 0);
+    double tar_value = base_module_state_->joint_pose_.coeff(id, 0);
 
     ROS_INFO_STREAM("[ID : " << id << "] ini_value : " << ini_value << "  tar_value : " << tar_value);
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
-                                                                robotis_state_->smp_time_, robotis_state_->mov_time_);
+                                                                base_module_state_->smp_time_, base_module_state_->mov_time_);
 
-    robotis_state_->calc_joint_tra_.block(0, id, robotis_state_->all_time_steps_, 1) = tra;
+    base_module_state_->calc_joint_tra_.block(0, id, base_module_state_->all_time_steps_, 1) = tra;
   }
 
-  robotis_state_->is_moving_ = true;
-  robotis_state_->cnt_ = 0;
+  base_module_state_->is_moving_ = true;
+  base_module_state_->cnt_ = 0;
   ini_pose_only_ = true;
   ROS_INFO("[start] send trajectory");
 }
 
 bool BaseModule::isRunning()
 {
-  return robotis_state_->is_moving_;
+  return base_module_state_->is_moving_;
 }
 
 void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
@@ -423,15 +423,15 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
   /* ----- send trajectory ----- */
 
-  if (robotis_state_->is_moving_ == true)
+  if (base_module_state_->is_moving_ == true)
   {
-    if (robotis_state_->cnt_ == 1)
+    if (base_module_state_->cnt_ == 1)
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Init Pose");
 
     for (int id = 1; id <= MAX_JOINT_ID; id++)
-      joint_state_->goal_joint_state_[id].position_ = robotis_state_->calc_joint_tra_(robotis_state_->cnt_, id);
+      joint_state_->goal_joint_state_[id].position_ = base_module_state_->calc_joint_tra_(base_module_state_->cnt_, id);
 
-    robotis_state_->cnt_++;
+    base_module_state_->cnt_++;
   }
 
   /*----- set joint data -----*/
@@ -446,14 +446,14 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
   /*---------- initialize count number ----------*/
 
-  if ((robotis_state_->cnt_ >= robotis_state_->all_time_steps_) && (robotis_state_->is_moving_ == true))
+  if ((base_module_state_->cnt_ >= base_module_state_->all_time_steps_) && (base_module_state_->is_moving_ == true))
   {
     ROS_INFO("[end] send trajectory");
 
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Finish Init Pose");
 
-    robotis_state_->is_moving_ = false;
-    robotis_state_->cnt_ = 0;
+    base_module_state_->is_moving_ = false;
+    base_module_state_->cnt_ = 0;
 
     // set all joints -> none
     if (ini_pose_only_ == true)

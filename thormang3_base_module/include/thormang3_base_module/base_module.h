@@ -59,12 +59,10 @@
 #include "robotis_math/robotis_math.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
-#include "robotis_state.h"
+#include "base_module_state.h"
 
 namespace thormang3
 {
-
-//using namespace ROBOTIS_BASE;
 
 class BaseJointData
 {
@@ -109,8 +107,8 @@ public:
   void poseGenerateProc(std::map<std::string, double>& joint_angle_pose);
 
   /* Parameter */
-  RobotisState   *robotis_state_;
-  BaseJointState *joint_state_;
+  BaseModuleState  *base_module_state_;
+  BaseJointState   *joint_state_;
 
 private:
   void queueThread();
