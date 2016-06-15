@@ -29,14 +29,14 @@
  *******************************************************************************/
 
 /*
- *  robotis_state.h
+ *  manipulation_module_state.h
  *
  *  Created on: June 7, 2016
  *      Author: sch
  */
 
-#ifndef THORMANG3_MANIPULATION_MODULE_ROBOTIS_STATE_H_
-#define THORMANG3_MANIPULATION_MODULE_ROBOTIS_STATE_H_
+#ifndef THORMANG3_MANIPULATION_MODULE_MANIPULATION_MODULE_STATE_H_
+#define THORMANG3_MANIPULATION_MODULE_MANIPULATION_MODULE_STATE_H_
 
 #define EIGEN_NO_DEBUG
 #define EIGEN_NO_STATIC_ASSERT
@@ -50,46 +50,47 @@
 #include "thormang3_manipulation_module_msgs/JointPose.h"
 #include "thormang3_manipulation_module_msgs/KinematicsPose.h"
 
-namespace ROBOTIS_MANIPULATION
+namespace thormang3
 {
 
-class RobotisState
+class ManipulationModuleState
 {
 public:
+  ManipulationModuleState();
+  ~ManipulationModuleState();
 
-    RobotisState();
-    ~RobotisState();
+  void setInverseKinematics(int cnt, Eigen::MatrixXd start_rotation);
 
-    bool is_moving;
+  bool is_moving_;
 
-    /* trajectory */
-	int cnt; // counter number
+  /* trajectory */
+  int cnt_; // counter number
 
-	double mov_time; // movement time
-	double smp_time; // sampling time
+  double mov_time_; // movement time
+  double smp_time_; // sampling time
 
-    int all_time_steps; // all time steps of movement time
+  int all_time_steps_; // all time steps of movement time
 
-    Eigen::MatrixXd calc_joint_tra; // calculated joint trajectory
-    Eigen::MatrixXd calc_task_tra; // calculated task trajectory
+  Eigen::MatrixXd calc_joint_tra_; // calculated joint trajectory
+  Eigen::MatrixXd calc_task_tra_; // calculated task trajectory
 
-    Eigen::MatrixXd joint_ini_pose;
+  Eigen::MatrixXd joint_ini_pose_;
 
-    /* msgs */
-    thormang3_manipulation_module_msgs::JointPose goal_joint_pose_msg;
-    thormang3_manipulation_module_msgs::KinematicsPose goal_kinematics_pose_msg;
+  /* msgs */
+  thormang3_manipulation_module_msgs::JointPose goal_joint_pose_msg_;
+  thormang3_manipulation_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
 
-    /* ik */
-    bool ik_solve;
-    Eigen::MatrixXd ik_target_position;
-    Eigen::MatrixXd ik_start_rotation , ik_target_rotation;
-    int ik_id_start, ik_id_end;
+  /* ik */
+  bool  ik_solve_;
+  int   ik_id_start_;
+  int   ik_id_end_;
+  Eigen::MatrixXd ik_target_position_;
+  Eigen::MatrixXd ik_start_rotation_;
+  Eigen::MatrixXd ik_target_rotation_;
 
-    Eigen::MatrixXd ik_weight;
-
-    void setInverseKinematics(int cnt , Eigen::MatrixXd start_rotation);
+  Eigen::MatrixXd ik_weight_;
 };
 
 }
 
-#endif /* THORMANG3_MANIPULATION_MODULE_ROBOTIS_STATE_H_ */
+#endif /* THORMANG3_MANIPULATION_MODULE_MANIPULATION_MODULE_STATE_H_ */

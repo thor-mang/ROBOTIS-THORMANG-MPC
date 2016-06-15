@@ -49,13 +49,13 @@
 #include <boost/thread.hpp>
 #include <yaml-cpp/yaml.h>
 
-#include "robotis_framework_common/motion_module.h"
+#include "manipulation_module_state.h"
 
 #include "robotis_math/robotis_math.h"
+#include "robotis_framework_common/motion_module.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
-#include "robotis_controller_msgs/StatusMsg.h"
 
-#include "robotis_state.h"
+#include "robotis_controller_msgs/StatusMsg.h"
 
 #include "thormang3_manipulation_module_msgs/JointPose.h"
 #include "thormang3_manipulation_module_msgs/KinematicsPose.h"
@@ -68,63 +68,45 @@ namespace thormang3
 
 class ManipulationJointData
 {
-
 public:
-  double position;
-  double velocity;
-  double effort;
+  double  position_;
+  double  velocity_;
+  double  effort_;
 
-  int p_gain;
-  int i_gain;
-  int d_gain;
-
+  int     p_gain_;
+  int     i_gain_;
+  int     d_gain_;
 };
 
 class ManipulationJointState
 {
-
 public:
-  ManipulationJointData curr_joint_state[ MAX_JOINT_ID + 1];
-  ManipulationJointData goal_joint_state[ MAX_JOINT_ID + 1];
-  ManipulationJointData fake_joint_state[ MAX_JOINT_ID + 1];
-
+  ManipulationJointData curr_joint_state[MAX_JOINT_ID + 1];
+  ManipulationJointData goal_joint_state[MAX_JOINT_ID + 1];
+  ManipulationJointData fake_joint_state[MAX_JOINT_ID + 1];
 };
 
 class ManipulationModule: public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<ManipulationModule>
+                          public robotis_framework::Singleton<ManipulationModule>
 {
-private:
-  int control_cycle_msec_;
-  boost::thread queue_thread_;
-  boost::thread* tra_gene_tread_;
-
-  ros::Publisher status_msg_pub_;
-
-  std::map<std::string, int> joint_name_to_id;
-
-  void QueueThread();
-
-  void parseData(const std::string &path);
-  void parseIniPoseData(const std::string &path);
-
 public:
   ManipulationModule();
   virtual ~ManipulationModule();
 
   /* ROS Topic Callback Functions */
-  void IniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
-  void JointPoseMsgCallback(const thormang3_manipulation_module_msgs::JointPose::ConstPtr& msg);
-  void KinematicsPoseMsgCallback(const thormang3_manipulation_module_msgs::KinematicsPose::ConstPtr& msg);
+  void initPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
+  void jointPoseMsgCallback(const thormang3_manipulation_module_msgs::JointPose::ConstPtr& msg);
+  void kinematicsPoseMsgCallback(const thormang3_manipulation_module_msgs::KinematicsPose::ConstPtr& msg);
 
-  bool GetJointPoseCallback(thormang3_manipulation_module_msgs::GetJointPose::Request &req,
-      thormang3_manipulation_module_msgs::GetJointPose::Response &res);
-  bool GetKinematicsPoseCallback(thormang3_manipulation_module_msgs::GetKinematicsPose::Request &req,
-      thormang3_manipulation_module_msgs::GetKinematicsPose::Response &res);
+  bool getJointPoseCallback(thormang3_manipulation_module_msgs::GetJointPose::Request &req,
+                            thormang3_manipulation_module_msgs::GetJointPose::Response &res);
+  bool getKinematicsPoseCallback(thormang3_manipulation_module_msgs::GetKinematicsPose::Request &req,
+                                 thormang3_manipulation_module_msgs::GetKinematicsPose::Response &res);
 
   /* ROS Calculation Functions */
-  void IniposeTraGeneProc();
-  void JointTraGeneProc();
-  void TaskTraGeneProc();
+  void initPoseTrajGenerateProc();
+  void jointTrajGenerateProc();
+  void taskTrajGenerateProc();
 
   /* ROS Framework Functions */
   void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
@@ -132,12 +114,26 @@ public:
   void stop();
   bool isRunning();
 
-  void PublishStatusMsg(unsigned int type, std::string msg);
+  void publishStatusMsg(unsigned int type, std::string msg);
 
   /* Parameter */
-  KinematicsDynamics *Humanoid;
-  ROBOTIS_MANIPULATION::RobotisState *Robotis;
-  ManipulationJointState *JointState;
+  KinematicsDynamics       *humanoid_;
+  ManipulationJointState   *joint_state_;
+  ManipulationModuleState  *manipulation_module_state_;
+
+private:
+  void queueThread();
+
+  void parseData(const std::string &path);
+  void parseIniPoseData(const std::string &path);
+
+  int             control_cycle_msec_;
+  boost::thread   queue_thread_;
+  boost::thread  *traj_generate_tread_;
+
+  ros::Publisher  status_msg_pub_;
+
+  std::map<std::string, int> joint_name_to_id;
 };
 
 }

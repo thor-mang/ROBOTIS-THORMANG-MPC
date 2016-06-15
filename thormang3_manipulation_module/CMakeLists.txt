@@ -36,7 +36,7 @@ include_directories(
 ## Declare a C++ library
 add_library(thormang3_manipulation_module
   src/manipulation_module.cpp
-  src/robotis_state.cpp
+  src/manipulation_module_state.cpp
 )
 
 add_dependencies(thormang3_manipulation_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
