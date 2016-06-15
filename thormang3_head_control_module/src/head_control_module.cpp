@@ -1,3 +1,33 @@
+/*******************************************************************************
+ * Copyright (c) 2016, ROBOTIS CO., LTD.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * * Neither the name of ROBOTIS nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+
 /*
  * HeadControlModule.cpp
  *
@@ -11,19 +41,19 @@
 using namespace thormang3;
 
 HeadControlModule::HeadControlModule()
-: control_cycle_msec_(0)
-, stop_process_(false)
-, is_moving_(false)
-, is_direct_control_(false)
-, tra_count_(0)
-, tra_size_(0)
-, current_state_(None)
-, original_position_lidar_(0.0)
-, moving_time_(3.0)
-, DEBUG(false)
+  : control_cycle_msec_(0),
+    stop_process_(false),
+    is_moving_(false),
+    is_direct_control_(false),
+    tra_count_(0),
+    tra_size_(0),
+    current_state_(None),
+    original_position_lidar_(0.0),
+    moving_time_(3.0),
+    DEBUG(false)
 {
-  enable_ = false;
-  module_name_ = "head_control_module";
+  enable_       = false;
+  module_name_  = "head_control_module";
   control_mode_ = robotis_framework::PositionControl;
 
   result_["head_y"]    = new robotis_framework::DynamixelState();
@@ -85,7 +115,8 @@ void HeadControlModule::get3DLidarCallback(const std_msgs::String::ConstPtr &msg
     return;
   }
 
-  if(DEBUG) fprintf(stderr, "TOPIC CALLBACK : get_3d_lidar\n");
+  if(DEBUG)
+    fprintf(stderr, "TOPIC CALLBACK : get_3d_lidar\n");
 
   if(current_state_ == None)
   {
@@ -136,15 +167,20 @@ void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::Cons
 
       // set time
       int calc_moving_time = fabs(goal_position_.coeff(0, iter->second) - target_position_.coeff(0, iter->second)) / 0.45;
-      if(calc_moving_time > moving_time_) moving_time_ = calc_moving_time;
+      if(calc_moving_time > moving_time_)
+        moving_time_ = calc_moving_time;
 
-      if(DEBUG) std::cout << "joint : "  << joint_name << ", Index : " << iter->second << ", Angle : " << msg->position[ix] << ", Time : " << moving_time_ << std::endl;
+      if(DEBUG)
+      {
+        std::cout << "joint : "  << joint_name << ", Index : " << iter->second
+                  << ", Angle : " << msg->position[ix] << ", Time : " << moving_time_ << std::endl;
+      }
     }
   }
 
   // set init joint vel, accel
-  goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
-  goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
+  goal_velocity_      = Eigen::MatrixXd::Zero(1, result_.size());
+  goal_acceleration_  = Eigen::MatrixXd::Zero(1, result_.size());
 
   if(is_moving_ == true && is_direct_control_ == true)
   {
@@ -162,7 +198,8 @@ void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::Cons
 
 void HeadControlModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors)
 {
-  if(enable_ == false) return;
+  if(enable_ == false)
+    return;
 
   tra_lock_.lock();
 
@@ -292,7 +329,8 @@ void HeadControlModule::finishMoving()
   }
 
   // is_direct_control_ = false;
-  if(DEBUG) std::cout << "Trajectory End" << std::endl;
+  if(DEBUG)
+    std::cout << "Trajectory End" << std::endl;
 }
 
 void HeadControlModule::stopMoving()
@@ -414,12 +452,12 @@ Eigen::MatrixXd HeadControlModule::calcMinimumJerkTraPVA( double pos_start , dou
   Eigen::MatrixXd poly_vector( 3 , 1 );
 
   poly_matrix <<
-      robotis_framework::powDI( mov_time , 3 )   , robotis_framework::powDI( mov_time , 4 )      , robotis_framework::powDI( mov_time , 5 ),
-      3 * robotis_framework::powDI( mov_time , 2 )   , 4 * robotis_framework::powDI( mov_time , 3 )  , 5 * robotis_framework::powDI( mov_time , 4 ),
-      6 * mov_time                , 12 * robotis_framework::powDI( mov_time , 2 ) , 20 * robotis_framework::powDI( mov_time , 3 );
+      robotis_framework::powDI(mov_time , 3),     robotis_framework::powDI(mov_time , 4),       robotis_framework::powDI(mov_time , 5),
+      3 * robotis_framework::powDI(mov_time , 2), 4 * robotis_framework::powDI(mov_time , 3),   5 * robotis_framework::powDI(mov_time , 4),
+      6 * mov_time,                               12 * robotis_framework::powDI(mov_time , 2),  20 * robotis_framework::powDI(mov_time , 3);
 
   poly_vector <<
-      pos_end - pos_start - vel_start * mov_time - accel_start * pow( mov_time , 2 ) / 2,
+      pos_end - pos_start - vel_start * mov_time - accel_start * pow(mov_time , 2) / 2,
       vel_end - vel_start - accel_start * mov_time,
       accel_end - accel_start ;
 
@@ -477,25 +515,26 @@ void HeadControlModule::jointTraGeneThread()
     std::string joint_name = state_iter->first;
     int index = using_joint_name_[joint_name];
 
-    double ini_value = goal_position_.coeff(0, index);
-    double ini_vel = goal_velocity_.coeff(0, index);
-    double ini_accel = goal_acceleration_.coeff(0, index);
+    double ini_value  = goal_position_.coeff(0, index);
+    double ini_vel    = goal_velocity_.coeff(0, index);
+    double ini_accel  = goal_acceleration_.coeff(0, index);
 
-    double tar_value = target_position_.coeff(0, index);
+    double tar_value  = target_position_.coeff(0, index);
 
-    Eigen::MatrixXd tra = calcMinimumJerkTraPVA( ini_value , ini_vel , ini_accel ,
-        tar_value , 0.0 , 0.0 ,
-        smp_time , moving_time_ );
+    Eigen::MatrixXd tra = calcMinimumJerkTraPVA(ini_value , ini_vel , ini_accel ,
+                                                tar_value , 0.0 , 0.0 ,
+                                                smp_time , moving_time_ );
 
-    calc_joint_tra_.block( 0 , index , all_time_steps , 1 ) = tra.block(0, 0, all_time_steps, 1);
-    calc_joint_vel_tra_.block( 0 , index , all_time_steps , 1 ) = tra.block(0, 1, all_time_steps, 1);
-    calc_joint_accel_tra_.block( 0 , index , all_time_steps , 1 ) = tra.block(0, 2, all_time_steps, 1);
+    calc_joint_tra_.block(0 , index , all_time_steps , 1)       = tra.block(0, 0, all_time_steps, 1);
+    calc_joint_vel_tra_.block(0 , index , all_time_steps , 1)   = tra.block(0, 1, all_time_steps, 1);
+    calc_joint_accel_tra_.block(0 , index , all_time_steps , 1) = tra.block(0, 2, all_time_steps, 1);
   }
 
   tra_size_ = calc_joint_tra_.rows();
   tra_count_ = 0;
 
-  if(DEBUG) ROS_INFO("[ready] make trajectory : %d, %d", tra_size_, tra_count_);
+  if(DEBUG)
+    ROS_INFO("[ready] make trajectory : %d, %d", tra_size_, tra_count_);
 
   // init value
   // moving_time_ = 0;
@@ -507,9 +546,9 @@ void HeadControlModule::publishStatusMsg(unsigned int type, std::string msg)
 {
   robotis_controller_msgs::StatusMsg status_msg;
   status_msg.header.stamp = ros::Time::now();
-  status_msg.type = type;
-  status_msg.module_name = "Head Control";
-  status_msg.status_msg = msg;
+  status_msg.type         = type;
+  status_msg.module_name  = "Head Control";
+  status_msg.status_msg   = msg;
 
   status_msg_pub_.publish(status_msg);
 }
