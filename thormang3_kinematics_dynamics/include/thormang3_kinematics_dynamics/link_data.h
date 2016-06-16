@@ -29,53 +29,53 @@
  *******************************************************************************/
 
 /*
- * motion_module_tutorial.h
+ * link_data.h
  *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
+ *  Created on: June 7, 2016
+ *      Author: sch
  */
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
+#ifndef THORMANG3_KINEMATICS_DYNAMICS_LINK_DATA_H_
+#define THORMANG3_KINEMATICS_DYNAMICS_LINK_DATA_H_
 
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
-
-#include "robotis_framework_common/motion_module.h"
+#include "robotis_math/robotis_math.h"
 
 namespace thormang3
 {
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
+class LinkData
 {
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
-
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
-
-  void queueThread();
-
 public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
 
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
+  LinkData();
+  ~LinkData();
 
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+  std::string name_;
 
-  void stop();
-  bool isRunning();
+  int parent_;
+  int sibling_;
+  int child_;
+
+  double mass_;
+
+  Eigen::MatrixXd relative_position_;
+  Eigen::MatrixXd joint_axis_;
+  Eigen::MatrixXd center_of_mass_;
+  Eigen::MatrixXd inertia_;
+
+  double joint_limit_max_;
+  double joint_limit_min_;
+
+  double joint_angle_;
+  double joint_velocity_;
+  double joint_acceleration_;
+
+  Eigen::MatrixXd position_;
+  Eigen::MatrixXd orientation_;
+  Eigen::MatrixXd transformation_;
+
 };
 
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+#endif /* THORMANG3_KINEMATICS_DYNAMICS_LINK_DATA_H_ */

@@ -28,54 +28,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * motion_module_tutorial.h
- *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
- */
+#ifndef THORMANG3_BASE_MODULE_BASE_MODULE_STATE_H_
+#define THORMANG3_BASE_MODULE_BASE_MODULE_STATE_H_
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
-
-#include "robotis_framework_common/motion_module.h"
+#include "robotis_math/robotis_math.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
 namespace thormang3
 {
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
+class BaseModuleState
 {
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
-
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
-
-  void queueThread();
-
 public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
+  BaseModuleState();
+  ~BaseModuleState();
 
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
+  bool is_moving_;
 
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+  int cnt_; // counter number
 
-  void stop();
-  bool isRunning();
+  double mov_time_; // movement time
+  double smp_time_; // sampling time
+
+  int all_time_steps_; // all time steps of movement time
+
+  Eigen::MatrixXd calc_joint_tra_; // calculated joint trajectory
+
+  Eigen::MatrixXd joint_ini_pose_;
+  Eigen::MatrixXd joint_pose_;
+
+  int via_num_;
+
+  Eigen::MatrixXd joint_via_pose_;
+  Eigen::MatrixXd joint_via_dpose_;
+  Eigen::MatrixXd joint_via_ddpose_;
+
+  Eigen::MatrixXd via_time_;
 };
 
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+#endif /* THORMANG3_BASE_MODULE_BASE_MODULE_STATE_H_ */

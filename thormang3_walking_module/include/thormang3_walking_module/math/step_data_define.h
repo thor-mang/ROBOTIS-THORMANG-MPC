@@ -29,53 +29,53 @@
  *******************************************************************************/
 
 /*
- * motion_module_tutorial.h
+ * StepDataDefine.h
  *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
+ *  Created on: 2013. 12. 7.
+ *      Author: Jay Song
  */
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
-
-#include "robotis_framework_common/motion_module.h"
+#ifndef THORMANG3_WALKING_MODULE_STEP_DATA_DEFINE_H_
+#define THORMANG3_WALKING_MODULE_STEP_DATA_DEFINE_H_
 
 namespace thormang3
 {
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
+typedef struct
 {
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
+  double x, y, z;
+} Position3D;
 
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
+typedef struct
+{
+  double x, y, z, roll, pitch, yaw;
+} Pose3D;
 
-  void queueThread();
+typedef struct
+{
+  int    moving_foot;
+  double foot_z_swap, body_z_swap;
+  double shoulder_swing_gain, elbow_swing_gain;
+  double waist_roll_angle, waist_pitch_angle, waist_yaw_angle;
+  Pose3D left_foot_pose;
+  Pose3D right_foot_pose;
+  Pose3D body_pose;
+} StepPositionData;
 
-public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
+typedef struct
+{
+  int    walking_state;
+  double abs_step_time, dsp_ratio;
+  double sigmoid_ratio_x, sigmoid_ratio_y, sigmoid_ratio_z, sigmoid_ratio_roll, sigmoid_ratio_pitch, sigmoid_ratio_yaw;
+  double sigmoid_distortion_x, sigmoid_distortion_y, sigmoid_distortion_z, sigmoid_distortion_roll, sigmoid_distortion_pitch, sigmoid_distortion_yaw;
+} StepTimeData;
 
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
-
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
-
-  void stop();
-  bool isRunning();
-};
+typedef struct
+{
+  StepPositionData position_data;
+  StepTimeData     time_data;
+} StepData;
 
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+#endif /* THORMANG3_WALKING_MODULE_STEP_DATA_DEFINE_H_ */

@@ -29,53 +29,44 @@
  *******************************************************************************/
 
 /*
- * motion_module_tutorial.h
+ * link_data.cpp
  *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
+ *  Created on: June 7, 2016
+ *      Author: sch
  */
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
-
-#include "robotis_framework_common/motion_module.h"
+#include "thormang3_kinematics_dynamics/link_data.h"
 
 namespace thormang3
 {
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
+LinkData::LinkData()
 {
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
+  name_ = "";
 
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
+  parent_ = -1;
+  sibling_ = -1;
+  child_ = -1;
 
-  void queueThread();
+  mass_ = 0.0;
 
-public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
+  relative_position_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
+  joint_axis_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
+  center_of_mass_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
+  inertia_ =robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
+  joint_limit_max_ = 100.0;
+  joint_limit_min_ = -100.0;
 
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+  joint_angle_ = 0.0;
+  joint_velocity_ = 0.0;
+  joint_acceleration_ = 0.0;
 
-  void stop();
-  bool isRunning();
-};
-
+  position_ = robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
+  orientation_ = robotis_framework::convertRPYToRotation( 0.0 , 0.0 , 0.0 );
+  transformation_ = robotis_framework::getTransformationXYZRPY( 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0);
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+LinkData::~LinkData(){}
+
+}

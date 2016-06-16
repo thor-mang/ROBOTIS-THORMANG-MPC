@@ -29,53 +29,44 @@
  *******************************************************************************/
 
 /*
- * motion_module_tutorial.h
+ *  kinematics_dynamics_define.h
  *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
+ *  Created on: June 7, 2016
+ *      Author: sch
  */
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
-
-#include "robotis_framework_common/motion_module.h"
+#ifndef THORMANG3_KINEMATICS_DYNAMICS_KINEMATICS_DYNAMICS_DEFINE_H_
+#define THORMANG3_KINEMATICS_DYNAMICS_KINEMATICS_DYNAMICS_DEFINE_H_
 
 namespace thormang3
 {
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
-{
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
+#define MAX_JOINT_ID    (31) // 29 + 2
+#define ALL_JOINT_ID    (46)
 
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
+#define MAX_ARM_ID      (7)
+#define MAX_LEG_ID      (6)
+#define MAX_ITER        (5)
 
-  void queueThread();
+#define ID_HEAD_END     (29)
+#define ID_COB          (44)
+#define ID_TORSO        (27)
 
-public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
+#define ID_R_ARM_START  (1)
+#define ID_L_ARM_START  (2)
+#define ID_R_ARM_END    (35)
+#define ID_L_ARM_END    (34)
 
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
+#define ID_R_LEG_START  (15)
+#define ID_L_LEG_START  (16)
+#define ID_R_LEG_END    (45)
+#define ID_L_LEG_END    (46)
 
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+#define ID_R_LEG_FT     (37)
+#define ID_L_LEG_FT     (36)
 
-  void stop();
-  bool isRunning();
-};
+#define GRAVITY_ACCELERATION (9.8)
 
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+#endif /* THORMANG3_KINEMATICS_DYNAMICS_KINEMATICS_DYNAMICS_DEFINE_H_ */

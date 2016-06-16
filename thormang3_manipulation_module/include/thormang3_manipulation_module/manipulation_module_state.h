@@ -29,53 +29,68 @@
  *******************************************************************************/
 
 /*
- * motion_module_tutorial.h
+ *  manipulation_module_state.h
  *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
+ *  Created on: June 7, 2016
+ *      Author: sch
  */
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
+#ifndef THORMANG3_MANIPULATION_MODULE_MANIPULATION_MODULE_STATE_H_
+#define THORMANG3_MANIPULATION_MODULE_MANIPULATION_MODULE_STATE_H_
 
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
+#define EIGEN_NO_DEBUG
+#define EIGEN_NO_STATIC_ASSERT
 
-#include "robotis_framework_common/motion_module.h"
+#include <std_msgs/Float64.h>
+#include <std_msgs/String.h>
+
+#include "robotis_math/robotis_math.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
+
+#include "thormang3_manipulation_module_msgs/JointPose.h"
+#include "thormang3_manipulation_module_msgs/KinematicsPose.h"
 
 namespace thormang3
 {
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
+class ManipulationModuleState
 {
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
-
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
-
-  void queueThread();
-
 public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
+  ManipulationModuleState();
+  ~ManipulationModuleState();
 
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
+  void setInverseKinematics(int cnt, Eigen::MatrixXd start_rotation);
 
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+  bool is_moving_;
 
-  void stop();
-  bool isRunning();
+  /* trajectory */
+  int cnt_; // counter number
+
+  double mov_time_; // movement time
+  double smp_time_; // sampling time
+
+  int all_time_steps_; // all time steps of movement time
+
+  Eigen::MatrixXd calc_joint_tra_; // calculated joint trajectory
+  Eigen::MatrixXd calc_task_tra_; // calculated task trajectory
+
+  Eigen::MatrixXd joint_ini_pose_;
+
+  /* msgs */
+  thormang3_manipulation_module_msgs::JointPose goal_joint_pose_msg_;
+  thormang3_manipulation_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
+
+  /* ik */
+  bool  ik_solve_;
+  int   ik_id_start_;
+  int   ik_id_end_;
+  Eigen::MatrixXd ik_target_position_;
+  Eigen::MatrixXd ik_start_rotation_;
+  Eigen::MatrixXd ik_target_rotation_;
+
+  Eigen::MatrixXd ik_weight_;
 };
 
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+#endif /* THORMANG3_MANIPULATION_MODULE_MANIPULATION_MODULE_STATE_H_ */

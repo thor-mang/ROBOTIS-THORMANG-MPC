@@ -4,9 +4,12 @@
   <version>0.1.0</version>
   <description>The thormang3_action_module package</description>
 
-  <maintainer email="hjsong@robotis.com">Jay Song</maintainer>
-  <license>GLPv2</license>
-
+  <maintainer email="hjsong@robotis.com">ROBOTIS</maintainer>
+  
+  <license>BSD</license>
+  
+  <author email="hjsong@robotis.com">ROBOTIS</author>
+  
   <buildtool_depend>catkin</buildtool_depend>
   
   <build_depend>roscpp</build_depend>

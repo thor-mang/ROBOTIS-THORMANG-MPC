@@ -4,14 +4,12 @@
   <version>0.0.0</version>
   <description>The thormang3_manipulation_module package</description>
 
-  <maintainer email="sch@robotis.com">robotis</maintainer>
+  <maintainer email="sch@robotis.com">sch</maintainer>
+  <license>BSD</license>
 
-  <license>GPLv2</license>
-
-  <!-- <url type="website">http://wiki.ros.org/thor_manipulation</url> -->
-
+  <author email="sch@robotis.com">sch</author>
+  
   <buildtool_depend>catkin</buildtool_depend>
-
   <build_depend>robotis_device</build_depend>
   <build_depend>robotis_math</build_depend>
   <build_depend>roscpp</build_depend>

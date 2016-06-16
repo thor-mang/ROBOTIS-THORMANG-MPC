@@ -29,53 +29,30 @@
  *******************************************************************************/
 
 /*
- * motion_module_tutorial.h
+ * linear_algebra.cpp
  *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
+ *  Created on: 2013. 12. 3.
+ *      Author: Jay Song
  */
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
-
-#include "robotis_framework_common/motion_module.h"
+#include <iostream>
+#include "../include/thormang3_walking_module/math/linear_algebra.h"
 
 namespace thormang3
 {
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
+Pose3D getPose3DfromTransformMatrix(Eigen::MatrixXd matTransform)
 {
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
+  Pose3D pose_3d;
 
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
+  pose_3d.x     = matTransform.coeff(0, 3);
+  pose_3d.y     = matTransform.coeff(1, 3);
+  pose_3d.z     = matTransform.coeff(2, 3);
+  pose_3d.roll  = atan2( matTransform.coeff(2,1), matTransform.coeff(2,2));
+  pose_3d.pitch = atan2(-matTransform.coeff(2,0), sqrt(matTransform.coeff(2,1)*matTransform.coeff(2,1) + matTransform.coeff(2,2)*matTransform.coeff(2,2)) );
+  pose_3d.yaw   = atan2( matTransform.coeff(1,0), matTransform.coeff(0,0));
 
-  void queueThread();
-
-public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
-
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
-
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
-
-  void stop();
-  bool isRunning();
-};
-
+  return pose_3d;
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+}

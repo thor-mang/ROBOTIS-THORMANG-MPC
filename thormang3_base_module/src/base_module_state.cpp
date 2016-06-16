@@ -29,53 +29,41 @@
  *******************************************************************************/
 
 /*
- * motion_module_tutorial.h
+ * base_module_state.cpp
  *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
+ *  Created on: Jan 11, 2016
+ *      Author: sch
  */
 
-#ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
-#define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
+#include "thormang3_base_module/base_module_state.h"
 
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
-#include <boost/thread.hpp>
+using namespace thormang3;
 
-#include "robotis_framework_common/motion_module.h"
-
-namespace thormang3
+BaseModuleState::BaseModuleState()
 {
+  is_moving_ = false;
 
-class MotionModuleTutorial
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<MotionModuleTutorial>
-{
-private:
-  int           control_cycle_msec_;
-  boost::thread queue_thread_;
+  cnt_ = 0;
 
-  /* sample subscriber & publisher */
-  ros::Subscriber sub1_;
-  ros::Publisher pub1_;
+  mov_time_ = 1.0;
+  smp_time_ = 0.008;
+  all_time_steps_   = int(mov_time_ / smp_time_) + 1;
 
-  void queueThread();
+  calc_joint_tra_   = Eigen::MatrixXd::Zero(all_time_steps_, MAX_JOINT_ID + 1);
 
-public:
-  MotionModuleTutorial();
-  virtual ~MotionModuleTutorial();
+  joint_ini_pose_   = Eigen::MatrixXd::Zero( MAX_JOINT_ID + 1, 1);
+  joint_pose_       = Eigen::MatrixXd::Zero( MAX_JOINT_ID + 1, 1);
 
-  /* ROS Topic Callback Functions */
-  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
+  via_num_ = 1;
 
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+  joint_via_pose_   = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
+  joint_via_dpose_  = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
+  joint_via_ddpose_ = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
 
-  void stop();
-  bool isRunning();
-};
-
+  via_time_         = Eigen::MatrixXd::Zero(via_num_, 1);
 }
 
-#endif /* MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_ */
+BaseModuleState::~BaseModuleState()
+{
+}
+
