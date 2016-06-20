@@ -34,7 +34,8 @@
   <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
                 	 
   <!-- imu sensor package -->
-  <include file="$(find thormang3_imu_3dm_gx4)/launch/imu.launch" if="$(arg use_imu)" />
+  <!--<include file="$(find imu_3dm_gx4)/launch/imu.launch" if="$(arg use_imu)" /> -->
+  <include file="$(find microstrain_3dm_gx3_45)/launch/thor3_imu.launch" if="$(arg use_imu)" />
 
   <!-- lidar -->
   <include file="$(find thormang3_description)/launch/thor_laserscan.launch" if="$(arg use_lidar)" /> 
