@@ -447,9 +447,19 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
     return true;
   }
 
-  if(online_walking->isRunning() == true)
+//  if(online_walking->isRunning() == true)
+  //  {
+//    res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::ROBOT_IS_WALKING_NOW;
+//    std::string status_msg  = WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG;
+//    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+//    return true;
+//  }
+
+  if((req.step_data_array.size() > 100)
+      && (req.remove_existing_step_data == true)
+      && ((online_walking->isRunning() == true)))
   {
-    res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::ROBOT_IS_WALKING_NOW;
+    res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::TOO_MANY_STEP_DATA;
     std::string status_msg  = WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG;
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
     return true;
@@ -501,6 +511,16 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
     if(exist_num_of_step_data != 0)
       for(int remove_count  = 0; remove_count < exist_num_of_step_data; remove_count++)
         online_walking->eraseLastStepData();
+  }
+  else
+  {
+    if(online_walking->isRunning() == true)
+    {
+      res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::ROBOT_IS_WALKING_NOW;
+      std::string status_msg  = WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG;
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+      return true;
+    }
   }
 
   for(unsigned int i = 0; i < req_step_data_array.size() ; i++)
