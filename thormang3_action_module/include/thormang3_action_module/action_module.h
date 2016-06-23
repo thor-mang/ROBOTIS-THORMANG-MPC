@@ -39,13 +39,12 @@
 #define THORMANG3_ACTION_MODULE_ACTION_MODULE_H_
 
 #define _USE_MATH_DEFINES
+
 #include <cmath>
-#include <map>
 
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <ros/callback_queue.h>
-#include <std_msgs/Int16.h>
 #include <std_msgs/Int32.h>
 #include <boost/thread.hpp>
 
@@ -53,6 +52,7 @@
 #include "robotis_controller_msgs/StatusMsg.h"
 
 #include "thormang3_action_module_msgs/IsRunning.h"
+#include "thormang3_action_module_msgs/StartAction.h"
 
 #include "action_file_define.h"
 
@@ -101,11 +101,14 @@ private:
                                 thormang3_action_module_msgs::IsRunning::Response &res);
 
   void pageNumberCallback(const std_msgs::Int32::ConstPtr& msg);
+  void startActionCallback(const thormang3_action_module_msgs::StartAction::ConstPtr& msg);
 
   int convertRadTow4095(double rad);
   double convertw4095ToRad(int w4095);
   std::string convertIntToString(int n);
 
+  std::map<std::string, bool> action_joints_enable_;
+  std::map<std::string, robotis_framework::DynamixelState *> action_result_;
   int             control_cycle_msec_;
   boost::thread   queue_thread_;
 

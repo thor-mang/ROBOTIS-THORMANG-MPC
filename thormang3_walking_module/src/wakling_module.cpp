@@ -58,7 +58,7 @@ const std::string WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG = "Failed_to_add
 const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_START_MSG = "Balance_Param_Setting_Started";
 const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISH_MSG = "Balance_Param_Setting_Finished";
 const std::string WalkingStatusMSG::WALKING_MODULE_IS_ENABLED_MSG = "Walking_Module_is_enabled";
-const std::string WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG = "Walking_Module_is_enabled";
+const std::string WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG = "Walking_Module_is_not_enabled";
 const std::string WalkingStatusMSG::WALKING_START_MSG = "Walking_Started";
 const std::string WalkingStatusMSG::WALKING_FINISH_MSG = "Walking_Finished";
 
@@ -758,7 +758,7 @@ void WalkingMotionModule::onModuleDisable()
   previous_running_ = present_running = false;
 
   RobotisOnlineWalking *prev_walking = RobotisOnlineWalking::getInstance();
-  std::string status_msg = WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG;
+  std::string status_msg = WalkingStatusMSG::WALKING_MODULE_IS_ENABLED_MSG;
   balance_update_with_loop_ = false;
   prev_walking->HIP_ROLL_FEEDFORWARD_ANGLE_RAD = 0.0;
 
