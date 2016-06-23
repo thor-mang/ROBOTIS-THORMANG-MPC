@@ -106,8 +106,11 @@ void ActionModule::initialize(const int control_cycle_msec, robotis_framework::R
 
     joint_name_to_id_[joint_name]   = dxl_info->id_;
     joint_id_to_name_[dxl_info->id_] = joint_name;
+    action_result_[joint_name] = new robotis_framework::DynamixelState();
+    action_result_[joint_name]->goal_position_ = dxl_info->dxl_state_->goal_position_;
     result_[joint_name] = new robotis_framework::DynamixelState();
     result_[joint_name]->goal_position_ = dxl_info->dxl_state_->goal_position_;
+    action_joints_enable_[joint_name] = false;
   }
 
   ros::NodeHandle ros_node;
@@ -131,7 +134,8 @@ void ActionModule::queueThread()
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 0);
 
   /* subscriber */
-  ros::Subscriber action_page_sub = ros_node.subscribe("/robotis/action/page_num", 1, &ActionModule::pageNumberCallback, this);
+  ros::Subscriber action_page_sub = ros_node.subscribe("/robotis/action/page_num", 0, &ActionModule::pageNumberCallback, this);
+  ros::Subscriber start_action_sub = ros_node.subscribe("/robotis/action/start_action", 0, &ActionModule::startActionCallback, this);
 
   /* ROS Service Callback Functions */
   ros::ServiceServer is_running_server = ros_node.advertiseService("/robotis/action/is_running", &ActionModule::isRunningServiceCallback, this);
@@ -152,6 +156,13 @@ bool ActionModule::isRunningServiceCallback(thormang3_action_module_msgs::IsRunn
 
 void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
 {
+  if(enable_ == false)
+  {
+    std::string status_msg = "Action Module is not enabled";
+    ROS_INFO_STREAM(status_msg);
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+  }
+
   if(msg->data == -1)
   {
     stop();
@@ -162,13 +173,74 @@ void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
   }
   else
   {
-    if(start(msg->data) == true) {
+    for(std::map<std::string, bool>::iterator joints_enable_it = action_joints_enable_.begin(); joints_enable_it != action_joints_enable_.end(); joints_enable_it++)
+      joints_enable_it->second = true;
+
+    if(start(msg->data) == true)
+    {
       std::string status_msg = "Succeed to start page " + convertIntToString(msg->data);
       ROS_INFO_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
     }
-    else {
+    else
+    {
       std::string status_msg = "Failed to start page " + convertIntToString(msg->data);
+      ROS_ERROR_STREAM(status_msg);
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+    }
+  }
+}
+
+
+void ActionModule::startActionCallback(const thormang3_action_module_msgs::StartAction::ConstPtr& msg)
+{
+  if(enable_ == false)
+  {
+    std::string status_msg = "Action Module is not enabled";
+    ROS_INFO_STREAM(status_msg);
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+  }
+
+  if(msg->page_num == -1)
+  {
+    stop();
+  }
+  else if(msg->page_num == -2)
+  {
+    brake();
+  }
+  else
+  {
+    for(std::map<std::string, bool>::iterator joints_enable_it = action_joints_enable_.begin(); joints_enable_it != action_joints_enable_.end(); joints_enable_it++)
+      joints_enable_it->second = false;
+
+    int joint_name_array_size = msg->joint_name_array.size();
+    std::map<std::string, bool>::iterator joints_enable_it = action_joints_enable_.begin();
+    for(int joint_idx = 0; joint_idx < joint_name_array_size; joint_idx++)
+    {
+      joints_enable_it = action_joints_enable_.find(msg->joint_name_array[joint_idx]);
+      if(joints_enable_it == action_joints_enable_.end())
+      {
+        std::string status_msg = "Invalid Joint Name : " + msg->joint_name_array[joint_idx];
+        ROS_INFO_STREAM(status_msg);
+        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+        return;
+      }
+      else
+      {
+        joints_enable_it->second = true;
+      }
+    }
+
+    if(start(msg->page_num) == true)
+    {
+      std::string status_msg = "Succeed to start page " + convertIntToString(msg->page_num);
+      ROS_INFO_STREAM(status_msg);
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+    }
+    else
+    {
+      std::string status_msg = "Failed to start page " + convertIntToString(msg->page_num);
       ROS_ERROR_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
     }
@@ -180,7 +252,8 @@ void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
   if(enable_ == false)
     return;
 
-  if(action_module_enabled_ == true) {
+  if(action_module_enabled_ == true)
+  {
     for(std::map<std::string, robotis_framework::Dynamixel *>::iterator dxls_it = dxls.begin() ; dxls_it != dxls.end(); dxls_it++)
     {
       std::string joint_name = dxls_it->first;
@@ -196,24 +269,35 @@ void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
     action_module_enabled_ = false;
   }
 
+  actionPlayProcess(dxls);
+
+  for(std::map<std::string, bool>::iterator action_enable_it = action_joints_enable_.begin(); action_enable_it != action_joints_enable_.end(); action_enable_it++)
+  {
+    if(action_enable_it->second == true)
+      result_[action_enable_it->first]->goal_position_ = action_result_[action_enable_it->first]->goal_position_;
+  }
 
   previous_running_ = present_running_;
   present_running_  = isRunning();
 
-  if(present_running_ != previous_running_) {
-    if(present_running_ == true) {
+  if(present_running_ != previous_running_)
+  {
+    if(present_running_ == true)
+    {
       std::string status_msg = "Action_Start";
       ROS_INFO_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
     }
-    else {
+    else
+    {
+      for(std::map<std::string, robotis_framework::DynamixelState*>::iterator action_result_it = action_result_.begin(); action_result_it != action_result_.end(); action_result_it++)
+        action_result_it->second->goal_position_ = result_[action_result_it->first]->goal_position_;
+
       std::string status_msg = "Action_Finish";
       ROS_INFO_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
     }
   }
-
-  actionPlayProcess(dxls);
 }
 
 void ActionModule::onModuleEnable()
@@ -322,7 +406,7 @@ bool ActionModule::createFile(std::string file_name)
   action_file_define::Page page;
   resetPage(&page);
 
-  for(int i=0; i < action_file_define::MAXNUM_PAGE; i++)
+  for(int i = 0; i < action_file_define::MAXNUM_PAGE; i++)
     fwrite((const void *)&page, 1, sizeof(action_file_define::Page), action);
 
   if(action_file_ != 0)
@@ -612,7 +696,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
         {
           if( moving_angle1024[id] == 0 )
           {
-            result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle1024[id]);
+            action_result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle1024[id]);
           }
           else
           {
@@ -622,11 +706,11 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
               goal_speed1024[id] = last_out_speed1024[id] + speed_n;
               accel_angle1024[id] =  (short)( ( ( (long)( last_out_speed1024[id] + (speed_n >> 1) ) * unit_time_count * 144 ) / 15 ) >> 9);
 
-              result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle1024[id] + accel_angle1024[id]);
+              action_result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle1024[id] + accel_angle1024[id]);
             }
             else if( section == MAIN_SECTION )
             {
-              result_[joint_name]->goal_position_	= convertw4095ToRad(start_angle1024[id] + (short int)(((long)(main_angle1024[id])*unit_time_count) / unit_time_num));
+              action_result_[joint_name]->goal_position_	= convertw4095ToRad(start_angle1024[id] + (short int)(((long)(main_angle1024[id])*unit_time_count) / unit_time_num));
 
               goal_speed1024[id] = main_speed1024[id];
             }
@@ -635,7 +719,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
               if( unit_time_count == (unit_time_num-1) )
               {
                 // use target angle in order to reduce the last step error
-                result_[joint_name]->goal_position_	= convertw4095ToRad(target_angle1024[id]);
+                action_result_[joint_name]->goal_position_	= convertw4095ToRad(target_angle1024[id]);
               }
               else
               {
@@ -644,7 +728,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
                   speed_n = (short int)(((long)(0 - last_out_speed1024[id]) * unit_time_count) / unit_time_num);
                   goal_speed1024[id] = last_out_speed1024[id] + speed_n;
 
-                  result_[joint_name]->goal_position_
+                  action_result_[joint_name]->goal_position_
                   = convertw4095ToRad(start_angle1024[id] + (short)((((long)(last_out_speed1024[id] + (speed_n>>1)) * unit_time_count * 144) / 15) >> 9));
 
                 }
@@ -652,7 +736,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
                 {
                   // Same as MAIN Section
                   // because some servos need to be rotate, others do not.
-                  result_[joint_name]->goal_position_
+                  action_result_[joint_name]->goal_position_
                   = convertw4095ToRad(start_angle1024[id] + (short int)(((long)(main_angle1024[id]) * unit_time_count) / unit_time_num));
 
                   goal_speed1024[id] = main_speed1024[id];
@@ -660,7 +744,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
               }
             }
           }
-          //result_[_joint_name]->position_p_gain = ( 256 >> (play_page_.header.pgain[bID] >> 4) ) << 2 ;
+          //action_result_[_joint_name]->position_p_gain = ( 256 >> (play_page_.header.pgain[bID] >> 4) ) << 2 ;
         }
       }
     }
