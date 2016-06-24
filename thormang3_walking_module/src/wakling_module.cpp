@@ -58,7 +58,7 @@ const std::string WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG = "Failed_to_add
 const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_START_MSG = "Balance_Param_Setting_Started";
 const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISH_MSG = "Balance_Param_Setting_Finished";
 const std::string WalkingStatusMSG::WALKING_MODULE_IS_ENABLED_MSG = "Walking_Module_is_enabled";
-const std::string WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG = "Walking_Module_is_not_enabled";
+const std::string WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG = "Walking_Module_is_disabled";
 const std::string WalkingStatusMSG::WALKING_START_MSG = "Walking_Started";
 const std::string WalkingStatusMSG::WALKING_FINISH_MSG = "Walking_Finished";
 
@@ -181,16 +181,16 @@ void WalkingMotionModule::initialize(const int control_cycle_msec, robotis_frame
   online_walking->LANDING_CONTROLLER_GAIN = 0;
 
   //time constant
-  online_walking->BALANCE_ANKLE_ROLL_TIME_CONSTANT_BY_IMU    = 0.2;
-  online_walking->BALANCE_ANKLE_PITCH_TIME_CONSTANT_BY_IMU    = 0.2;
+  online_walking->BALANCE_ANKLE_ROLL_TIME_CONSTANT_BY_IMU  = 0.2;
+  online_walking->BALANCE_ANKLE_PITCH_TIME_CONSTANT_BY_IMU = 0.2;
 
-  online_walking->BALANCE_X_TIME_CONSTANT                    = 0.1;
-  online_walking->BALANCE_Y_TIME_CONSTANT                    = 0.1;
-  online_walking->BALANCE_Z_TIME_CONSTANT                    = 0.1;
-  online_walking->BALANCE_RIGHT_ANKLE_ROLL_TIME_CONSTANT    = 0.1;
-  online_walking->BALANCE_RIGHT_ANKLE_PITCH_TIME_CONSTANT    = 0.1;
-  online_walking->BALANCE_LEFT_ANKLE_ROLL_TIME_CONSTANT         = 0.1;
-  online_walking->BALANCE_LEFT_ANKLE_PITCH_TIME_CONSTANT    = 0.1;
+  online_walking->BALANCE_X_TIME_CONSTANT                  = 0.1;
+  online_walking->BALANCE_Y_TIME_CONSTANT                  = 0.1;
+  online_walking->BALANCE_Z_TIME_CONSTANT                  = 0.1;
+  online_walking->BALANCE_RIGHT_ANKLE_ROLL_TIME_CONSTANT   = 0.1;
+  online_walking->BALANCE_RIGHT_ANKLE_PITCH_TIME_CONSTANT  = 0.1;
+  online_walking->BALANCE_LEFT_ANKLE_ROLL_TIME_CONSTANT    = 0.1;
+  online_walking->BALANCE_LEFT_ANKLE_PITCH_TIME_CONSTANT   = 0.1;
 
 
   online_walking->COB_X_MANUAL_ADJUSTMENT_M    = -10.0*0.001;
@@ -758,7 +758,7 @@ void WalkingMotionModule::onModuleDisable()
   previous_running_ = present_running = false;
 
   RobotisOnlineWalking *prev_walking = RobotisOnlineWalking::getInstance();
-  std::string status_msg = WalkingStatusMSG::WALKING_MODULE_IS_ENABLED_MSG;
+  std::string status_msg = WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG;
   balance_update_with_loop_ = false;
   prev_walking->HIP_ROLL_FEEDFORWARD_ANGLE_RAD = 0.0;
 
