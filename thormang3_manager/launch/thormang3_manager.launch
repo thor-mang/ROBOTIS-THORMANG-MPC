@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 
 <launch>
+  
+  <!-- Executing this here to be separated from oder parameter load -->
+  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
+    
+
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->
   <arg name="use_imu" default="true" />
   <arg name="use_lidar" default="true" />
@@ -28,8 +33,8 @@
 
   <!-- ros control module -->
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
-  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
-  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
+
+  
     	 
   <!-- imu sensor package -->
   <!--<include file="$(find imu_3dm_gx4)/launch/imu.launch" if="$(arg use_imu)" /> -->
@@ -40,4 +45,7 @@
 
   <!-- THORMANG3 Manager Node -->
   <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen" />
+
+  <!-- Executing this here to be separated from oder parameter load -->
+  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
 </launch>
