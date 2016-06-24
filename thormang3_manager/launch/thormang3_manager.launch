@@ -1,6 +1,9 @@
 <?xml version="1.0" ?>
 
 <launch>
+  <!-- Executing this here to be separated from second parameter load -->
+  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
+
   <arg name="use_imu" default="true" />
   <arg name="use_lidar" default="true" />
   <arg name="gazebo" default="false" />
@@ -29,10 +32,7 @@
 
   <!-- ros control module -->
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
-
-  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
-  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
-                	 
+           	 
   <!-- imu sensor package -->
   <!--<include file="$(find imu_3dm_gx4)/launch/imu.launch" if="$(arg use_imu)" /> -->
   <include file="$(find microstrain_3dm_gx3_45)/launch/thor3_imu.launch" if="$(arg use_imu)" />
@@ -42,4 +42,7 @@
 
   <!-- THORMANG3 Manager -->
   <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen"/>
+
+  <!-- Executing this here to be separated from first parameter load -->
+  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
 </launch>
