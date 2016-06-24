@@ -161,6 +161,7 @@ void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
     std::string status_msg = "Action Module is not enabled";
     ROS_INFO_STREAM(status_msg);
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+    return;
   }
 
   if(msg->data == -1)
@@ -199,6 +200,7 @@ void ActionModule::startActionCallback(const thormang3_action_module_msgs::Start
     std::string status_msg = "Action Module is not enabled";
     ROS_INFO_STREAM(status_msg);
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+    return;
   }
 
   if(msg->page_num == -1)
