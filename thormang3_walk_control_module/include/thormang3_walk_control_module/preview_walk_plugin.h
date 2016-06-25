@@ -33,12 +33,16 @@
 
 #include <vigir_walk_control/walk_controller_plugin.h>
 
+#include <thor_mang_footstep_planning_plugins/thor_mang_step_plan_msg_plugin.h>
+
 
 
 namespace thormang3
 {
+using namespace vigir_footstep_planning;
 using namespace vigir_footstep_planning_msgs;
 using namespace vigir_walk_control;
+using namespace thor_mang_footstep_planning;
 
 class PreviewWalkPlugin
   : public WalkControllerPlugin
@@ -52,27 +56,54 @@ public:
   virtual ~PreviewWalkPlugin();
 
   /**
-   * @brief We have to initialize all variables at beginning of new step plan
-   * execution here.
+   * @brief Sets the StepPlanMsgPlugin to be used.
+   * @param plugin Plugin of type StepPlanMsgPlugin
+   */
+  void setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin) override;
+
+  /**
+   * @brief Merges given step plan to the current step queue of steps. Hereby, two cases have to considered:
+   * 1. In case of an empty step queue (robot is standing) the step plan has to begin with step index 0.
+   * 2. In case of an non-empty step queue (robot is walking) the first step of the step plan has to be
+   * identical with the corresponding step (=same step index) in the step queue. Be aware that already performed
+   * steps have been popped from step queue and therefore are not exisiting anymore.
+   * The default implementation resets the plugin previously when in FINISHED or FAILED state.
+   * @param step_plan Step plan to be merged into step queue.
+   */
+  virtual void updateStepPlan(const msgs::StepPlan& step_plan) override;
+
+  /**
+   * @brief This method is called when new step plan has been enqueued and previously the walk controller state was IDLE.
    */
   void initWalk() override;
 
   /**
-   * @brief Simulates handling of walking engine and triggers in regular interval
-   * a succesful execution of a step.
+   * @brief PreProcess Method is called before processing walk controller, e.g. for precompute/update data or check walking engine status.
+   * For keeping the default behavior running, following variables has to be properly updated here:
+   * - feedback.first_changeable_step_index
+   * - next_step_index_needed
+   * - setState(FINISEHD) when execution of all steps were successfully completed
+   * - setState(FAILED) when an error has occured
    */
   void preProcess(const ros::TimerEvent& event) override;
 
   /**
-   * @brief Handles fake execution of step. In fact it does nothing as accepting
-   * the step.
-   * @param Step to be executed
-   * @return Returns always true for demonstration
+   * @brief This method will be called when the next step should be added to execution pipeline. The call of this function should
+   * be triggered by the process(...) method when nextStepIndexNeeded has been changed.
+   * @param step Step to be executed now
    */
   bool executeStep(const msgs::Step& step) override;
 
+  /**
+   * @brief Will be called when (soft) stop is requested and resets plugin.
+   */
+  void stop() override;
+
 protected:
-  ros::Time next_step_needed_time_;
+  ThorMangStepPlanMsgPlugin::ConstPtr thor_mang_step_plan_msg_plugin_;
+  ROBOTIS::StepData last_step_data_;
+
+  int last_remaining_unreserved_steps_;
 };
 }
 
