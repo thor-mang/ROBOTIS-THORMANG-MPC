@@ -154,6 +154,7 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
     if (dxl)
     {
       pos_[joint_name] = dxl->dxl_state_->present_position_;
+      cmd_[joint_name] = NAN;
       vel_[joint_name] = dxl->dxl_state_->present_velocity_;
       eff_[joint_name] = dxl->dxl_state_->present_torque_;
     }
