@@ -145,7 +145,6 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
   }
 
   /** update joints */
-
   for(std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
@@ -154,6 +153,7 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
     if (dxl)
     {
       pos_[joint_name] = dxl->dxl_state->present_position;
+      cmd_[joint_name] = NAN;
       vel_[joint_name] = dxl->dxl_state->present_velocity;
       eff_[joint_name] = dxl->dxl_state->present_current;
     }
@@ -179,7 +179,6 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
   for(std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
-
     result[joint_name]->goal_position = cmd_[joint_name];
   }
 }
