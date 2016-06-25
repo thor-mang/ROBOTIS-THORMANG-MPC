@@ -37,7 +37,6 @@
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
            	 
   <!-- imu sensor package -->
-  <!--<include file="$(find imu_3dm_gx4)/launch/imu.launch" if="$(arg use_imu)" /> -->
   <include file="$(find microstrain_3dm_gx3_45)/launch/thor3_imu.launch" if="$(arg use_imu)" />
 
   <!-- lidar -->

@@ -460,33 +460,3 @@ head_p      :   # H42-20-S300-R
 head_lidar_spinning_joint:
     goal_velocity        : 100
        
-#r_arm_grip  :   # GRIPPER
-#   return_delay_time     :   10    
-#   operating_mode        :    3     
-#   shutdown              :   48    
-#   #homing_offset        :    0  there is no homming offset in ctrl table of gripper
-#   torque_limit          :  250
-#   max_position_limit    :  750
-#   min_position_limit    :    0
-#   goal_torque           :  310
-#   goal_velocity         :    0
-#   goal_acceleration     :    0
-#   position_p_gain       :   64
-#   #velocity_p_gain      :  440
-#   #velocity_i_gain      :   40
-       
-#l_arm_grip  :   # GRIPPER
-#   return_delay_time     :   10   
-#   operating_mode        :    3    
-#   shutdown              :   48   
-#   #homing_offset        :    0  there is no homming offset in ctrl table of gripper   
-#   torque_limit          :  250
-#   max_position_limit    :  750
-#   min_position_limit    :    0
-#   goal_torque           :  310
-#   goal_velocity         :    0
-#   goal_acceleration     :    0
-#   position_p_gain       :   64
-#   #velocity_p_gain      :  440
-#   #velocity_i_gain      :   40
-       
