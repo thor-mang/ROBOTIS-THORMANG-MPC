@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   thormang3_walking_module
   vigir_walk_control
+  thor_mang_footstep_planning_plugins
 )
 
 ## System dependencies are found with CMake's conventions
@@ -91,7 +92,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_walk_control_module
-  CATKIN_DEPENDS roscpp actionlib_msgs actionlib std_msgs thormang3_walking_module vigir_walk_control
+  CATKIN_DEPENDS roscpp actionlib_msgs actionlib std_msgs thormang3_walking_module vigir_walk_control thor_mang_footstep_planning_plugins
 #  DEPENDS system_lib
 )
 
