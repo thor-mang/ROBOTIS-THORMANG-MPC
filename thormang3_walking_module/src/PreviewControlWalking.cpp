@@ -534,12 +534,14 @@ void PreviewControlWalking::Initialize()
 	epl.x -=  COB_X_MANUAL_ADJUSTMENT_M;
 	double angle[12];
 	if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false) {
-		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
+		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);    
+    pthread_mutex_unlock(&m_mutex_lock);
 		return;
 	}
 
 	if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false) {
 		printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
+    pthread_mutex_unlock(&m_mutex_lock);
 		return;
 	}
 
@@ -766,12 +768,14 @@ void PreviewControlWalking::LocalizeAllWalkingParameter()
 
 	double angle[12];
 	if(thormang3_kd_->InverseKinematicsforRightLeg(&angle[0], epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw) == false)	{
-		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);
+		printf("IK not Solved EPR : %f %f %f %f %f %f\n", epr.x, epr.y, epr.z, epr.roll, epr.pitch, epr.yaw);    
+    pthread_mutex_unlock(&m_mutex_lock);
 		return;
 	}
 
 	if(thormang3_kd_->InverseKinematicsforLeftLeg(&angle[6], epl.x, epl.y, epl.z, epl.roll, epl.pitch, epl.yaw) == false)	{
 		printf("IK not Solved EPL : %f %f %f %f %f %f\n", epl.x, epr.y, epl.z, epl.roll, epl.pitch, epl.yaw);
+    pthread_mutex_unlock(&m_mutex_lock);
 		return;
 	}
 

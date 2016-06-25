@@ -43,6 +43,7 @@ add_library(thormang3_walking_module
   src/LinearAlgebra.cpp
   src/WaklingModule.cpp
   src/PreviewControlWalking.cpp
+  src/WalkingModuleCommon.cpp
 )
 
 ## Add cmake target dependencies of the library
