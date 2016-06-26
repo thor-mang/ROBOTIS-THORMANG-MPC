@@ -24,7 +24,7 @@
   <param name="action_file_path"         value="$(find thormang3_action_module)/data/motion_4096.bin" />
 
   <!-- Robot Model & TF -->
-  <include file="$(find thormang3_description)/launch/thormang3_mpc.launch">
+  <include file="$(find thormang3_description)/launch/robot_model.launch">
     <arg name="robot_name" value="$(arg robot_name)" />
     <arg name="use_hands" value="$(arg use_hands)" />
     <arg name="pinned" value="$(arg pinned)" />
