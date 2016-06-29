@@ -663,11 +663,18 @@ void	WalkingMotionModule::IMUDataOutputCallback(const sensor_msgs::Imu::ConstPtr
 	Eigen::Quaterniond imu_quat;
 	tf::quaternionMsgToEigen(msg->orientation, imu_quat);
 
+  // rotate imu sensor values back to raw sensor frame
+  Eigen::AngleAxisd rotX(-M_PI, Eigen::Vector3d::UnitX());
+  Eigen::AngleAxisd rotZ(-M_PI, Eigen::Vector3d::UnitZ());
+
+  imu_quat = rotX * rotZ * imu_quat;
+
 	Eigen::MatrixXd imu_mat = (RX_PI_3x3*(imu_quat.toRotationMatrix()))*RZ_PI_3x3;
 
 	double roll  = atan2( imu_mat.coeff(2,1), imu_mat.coeff(2,2));
 	double pitch = atan2(-imu_mat.coeff(2,0), sqrt(powDI(imu_mat.coeff(2,1), 2) + powDI(imu_mat.coeff(2,2), 2)));
 	double yaw   = atan2( imu_mat.coeff(1,0), imu_mat.coeff(0,0));
+
 
 	PreviewControlWalking::GetInstance()->current_imu_roll_rad = roll;
 	PreviewControlWalking::GetInstance()->current_imu_pitch_rad = pitch;
