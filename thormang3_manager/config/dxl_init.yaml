@@ -448,8 +448,8 @@ head_p      :   # H42-20-S300-R
    shutdown              : 58    
    homing_offset         : 0     
    torque_limit          : 372
-   max_position_limit    : 151900
-   min_position_limit    : -151900
+   max_position_limit    : 63000
+   min_position_limit    : -36153
    goal_torque           : 372
    goal_velocity         : 0
    goal_acceleration     : 0
