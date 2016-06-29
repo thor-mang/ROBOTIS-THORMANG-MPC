@@ -458,5 +458,5 @@ head_p      :   # H42-20-S300-R
    #velocity_i_gain      : 40
    
 head_lidar_spinning_joint:
-    goal_velocity        : 0
+    goal_velocity        : 100
        
