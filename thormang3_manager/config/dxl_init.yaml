@@ -10,8 +10,8 @@ r_arm_sh_p1 :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
 
 l_arm_sh_p1 :   # H54-200-S500-R
    return_delay_time     :  10    
@@ -25,8 +25,8 @@ l_arm_sh_p1 :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 r_arm_sh_r  :   # H54-100-S500-R
    return_delay_time     :  10    
@@ -40,8 +40,8 @@ r_arm_sh_r  :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 l_arm_sh_r  :   # H54-100-S500-R
    return_delay_time     :  10    
@@ -55,8 +55,8 @@ l_arm_sh_r  :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 r_arm_sh_p2 :   # H54-100-S500-R
    return_delay_time     :  10    
@@ -70,8 +70,8 @@ r_arm_sh_p2 :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 l_arm_sh_p2 :   # H54-100-S500-R
    return_delay_time     :  10    
@@ -85,8 +85,8 @@ l_arm_sh_p2 :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 r_arm_el_y  :   # H54-100-S500-R
    return_delay_time     :  10    
@@ -100,8 +100,8 @@ r_arm_el_y  :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 l_arm_el_y  :   # H54-100-S500-R
    return_delay_time     :  10    
@@ -115,8 +115,8 @@ l_arm_el_y  :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 r_arm_wr_r  :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -130,8 +130,8 @@ r_arm_wr_r  :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
        
 l_arm_wr_r  :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -145,8 +145,8 @@ l_arm_wr_r  :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
        
 r_arm_wr_y  :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -162,8 +162,8 @@ r_arm_wr_y  :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
        
 l_arm_wr_y  :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -179,8 +179,8 @@ l_arm_wr_y  :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
 
 r_arm_wr_p  :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -198,8 +198,8 @@ r_arm_wr_p  :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
 
 l_arm_wr_p  :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -217,8 +217,8 @@ l_arm_wr_p  :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
 
 r_leg_hip_y :   # H54-100-S500-R
    return_delay_time     :  10   
@@ -232,8 +232,8 @@ r_leg_hip_y :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 360 # default * 2.0
-   #velocity_i_gain      : 904 # default * 2.0
+   velocity_p_gain      : 360 # default * 2.0
+   velocity_i_gain      : 904 # default * 2.0
        
 l_leg_hip_y :   # H54-100-S500-R
    return_delay_time     :  10   
@@ -247,8 +247,8 @@ l_leg_hip_y :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 360 # default * 2.0
-   #velocity_i_gain      : 904 # default * 2.0
+   velocity_p_gain      : 360 # default * 2.0
+   velocity_i_gain      : 904 # default * 2.0
        
 r_leg_hip_r :   # H54-200-S500-R
    return_delay_time     :  10    
@@ -262,8 +262,8 @@ r_leg_hip_r :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 l_leg_hip_r :   # H54-200-S500-R
    return_delay_time     :  10    
@@ -277,8 +277,8 @@ l_leg_hip_r :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 r_leg_hip_p :   # H54-200-B500-R
    return_delay_time     :  10    
@@ -292,8 +292,8 @@ r_leg_hip_p :   # H54-200-B500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 l_leg_hip_p :   # H54-200-B500-R
    return_delay_time     :  10    
@@ -307,8 +307,8 @@ l_leg_hip_p :   # H54-200-B500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 r_leg_kn_p  :   # H54-200-S500-R
    return_delay_time     :  10    
@@ -322,8 +322,8 @@ r_leg_kn_p  :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 770  # default(308) * 2.5
-   #velocity_i_gain      : 1932 # default(773) * 2.5
+   velocity_p_gain      : 770  # default(308) * 2.5
+   velocity_i_gain      : 1932 # default(773) * 2.5
        
 l_leg_kn_p  :   # H54-200-S500-R
    return_delay_time     :  10    
@@ -337,8 +337,8 @@ l_leg_kn_p  :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 770  # default(308) * 2.5
-   #velocity_i_gain      : 1932 # default(773) * 2.5
+   velocity_p_gain      : 770  # default(308) * 2.5
+   velocity_i_gain      : 1932 # default(773) * 2.5
        
 r_leg_an_p  :   # H54-200-B500-R
    return_delay_time     :  10    
@@ -354,8 +354,8 @@ r_leg_an_p  :   # H54-200-B500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 l_leg_an_p  :   # H54-200-B500-R
    return_delay_time     :  10    
@@ -371,8 +371,8 @@ l_leg_an_p  :   # H54-200-B500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 r_leg_an_r  :   # H54-200-S500-R
    return_delay_time     :  10    
@@ -390,8 +390,8 @@ r_leg_an_r  :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 l_leg_an_r  :   # H54-200-S500-R
    return_delay_time     :  10    
@@ -409,8 +409,8 @@ l_leg_an_r  :   # H54-200-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 616  # default(308) * 2.0
-   #velocity_i_gain      : 1546 # default(773) * 2.0
+   velocity_p_gain      : 616  # default(308) * 2.0
+   velocity_i_gain      : 1546 # default(773) * 2.0
        
 torso_y     :   # H54-100-S500-R
    return_delay_time     :  10    
@@ -424,8 +424,8 @@ torso_y     :   # H54-100-S500-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 180
-   #velocity_i_gain      : 452
+   velocity_p_gain      : 180
+   velocity_i_gain      : 452
        
 head_y      :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -439,8 +439,8 @@ head_y      :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
        
 head_p      :   # H42-20-S300-R
    return_delay_time     : 10    
@@ -454,8 +454,8 @@ head_p      :   # H42-20-S300-R
    goal_velocity         : 0
    goal_acceleration     : 0
    position_p_gain       : 32
-   #velocity_p_gain      : 440
-   #velocity_i_gain      : 40
+   velocity_p_gain      : 440
+   velocity_i_gain      : 40
    
 head_lidar_spinning_joint:
     goal_velocity        : 100
