@@ -11,7 +11,9 @@
             head_traj_controller
             torso_traj_controller
             left_arm_traj_controller
-            right_arm_traj_controller"/>
+            right_arm_traj_controller
+            left_leg_traj_controller
+            right_leg_traj_controller"/>
   </group>
 </launch>
 
