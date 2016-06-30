@@ -58,6 +58,12 @@ void WalkControlModule::queueThread()
   vigir_generic_params::ParameterManager::initialize(nh);
   vigir_pluginlib::PluginManager::initialize(nh);
 
+  // dynamic reconfigure
+  dynamic_reconfigure::Server<thormang3_walk_control_module::BalanceParametersConfig> server(nh);
+  dynamic_reconfigure::Server<thormang3_walk_control_module::BalanceParametersConfig>::CallbackType callback_f;
+  callback_f = boost::bind(&WalkControlModule::dynamicReconfigureCallback, this, _1, _2);
+  server.setCallback(callback_f);
+
   // start walk controller
   walk_controller_.reset(new vigir_walk_control::WalkController(nh, false));
 
@@ -66,5 +72,50 @@ void WalkControlModule::queueThread()
   ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(nh.ok())
     callback_queue.callAvailable(duration);
+}
+
+void WalkControlModule::dynamicReconfigureCallback(thormang3_walk_control_module::BalanceParametersConfig &config, uint32_t level)
+{
+  boost::mutex::scoped_lock lock(walk_control_mutex_);
+
+  ROS_INFO_STREAM("Balance parameters changed.");
+  thormang3_walking_module_msgs::BalanceParam  balance_param_msg;
+
+  // ####### cob_offset #######
+  balance_param_msg.cob_x_offset_m = config.cob_x_offset_m;
+  balance_param_msg.cob_y_offset_m = config.cob_y_offset_m;
+
+  // ####### FeedForward #####
+  balance_param_msg.hip_roll_swap_angle_rad = config.hip_roll_swap_angle_rad;
+
+  // ########## Gain ########
+  // gyro
+  balance_param_msg.gyro_gain = config.gyro_gain;
+
+  // imu
+  balance_param_msg.foot_roll_angle_gain = config.foot_roll_angle_gain;
+  balance_param_msg.foot_pitch_angle_gain = config.foot_pitch_angle_gain;
+  // ft sensor
+  balance_param_msg.foot_x_force_gain = config.foot_x_force_gain;
+  balance_param_msg.foot_y_force_gain = config.foot_z_force_gain;
+  balance_param_msg.foot_z_force_gain = config.foot_z_force_gain;
+  balance_param_msg.foot_roll_torque_gain = config.foot_roll_torque_gain;
+  balance_param_msg.foot_pitch_torque_gain = config.foot_pitch_torque_gain;
+
+  // ########## TIME CONSTANT ##########
+  // imu
+  balance_param_msg.foot_roll_angle_time_constant = config.foot_roll_angle_time_constant;
+  balance_param_msg.foot_pitch_angle_time_constant = config.foot_pitch_angle_time_constant;
+  // ft
+  balance_param_msg.foot_x_force_time_constant = config.foot_x_force_time_constant;
+  balance_param_msg.foot_y_force_time_constant = config.foot_y_force_time_constant;
+  balance_param_msg.foot_z_force_time_constant = config.foot_z_force_time_constant;
+  balance_param_msg.foot_roll_torque_time_constant = config.foot_roll_torque_time_constant;
+  balance_param_msg.foot_pitch_torque_time_constant = config.foot_pitch_torque_time_constant;
+
+  WalkingMotionModule::setBalanceParam(balance_param_msg);
+
+  // ######### Balance Enabled #########
+  WalkControlModule::balance_update_with_loop_ = config.balance;
 }
 }

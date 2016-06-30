@@ -85,7 +85,7 @@ public:
   double l_foot_fx_N_,  l_foot_fy_N_,  l_foot_fz_N_;
   double l_foot_Tx_Nm_, l_foot_Ty_Nm_, l_foot_Tz_Nm_;
 
-private:
+protected:
   void publishRobotPose(void);
 
   void publishStatusMsg(unsigned int type, std::string msg);

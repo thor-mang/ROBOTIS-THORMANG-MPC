@@ -42,6 +42,10 @@
 // vigir walk control
 #include <vigir_walk_control/walk_controller.h>
 
+// dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <thormang3_walk_control_module/BalanceParametersConfig.h>
+
 
 
 namespace thormang3
@@ -66,6 +70,7 @@ public:
 
 private:
   void queueThread();
+  void dynamicReconfigureCallback(thormang3_walk_control_module::BalanceParametersConfig &config, uint32_t level);
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
