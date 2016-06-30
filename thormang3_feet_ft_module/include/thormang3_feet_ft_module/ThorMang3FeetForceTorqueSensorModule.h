@@ -42,10 +42,10 @@ private:
 
     ThorMang3KinematicsDynamics* thormang3_kd_;
 
-	bool exist_r_leg_an_r_;
-	bool exist_r_leg_an_p_;
-	bool exist_l_leg_an_r_;
-	bool exist_l_leg_an_p_;
+    bool exist_r_leg_an_r_;
+    bool exist_r_leg_an_p_;
+    bool exist_l_leg_an_r_;
+    bool exist_l_leg_an_p_;
 
     void QueueThread();
 
@@ -62,46 +62,46 @@ private:
     double total_mass_;
     double r_foot_ft_scale_factor_, l_foot_ft_scale_factor_;
 
-	ros::Publisher  thormang3_foot_ft_status_pub_;
-	ros::Publisher  thormang3_foot_ft_both_ft_pub_;
+    ros::Publisher  thormang3_foot_ft_status_pub_;
+    ros::Publisher  thormang3_foot_ft_both_ft_pub_;
 
-	void FootForceTorqueSensorInitialize();
-	void SaveFTCalibrationData(const std::string &path);
+    void FootForceTorqueSensorInitialize();
+    void SaveFTCalibrationData(const std::string &path);
 
-	void FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
+    void FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
     void PublishStatusMsg(unsigned int type, std::string msg);
     void PublishBothFTData(int type, Eigen::MatrixXd &ft_right, Eigen::MatrixXd &ft_left);
     
-    bool	has_ft_air_;
-    bool	has_ft_gnd_;
-    int 	ft_command_;
-    int		ft_period_;
-    int		ft_get_count_;
+    bool has_ft_air_;
+    bool has_ft_gnd_;
+    int  ft_command_;
+    int  ft_period_;
+    int  ft_get_count_;
 
     enum
 	{
     	FT_NONE = 0,
     	FT_AIR = 1,
-		FT_GND = 2,
-		FT_CALC = 3,
+        FT_GND = 2,
+        FT_CALC = 3,
 	};
 
 public:
     ThorMang3FeetForceTorqueSensor();
     ~ThorMang3FeetForceTorqueSensor();
     
-  bool gazebo_mode;
-  std::string gazebo_robot_name;
+    bool gazebo_mode;
+    std::string gazebo_robot_name;
 
-	double r_foot_fx_raw_N,  r_foot_fy_raw_N,  r_foot_fz_raw_N;
-	double r_foot_tx_raw_Nm, r_foot_ty_raw_Nm, r_foot_tz_raw_Nm;
-	double l_foot_fx_raw_N,  l_foot_fy_raw_N,  l_foot_fz_raw_N;
-	double l_foot_tx_raw_Nm, l_foot_ty_raw_Nm, l_foot_tz_raw_Nm;
+    double r_foot_fx_raw_N,  r_foot_fy_raw_N,  r_foot_fz_raw_N;
+    double r_foot_tx_raw_Nm, r_foot_ty_raw_Nm, r_foot_tz_raw_Nm;
+    double l_foot_fx_raw_N,  l_foot_fy_raw_N,  l_foot_fz_raw_N;
+    double l_foot_tx_raw_Nm, l_foot_ty_raw_Nm, l_foot_tz_raw_Nm;
 
-	double r_foot_fx_scaled_N,  r_foot_fy_scaled_N,  r_foot_fz_scaled_N;
-	double r_foot_tx_scaled_Nm, r_foot_ty_scaled_Nm, r_foot_tz_scaled_Nm;
-	double l_foot_fx_scaled_N,  l_foot_fy_scaled_N,  l_foot_fz_scaled_N;
-	double l_foot_tx_scaled_Nm, l_foot_ty_scaled_Nm, l_foot_tz_scaled_Nm;
+    double r_foot_fx_scaled_N,  r_foot_fy_scaled_N,  r_foot_fz_scaled_N;
+    double r_foot_tx_scaled_Nm, r_foot_ty_scaled_Nm, r_foot_tz_scaled_Nm;
+    double l_foot_fx_scaled_N,  l_foot_fy_scaled_N,  l_foot_fz_scaled_N;
+    double l_foot_tx_scaled_Nm, l_foot_ty_scaled_Nm, l_foot_tz_scaled_Nm;
 
 
     /* ROS Topic Callback Functions */
@@ -110,8 +110,8 @@ public:
     void    Initialize(const int control_cycle_msec, Robot *robot);
     void    Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors);
 
-    void	Stop();
-    bool	IsRunning();
+    void    Stop();
+    bool    IsRunning();
 
 
 };

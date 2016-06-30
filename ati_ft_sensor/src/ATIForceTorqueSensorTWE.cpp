@@ -140,7 +140,7 @@ bool ATIForceTorqueSensorTWE::parseFTData(const std::string& ft_data_path, const
 
 
 void ATIForceTorqueSensorTWE::SetCurrentVoltageOutput(double voltage0, double voltage1, double voltage2,
-							 	 	 	 	 	 	  double voltage3, double voltage4, double voltage5)
+                                                      double voltage3, double voltage4, double voltage5)
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
   
@@ -152,7 +152,7 @@ void ATIForceTorqueSensorTWE::SetCurrentVoltageOutput(double voltage0, double vo
 	ft_current_volatge_.coeffRef(5, 0) = voltage5;
 
 
-	ft_raw_		= 					  ft_coeff_mat_ * (ft_current_volatge_ - ft_unload_volatge_);
+  ft_raw_		= ft_coeff_mat_ * (ft_current_volatge_ - ft_unload_volatge_);
 
 	ft_scale_param_mutex_.lock();
 	ft_scaled_	= ft_scale_factor_ * (ft_raw_ - ft_null_ );
@@ -183,7 +183,7 @@ void ATIForceTorqueSensorTWE::SetCurrentVoltageOutput(Eigen::MatrixXd voltage)
 	}
 
 	SetCurrentVoltageOutput(voltage.coeff(0,0), voltage.coeff(1,0), voltage.coeff(2,0),
-							voltage.coeff(3,0), voltage.coeff(4,0), voltage.coeff(5,0));
+                          voltage.coeff(3,0), voltage.coeff(4,0), voltage.coeff(5,0));
 }
 
 void ATIForceTorqueSensorTWE::SetCurrentForceTorqueRaw(const geometry_msgs::Wrench& ft_msg)
@@ -204,46 +204,45 @@ void ATIForceTorqueSensorTWE::SetCurrentForceTorqueRaw(const geometry_msgs::Wren
 Eigen::MatrixXd ATIForceTorqueSensorTWE::GetCurrentForceTorqueRaw()
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
-	return ft_raw_;
+  return ft_raw_;
 }
 
 Eigen::MatrixXd ATIForceTorqueSensorTWE::GetCurrentForceTorqueScaled()
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
-	return ft_scaled_;
+  return ft_scaled_;
 }
 
 void ATIForceTorqueSensorTWE::GetCurrentForceTorqueRaw(double* force_x_N,   double* force_y_N,   double* force_z_N,
-						      	  	  	  	  	 double* torque_x_Nm, double* torque_y_Nm, double* torque_z_Nm)
+                                                       double* torque_x_Nm, double* torque_y_Nm, double* torque_z_Nm)
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
-  
-	*force_x_N   = ft_raw_.coeff(0,0);
-	*force_y_N   = ft_raw_.coeff(1,0);
-	*force_z_N   = ft_raw_.coeff(2,0);
-	*torque_x_Nm = ft_raw_.coeff(3,0);
-	*torque_y_Nm = ft_raw_.coeff(4,0);
-	*torque_z_Nm = ft_raw_.coeff(5,0);
+
+  *force_x_N   = ft_raw_.coeff(0,0);
+  *force_y_N   = ft_raw_.coeff(1,0);
+  *force_z_N   = ft_raw_.coeff(2,0);
+  *torque_x_Nm = ft_raw_.coeff(3,0);
+  *torque_y_Nm = ft_raw_.coeff(4,0);
+  *torque_z_Nm = ft_raw_.coeff(5,0);
 }
 
 void ATIForceTorqueSensorTWE::GetCurrentForceTorqueScaled(double* force_x_N,   double* force_y_N,   double* force_z_N,
-						     	 	 	 	 	 	   double* torque_x_Nm, double* torque_y_Nm, double* torque_z_Nm)
+                                                          double* torque_x_Nm, double* torque_y_Nm, double* torque_z_Nm)
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
-  
-	*force_x_N   = ft_scaled_.coeff(0,0);
-	*force_y_N   = ft_scaled_.coeff(1,0);
-	*force_z_N   = ft_scaled_.coeff(2,0);
-	*torque_x_Nm = ft_scaled_.coeff(3,0);
-	*torque_y_Nm = ft_scaled_.coeff(4,0);
-	*torque_z_Nm = ft_scaled_.coeff(5,0);
+
+  *force_x_N   = ft_scaled_.coeff(0,0);
+  *force_y_N   = ft_scaled_.coeff(1,0);
+  *force_z_N   = ft_scaled_.coeff(2,0);
+  *torque_x_Nm = ft_scaled_.coeff(3,0);
+  *torque_y_Nm = ft_scaled_.coeff(4,0);
+  *torque_z_Nm = ft_scaled_.coeff(5,0);
 }
 
 void ATIForceTorqueSensorTWE::SetCurrentVoltageOutputPublishForceTorque(double voltage0, double voltage1, double voltage2,
-		 	 	 	 	 	 	 	 	 	   	   	   	   	   	  double voltage3, double voltage4, double voltage5)
+                                                                        double voltage3, double voltage4, double voltage5)
 {
-	SetCurrentVoltageOutput(voltage0, voltage1, voltage2, voltage3, voltage4, voltage5);
-  
+  SetCurrentVoltageOutput(voltage0, voltage1, voltage2, voltage3, voltage4, voltage5);
   PublishForceTorque();
 }
 

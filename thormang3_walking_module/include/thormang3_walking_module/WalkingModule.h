@@ -100,6 +100,7 @@ private:
     int		StepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, StepData& des);
     int		StepDataToStepDataMsg(StepData& src, thormang3_walking_module_msgs::StepData& des);
 
+protected:
     void	SetBalanceParam(thormang3_walking_module_msgs::BalanceParam& balance_param_msg);
 
 public:

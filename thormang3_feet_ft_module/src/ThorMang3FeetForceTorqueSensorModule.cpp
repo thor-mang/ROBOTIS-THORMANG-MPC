@@ -252,7 +252,7 @@ void 	ThorMang3FeetForceTorqueSensor::FTSensorCalibrationCommandCallback(const s
         		PublishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "There is no value for calibration");
         }
         else if(_command == "ft_save") {
-            ros::NodeHandle _ros_node;
+          ros::NodeHandle _ros_node;
         	std::string _ft_calib_data_path = _ros_node.param<std::string>("ft_calibration_data_path", "");
         	SaveFTCalibrationData(_ft_calib_data_path);
         }

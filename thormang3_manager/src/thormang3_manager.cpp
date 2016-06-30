@@ -79,8 +79,8 @@ int main(int argc, char **argv)
     _controller->AddMotionModule((MotionModule*)BaseModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)ManipulationModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)HeadControlModule::GetInstance());
-    _controller->AddMotionModule((MotionModule*)WalkingMotionModule::GetInstance()); // Encaspulated by WalkControlModule
-    //_controller->AddMotionModule((MotionModule*)thormang3::WalkControlModule::GetInstance());
+    //_controller->AddMotionModule((MotionModule*)WalkingMotionModule::GetInstance()); // Encaspulated by WalkControlModule
+    _controller->AddMotionModule((MotionModule*)thormang3::WalkControlModule::GetInstance());
     _controller->AddMotionModule((MotionModule*)RosControlModule::GetInstance());
 
     _controller->StartTimer();

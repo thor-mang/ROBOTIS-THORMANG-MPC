@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   thormang3_walking_module
   vigir_walk_control
   thor_mang_footstep_planning_plugins
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -28,6 +29,12 @@ find_package(catkin REQUIRED COMPONENTS
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 # catkin_python_setup()
+
+########### Dynamic Reconfigure
+
+generate_dynamic_reconfigure_options(
+  cfg/BalanceParameters.cfg
+)
 
 ################################################
 ## Declare ROS messages, services and actions ##

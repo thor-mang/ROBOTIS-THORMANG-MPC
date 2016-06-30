@@ -42,6 +42,10 @@
 // vigir walk control
 #include <vigir_walk_control/walk_controller.h>
 
+// dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <thormang3_walk_control_module/BalanceParametersConfig.h>
+
 
 
 namespace thormang3
@@ -67,6 +71,7 @@ public:
   void Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, double> sensors) override;
 
 private:
+  void DynamicReconfigureCallback(thormang3_walk_control_module::BalanceParametersConfig &config, uint32_t level);
   void QueueThread();
 
   int control_cycle_msec_;
