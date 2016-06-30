@@ -696,6 +696,9 @@ void WalkingMotionModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   RobotisOnlineWalking::getInstance()->current_gyro_roll_rad_per_sec_  = -1.0*(msg->angular_velocity.x);
   RobotisOnlineWalking::getInstance()->current_gyro_pitch_rad_per_sec_ = -1.0*(msg->angular_velocity.y);
 
+#warning rotate imu sensor values back to raw sensor frame
+  /// TODO rotate imu sensor values back to raw sensor frame
+
   Eigen::Quaterniond imu_quat;
   tf::quaternionMsgToEigen(msg->orientation, RobotisOnlineWalking::getInstance()->quat_current_imu_);
 }
