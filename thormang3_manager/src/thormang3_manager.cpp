@@ -65,9 +65,10 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if(_offset_file != "")
+    if(_offset_file != "") {
+        _controller->offset_config_path_ = _offset_file;
         _controller->LoadOffset(_offset_file);
-
+    }
     sleep(1);
 
     /* Add Sensor Module */

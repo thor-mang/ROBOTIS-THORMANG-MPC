@@ -2,7 +2,6 @@ offset:
   head_p: 0
   head_y: 0
   l_arm_el_y: 0
-  l_arm_grip: 0
   l_arm_sh_p1: 0
   l_arm_sh_p2: 0
   l_arm_sh_r: 0
@@ -16,7 +15,6 @@ offset:
   l_leg_hip_y: 0
   l_leg_kn_p: 0
   r_arm_el_y: 0
-  r_arm_grip: 0
   r_arm_sh_p1: 0
   r_arm_sh_p2: 0
   r_arm_sh_r: 0
