@@ -89,7 +89,7 @@ void PreviewWalkPlugin::initWalk()
   //prev_walking->SetInitalWaistYawAngle();
 
   int min_steps_in_queue = 2;
-  
+
   // initialize with +min_steps_in_queue that will cause trigger to fill step data of walking engine in preProcess() step
   last_remaining_unreserved_steps_ = prev_walking->GetNumofRemainingUnreservedStepData() + min_steps_in_queue;
 
@@ -177,7 +177,7 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
 {
   /// TODO: flush step
   ROBOTIS::PreviewControlWalking* prev_walking = ROBOTIS::PreviewControlWalking::GetInstance();
-  
+
   // add initial step
   if (step.step_index == 0)
   {
@@ -191,8 +191,9 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
       return false;
     }
     last_step_data_ = step_data;
-    
+
     // add final step
+    step_data.PositionData.dZ_Swap_Amplitude = 0.0;
     step_data.PositionData.bMovingFoot = ROBOTIS::MovingFootFlag::NFootMove;
     step_data.TimeData.bWalkingState = ROBOTIS::WalkingStateFlag::InWalkingEnding;
     step_data.TimeData.dAbsStepTime += 2.0;
@@ -206,7 +207,7 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
   {
     // remove final step to be updated
     prev_walking->EraseLastStepData();
-    
+
     /// TODO: use robotis reference step here?
     ROBOTIS::StepData step_data = last_step_data_;
     step_data << step;
@@ -217,8 +218,9 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
       return false;
     }
     last_step_data_ = step_data;
-    
+
     // readd updated final step
+    step_data.PositionData.dZ_Swap_Amplitude = 0.0;
     step_data.PositionData.bMovingFoot = ROBOTIS::MovingFootFlag::NFootMove;
     step_data.TimeData.bWalkingState = ROBOTIS::WalkingStateFlag::InWalkingEnding;
     step_data.TimeData.dAbsStepTime += 2.0;
@@ -234,7 +236,7 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
   msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
   feedback.first_changeable_step_index++;
   setFeedbackState(feedback);
-  
+
   ROS_INFO("[PreviewWalkPlugin] Send step %i to walking engine.", step.step_index);
   return true;
 }
