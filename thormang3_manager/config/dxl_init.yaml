@@ -256,8 +256,8 @@ r_leg_hip_r :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  48356
-   min_position_limit    : -13530
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -271,12 +271,12 @@ l_leg_hip_r :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  13530
-   min_position_limit    : -48356
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
-   position_p_gain       : 32
+   position_p_gain       : 3200
    velocity_p_gain      : 616  # default(308) * 2.0
    velocity_i_gain      : 1546 # default(773) * 2.0
        
@@ -286,8 +286,8 @@ r_leg_hip_p :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  -8365
    torque_limit          :  1240
-   max_position_limit    :  133105
-   min_position_limit    : -62107
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -301,8 +301,8 @@ l_leg_hip_p :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  8365
    torque_limit          :  1240
-   max_position_limit    :  57179
-   min_position_limit    : -141945
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -316,8 +316,8 @@ r_leg_kn_p  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         : -12548    # -9 deg
    torque_limit          :  1240
-   max_position_limit    :  148510
-   min_position_limit    : -206291
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -331,8 +331,8 @@ l_leg_kn_p  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  12548   #9 deg
    torque_limit          :  1240
-   max_position_limit    :  214844
-   min_position_limit    : -134789
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
@@ -346,8 +346,8 @@ r_leg_an_p  :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  8365  # 6 deg
    torque_limit          :  1240
-   max_position_limit    :  70347
-   min_position_limit    : -120835
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    goal_torque           : 1240
@@ -363,8 +363,8 @@ l_leg_an_p  :   # H54-200-B500-R
    shutdown              :  58    
    homing_offset         :  -8365   # 6 deg
    torque_limit          :  1240
-   max_position_limit    :  137220
-   min_position_limit    : -60323
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    goal_torque           : 1240
@@ -380,8 +380,8 @@ r_leg_an_r  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  137150
-   min_position_limit    : -47071
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    external_port_mod_3   : 0
@@ -399,8 +399,8 @@ l_leg_an_r  :   # H54-200-S500-R
    shutdown              :  58    
    homing_offset         :  0
    torque_limit          :  1240
-   max_position_limit    :  54190
-   min_position_limit    : -85288
+   max_position_limit    :  250950
+   min_position_limit    : -250950
    external_port_mod_1   : 0
    external_port_mod_2   : 0
    external_port_mod_3   : 0
