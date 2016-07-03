@@ -1,21 +1,19 @@
 offset:
-  head_p: 0
-  l_leg_an_r: -0.01
-  l_leg_hip_p: 0
-  l_arm_sh_p2: 0
-  l_arm_sh_p1: 0
-  l_arm_el_y: 0
-  head_y: 0
   l_arm_sh_r: 0
+  l_arm_sh_p2: 0
+  head_lidar_spinning_joint: 0
+  head_p: 0
   l_arm_wr_p: 0
   l_arm_wr_r: 0
   l_arm_wr_y: 0
   l_f0_j0: 0
   l_f1_j0: 0
   l_leg_an_p: 0.03
-  l_leg_hip_r: 0
+  l_leg_an_r: -0.01
+  l_leg_hip_p: 0
+  l_leg_hip_r: -0.02
   l_leg_hip_y: 0
-  l_leg_kn_p: -0.01
+  l_leg_kn_p: -0.04
   r_arm_el_y: 0
   r_arm_sh_p1: 0
   r_arm_sh_p2: 0
@@ -31,5 +29,7 @@ offset:
   r_leg_hip_r: 0.03
   r_leg_hip_y: 0
   r_leg_kn_p: 0
-  torso_y: -0
-  head_lidar_spinning_joint: 0
+  torso_y: -0.02
+  l_arm_sh_p1: 0
+  l_arm_el_y: 0
+  head_y: 0
