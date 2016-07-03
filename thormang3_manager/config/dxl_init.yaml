@@ -276,7 +276,7 @@ l_leg_hip_r :   # H54-200-S500-R
    goal_torque           : 1240
    goal_velocity         : 0
    goal_acceleration     : 0
-   position_p_gain       : 3200
+   position_p_gain       : 32
    velocity_p_gain      : 616  # default(308) * 2.0
    velocity_i_gain      : 1546 # default(773) * 2.0
        
