@@ -41,60 +41,59 @@
 using namespace ROBOTIS;
 
 SensorModuleTutorial::SensorModuleTutorial()
-    : control_cycle_msec_(8)
+  : control_cycle_msec_(8)
 {
-    module_name_    = "test_sensor_module"; // set unique module name
+  module_name_ = "test_sensor_module"; // set unique module name
 
-    result_["test_sensor"] = 0.0;
+  result_["test_sensor"] = 0.0;
 }
 
 SensorModuleTutorial::~SensorModuleTutorial()
 {
-    queue_thread_.join();
+  queue_thread_.join();
 }
 
 void SensorModuleTutorial::initialize(const int control_cycle_msec, robotis_framework::Robot *robot)
 {
-    control_cycle_msec_ = control_cycle_msec;
-    queue_thread_       = boost::thread(boost::bind(&SensorModuleTutorial::queueThread, this));
+  control_cycle_msec_ = control_cycle_msec;
+  queue_thread_ = boost::thread(boost::bind(&SensorModuleTutorial::queueThread, this));
 }
 
 void SensorModuleTutorial::queueThread()
 {
-    ros::NodeHandle     _ros_node;
-    ros::CallbackQueue  _callback_queue;
+  ros::NodeHandle ros_node;
+  ros::CallbackQueue callback_queue;
 
-    _ros_node.setCallbackQueue(&_callback_queue);
+  ros_node.setCallbackQueue(&callback_queue);
 
-    /* subscriber */
-    sub1_ = _ros_node.subscribe("/tutorial_topic", 10, &SensorModuleTutorial::topicCallback, this);
+  /* subscriber */
+  sub1_ = ros_node.subscribe("/tutorial_topic", 10, &SensorModuleTutorial::topicCallback, this);
 
-    /* publisher */
-    pub1_ = _ros_node.advertise<std_msgs::Int16>("/tutorial_publish", 1, true);
+  /* publisher */
+  pub1_ = ros_node.advertise<std_msgs::Int16>("/tutorial_publish", 1, true);
 
-    while(_ros_node.ok())
-    {
-        _callback_queue.callAvailable();
-        usleep(100);
-    }
+  while (ros_node.ok())
+  {
+    callback_queue.callAvailable();
+    usleep(1000);
+  }
 }
 
 void SensorModuleTutorial::topicCallback(const std_msgs::Int16::ConstPtr &msg)
 {
-    std_msgs::Int16 _msg;
-    _msg.data = msg->data;
-    pub1_.publish(_msg);
+  std_msgs::Int16 msg_int16;
+  msg_int16.data = msg->data;
+  pub1_.publish(msg_int16);
 }
 
 void SensorModuleTutorial::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
-                                   std::map<std::string, robotis_framework::Sensor *> sensors)
+    std::map<std::string, robotis_framework::Sensor *> sensors)
 {
-    uint16_t ext_port_data_1 = dxls["r_leg_an_p"]->dxl_state_->bulk_read_table_["external_port_data_1"];
-    uint16_t ext_port_data_2 = dxls["r_leg_an_p"]->dxl_state_->bulk_read_table_["external_port_data_2"];
+  uint16_t ext_port_data_1 = dxls["r_leg_an_p"]->dxl_state_->bulk_read_table_["external_port_data_1"];
+  uint16_t ext_port_data_2 = dxls["r_leg_an_p"]->dxl_state_->bulk_read_table_["external_port_data_2"];
 
-    // ...
+  // ...
 
-    result_["test_sensor"] = 0.0;
+  result_["test_sensor"] = 0.0;
 }
-
 

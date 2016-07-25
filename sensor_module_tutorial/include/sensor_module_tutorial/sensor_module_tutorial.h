@@ -38,7 +38,6 @@
 #ifndef SENSOR_MODULE_TUTORIAL_SENSOR_MODULE_TUTORIAL_H_
 #define SENSOR_MODULE_TUTORIAL_SENSOR_MODULE_TUTORIAL_H_
 
-
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <std_msgs/Int16.h>
@@ -54,27 +53,27 @@ class SensorModuleTutorial
     public robotis_framework::Singleton<SensorModuleTutorial>
 {
 private:
-    int             control_cycle_msec_;
-    boost::thread   queue_thread_;
+  int           control_cycle_msec_;
+  boost::thread queue_thread_;
 
-    /* sample subscriber & publisher */
-    ros::Subscriber sub1_;
-    ros::Publisher  pub1_;
+  /* sample subscriber & publisher */
+  ros::Subscriber sub1_;
+  ros::Publisher  pub1_;
 
-    void queueThread();
+  void queueThread();
 
 public:
-    SensorModuleTutorial();
-    virtual ~SensorModuleTutorial();
+  SensorModuleTutorial();
+  virtual ~SensorModuleTutorial();
 
-    /* ROS Topic Callback Functions */
-    void    topicCallback(const std_msgs::Int16::ConstPtr &msg);
+  /* ROS Topic Callback Functions */
+  void topicCallback(const std_msgs::Int16::ConstPtr &msg);
 
-    void    initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-    void    process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors);
+  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
+  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
+               std::map<std::string, robotis_framework::Sensor *> sensors);
 };
 
 }
-
 
 #endif /* SENSOR_MODULE_TUTORIAL_SENSOR_MODULE_TUTORIAL_H_ */
