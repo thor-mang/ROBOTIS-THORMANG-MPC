@@ -130,6 +130,7 @@ private:
   double left_fz_sigmoid_target_;
   double left_fz_sigmoid_shift_;
 
+  double total_mass_of_robot_;
   double right_dsp_fz_N_, right_ssp_fz_N_;
   double left_dsp_fz_N_,  left_ssp_fz_N_;
 
