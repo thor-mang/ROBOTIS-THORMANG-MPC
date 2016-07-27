@@ -58,7 +58,7 @@ private:
 
   /* sample subscriber & publisher */
   ros::Subscriber sub1_;
-  ros::Publisher pub1_;
+  ros::Publisher  pub1_;
 
   void queueThread();
 

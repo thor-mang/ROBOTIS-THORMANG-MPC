@@ -65,29 +65,29 @@ void MotionModuleTutorial::initialize(const int control_cycle_msec, robotis_fram
 
 void MotionModuleTutorial::queueThread()
 {
-  ros::NodeHandle _ros_node;
-  ros::CallbackQueue _callback_queue;
+  ros::NodeHandle ros_node;
+  ros::CallbackQueue callback_queue;
 
-  _ros_node.setCallbackQueue(&_callback_queue);
+  ros_node.setCallbackQueue(&callback_queue);
 
   /* subscriber */
-  sub1_ = _ros_node.subscribe("/tutorial_topic", 10, &MotionModuleTutorial::topicCallback, this);
+  sub1_ = ros_node.subscribe("/tutorial_topic", 10, &MotionModuleTutorial::topicCallback, this);
 
   /* publisher */
-  pub1_ = _ros_node.advertise<std_msgs::Int16>("/tutorial_publish", 1, true);
+  pub1_ = ros_node.advertise<std_msgs::Int16>("/tutorial_publish", 1, true);
 
-  while (_ros_node.ok())
+  while (ros_node.ok())
   {
-    _callback_queue.callAvailable();
-    usleep(100);
+    callback_queue.callAvailable();
+    usleep(1000);
   }
 }
 
 void MotionModuleTutorial::topicCallback(const std_msgs::Int16::ConstPtr &msg)
 {
-  std_msgs::Int16 _msg;
-  _msg.data = msg->data;
-  pub1_.publish(_msg);
+  std_msgs::Int16 msg_int16;
+  msg_int16.data = msg->data;
+  pub1_.publish(msg_int16);
 }
 
 void MotionModuleTutorial::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
