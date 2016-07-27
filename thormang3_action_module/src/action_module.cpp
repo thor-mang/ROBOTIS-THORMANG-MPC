@@ -266,6 +266,7 @@ void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
       else
       {
         result_it->second->goal_position_ = dxls_it->second->dxl_state_->goal_position_;
+		action_result_[joint_name]->goal_position_ = dxls_it->second->dxl_state_->goal_position_;
       }
     }
     action_module_enabled_ = false;

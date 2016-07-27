@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_math
   thormang3_kinematics_dynamics
   thormang3_walking_module_msgs
+  thormang3_balance_control
 )
 
 find_package(Eigen REQUIRED)
@@ -35,8 +36,8 @@ include_directories(
 ## Declare a C++ library
 add_library(thormang3_walking_module
   src/linear_algebra.cpp
-  src/wakling_module.cpp
   src/robotis_online_walking.cpp
+  src/wakling_module.cpp
 )
 
 add_dependencies(thormang3_walking_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

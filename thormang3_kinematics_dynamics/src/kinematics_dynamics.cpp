@@ -673,10 +673,9 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
   }
 
   thigh_length_m_ = std::fabs(thormang3_link_data_[ID_R_LEG_START+2*3]->relative_position_.coeff(2,0));
-  calf_length_m_ = std::fabs(thormang3_link_data_[ID_R_LEG_START+2*4]->relative_position_.coeff(2,0));
-  ankle_length_m_ =
-      std::fabs(thormang3_link_data_[ID_R_LEG_FT]->relative_position_.coeff(2,0)
-          + thormang3_link_data_[ID_R_LEG_END]->relative_position_.coeff(2,0));
+  calf_length_m_  = std::fabs(thormang3_link_data_[ID_R_LEG_START+2*4]->relative_position_.coeff(2,0));
+  ankle_length_m_ = std::fabs(thormang3_link_data_[ID_R_LEG_FT]->relative_position_.coeff(2,0)
+                              + thormang3_link_data_[ID_R_LEG_END]->relative_position_.coeff(2,0));
   leg_side_offset_m_ 	= 2.0*(std::fabs(thormang3_link_data_[ID_R_LEG_START]->relative_position_.coeff(1, 0)));
 
 }
