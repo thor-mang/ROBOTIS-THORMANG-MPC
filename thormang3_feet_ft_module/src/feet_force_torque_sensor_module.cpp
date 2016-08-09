@@ -247,7 +247,7 @@ void  FeetForceTorqueSensor::ftSensorCalibrationCommandCallback(const std_msgs::
       r_foot_ft_gnd_.fill(0);
       l_foot_ft_gnd_.fill(0);
     }
-    else if(command == "ft_apply")
+    else if(command == "ft_send")
     {
       if(has_ft_air_ && has_ft_gnd_)
       {
@@ -255,10 +255,10 @@ void  FeetForceTorqueSensor::ftSensorCalibrationCommandCallback(const std_msgs::
         scale = ( r_foot_ft_gnd_.coeff(2, 0) + l_foot_ft_gnd_.coeff(2, 0) - r_foot_ft_air_.coeff(2, 0) - l_foot_ft_air_.coeff(2, 0) ) / (total_mass_ * GRAVITY_ACCELERATION);
         r_foot_ft_scale_factor_ = l_foot_ft_scale_factor_ = scale;
 
-        PRINT_VAR(r_foot_ft_scale_factor_);
-        PRINT_VAR(l_foot_ft_scale_factor_);
-        PRINT_MAT(r_foot_ft_air_) ;
-        PRINT_MAT(l_foot_ft_air_) ;
+        ROS_INFO_STREAM("r_foot_ft_scale_factor_ : " << r_foot_ft_scale_factor_);
+        ROS_INFO_STREAM("l_foot_ft_scale_factor_ : " << l_foot_ft_scale_factor_);
+        ROS_INFO_STREAM("r_foot_ft_air_ : " << r_foot_ft_air_.transpose());
+        ROS_INFO_STREAM("l_foot_ft_air_ : " << l_foot_ft_air_.transpose());
         r_foot_ft_sensor_.setScaleParam(r_foot_ft_scale_factor_, r_foot_ft_air_);
         l_foot_ft_sensor_.setScaleParam(l_foot_ft_scale_factor_, l_foot_ft_air_);
 
