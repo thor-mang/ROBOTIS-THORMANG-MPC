@@ -655,10 +655,10 @@ void WalkingMotionModule::setBalanceParam(thormang3_walking_module_msgs::Balance
 
   online_walking->balance_ctrl_.foot_force_z_diff_ctrl_.time_constant_sec_ = balance_param_msg.foot_z_force_time_constant;
 
-  online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.gain_  = balance_param_msg.foot_roll_torque_time_constant;
-  online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.gain_ = balance_param_msg.foot_pitch_torque_time_constant;
-  online_walking->balance_ctrl_.left_foot_torque_roll_ctrl_.gain_   = balance_param_msg.foot_roll_torque_time_constant;
-  online_walking->balance_ctrl_.left_foot_torque_pitch_ctrl_.gain_  = balance_param_msg.foot_pitch_torque_time_constant;
+  online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.time_constant_sec_  = balance_param_msg.foot_roll_torque_time_constant;
+  online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.time_constant_sec_ = balance_param_msg.foot_pitch_torque_time_constant;
+  online_walking->balance_ctrl_.left_foot_torque_roll_ctrl_.time_constant_sec_   = balance_param_msg.foot_roll_torque_time_constant;
+  online_walking->balance_ctrl_.left_foot_torque_pitch_ctrl_.time_constant_sec_  = balance_param_msg.foot_pitch_torque_time_constant;
 }
 
 bool WalkingMotionModule::removeExistingStepDataServiceCallback(thormang3_walking_module_msgs::RemoveExistingStepData::Request  &req,
@@ -784,12 +784,12 @@ void WalkingMotionModule::process(std::map<std::string, robotis_framework::Dynam
       + balance_update_polynomial_coeff_.coeff(4,0) * robotis_framework::powDI(balance_update_sys_time_ , 1)
       + balance_update_polynomial_coeff_.coeff(5,0) ;
 
-      current_balance_param_.cob_x_offset_m                  = current_update_gain*(desired_balance_param_.cob_x_offset_m                   - previous_balance_param_.cob_x_offset_m                  ) + previous_balance_param_.cob_x_offset_m;
-      current_balance_param_.cob_y_offset_m                  = current_update_gain*(desired_balance_param_.cob_y_offset_m                   - previous_balance_param_.cob_y_offset_m                  ) + previous_balance_param_.cob_y_offset_m;
+      current_balance_param_.cob_x_offset_m                  = current_update_gain*(desired_balance_param_.cob_x_offset_m                   - previous_balance_param_.cob_x_offset_m                ) + previous_balance_param_.cob_x_offset_m;
+      current_balance_param_.cob_y_offset_m                  = current_update_gain*(desired_balance_param_.cob_y_offset_m                   - previous_balance_param_.cob_y_offset_m                ) + previous_balance_param_.cob_y_offset_m;
 
-      current_balance_param_.hip_roll_swap_angle_rad           = current_update_gain*(desired_balance_param_.hip_roll_swap_angle_rad         - previous_balance_param_.hip_roll_swap_angle_rad        ) + previous_balance_param_.hip_roll_swap_angle_rad;
+      current_balance_param_.hip_roll_swap_angle_rad         = current_update_gain*(desired_balance_param_.hip_roll_swap_angle_rad         - previous_balance_param_.hip_roll_swap_angle_rad        ) + previous_balance_param_.hip_roll_swap_angle_rad;
 
-      current_balance_param_.gyro_gain                       = current_update_gain*(desired_balance_param_.gyro_gain                         - previous_balance_param_.gyro_gain                      ) + previous_balance_param_.gyro_gain;
+      current_balance_param_.gyro_gain                       = current_update_gain*(desired_balance_param_.gyro_gain                         - previous_balance_param_.gyro_gain                    ) + previous_balance_param_.gyro_gain;
       current_balance_param_.foot_roll_angle_gain            = current_update_gain*(desired_balance_param_.foot_roll_angle_gain            - previous_balance_param_.foot_roll_angle_gain           ) + previous_balance_param_.foot_roll_angle_gain;
       current_balance_param_.foot_pitch_angle_gain           = current_update_gain*(desired_balance_param_.foot_pitch_angle_gain           - previous_balance_param_.foot_pitch_angle_gain          ) + previous_balance_param_.foot_pitch_angle_gain;
 

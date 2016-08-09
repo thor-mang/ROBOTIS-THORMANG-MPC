@@ -87,10 +87,7 @@ RobotisBalanceControl::RobotisBalanceControl()
   balance_control_error_ = BalanceControlError::NoError;
   control_cycle_sec_ = 0.008;
 
-  desired_global_to_robot_      = Eigen::MatrixXd::Identity(4,4);
-  desired_global_to_cob_        = Eigen::MatrixXd::Identity(4,4);
-  desired_global_to_right_foot_ = Eigen::MatrixXd::Identity(4,4);
-  desired_global_to_left_foot_  = Eigen::MatrixXd::Identity(4,4);
+  desired_robot_to_cob_        = Eigen::MatrixXd::Identity(4,4);
   desired_robot_to_right_foot_  = Eigen::MatrixXd::Identity(4,4);
   desired_robot_to_left_foot_   = Eigen::MatrixXd::Identity(4,4);
 
@@ -153,9 +150,9 @@ RobotisBalanceControl::RobotisBalanceControl()
   foot_pitch_adjustment_abs_max_rad_ = 15.0*DEGREE2RADIAN;
   foot_yaw_adjustment_abs_max_rad_   = 15.0*DEGREE2RADIAN;
 
-  mat_cob_adjustment_        = Eigen::MatrixXd::Identity(4,4);
-  mat_right_foot_adjustment_ = Eigen::MatrixXd::Identity(4,4);
-  mat_left_foot_adjustment_  = Eigen::MatrixXd::Identity(4,4);
+  mat_robot_to_cob_modified_        = Eigen::MatrixXd::Identity(4,4);
+  mat_robot_to_right_foot_modified_ = Eigen::MatrixXd::Identity(4,4);
+  mat_robot_to_left_foot_modified_  = Eigen::MatrixXd::Identity(4,4);
   pose_cob_adjustment_         = Eigen::VectorXd::Zero(6);
   pose_right_foot_adjustment_  = Eigen::VectorXd::Zero(6);;
   pose_left_foot_adjustment_   = Eigen::VectorXd::Zero(6);;
@@ -193,7 +190,7 @@ void RobotisBalanceControl::initialize(const int control_cycle_msec)
   left_foot_torque_pitch_ctrl_.control_cycle_sec_ = control_cycle_sec_;
 }
 
-void RobotisBalanceControl::process(int *balance_error, Eigen::MatrixXd *cob_adjustment, Eigen::MatrixXd *right_foot_adjustment, Eigen::MatrixXd *left_foot_adjustment)
+void RobotisBalanceControl::process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified)
 {
   balance_control_error_ = BalanceControlError::NoError;
 
@@ -241,7 +238,6 @@ void RobotisBalanceControl::process(int *balance_error, Eigen::MatrixXd *cob_adj
   l_foot_roll_adjustment_by_torque_roll_ = left_foot_torque_roll_ctrl_.getDampingControllerOutput(current_left_tx_Nm_);
   l_foot_pitch_adjustment_by_torque_pitch_ = left_foot_torque_pitch_ctrl_.getDampingControllerOutput(current_left_ty_Nm_);
 
-
   // sum of sensory balance result
   pose_cob_adjustment_.coeffRef(0) = cob_x_manual_adjustment_m_;
   pose_cob_adjustment_.coeffRef(1) = cob_y_manual_adjustment_m_;
@@ -282,56 +278,54 @@ void RobotisBalanceControl::process(int *balance_error, Eigen::MatrixXd *cob_adj
   pose_cob_adjustment_.coeffRef(2) = copysign(fmin(fabs(pose_cob_adjustment_.coeff(2)), cob_x_adjustment_abs_max_m_      ), pose_cob_adjustment_.coeff(2));
   pose_cob_adjustment_.coeffRef(3) = copysign(fmin(fabs(pose_cob_adjustment_.coeff(3)), cob_roll_adjustment_abs_max_rad_ ), pose_cob_adjustment_.coeff(3));
   pose_cob_adjustment_.coeffRef(4) = copysign(fmin(fabs(pose_cob_adjustment_.coeff(4)), cob_pitch_adjustment_abs_max_rad_), pose_cob_adjustment_.coeff(4));
-  pose_cob_adjustment_.coeffRef(5)   = 0;
+  pose_cob_adjustment_.coeffRef(5) = 0;
 
   pose_right_foot_adjustment_.coeffRef(0) = copysign(fmin(fabs(pose_right_foot_adjustment_.coeff(0)), foot_x_adjustment_abs_max_m_      ), pose_right_foot_adjustment_.coeff(0));
   pose_right_foot_adjustment_.coeffRef(1) = copysign(fmin(fabs(pose_right_foot_adjustment_.coeff(1)), foot_y_adjustment_abs_max_m_      ), pose_right_foot_adjustment_.coeff(1));
   pose_right_foot_adjustment_.coeffRef(2) = copysign(fmin(fabs(pose_right_foot_adjustment_.coeff(2)), foot_z_adjustment_abs_max_m_      ), pose_right_foot_adjustment_.coeff(2));
   pose_right_foot_adjustment_.coeffRef(3) = copysign(fmin(fabs(pose_right_foot_adjustment_.coeff(3)), foot_roll_adjustment_abs_max_rad_ ), pose_right_foot_adjustment_.coeff(3));
   pose_right_foot_adjustment_.coeffRef(4) = copysign(fmin(fabs(pose_right_foot_adjustment_.coeff(4)), foot_pitch_adjustment_abs_max_rad_), pose_right_foot_adjustment_.coeff(4));
-  pose_right_foot_adjustment_.coeffRef(5)   = 0;
+  pose_right_foot_adjustment_.coeffRef(5) = 0;
 
   pose_left_foot_adjustment_.coeffRef(0) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(0)), foot_x_adjustment_abs_max_m_      ), pose_left_foot_adjustment_.coeff(0));
   pose_left_foot_adjustment_.coeffRef(1) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(1)), foot_y_adjustment_abs_max_m_      ), pose_left_foot_adjustment_.coeff(1));
   pose_left_foot_adjustment_.coeffRef(2) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(2)), foot_z_adjustment_abs_max_m_      ), pose_left_foot_adjustment_.coeff(2));
   pose_left_foot_adjustment_.coeffRef(3) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(3)), foot_roll_adjustment_abs_max_rad_ ), pose_left_foot_adjustment_.coeff(3));
   pose_left_foot_adjustment_.coeffRef(4) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(4)), foot_pitch_adjustment_abs_max_rad_), pose_left_foot_adjustment_.coeff(4));
-  pose_left_foot_adjustment_.coeffRef(5)   = 0;
+  pose_left_foot_adjustment_.coeffRef(5) = 0;
 
-  // return result
-  mat_cob_adjustment_ = robotis_framework::getTransformationXYZRPY(pose_cob_adjustment_.coeff(0), pose_cob_adjustment_.coeff(1), pose_cob_adjustment_.coeff(2),
-      pose_cob_adjustment_.coeff(3), pose_cob_adjustment_.coeff(4), pose_cob_adjustment_.coeff(5));
+  Eigen::MatrixXd cob_rotation_adj = robotis_framework::getRotationZ(pose_cob_adjustment_.coeff(5)) * robotis_framework::getRotationY(pose_cob_adjustment_.coeff(4)) * robotis_framework::getRotationX(pose_cob_adjustment_.coeff(3));
+  Eigen::MatrixXd rf_rotation_adj = robotis_framework::getRotationZ(pose_right_foot_adjustment_.coeff(5)) * robotis_framework::getRotationY(pose_right_foot_adjustment_.coeff(4)) * robotis_framework::getRotationX(pose_right_foot_adjustment_.coeff(3));
+  Eigen::MatrixXd lf_rotation_adj = robotis_framework::getRotationZ(pose_left_foot_adjustment_.coeff(5)) * robotis_framework::getRotationY(pose_left_foot_adjustment_.coeff(4)) * robotis_framework::getRotationX(pose_left_foot_adjustment_.coeff(3));
+  mat_robot_to_cob_modified_.block<3,3>(0,0) = cob_rotation_adj * desired_robot_to_cob_.block<3,3>(0,0);
+  mat_robot_to_right_foot_modified_.block<3,3>(0,0) = rf_rotation_adj * desired_robot_to_right_foot_.block<3,3>(0,0);;
+  mat_robot_to_left_foot_modified_.block<3,3>(0,0) = lf_rotation_adj * desired_robot_to_left_foot_.block<3,3>(0,0);;
 
-  mat_right_foot_adjustment_ = robotis_framework::getTransformationXYZRPY(pose_right_foot_adjustment_.coeff(0), pose_right_foot_adjustment_.coeff(1), pose_right_foot_adjustment_.coeff(2),
-      pose_right_foot_adjustment_.coeff(3), pose_right_foot_adjustment_.coeff(4), pose_right_foot_adjustment_.coeff(5));
+  mat_robot_to_cob_modified_.coeffRef(0,3) = desired_robot_to_cob_.coeff(0,3) + pose_cob_adjustment_.coeff(0);
+  mat_robot_to_cob_modified_.coeffRef(1,3) = desired_robot_to_cob_.coeff(1,3) + pose_cob_adjustment_.coeff(1);
+  mat_robot_to_cob_modified_.coeffRef(2,3) = desired_robot_to_cob_.coeff(2,3) + pose_cob_adjustment_.coeff(2);
 
-  mat_left_foot_adjustment_ = robotis_framework::getTransformationXYZRPY(pose_left_foot_adjustment_.coeff(0), pose_left_foot_adjustment_.coeff(1), pose_left_foot_adjustment_.coeff(2),
-      pose_left_foot_adjustment_.coeff(3), pose_left_foot_adjustment_.coeff(4), pose_left_foot_adjustment_.coeff(5));
+  mat_robot_to_right_foot_modified_.coeffRef(0,3) = desired_robot_to_right_foot_.coeff(0,3) + pose_right_foot_adjustment_.coeff(0);
+  mat_robot_to_right_foot_modified_.coeffRef(1,3) = desired_robot_to_right_foot_.coeff(1,3) + pose_right_foot_adjustment_.coeff(1);
+  mat_robot_to_right_foot_modified_.coeffRef(2,3) = desired_robot_to_right_foot_.coeff(2,3) + pose_right_foot_adjustment_.coeff(2);
+
+  mat_robot_to_left_foot_modified_.coeffRef(0,3) = desired_robot_to_left_foot_.coeff(0,3) + pose_left_foot_adjustment_.coeff(0);
+  mat_robot_to_left_foot_modified_.coeffRef(1,3) = desired_robot_to_left_foot_.coeff(1,3) + pose_left_foot_adjustment_.coeff(1);
+  mat_robot_to_left_foot_modified_.coeffRef(2,3) = desired_robot_to_left_foot_.coeff(2,3) + pose_left_foot_adjustment_.coeff(2);
 
   if(balance_error != 0)
     *balance_error = balance_control_error_;
 
-//  *cob_adjustment        = Eigen::MatrixXd::Identity(4,4);
-//  *right_foot_adjustment = Eigen::MatrixXd::Identity(4,4);
-//  *left_foot_adjustment  = Eigen::MatrixXd::Identity(4,4);
-  *cob_adjustment        = mat_cob_adjustment_;
-  *right_foot_adjustment = mat_right_foot_adjustment_;
-  *left_foot_adjustment  = mat_left_foot_adjustment_;
+  *robot_to_cob_modified        = mat_robot_to_cob_modified_;
+  *robot_to_right_foot_modified = mat_robot_to_right_foot_modified_;
+  *robot_to_left_foot_modified  = mat_robot_to_left_foot_modified_;
 }
 
-void RobotisBalanceControl::setDesiredPose(const Eigen::MatrixXd &global_to_cob, const Eigen::MatrixXd &global_to_right_foot, const Eigen::MatrixXd &global_to_left_foot)
+void RobotisBalanceControl::setDesiredPose(const Eigen::MatrixXd &robot_to_cob, const Eigen::MatrixXd &robot_to_right_foot, const Eigen::MatrixXd &robot_to_left_foot)
 {
-  desired_global_to_cob_        = global_to_cob;
-  desired_global_to_right_foot_ = global_to_right_foot;
-  desired_global_to_left_foot_  = global_to_left_foot;
-
-  double cob_yaw = atan2( desired_global_to_cob_.coeff(1,0), desired_global_to_cob_.coeff(0,0));
-  desired_global_to_robot_ = robotis_framework::getTransformationXYZRPY(desired_global_to_cob_.coeff(0, 3), desired_global_to_cob_.coeff(1, 3), desired_global_to_cob_.coeff(2, 3), 0, 0, cob_yaw);
-
-  Eigen::MatrixXd robot_to_global = robotis_framework::getInverseTransformation(desired_global_to_robot_);
-
-  desired_robot_to_right_foot_ = robot_to_global * desired_global_to_right_foot_;
-  desired_robot_to_left_foot_  = robot_to_global * desired_global_to_left_foot_;;
+  desired_robot_to_cob_        = robot_to_cob;
+  desired_robot_to_right_foot_ = robot_to_right_foot;
+  desired_robot_to_left_foot_  = robot_to_left_foot;
 }
 
 void RobotisBalanceControl::setDesiredCOBGyro(double gyro_roll, double gyro_pitch)\

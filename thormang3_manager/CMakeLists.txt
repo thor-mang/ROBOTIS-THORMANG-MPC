@@ -26,6 +26,13 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Eigen REQUIRED)
 
+catkin_package(
+#   INCLUDE_DIRS include
+#  LIBRARIES thormang3_manager
+#  CATKIN_DEPENDS robotis_controller roscpp
+#  DEPENDS system_lib
+)
+
 include_directories(
   include
   ${Eigen_INCLUDE_DIRS}

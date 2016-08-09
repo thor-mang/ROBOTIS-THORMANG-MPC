@@ -134,9 +134,6 @@ private:
   double right_dsp_fz_N_, right_ssp_fz_N_;
   double left_dsp_fz_N_,  left_ssp_fz_N_;
 
-  Eigen::MatrixXd mat_cob_adjustment_;
-  Eigen::MatrixXd mat_rfoot_adjustment_;
-  Eigen::MatrixXd mat_lfoot_adjustment_;
   Eigen::MatrixXd mat_robot_to_cob_modified_, mat_cob_to_robot_modified_;
   Eigen::MatrixXd mat_robot_to_rf_modified_;
   Eigen::MatrixXd mat_robot_to_lf_modified_;

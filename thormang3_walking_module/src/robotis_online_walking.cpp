@@ -335,21 +335,12 @@ void RobotisOnlineWalking::initialize()
 
   mat_robot_to_rfoot_ = mat_robot_to_g_*mat_g_to_rfoot_;
   mat_robot_to_lfoot_ = mat_robot_to_g_*mat_g_to_lfoot_;
-  //mat_rhip_to_rfoot_ = ((((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_cob_adjustment_ ) * mat_robot_to_cob_ ) * mat_cob_to_g_ ) * mat_g_to_rfoot_;
-  //mat_lhip_to_lfoot_ = ((((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_cob_adjustment_ ) * mat_robot_to_cob_ ) * mat_cob_to_g_ ) * mat_g_to_lfoot_;
 
-  balance_ctrl_.process(&balance_error_, &mat_cob_adjustment_, &mat_rfoot_adjustment_, &mat_lfoot_adjustment_);
-
-  mat_robot_to_cob_modified_ = mat_robot_to_cob_*mat_cob_adjustment_;
+  balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
   mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
-  mat_robot_to_rf_modified_  = mat_robot_to_g_*mat_g_to_rfoot_*mat_rfoot_adjustment_;
-  mat_robot_to_lf_modified_  = mat_robot_to_g_*mat_g_to_lfoot_*mat_lfoot_adjustment_;
 
   rhip_to_rfoot_pose_ = getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
   lhip_to_lfoot_pose_ = getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
-
-//  epr.x -=  balance_ctrl_.getCOBManualAdjustmentX();
-//  epl.x -=  balance_ctrl_.getCOBManualAdjustmentX();
 
   if(thormang3_kd_->calcInverseKinematicsForRightLeg(&r_leg_out_angle_rad_[0], rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw) == false)
   {
@@ -521,11 +512,8 @@ void RobotisOnlineWalking::reInitialize()
   mat_robot_to_rfoot_ = mat_rhip_to_cob_*mat_cob_to_g_*mat_g_to_rfoot_;
   mat_robot_to_lfoot_ = mat_lhip_to_cob_*mat_cob_to_g_*mat_g_to_lfoot_;
 
-  balance_ctrl_.process(&balance_error_, &mat_cob_adjustment_, &mat_rfoot_adjustment_, &mat_lfoot_adjustment_);
-  mat_robot_to_cob_modified_ = mat_robot_to_cob_*mat_cob_adjustment_;
+  balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
   mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
-  mat_robot_to_rf_modified_  = mat_robot_to_g_*mat_g_to_rfoot_*mat_rfoot_adjustment_;
-  mat_robot_to_lf_modified_  = mat_robot_to_g_*mat_g_to_lfoot_*mat_lfoot_adjustment_;
 
   rhip_to_rfoot_pose_ = getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
   lhip_to_lfoot_pose_ = getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
@@ -1187,8 +1175,6 @@ void RobotisOnlineWalking::process()
 
       body_roll_swap = body_roll_swap_dir * body_roll_swap;
 
-      //            printf("m_Stepdata.size :  %d, time : %f, Foot : %d  x_move: %f %f\n",
-          //                    m_StepData.size(), m_StepData[0].TimeData.dAbsStepTime, m_StepData[0].PositionData.bMovingFoot, x_move, time);
       if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
       {
         present_right_foot_pose_.x = x_move;
@@ -1211,7 +1197,6 @@ void RobotisOnlineWalking::process()
         present_left_foot_pose_.yaw = c_move;
       }
       else {
-        //printf("%d %f\n", m_WalkingTime, m_PresentLeftFootPosition.x );
         present_right_foot_pose_ = added_step_data_[0].position_data.right_foot_pose;
         present_left_foot_pose_ = added_step_data_[0].position_data.left_foot_pose;
       }
@@ -1221,14 +1206,12 @@ void RobotisOnlineWalking::process()
 
       walking_time_ += TIME_UNIT;
 
-      //fprintf(stderr, "%d, %f\n", m_WalkingTime, m_StepData[m_StepData.size() - 1].TimeData.dAbsStepTime);
-      if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5) {
-        //                m_WalkingTime = m_StepData[m_StepData.size() - 1].TimeData.dAbsStepTime;
+      if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5)
+      {
         real_running = false;
         calcStepIdxData();
         mutex_lock_.unlock();
         reInitialize();
-        //                printf("Localize\n");
       }
 
       if(balancing_index_ == BalancingPhase0 || balancing_index_ == BalancingPhase9)
@@ -1409,8 +1392,8 @@ void RobotisOnlineWalking::process()
     {
     case BalancingPhase0:
       //fprintf(stderr, "DSP : START\n");
-      r_target_fx_N = l_target_fx_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1418,8 +1401,8 @@ void RobotisOnlineWalking::process()
       break;
     case BalancingPhase1:
       //fprintf(stderr, "DSP : R--O->L\n");
-      r_target_fx_N = l_target_fx_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1431,8 +1414,8 @@ void RobotisOnlineWalking::process()
       r_target_fy_N = 0;
       r_target_fz_N = 0;
 
-      l_target_fx_N = total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fx_N = total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
       right_roll_dir = -1.0;
@@ -1444,8 +1427,8 @@ void RobotisOnlineWalking::process()
       r_target_fy_N = 0;
       r_target_fz_N = 0;
 
-      l_target_fx_N = total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fx_N = total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
       right_roll_dir = -1.0;
@@ -1453,8 +1436,8 @@ void RobotisOnlineWalking::process()
       break;
     case BalancingPhase4:
       //fprintf(stderr, "DSP : R--O<-L\n");
-      r_target_fx_N = l_target_fx_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1463,8 +1446,8 @@ void RobotisOnlineWalking::process()
       break;
     case BalancingPhase5:
       //fprintf(stderr, "DSP : R<-O--L\n");
-      r_target_fx_N = l_target_fx_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1473,8 +1456,8 @@ void RobotisOnlineWalking::process()
       break;
     case BalancingPhase6:
       //fprintf(stderr, "SSP : R_BALANCING1\n");
-      r_target_fx_N = total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
@@ -1486,8 +1469,8 @@ void RobotisOnlineWalking::process()
       break;
     case BalancingPhase7:
       //fprintf(stderr, "SSP : R_BALANCING2\n");
-      r_target_fx_N = total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
@@ -1499,8 +1482,8 @@ void RobotisOnlineWalking::process()
       break;
     case BalancingPhase8:
       //fprintf(stderr, "DSP : R->O--L");
-      r_target_fx_N = l_target_fx_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1509,8 +1492,8 @@ void RobotisOnlineWalking::process()
       break;
     case BalancingPhase9:
       //fprintf(stderr, "DSP : END");
-      r_target_fx_N = l_target_fx_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = 0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1567,9 +1550,9 @@ void RobotisOnlineWalking::process()
 
     balance_ctrl_.setDesiredCOBGyro(0,0);
     balance_ctrl_.setDesiredCOBOrientation(present_body_pose_.roll, present_body_pose_.pitch);
-    balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*0, r_target_fy_N*0, r_target_fz_N, 0, 0, 0,
-                                            l_target_fx_N*0, l_target_fy_N*0, l_target_fz_N, 0, 0, 0);
-    balance_ctrl_.setDesiredPose(mat_g_to_cob_, mat_g_to_rfoot_, mat_g_to_lfoot_);
+    balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*1.0, r_target_fy_N*1.0, r_target_fz_N, 0, 0, 0,
+                                            l_target_fx_N*1.0, l_target_fy_N*1.0, l_target_fz_N, 0, 0, 0);
+    balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
     balance_ctrl_.setCurrentGyroSensorOutput(current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_);
     balance_ctrl_.setCurrentOrientationSensorOutput(current_imu_roll_rad_, current_imu_pitch_rad_);
     balance_ctrl_.setCurrentFootForceTorqueSensorOutput(mat_right_force.coeff(0,0),  mat_right_force.coeff(1,0),  mat_right_force.coeff(2,0),
@@ -1577,24 +1560,20 @@ void RobotisOnlineWalking::process()
                                                         mat_left_force.coeff(0,0),   mat_left_force.coeff(1,0),   mat_left_force.coeff(2,0),
                                                         mat_left_torque.coeff(0,0),  mat_left_torque.coeff(1,0),  mat_left_torque.coeff(2,0));
 
-    balance_ctrl_.process(&balance_error_, &mat_cob_adjustment_, &mat_rfoot_adjustment_, &mat_lfoot_adjustment_);
-
-    mat_robot_to_cob_modified_ = mat_robot_to_cob_*mat_cob_adjustment_;
+    balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
-    mat_robot_to_rf_modified_  = mat_robot_to_g_*mat_g_to_rfoot_*mat_rfoot_adjustment_;
-    mat_robot_to_lf_modified_  = mat_robot_to_g_*mat_g_to_lfoot_*mat_lfoot_adjustment_;
     //Stabilizer End
 
     rhip_to_rfoot_pose_ = getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
     lhip_to_lfoot_pose_ = getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
 
-    if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) ) {
-      //printf("yawyaw\n");
+    if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) )
+    {
       return;
     }
 
-    if((lhip_to_lfoot_pose_.yaw < -30.0*M_PI/180.0) || (lhip_to_lfoot_pose_.yaw > 30.0*M_PI/180.0) ) {
-      //printf("yawyaw2\n");
+    if((lhip_to_lfoot_pose_.yaw < -30.0*M_PI/180.0) || (lhip_to_lfoot_pose_.yaw > 30.0*M_PI/180.0) )
+    {
       return;
     }
 
@@ -1638,7 +1617,6 @@ void RobotisOnlineWalking::process()
       out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
       out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
     }
-
   }
 }
 

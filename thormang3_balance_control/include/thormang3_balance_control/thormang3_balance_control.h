@@ -79,9 +79,9 @@ public:
 
   void initialize(const int control_cycle_msec);
 
-  void process(int *balance_error, Eigen::MatrixXd *cob_adjustment, Eigen::MatrixXd *right_foot_adjustment, Eigen::MatrixXd *left_foot_adjustment);
+  void process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified);
 
-  void setDesiredPose(const Eigen::MatrixXd &global_to_cob, const Eigen::MatrixXd &global_to_right_foot, const Eigen::MatrixXd &global_to_left_foot);
+  void setDesiredPose(const Eigen::MatrixXd &robot_to_cob, const Eigen::MatrixXd &robot_to_right_foot, const Eigen::MatrixXd &robot_to_left_foot);
 
   // all arguments are with respect to robot coordinate.
   void setDesiredCOBGyro(double gyro_roll, double gyro_pitch);
@@ -138,10 +138,7 @@ private:
   double control_cycle_sec_;
 
   // desired pose
-  Eigen::MatrixXd desired_global_to_robot_;
-  Eigen::MatrixXd desired_global_to_cob_;
-  Eigen::MatrixXd desired_global_to_right_foot_;
-  Eigen::MatrixXd desired_global_to_left_foot_;
+  Eigen::MatrixXd desired_robot_to_cob_;
   Eigen::MatrixXd desired_robot_to_right_foot_;
   Eigen::MatrixXd desired_robot_to_left_foot_;
 
@@ -193,9 +190,9 @@ private:
   Eigen::VectorXd pose_right_foot_adjustment_;
   Eigen::VectorXd pose_left_foot_adjustment_;
 
-  Eigen::MatrixXd mat_cob_adjustment_;
-  Eigen::MatrixXd mat_right_foot_adjustment_;
-  Eigen::MatrixXd mat_left_foot_adjustment_;
+  Eigen::MatrixXd mat_robot_to_cob_modified_;
+  Eigen::MatrixXd mat_robot_to_right_foot_modified_;
+  Eigen::MatrixXd mat_robot_to_left_foot_modified_;
 
   // maximum adjustment
   double cob_x_adjustment_abs_max_m_;
