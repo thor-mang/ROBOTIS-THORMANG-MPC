@@ -252,19 +252,19 @@ int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_m
   des.time_data.   walking_state           = src.time_data.walking_state;
   des.time_data.abs_step_time            = src.time_data.abs_step_time;
   des.time_data.dsp_ratio               = src.time_data.dsp_ratio;
-  des.time_data.start_time_delay_ratio_x         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_x;
-  des.time_data.start_time_delay_ratio_y         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_y;
-  des.time_data.start_time_delay_ratio_z         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_z;
-  des.time_data.start_time_delay_ratio_roll      = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_roll;
-  des.time_data.start_time_delay_ratio_pitch     = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_pitch;
-  des.time_data.start_time_delay_ratio_yaw       = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_yaw;
-
-  des.time_data.finish_time_advance_ratio_x     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_x;
-  des.time_data.finish_time_advance_ratio_y     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_y;
-  des.time_data.finish_time_advance_ratio_z     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_z;
-  des.time_data.finish_time_advance_ratio_roll  = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_roll;
-  des.time_data.finish_time_advance_ratio_pitch = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_pitch;
-  des.time_data.finish_time_advance_ratio_yaw   = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_yaw;
+//  des.time_data.start_time_delay_ratio_x         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_x;
+//  des.time_data.start_time_delay_ratio_y         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_y;
+//  des.time_data.start_time_delay_ratio_z         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_z;
+//  des.time_data.start_time_delay_ratio_roll      = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_roll;
+//  des.time_data.start_time_delay_ratio_pitch     = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_pitch;
+//  des.time_data.start_time_delay_ratio_yaw       = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_yaw;
+//
+//  des.time_data.finish_time_advance_ratio_x     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_x;
+//  des.time_data.finish_time_advance_ratio_y     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_y;
+//  des.time_data.finish_time_advance_ratio_z     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_z;
+//  des.time_data.finish_time_advance_ratio_roll  = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_roll;
+//  des.time_data.finish_time_advance_ratio_pitch = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_pitch;
+//  des.time_data.finish_time_advance_ratio_yaw   = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_yaw;
 
 
   des.position_data.moving_foot         = src.position_data.moving_foot;
@@ -291,6 +291,20 @@ int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_m
   des.position_data.left_foot_pose.roll   = src.position_data.left_foot_pose.roll;
   des.position_data.left_foot_pose.pitch  = src.position_data.left_foot_pose.pitch;
   des.position_data.left_foot_pose.yaw    = src.position_data.left_foot_pose.yaw;
+
+  des.time_data.start_time_delay_ratio_x         = src.time_data.start_time_delay_ratio_x;
+  des.time_data.start_time_delay_ratio_y         = src.time_data.start_time_delay_ratio_y;
+  des.time_data.start_time_delay_ratio_z         = src.time_data.start_time_delay_ratio_z;
+  des.time_data.start_time_delay_ratio_roll      = src.time_data.start_time_delay_ratio_roll;
+  des.time_data.start_time_delay_ratio_pitch     = src.time_data.start_time_delay_ratio_pitch;
+  des.time_data.start_time_delay_ratio_yaw       = src.time_data.start_time_delay_ratio_yaw;
+
+  des.time_data.finish_time_advance_ratio_x     = src.time_data.finish_time_advance_ratio_x;
+  des.time_data.finish_time_advance_ratio_y     = src.time_data.finish_time_advance_ratio_y;
+  des.time_data.finish_time_advance_ratio_z     = src.time_data.finish_time_advance_ratio_z;
+  des.time_data.finish_time_advance_ratio_roll  = src.time_data.finish_time_advance_ratio_roll;
+  des.time_data.finish_time_advance_ratio_pitch = src.time_data.finish_time_advance_ratio_pitch;
+  des.time_data.finish_time_advance_ratio_yaw   = src.time_data.finish_time_advance_ratio_yaw;
 
   if((src.time_data.walking_state != thormang3_walking_module_msgs::StepTimeData::IN_WALKING_STARTING)
       && (src.time_data.walking_state != thormang3_walking_module_msgs::StepTimeData::IN_WALKING)

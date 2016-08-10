@@ -224,10 +224,10 @@ RobotisOnlineWalking::RobotisOnlineWalking()
   left_dsp_fz_N_  = -1.0*(total_mass_of_robot_)*9.8*0.5;
   left_ssp_fz_N_  = -1.0*(total_mass_of_robot_)*9.8;
 
-  left_fz_sigmoid_start_time_ = 0;
-  left_fz_sigmoid_end_time_  = 0;
-  left_fz_sigmoid_target_  = left_dsp_fz_N_;
-  left_fz_sigmoid_shift_   = left_dsp_fz_N_;
+  left_fz_trajectory_start_time_ = 0;
+  left_fz_trajectory_end_time_  = 0;
+  left_fz_trajectory_target_  = left_dsp_fz_N_;
+  left_fz_trajectory_shift_   = left_dsp_fz_N_;
 
 
   balance_error_ = BalanceControlError::NoError;
@@ -471,10 +471,10 @@ void RobotisOnlineWalking::initialize()
   r_elbow_out_angle_rad_ = r_elbow_dir_*(mat_robot_to_rfoot_.coeff(0, 3) - mat_robot_to_lfoot_.coeff(0, 3))*elbow_swing_gain_ + r_init_elbow_angle_rad_;
   l_elbow_out_angle_rad_ = l_elbow_dir_*(mat_robot_to_lfoot_.coeff(0, 3) - mat_robot_to_rfoot_.coeff(0, 3))*elbow_swing_gain_ + l_init_elbow_angle_rad_;
 
-  left_fz_sigmoid_start_time_ = 0;
-  left_fz_sigmoid_end_time_  = 0;
-  left_fz_sigmoid_target_  = left_dsp_fz_N_;
-  left_fz_sigmoid_shift_   = left_dsp_fz_N_;
+  left_fz_trajectory_start_time_ = 0;
+  left_fz_trajectory_end_time_  = 0;
+  left_fz_trajectory_target_  = left_dsp_fz_N_;
+  left_fz_trajectory_shift_   = left_dsp_fz_N_;
 
 }
 
@@ -580,10 +580,10 @@ void RobotisOnlineWalking::reInitialize()
 
   mutex_lock_.unlock();
 
-  left_fz_sigmoid_start_time_ = 0;
-  left_fz_sigmoid_end_time_  = 0;
-  left_fz_sigmoid_target_  = left_dsp_fz_N_;
-  left_fz_sigmoid_shift_   = left_dsp_fz_N_;
+  left_fz_trajectory_start_time_ = 0;
+  left_fz_trajectory_end_time_  = 0;
+  left_fz_trajectory_target_  = left_dsp_fz_N_;
+  left_fz_trajectory_shift_   = left_dsp_fz_N_;
 
 }
 
@@ -950,10 +950,38 @@ void RobotisOnlineWalking::process()
     calcRefZMP();
     calcDesiredPose();
 
-    double body_roll_swap = 0;
-    int detail_balance_time_idx = 0;
+    double hip_roll_swap = 0;
+
     if((added_step_data_.size() != 0) && real_running)
     {
+      double period_time, dsp_ratio, ssp_ratio, foot_move_period_time, ssp_time_start, ssp_time_end;
+//      double x_move_amp, y_move_amp, z_move_amp, a_move_amp, b_move_amp, c_move_amp, z_vibe_amp;
+//      double x_move_amp_shift, y_move_amp_shift, z_move_amp_shift, a_move_amp_shift, b_move_amp_shift, c_move_amp_shift, z_vibe_amp_shift;
+//      double z_vibe_phase_shift;
+
+      period_time = added_step_data_[0].time_data.abs_step_time - reference_time_;
+      dsp_ratio = added_step_data_[0].time_data.dsp_ratio;
+      ssp_ratio = 1 - dsp_ratio;
+      foot_move_period_time = ssp_ratio*period_time;
+
+      ssp_time_start = dsp_ratio*period_time/2.0 + reference_time_;
+      ssp_time_end = (1 + ssp_ratio)*period_time / 2.0 + reference_time_;
+
+      double start_time_delay_ratio_x        = added_step_data_[0].time_data.start_time_delay_ratio_x;
+      double start_time_delay_ratio_y        = added_step_data_[0].time_data.start_time_delay_ratio_y;
+      double start_time_delay_ratio_z        = added_step_data_[0].time_data.start_time_delay_ratio_z;
+      double start_time_delay_ratio_roll     = added_step_data_[0].time_data.start_time_delay_ratio_roll;
+      double start_time_delay_ratio_pitch    = added_step_data_[0].time_data.start_time_delay_ratio_pitch;
+      double start_time_delay_ratio_yaw      = added_step_data_[0].time_data.start_time_delay_ratio_yaw;
+      double finish_time_advance_ratio_x     = added_step_data_[0].time_data.finish_time_advance_ratio_x;
+      double finish_time_advance_ratio_y     = added_step_data_[0].time_data.finish_time_advance_ratio_y;
+      double finish_time_advance_ratio_z     = added_step_data_[0].time_data.finish_time_advance_ratio_z;
+      double finish_time_advance_ratio_roll  = added_step_data_[0].time_data.finish_time_advance_ratio_roll;
+      double finish_time_advance_ratio_pitch = added_step_data_[0].time_data.finish_time_advance_ratio_pitch;
+      double finish_time_advance_ratio_yaw   = added_step_data_[0].time_data.finish_time_advance_ratio_yaw;
+
+      double hip_roll_swap_dir = 1.0;
+
       if( (walking_time_ - reference_time_) < TIME_UNIT)
       {
         waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
@@ -966,7 +994,6 @@ void RobotisOnlineWalking::process()
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.pitch, 0, 0);
 
         double bc_move_amp = added_step_data_[0].position_data.body_pose.yaw - previous_step_body_pose_.yaw;
-        double bc_move_amp_shift = previous_step_body_pose_.yaw;
 
         if(bc_move_amp >= M_PI)
           bc_move_amp -= 2.0*M_PI;
@@ -975,10 +1002,123 @@ void RobotisOnlineWalking::process()
 
         body_yaw_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.yaw, 0, 0,
             added_step_data_[0].time_data.abs_step_time, bc_move_amp + previous_step_body_pose_.yaw, 0, 0);
+
         body_z_swap_tra_.changeTrajectory(reference_time_,
             0, 0, 0,
             0.5*(added_step_data_[0].time_data.abs_step_time + reference_time_),
             added_step_data_[0].position_data.body_z_swap, 0, 0);
+
+        if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
+        {
+          foot_x_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_x*foot_move_period_time,
+              previous_step_right_foot_pose_.x, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_x*foot_move_period_time,
+              added_step_data_[0].position_data.right_foot_pose.x, 0, 0);
+          foot_y_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_y*foot_move_period_time,
+              previous_step_right_foot_pose_.y, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_y*foot_move_period_time,
+              added_step_data_[0].position_data.right_foot_pose.y, 0, 0);
+          foot_z_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_z*foot_move_period_time,
+              previous_step_right_foot_pose_.z, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_z*foot_move_period_time,
+              added_step_data_[0].position_data.right_foot_pose.z, 0, 0);
+          foot_roll_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_roll*foot_move_period_time,
+              previous_step_right_foot_pose_.roll, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_roll*foot_move_period_time,
+              added_step_data_[0].position_data.right_foot_pose.roll, 0, 0);
+          foot_pitch_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_pitch*foot_move_period_time,
+              previous_step_right_foot_pose_.pitch, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_pitch*foot_move_period_time,
+              added_step_data_[0].position_data.right_foot_pose.pitch, 0, 0);
+
+//          x_move_amp = (added_step_data_[0].position_data.right_foot_pose.x - previous_step_right_foot_pose_.x);
+//          x_move_amp_shift = previous_step_right_foot_pose_.x;
+//
+//          y_move_amp = (added_step_data_[0].position_data.right_foot_pose.y - previous_step_right_foot_pose_.y);
+//          y_move_amp_shift = previous_step_right_foot_pose_.y;
+//
+//          z_move_amp = (added_step_data_[0].position_data.right_foot_pose.z - previous_step_right_foot_pose_.z);
+//          z_move_amp_shift = previous_step_right_foot_pose_.z;
+//
+//          a_move_amp = (added_step_data_[0].position_data.right_foot_pose.roll - previous_step_right_foot_pose_.roll);
+//          a_move_amp_shift = previous_step_right_foot_pose_.roll;
+//
+//          b_move_amp = (added_step_data_[0].position_data.right_foot_pose.pitch - previous_step_right_foot_pose_.pitch);
+//          b_move_amp_shift = previous_step_right_foot_pose_.pitch;
+
+          double c_move_amp = added_step_data_[0].position_data.right_foot_pose.yaw - previous_step_right_foot_pose_.yaw;
+          if(c_move_amp >= M_PI)
+            c_move_amp -= 2.0*M_PI;
+          else if(c_move_amp <= -M_PI)
+            c_move_amp += 2.0*M_PI;
+
+          foot_yaw_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_yaw*foot_move_period_time,
+              previous_step_right_foot_pose_.yaw, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_yaw*foot_move_period_time,
+              c_move_amp + previous_step_right_foot_pose_.yaw, 0, 0);
+
+          foot_z_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
+              0.5*(ssp_time_start + ssp_time_end), added_step_data_[0].position_data.foot_z_swap, 0, 0);
+
+//          z_vibe_amp = added_step_data_[0].position_data.foot_z_swap*0.5;
+//          z_vibe_amp_shift = z_vibe_amp;
+//          z_vibe_phase_shift = M_PI*0.5;
+
+          hip_roll_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
+              0.5*(ssp_time_start + ssp_time_end), hip_roll_feedforward_angle_rad_, 0, 0);
+        }
+        else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
+        {
+          foot_x_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_x*foot_move_period_time,
+              previous_step_left_foot_pose_.x, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_x*foot_move_period_time,
+              added_step_data_[0].position_data.left_foot_pose.x, 0, 0);
+          foot_y_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_y*foot_move_period_time,
+              previous_step_left_foot_pose_.y, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_y*foot_move_period_time,
+              added_step_data_[0].position_data.left_foot_pose.y, 0, 0);
+          foot_z_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_z*foot_move_period_time,
+              previous_step_left_foot_pose_.z, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_z*foot_move_period_time,
+              added_step_data_[0].position_data.left_foot_pose.z, 0, 0);
+          foot_roll_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_roll*foot_move_period_time,
+              previous_step_left_foot_pose_.roll, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_roll*foot_move_period_time,
+              added_step_data_[0].position_data.left_foot_pose.roll, 0, 0);
+          foot_pitch_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_pitch*foot_move_period_time,
+              previous_step_left_foot_pose_.pitch, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_pitch*foot_move_period_time,
+              added_step_data_[0].position_data.left_foot_pose.pitch, 0, 0);
+
+          double c_move_amp = added_step_data_[0].position_data.left_foot_pose.yaw - previous_step_left_foot_pose_.yaw;
+          if(c_move_amp >= M_PI)
+            c_move_amp -= 2.0*M_PI;
+          else if(c_move_amp <= -M_PI)
+            c_move_amp += 2.0*M_PI;
+
+          foot_yaw_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_yaw*foot_move_period_time,
+              previous_step_left_foot_pose_.yaw, 0, 0,
+              ssp_time_end - finish_time_advance_ratio_yaw*foot_move_period_time,
+              c_move_amp + previous_step_left_foot_pose_.yaw, 0, 0);
+
+          foot_z_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
+              0.5*(ssp_time_start + ssp_time_end), added_step_data_[0].position_data.foot_z_swap, 0, 0);
+
+          hip_roll_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
+              0.5*(ssp_time_start + ssp_time_end), hip_roll_feedforward_angle_rad_, 0, 0);
+
+          hip_roll_swap_dir = 1.0;
+        }
+        else
+        {
+          foot_z_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
+              ssp_time_end, 0, 0, 0);
+
+          hip_roll_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
+              ssp_time_end, 0, 0, 0);
+
+          hip_roll_swap_dir = 0.0;
+        }
       }
 //      double body_move_periodTime = added_step_data_[0].time_data.abs_step_time - reference_time_;
 //      double wp_move_amp = added_step_data_[0].position_data.waist_yaw_angle - previous_step_waist_yaw_angle_rad_;
@@ -1000,14 +1140,13 @@ void RobotisOnlineWalking::process()
 //      double z_swap_amp_shift = z_swap_amp;
 //      double z_swap_phase_shift = M_PI*0.5;
 
+      double z_swap = body_z_swap_tra_.getPosition(walking_time_);
+      double wp_move = waist_yaw_tra_.getPosition(walking_time_);
+      double bz_move = body_z_tra_.getPosition(walking_time_);
+      double ba_move = body_roll_tra_.getPosition(walking_time_);
+      double bb_move = body_pitch_tra_.getPosition(walking_time_);
+      double bc_move = body_yaw_tra_.getPosition(walking_time_);
 
-
-
-
-//      detail_balance_time_idx = (int)( (body_move_periodTime - walking_time_ + reference_time_) / (double)TIME_UNIT );
-//      if(detail_balance_time_idx >= preview_size_)
-//        detail_balance_time_idx = preview_size_ - 1;
-//
 //      double z_swap  = wsin(walking_time_ - reference_time_, body_move_periodTime, z_swap_phase_shift, z_swap_amp, z_swap_amp_shift);
 //
 //      double wp_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, wp_move_amp, wp_move_amp_shift, 1.0, 1.0);
@@ -1016,191 +1155,233 @@ void RobotisOnlineWalking::process()
 //      double bb_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bb_move_amp, bb_move_amp_shift, 1.0, 1.0);
 //      double bc_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bc_move_amp, bc_move_amp_shift, 1.0, 1.0);
 
-      double body_roll_swap_dir = 1.0;
-      double body_roll_swap_amp = 0.5*(hip_roll_feedforward_angle_rad_);
-      double body_roll_swap_amp_shift = body_roll_swap_amp;
+//      double body_roll_swap_dir = 1.0;
+//      double body_roll_swap_amp = 0.5*(hip_roll_feedforward_angle_rad_);
+//      double body_roll_swap_amp_shift = body_roll_swap_amp;
 
-//      present_waist_yaw_angle_rad_ = wp_move;
-//      present_body_pose_.z = bz_move + z_swap;
-//      present_body_pose_.roll = ba_move;
-//      present_body_pose_.pitch = bb_move;
-//      present_body_pose_.yaw = bc_move;
+      present_waist_yaw_angle_rad_ = wp_move;
+      present_body_pose_.z = bz_move + z_swap;
+      present_body_pose_.roll = ba_move;
+      present_body_pose_.pitch = bb_move;
+      present_body_pose_.yaw = bc_move;
 
       //Feet
-      double time = walking_time_ - reference_time_;
-      double period_time, dsp_ratio, ssp_ratio, foot_move_period_time, ssp_time_start, ssp_time_end;
-      double x_move_amp, y_move_amp, z_move_amp, a_move_amp, b_move_amp, c_move_amp, z_vibe_amp;
-      double x_move_amp_shift, y_move_amp_shift, z_move_amp_shift, a_move_amp_shift, b_move_amp_shift, c_move_amp_shift, z_vibe_amp_shift;
-      double z_vibe_phase_shift;
+//      double time = walking_time_ - reference_time_;
+//      double period_time, dsp_ratio, ssp_ratio, foot_move_period_time, ssp_time_start, ssp_time_end;
+//      double x_move_amp, y_move_amp, z_move_amp, a_move_amp, b_move_amp, c_move_amp, z_vibe_amp;
+//      double x_move_amp_shift, y_move_amp_shift, z_move_amp_shift, a_move_amp_shift, b_move_amp_shift, c_move_amp_shift, z_vibe_amp_shift;
+//      double z_vibe_phase_shift;
       double x_move, y_move, z_move, a_move, b_move, c_move, z_vibe;
+//
+//      period_time = added_step_data_[0].time_data.abs_step_time - reference_time_;
+//      dsp_ratio = added_step_data_[0].time_data.dsp_ratio;
+//      ssp_ratio = 1 - dsp_ratio;
+//      foot_move_period_time = ssp_ratio*period_time;
+//
+//      ssp_time_start = dsp_ratio*period_time/2.0;
+//      ssp_time_end = (1 + ssp_ratio)*period_time / 2.0;
 
-      period_time = added_step_data_[0].time_data.abs_step_time - reference_time_;
-      dsp_ratio = added_step_data_[0].time_data.dsp_ratio;
-      ssp_ratio = 1 - dsp_ratio;
-      foot_move_period_time = ssp_ratio*period_time;
+//      if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
+//      {
+//        x_move_amp = (added_step_data_[0].position_data.right_foot_pose.x - previous_step_right_foot_pose_.x);
+//        x_move_amp_shift = previous_step_right_foot_pose_.x;
+//
+//        y_move_amp = (added_step_data_[0].position_data.right_foot_pose.y - previous_step_right_foot_pose_.y);
+//        y_move_amp_shift = previous_step_right_foot_pose_.y;
+//
+//        z_move_amp = (added_step_data_[0].position_data.right_foot_pose.z - previous_step_right_foot_pose_.z);
+//        z_move_amp_shift = previous_step_right_foot_pose_.z;
+//
+//        a_move_amp = (added_step_data_[0].position_data.right_foot_pose.roll - previous_step_right_foot_pose_.roll);
+//        a_move_amp_shift = previous_step_right_foot_pose_.roll;
+//
+//        b_move_amp = (added_step_data_[0].position_data.right_foot_pose.pitch - previous_step_right_foot_pose_.pitch);
+//        b_move_amp_shift = previous_step_right_foot_pose_.pitch;
+//
+//        c_move_amp = (added_step_data_[0].position_data.right_foot_pose.yaw - previous_step_right_foot_pose_.yaw);
+//        c_move_amp_shift = previous_step_right_foot_pose_.yaw;
+//
+//        z_vibe_amp = added_step_data_[0].position_data.foot_z_swap*0.5;
+//        z_vibe_amp_shift = z_vibe_amp;
+//        z_vibe_phase_shift = M_PI*0.5;
+//
+//        body_roll_swap_dir = -1.0;
+//      }
+//      else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
+//      {
+//        x_move_amp = (added_step_data_[0].position_data.left_foot_pose.x - previous_step_left_foot_pose_.x);
+//        x_move_amp_shift = previous_step_left_foot_pose_.x;
+//
+//        y_move_amp = (added_step_data_[0].position_data.left_foot_pose.y - previous_step_left_foot_pose_.y);
+//        y_move_amp_shift = previous_step_left_foot_pose_.y;
+//
+//        z_move_amp = (added_step_data_[0].position_data.left_foot_pose.z - previous_step_left_foot_pose_.z);
+//        z_move_amp_shift = previous_step_left_foot_pose_.z;
+//
+//        a_move_amp = (added_step_data_[0].position_data.left_foot_pose.roll - previous_step_left_foot_pose_.roll);
+//        a_move_amp_shift = previous_step_left_foot_pose_.roll;
+//
+//        b_move_amp = (added_step_data_[0].position_data.left_foot_pose.pitch - previous_step_left_foot_pose_.pitch);
+//        b_move_amp_shift = previous_step_left_foot_pose_.pitch;
+//
+//        c_move_amp = (added_step_data_[0].position_data.left_foot_pose.yaw - previous_step_left_foot_pose_.yaw);
+//        c_move_amp_shift = previous_step_left_foot_pose_.yaw;
+//
+//        z_vibe_amp = added_step_data_[0].position_data.foot_z_swap*0.5;
+//        z_vibe_amp_shift = z_vibe_amp;
+//        z_vibe_phase_shift = M_PI*0.5;
+//
+//        body_roll_swap_dir = 1.0;
+//      }
+//      else
+//      {
+//        x_move_amp = 0.0;
+//        x_move_amp_shift = previous_step_left_foot_pose_.x;
+//
+//        y_move_amp = 0.0;
+//        y_move_amp_shift = previous_step_left_foot_pose_.y;
+//
+//        z_move_amp = 0.0;
+//        z_move_amp_shift = previous_step_left_foot_pose_.z;
+//
+//        a_move_amp = 0.0;
+//        a_move_amp_shift = previous_step_left_foot_pose_.roll;
+//
+//        b_move_amp = 0.0;
+//        b_move_amp_shift = previous_step_left_foot_pose_.pitch;
+//
+//        c_move_amp = 0.0;
+//        c_move_amp_shift = previous_step_left_foot_pose_.yaw;
+//
+//        z_vibe_amp = 0.0;
+//        z_vibe_amp_shift = z_vibe_amp;
+//        z_vibe_phase_shift = M_PI*0.5;
+//
+//        body_roll_swap_dir = 0.0;
+//      }
 
-      ssp_time_start = dsp_ratio*period_time/2.0;
-      ssp_time_end = (1 + ssp_ratio)*period_time / 2.0;
+//      if(c_move_amp >= M_PI)
+//        c_move_amp -= 2.0*M_PI;
+//      else if(c_move_amp <= -M_PI)
+//        c_move_amp += 2.0*M_PI;
 
-      if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
+
+      if( walking_time_ <= ssp_time_start)
       {
-        x_move_amp = (added_step_data_[0].position_data.right_foot_pose.x - previous_step_right_foot_pose_.x);
-        x_move_amp_shift = previous_step_right_foot_pose_.x;
+        x_move = foot_x_tra_.getPosition(ssp_time_start);
+        y_move = foot_y_tra_.getPosition(ssp_time_start);
+        z_move = foot_z_tra_.getPosition(ssp_time_start);
+        a_move = foot_roll_tra_.getPosition(ssp_time_start);
+        b_move = foot_pitch_tra_.getPosition(ssp_time_start);
+        c_move = foot_yaw_tra_.getPosition(ssp_time_start);
 
-        y_move_amp = (added_step_data_[0].position_data.right_foot_pose.y - previous_step_right_foot_pose_.y);
-        y_move_amp_shift = previous_step_right_foot_pose_.y;
+//        x_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
+//        y_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
+//        z_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
+//        a_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
+//        b_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
+//        c_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
 
-        z_move_amp = (added_step_data_[0].position_data.right_foot_pose.z - previous_step_right_foot_pose_.z);
-        z_move_amp_shift = previous_step_right_foot_pose_.z;
+        z_vibe = foot_z_swap_tra_.getPosition(ssp_time_start);
+        hip_roll_swap = hip_roll_swap_tra_.getPosition(ssp_time_start);
 
-        a_move_amp = (added_step_data_[0].position_data.right_foot_pose.roll - previous_step_right_foot_pose_.roll);
-        a_move_amp_shift = previous_step_right_foot_pose_.roll;
+//        z_vibe         = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp, z_vibe_amp_shift);
+//        body_roll_swap = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
 
-        b_move_amp = (added_step_data_[0].position_data.right_foot_pose.pitch - previous_step_right_foot_pose_.pitch);
-        b_move_amp_shift = previous_step_right_foot_pose_.pitch;
-
-        c_move_amp = (added_step_data_[0].position_data.right_foot_pose.yaw - previous_step_right_foot_pose_.yaw);
-        c_move_amp_shift = previous_step_right_foot_pose_.yaw;
-
-        z_vibe_amp = added_step_data_[0].position_data.foot_z_swap*0.5;
-        z_vibe_amp_shift = z_vibe_amp;
-        z_vibe_phase_shift = M_PI*0.5;
-
-        body_roll_swap_dir = -1.0;
-      }
-      else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
-      {
-        x_move_amp = (added_step_data_[0].position_data.left_foot_pose.x - previous_step_left_foot_pose_.x);
-        x_move_amp_shift = previous_step_left_foot_pose_.x;
-
-        y_move_amp = (added_step_data_[0].position_data.left_foot_pose.y - previous_step_left_foot_pose_.y);
-        y_move_amp_shift = previous_step_left_foot_pose_.y;
-
-        z_move_amp = (added_step_data_[0].position_data.left_foot_pose.z - previous_step_left_foot_pose_.z);
-        z_move_amp_shift = previous_step_left_foot_pose_.z;
-
-        a_move_amp = (added_step_data_[0].position_data.left_foot_pose.roll - previous_step_left_foot_pose_.roll);
-        a_move_amp_shift = previous_step_left_foot_pose_.roll;
-
-        b_move_amp = (added_step_data_[0].position_data.left_foot_pose.pitch - previous_step_left_foot_pose_.pitch);
-        b_move_amp_shift = previous_step_left_foot_pose_.pitch;
-
-        c_move_amp = (added_step_data_[0].position_data.left_foot_pose.yaw - previous_step_left_foot_pose_.yaw);
-        c_move_amp_shift = previous_step_left_foot_pose_.yaw;
-
-        z_vibe_amp = added_step_data_[0].position_data.foot_z_swap*0.5;
-        z_vibe_amp_shift = z_vibe_amp;
-        z_vibe_phase_shift = M_PI*0.5;
-
-        body_roll_swap_dir = 1.0;
-      }
-      else
-      {
-        x_move_amp = 0.0;
-        x_move_amp_shift = previous_step_left_foot_pose_.x;
-
-        y_move_amp = 0.0;
-        y_move_amp_shift = previous_step_left_foot_pose_.y;
-
-        z_move_amp = 0.0;
-        z_move_amp_shift = previous_step_left_foot_pose_.z;
-
-        a_move_amp = 0.0;
-        a_move_amp_shift = previous_step_left_foot_pose_.roll;
-
-        b_move_amp = 0.0;
-        b_move_amp_shift = previous_step_left_foot_pose_.pitch;
-
-        c_move_amp = 0.0;
-        c_move_amp_shift = previous_step_left_foot_pose_.yaw;
-
-        z_vibe_amp = 0.0;
-        z_vibe_amp_shift = z_vibe_amp;
-        z_vibe_phase_shift = M_PI*0.5;
-
-        body_roll_swap_dir = 0.0;
-      }
-
-      if(c_move_amp >= M_PI)
-        c_move_amp -= 2.0*M_PI;
-      else if(c_move_amp <= -M_PI)
-        c_move_amp += 2.0*M_PI;
-
-
-      if( time <= ssp_time_start)
-      {
-        x_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
-        y_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
-        z_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
-        a_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
-        b_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
-        c_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
-
-        z_vibe         = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp, z_vibe_amp_shift);
-        body_roll_swap = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
         if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
-        {
           balancing_index_ = BalancingPhase1;
-        }
-        else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)    {
+        else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
           balancing_index_ = BalancingPhase5;
-        }
-        else {
+        else
           balancing_index_ = BalancingPhase0;
-        }
       }
-      else if(time <= ssp_time_end)
+      else if( walking_time_ <= ssp_time_end)
       {
-        x_move = wsigmoid(time, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
-        y_move = wsigmoid(time, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
-        z_move = wsigmoid(time, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
-        a_move = wsigmoid(time, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
-        b_move = wsigmoid(time, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
-        c_move = wsigmoid(time, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
+        x_move = foot_x_tra_.getPosition(walking_time_);
+        y_move = foot_y_tra_.getPosition(walking_time_);
+        z_move = foot_z_tra_.getPosition(walking_time_);
+        a_move = foot_roll_tra_.getPosition(walking_time_);
+        b_move = foot_pitch_tra_.getPosition(walking_time_);
+        c_move = foot_yaw_tra_.getPosition(walking_time_);
 
-        z_vibe         = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
-        body_roll_swap = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
+//        x_move = wsigmoid(time, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
+//        y_move = wsigmoid(time, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
+//        z_move = wsigmoid(time, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
+//        a_move = wsigmoid(time, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
+//        b_move = wsigmoid(time, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
+//        c_move = wsigmoid(time, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
+        if(added_step_data_[0].position_data.moving_foot != STANDING)
+        {
+          if((walking_time_ >= 0.5*(ssp_time_start + ssp_time_end))
+              && (walking_time_ < (0.5*(ssp_time_start + ssp_time_end) + TIME_UNIT)))
+          {
+            body_z_swap_tra_.changeTrajectory(0.5*(added_step_data_[0].time_data.abs_step_time + reference_time_),
+                added_step_data_[0].position_data.body_z_swap, 0, 0,
+                added_step_data_[0].time_data.abs_step_time,
+                0, 0, 0);
+
+            foot_z_swap_tra_.changeTrajectory(0.5*(ssp_time_start + ssp_time_end),
+                added_step_data_[0].position_data.foot_z_swap, 0, 0,
+                ssp_time_end, 0, 0, 0);
+
+            hip_roll_swap_tra_.changeTrajectory(0.5*(ssp_time_start + ssp_time_end),
+                hip_roll_feedforward_angle_rad_, 0, 0,
+                ssp_time_end, 0, 0, 0);
+          }
+        }
+
+        z_vibe = foot_z_swap_tra_.getPosition(walking_time_);
+        hip_roll_swap = hip_roll_swap_tra_.getPosition(walking_time_);
+
+//        z_vibe         = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
+//        body_roll_swap = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
 
         if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
         {
-          if(time <= (ssp_time_end + ssp_time_start)*0.5)
+          if(walking_time_ <= (ssp_time_end + ssp_time_start)*0.5)
             balancing_index_ = BalancingPhase2;
           else
             balancing_index_ = BalancingPhase3;
         }
-        else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)    {
-          if(time <= (ssp_time_end + ssp_time_start)*0.5)
+        else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
+        {
+          if(walking_time_ <= (ssp_time_end + ssp_time_start)*0.5)
             balancing_index_ = BalancingPhase6;
           else
             balancing_index_ = BalancingPhase7;
         }
-        else {
+        else
           balancing_index_ = BalancingPhase0;
-        }
       }
-      else {
-        x_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
-        y_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
-        z_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
-        a_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
-        b_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
-        c_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
+      else
+      {
+        x_move = foot_x_tra_.getPosition(ssp_time_end);
+        y_move = foot_y_tra_.getPosition(ssp_time_end);
+        z_move = foot_z_tra_.getPosition(ssp_time_end);
+        a_move = foot_roll_tra_.getPosition(ssp_time_end);
+        b_move = foot_pitch_tra_.getPosition(ssp_time_end);
+        c_move = foot_yaw_tra_.getPosition(ssp_time_end);
 
-        z_vibe         = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
-        body_roll_swap = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
+//        x_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
+//        y_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
+//        z_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
+//        a_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
+//        b_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
+//        c_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
+
+        z_vibe = foot_z_swap_tra_.getPosition(ssp_time_end);
+        hip_roll_swap = hip_roll_swap_tra_.getPosition(ssp_time_end);
+//        z_vibe         = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
+//        body_roll_swap = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
+
         if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
-        {
           balancing_index_ = BalancingPhase4;
-        }
-        else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)    {
+        else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
           balancing_index_ = BalancingPhase8;
-        }
-        else {
+        else
           balancing_index_ = BalancingPhase0;
-        }
       }
 
-      body_roll_swap = body_roll_swap_dir * body_roll_swap;
 
       if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
       {
@@ -1212,8 +1393,11 @@ void RobotisOnlineWalking::process()
         present_right_foot_pose_.yaw = c_move;
 
         present_left_foot_pose_ = added_step_data_[0].position_data.left_foot_pose;
+
+        hip_roll_swap_dir = -1.0;
       }
-      else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)    {
+      else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
+      {
         present_right_foot_pose_ = added_step_data_[0].position_data.right_foot_pose;
 
         present_left_foot_pose_.x = x_move;
@@ -1222,11 +1406,18 @@ void RobotisOnlineWalking::process()
         present_left_foot_pose_.roll = a_move;
         present_left_foot_pose_.pitch = b_move;
         present_left_foot_pose_.yaw = c_move;
+
+        hip_roll_swap_dir = 1.0;
       }
-      else {
+      else
+      {
         present_right_foot_pose_ = added_step_data_[0].position_data.right_foot_pose;
         present_left_foot_pose_ = added_step_data_[0].position_data.left_foot_pose;
+
+        hip_roll_swap_dir = 0.0;
       }
+
+      hip_roll_swap = hip_roll_swap_dir * hip_roll_swap;
 
       shouler_swing_gain_ = added_step_data_[0].position_data.shoulder_swing_gain;
       elbow_swing_gain_ = added_step_data_[0].position_data.elbow_swing_gain;
@@ -1243,81 +1434,80 @@ void RobotisOnlineWalking::process()
 
       if(balancing_index_ == BalancingPhase0 || balancing_index_ == BalancingPhase9)
       {
-        left_fz_sigmoid_start_time_ = walking_time_;
-        left_fz_sigmoid_end_time_   = walking_time_;
-        left_fz_sigmoid_target_  = left_dsp_fz_N_;
-        left_fz_sigmoid_shift_   = left_dsp_fz_N_;
+        left_fz_trajectory_start_time_ = walking_time_;
+        left_fz_trajectory_end_time_   = walking_time_;
+        left_fz_trajectory_target_  = left_dsp_fz_N_;
+        left_fz_trajectory_shift_   = left_dsp_fz_N_;
       }
       else if(balancing_index_ == BalancingPhase1 )
       {
-        left_fz_sigmoid_end_time_ = ssp_time_start + reference_time_;
-        left_fz_sigmoid_target_ = left_ssp_fz_N_;
+        left_fz_trajectory_end_time_ = ssp_time_start;
+        left_fz_trajectory_target_ = left_ssp_fz_N_;
       }
       else if(balancing_index_ == BalancingPhase4 )
       {
-        left_fz_sigmoid_start_time_ = ssp_time_end + reference_time_;
-        left_fz_sigmoid_shift_ = left_ssp_fz_N_;
+        left_fz_trajectory_start_time_ = ssp_time_end;
+        left_fz_trajectory_shift_ = left_ssp_fz_N_;
         if(added_step_data_.size() > 1)
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
-            left_fz_sigmoid_target_ = left_dsp_fz_N_;
-            left_fz_sigmoid_end_time_ = added_step_data_[0].time_data.abs_step_time;
+            left_fz_trajectory_target_ = left_dsp_fz_N_;
+            left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
           else if(added_step_data_[1].position_data.moving_foot == LEFT_FOOT_SWING)
           {
-            left_fz_sigmoid_target_ = 0.0;
-            left_fz_sigmoid_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
+            left_fz_trajectory_target_ = 0.0;
+            left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
           else
           {
-            left_fz_sigmoid_target_ = left_ssp_fz_N_;
-            left_fz_sigmoid_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
+            left_fz_trajectory_target_ = left_ssp_fz_N_;
+            left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
         }
         else {
-          left_fz_sigmoid_target_ = left_dsp_fz_N_;
-          left_fz_sigmoid_end_time_ = added_step_data_[0].time_data.abs_step_time;
+          left_fz_trajectory_target_ = left_dsp_fz_N_;
+          left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
         }
-
       }
       else if(balancing_index_ == BalancingPhase5 )
       {
-        left_fz_sigmoid_end_time_ = ssp_time_start + reference_time_;
-        left_fz_sigmoid_target_ = 0.0;
+        left_fz_trajectory_end_time_ = ssp_time_start;
+        left_fz_trajectory_target_ = 0.0;
       }
       else if(balancing_index_ == BalancingPhase8)
       {
-        left_fz_sigmoid_start_time_ = ssp_time_end + reference_time_;
-        left_fz_sigmoid_shift_ = 0.0;
+        left_fz_trajectory_start_time_ = ssp_time_end;
+        left_fz_trajectory_shift_ = 0.0;
         if(added_step_data_.size() > 1)
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
-            left_fz_sigmoid_target_ = left_dsp_fz_N_;
-            left_fz_sigmoid_end_time_ = added_step_data_[0].time_data.abs_step_time;
+            left_fz_trajectory_target_ = left_dsp_fz_N_;
+            left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
           else if(added_step_data_[1].position_data.moving_foot == LEFT_FOOT_SWING)
           {
-            left_fz_sigmoid_target_ = 0.0;
-            left_fz_sigmoid_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
+            left_fz_trajectory_target_ = 0.0;
+            left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
           else
           {
-            left_fz_sigmoid_target_ = left_ssp_fz_N_;
-            left_fz_sigmoid_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
+            left_fz_trajectory_target_ = left_ssp_fz_N_;
+            left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
         }
         else
         {
-          left_fz_sigmoid_target_ = left_dsp_fz_N_;
-          left_fz_sigmoid_end_time_ = added_step_data_[0].time_data.abs_step_time;
+          left_fz_trajectory_target_ = left_dsp_fz_N_;
+          left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
         }
       }
       else
       {
-        left_fz_sigmoid_start_time_ = walking_time_;
-        left_fz_sigmoid_end_time_   = walking_time_;
+        left_fz_trajectory_start_time_ = walking_time_;
+        left_fz_trajectory_end_time_   = walking_time_;
       }
     }
 
@@ -1554,10 +1744,7 @@ void RobotisOnlineWalking::process()
       }
       else
       {
-        double l_target_fz_N_amp = 0;
-        double l_target_fz_N_amp_shift = 0;
-
-        l_target_fz_N = wsigmoid(walking_time_ - TIME_UNIT, left_fz_sigmoid_end_time_ -  left_fz_sigmoid_start_time_, left_fz_sigmoid_start_time_, left_fz_sigmoid_target_ - left_fz_sigmoid_shift_, left_fz_sigmoid_shift_, 1.0, 1.0);
+        l_target_fz_N = wsigmoid(walking_time_ - TIME_UNIT, left_fz_trajectory_end_time_ -  left_fz_trajectory_start_time_, left_fz_trajectory_start_time_, left_fz_trajectory_target_ - left_fz_trajectory_shift_, left_fz_trajectory_shift_, 1.0, 1.0);
         r_target_fz_N = left_ssp_fz_N_ - l_target_fz_N;
       }
     }
@@ -1626,17 +1813,17 @@ void RobotisOnlineWalking::process()
     if(added_step_data_.size() != 0)
     {
       if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
-        r_leg_out_angle_rad_[1] = r_leg_out_angle_rad_[1] + body_roll_swap;
+        r_leg_out_angle_rad_[1] = r_leg_out_angle_rad_[1] + hip_roll_swap;
       else if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
-        r_leg_out_angle_rad_[1] = r_leg_out_angle_rad_[1] - 0.35*body_roll_swap;
+        r_leg_out_angle_rad_[1] = r_leg_out_angle_rad_[1] - 0.35*hip_roll_swap;
     }
 
     if(added_step_data_.size() != 0)
     {
       if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
-        l_leg_out_angle_rad_[1] = l_leg_out_angle_rad_[1] + body_roll_swap;
+        l_leg_out_angle_rad_[1] = l_leg_out_angle_rad_[1] + hip_roll_swap;
       else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
-        l_leg_out_angle_rad_[1] = l_leg_out_angle_rad_[1] - 0.35*body_roll_swap;
+        l_leg_out_angle_rad_[1] = l_leg_out_angle_rad_[1] - 0.35*hip_roll_swap;
     }
 
     for(int angle_idx = 0; angle_idx < 6; angle_idx++)
