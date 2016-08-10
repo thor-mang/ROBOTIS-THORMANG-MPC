@@ -112,6 +112,8 @@ private:
 
   void setBalanceParam(thormang3_walking_module_msgs::BalanceParam& balance_param_msg);
 
+  void queueThread();
+
   int             control_cycle_msec_;
   boost::thread   queue_thread_;
   boost::mutex    publish_mutex_;
@@ -120,9 +122,6 @@ private:
   Eigen::MatrixXd desired_matrix_g_to_cob_;
   Eigen::MatrixXd desired_matrix_g_to_rfoot_;
   Eigen::MatrixXd desired_matrix_g_to_lfoot_;
-
-
-  void queueThread();
 
   bool previous_running_, present_running;
 

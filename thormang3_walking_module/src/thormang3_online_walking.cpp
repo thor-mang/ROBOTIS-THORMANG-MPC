@@ -954,52 +954,77 @@ void RobotisOnlineWalking::process()
     int detail_balance_time_idx = 0;
     if((added_step_data_.size() != 0) && real_running)
     {
-      double body_move_periodTime = added_step_data_[0].time_data.abs_step_time - reference_time_;
-      double wp_move_amp = added_step_data_[0].position_data.waist_yaw_angle - previous_step_waist_yaw_angle_rad_;
-      double wp_move_amp_shift = previous_step_waist_yaw_angle_rad_;
+      if( (walking_time_ - reference_time_) < TIME_UNIT)
+      {
+        waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
+            added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.waist_yaw_angle, 0, 0);
+        body_z_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.z, 0, 0,
+            added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.z, 0, 0);
+        body_roll_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.roll, 0, 0,
+            added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.roll, 0, 0);
+        body_pitch_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.pitch, 0, 0,
+            added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.pitch, 0, 0);
 
-      double bz_move_amp = added_step_data_[0].position_data.body_pose.z - previous_step_body_pose_.z;
-      double bz_move_amp_shift = previous_step_body_pose_.z;
+        double bc_move_amp = added_step_data_[0].position_data.body_pose.yaw - previous_step_body_pose_.yaw;
+        double bc_move_amp_shift = previous_step_body_pose_.yaw;
 
-      double ba_move_amp = added_step_data_[0].position_data.body_pose.roll - previous_step_body_pose_.roll;
-      double ba_move_amp_shift = previous_step_body_pose_.roll;
+        if(bc_move_amp >= M_PI)
+          bc_move_amp -= 2.0*M_PI;
+        else if(bc_move_amp <= -M_PI)
+          bc_move_amp += 2.0*M_PI;
 
-      double bb_move_amp = added_step_data_[0].position_data.body_pose.pitch - previous_step_body_pose_.pitch;
-      double bb_move_amp_shift = previous_step_body_pose_.pitch;
+        body_yaw_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.yaw, 0, 0,
+            added_step_data_[0].time_data.abs_step_time, bc_move_amp + previous_step_body_pose_.yaw, 0, 0);
+        body_z_swap_tra_.changeTrajectory(reference_time_,
+            0, 0, 0,
+            0.5*(added_step_data_[0].time_data.abs_step_time + reference_time_),
+            added_step_data_[0].position_data.body_z_swap, 0, 0);
+      }
+//      double body_move_periodTime = added_step_data_[0].time_data.abs_step_time - reference_time_;
+//      double wp_move_amp = added_step_data_[0].position_data.waist_yaw_angle - previous_step_waist_yaw_angle_rad_;
+//      double wp_move_amp_shift = previous_step_waist_yaw_angle_rad_;
+//
+//      double bz_move_amp = added_step_data_[0].position_data.body_pose.z - previous_step_body_pose_.z;
+//      double bz_move_amp_shift = previous_step_body_pose_.z;
+//
+//      double ba_move_amp = added_step_data_[0].position_data.body_pose.roll - previous_step_body_pose_.roll;
+//      double ba_move_amp_shift = previous_step_body_pose_.roll;
+//
+//      double bb_move_amp = added_step_data_[0].position_data.body_pose.pitch - previous_step_body_pose_.pitch;
+//      double bb_move_amp_shift = previous_step_body_pose_.pitch;
+//
+//      double bc_move_amp = added_step_data_[0].position_data.body_pose.yaw - previous_step_body_pose_.yaw;
+//      double bc_move_amp_shift = previous_step_body_pose_.yaw;
 
-      double bc_move_amp = added_step_data_[0].position_data.body_pose.yaw - previous_step_body_pose_.yaw;
-      double bc_move_amp_shift = previous_step_body_pose_.yaw;
+//      double z_swap_amp = 0.5*(added_step_data_[0].position_data.body_z_swap);
+//      double z_swap_amp_shift = z_swap_amp;
+//      double z_swap_phase_shift = M_PI*0.5;
 
-      double z_swap_amp = 0.5*(added_step_data_[0].position_data.body_z_swap);
-      double z_swap_amp_shift = z_swap_amp;
-      double z_swap_phase_shift = M_PI*0.5;
+
+
+
+
+//      detail_balance_time_idx = (int)( (body_move_periodTime - walking_time_ + reference_time_) / (double)TIME_UNIT );
+//      if(detail_balance_time_idx >= preview_size_)
+//        detail_balance_time_idx = preview_size_ - 1;
+//
+//      double z_swap  = wsin(walking_time_ - reference_time_, body_move_periodTime, z_swap_phase_shift, z_swap_amp, z_swap_amp_shift);
+//
+//      double wp_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, wp_move_amp, wp_move_amp_shift, 1.0, 1.0);
+//      double bz_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bz_move_amp, bz_move_amp_shift, 1.0, 1.0);
+//      double ba_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, ba_move_amp, ba_move_amp_shift, 1.0, 1.0);
+//      double bb_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bb_move_amp, bb_move_amp_shift, 1.0, 1.0);
+//      double bc_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bc_move_amp, bc_move_amp_shift, 1.0, 1.0);
 
       double body_roll_swap_dir = 1.0;
       double body_roll_swap_amp = 0.5*(hip_roll_feedforward_angle_rad_);
       double body_roll_swap_amp_shift = body_roll_swap_amp;
 
-      if(bc_move_amp >= M_PI)
-        bc_move_amp -= 2.0*M_PI;
-      else if(bc_move_amp <= -M_PI)
-        bc_move_amp += 2.0*M_PI;
-
-      detail_balance_time_idx = (int)( (body_move_periodTime - walking_time_ + reference_time_) / (double)TIME_UNIT );
-      if(detail_balance_time_idx >= preview_size_)
-        detail_balance_time_idx = preview_size_ - 1;
-
-      double z_swap  = wsin(walking_time_ - reference_time_, body_move_periodTime, z_swap_phase_shift, z_swap_amp, z_swap_amp_shift);
-
-      double wp_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, wp_move_amp, wp_move_amp_shift, 1.0, 1.0);
-      double bz_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bz_move_amp, bz_move_amp_shift, 1.0, 1.0);
-      double ba_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, ba_move_amp, ba_move_amp_shift, 1.0, 1.0);
-      double bb_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bb_move_amp, bb_move_amp_shift, 1.0, 1.0);
-      double bc_move = wsigmoid(walking_time_ - reference_time_, body_move_periodTime, 0, bc_move_amp, bc_move_amp_shift, 1.0, 1.0);
-
-      present_waist_yaw_angle_rad_ = wp_move;
-      present_body_pose_.z = bz_move + z_swap;
-      present_body_pose_.roll = ba_move;
-      present_body_pose_.pitch = bb_move;
-      present_body_pose_.yaw = bc_move;
+//      present_waist_yaw_angle_rad_ = wp_move;
+//      present_body_pose_.z = bz_move + z_swap;
+//      present_body_pose_.roll = ba_move;
+//      present_body_pose_.pitch = bb_move;
+//      present_body_pose_.yaw = bc_move;
 
       //Feet
       double time = walking_time_ - reference_time_;
@@ -1043,7 +1068,8 @@ void RobotisOnlineWalking::process()
 
         body_roll_swap_dir = -1.0;
       }
-      else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)    {
+      else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
+      {
         x_move_amp = (added_step_data_[0].position_data.left_foot_pose.x - previous_step_left_foot_pose_.x);
         x_move_amp_shift = previous_step_left_foot_pose_.x;
 
@@ -1123,7 +1149,8 @@ void RobotisOnlineWalking::process()
           balancing_index_ = BalancingPhase0;
         }
       }
-      else if(time <= ssp_time_end) {
+      else if(time <= ssp_time_end)
+      {
         x_move = wsigmoid(time, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
         y_move = wsigmoid(time, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
         z_move = wsigmoid(time, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
