@@ -29,15 +29,15 @@
  *******************************************************************************/
 
 /*
- * robotis_onlinel_walking.h
+ * thormang3_online_walking.h
  *
  *  Created on: 2016. 6. 10.
  *      Author: Jay Song
  */
 
 
-#ifndef THORMANG3_WALKING_MODULE_ROBOTIS_ONLINEL_WALKING_H_
-#define THORMANG3_WALKING_MODULE_ROBOTIS_ONLINEL_WALKING_H_
+#ifndef THORMANG3_WALKING_MODULE_THORMANG3_ONLINEL_WALKING_H_
+#define THORMANG3_WALKING_MODULE_THORMANG3_ONLINEL_WALKING_H_
 
 #include <vector>
 #include <boost/thread.hpp>
@@ -200,4 +200,4 @@ private:
 
 }
 
-#endif /* THORMANG3_WALKING_MODULE_ROBOTIS_ONLINEL_WALKING_H_ */
+#endif /* THORMANG3_WALKING_MODULE_THORMANG3_ONLINEL_WALKING_H_ */

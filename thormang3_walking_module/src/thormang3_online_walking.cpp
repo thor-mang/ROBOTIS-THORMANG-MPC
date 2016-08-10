@@ -29,7 +29,7 @@
  *******************************************************************************/
 
 /*
- * robotis_onlinel_walking.cpp
+ * thormang3_online_walking.cpp
  *
  *  Created on: 2016. 6. 10.
  *      Author: Jay Song
@@ -37,7 +37,7 @@
 
 #include <iostream>
 #include <stdio.h>
-#include "thormang3_walking_module/robotis_onlinel_walking.h"
+#include "thormang3_walking_module/thormang3_online_walking.h"
 
 
 using namespace thormang3;

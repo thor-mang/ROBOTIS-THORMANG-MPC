@@ -35,7 +35,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(thormang3_walking_module
-  src/thormang3_robotis_online_walking.cpp
+  src/thormang3_online_walking.cpp
   src/thormang3_wakling_module.cpp
 )
 
