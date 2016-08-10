@@ -137,8 +137,8 @@ RobotisOnlineWalking::RobotisOnlineWalking()
   mat_robot_to_rfoot_ = mat_robot_to_g_ * mat_g_to_rfoot_;
   mat_robot_to_lfoot_ = mat_robot_to_g_ * mat_g_to_lfoot_;
 
-  rhip_to_rfoot_pose_ = getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_rfoot_);
-  lhip_to_lfoot_pose_ = getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_lfoot_);
+  rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_rfoot_);
+  lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_lfoot_);
 
   thormang3_kd_->calcInverseKinematicsForRightLeg(&r_leg_out_angle_rad_[0], rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw);
   thormang3_kd_->calcInverseKinematicsForLeftLeg(&l_leg_out_angle_rad_[0], lhip_to_lfoot_pose_.x, lhip_to_lfoot_pose_.y, lhip_to_lfoot_pose_.z, lhip_to_lfoot_pose_.roll, lhip_to_lfoot_pose_.pitch, lhip_to_lfoot_pose_.yaw);
@@ -168,18 +168,18 @@ RobotisOnlineWalking::RobotisOnlineWalking()
   reference_step_data_for_addition_.time_data.walking_state = IN_WALKING_ENDING;
   reference_step_data_for_addition_.time_data.abs_step_time = 1.6;
   reference_step_data_for_addition_.time_data.dsp_ratio = 0.2;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
 
   present_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
   previous_step_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
@@ -339,8 +339,8 @@ void RobotisOnlineWalking::initialize()
   balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
   mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
 
-  rhip_to_rfoot_pose_ = getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
-  lhip_to_lfoot_pose_ = getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
+  rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
+  lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
 
   if(thormang3_kd_->calcInverseKinematicsForRightLeg(&r_leg_out_angle_rad_[0], rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw) == false)
   {
@@ -373,18 +373,18 @@ void RobotisOnlineWalking::initialize()
   reference_step_data_for_addition_.time_data.walking_state = IN_WALKING_ENDING;
   reference_step_data_for_addition_.time_data.abs_step_time = 0.0;
   reference_step_data_for_addition_.time_data.dsp_ratio = 0.2;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
 
   present_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
   previous_step_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
@@ -489,9 +489,9 @@ void RobotisOnlineWalking::reInitialize()
   //Initialize Time
   walking_time_ = 0; reference_time_ = 0;
 
-  previous_step_right_foot_pose_ = getPose3DfromTransformMatrix(mat_robot_to_rfoot_);
-  previous_step_left_foot_pose_  = getPose3DfromTransformMatrix(mat_robot_to_lfoot_);
-  previous_step_body_pose_ = getPose3DfromTransformMatrix(mat_robot_to_cob_);
+  previous_step_right_foot_pose_ = robotis_framework::getPose3DfromTransformMatrix(mat_robot_to_rfoot_);
+  previous_step_left_foot_pose_  = robotis_framework::getPose3DfromTransformMatrix(mat_robot_to_lfoot_);
+  previous_step_body_pose_       = robotis_framework::getPose3DfromTransformMatrix(mat_robot_to_cob_);
 
   present_right_foot_pose_ = previous_step_right_foot_pose_;
   present_left_foot_pose_  = previous_step_left_foot_pose_;
@@ -515,8 +515,8 @@ void RobotisOnlineWalking::reInitialize()
   balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
   mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
 
-  rhip_to_rfoot_pose_ = getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
-  lhip_to_lfoot_pose_ = getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
+  rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
+  lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
 
   if(thormang3_kd_->calcInverseKinematicsForRightLeg(&r_leg_out_angle_rad_[0], rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw) == false)
   {
@@ -549,18 +549,18 @@ void RobotisOnlineWalking::reInitialize()
   reference_step_data_for_addition_.time_data.walking_state = IN_WALKING_ENDING;
   reference_step_data_for_addition_.time_data.abs_step_time = 0.0;
   reference_step_data_for_addition_.time_data.dsp_ratio = 0.2;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
 
   present_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
   previous_step_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
@@ -603,7 +603,7 @@ bool RobotisOnlineWalking::isRunning()
   return real_running;
 }
 
-bool RobotisOnlineWalking::addStepData(StepData step_data)
+bool RobotisOnlineWalking::addStepData(robotis_framework::StepData step_data)
 {
   mutex_lock_.lock();
   added_step_data_.push_back(step_data);
@@ -639,20 +639,20 @@ void RobotisOnlineWalking::eraseLastStepData()
   mutex_lock_.unlock();
 }
 
-void RobotisOnlineWalking::getReferenceStepDatafotAddition(StepData *ref_step_data_for_addition)
+void RobotisOnlineWalking::getReferenceStepDatafotAddition(robotis_framework::StepData *ref_step_data_for_addition)
 {
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_x = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_y = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_z = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_roll = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.sigmoid_distortion_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
   (*ref_step_data_for_addition) = reference_step_data_for_addition_;
 }
 
@@ -1103,12 +1103,12 @@ void RobotisOnlineWalking::process()
 
       if( time <= ssp_time_start)
       {
-        x_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_x,     added_step_data_[0].time_data.sigmoid_distortion_x);
-        y_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_y,     added_step_data_[0].time_data.sigmoid_distortion_y);
-        z_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_z,     added_step_data_[0].time_data.sigmoid_distortion_z);
-        a_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_roll,  added_step_data_[0].time_data.sigmoid_distortion_roll);
-        b_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_pitch, added_step_data_[0].time_data.sigmoid_distortion_pitch);
-        c_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_yaw,   added_step_data_[0].time_data.sigmoid_distortion_yaw);
+        x_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
+        y_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
+        z_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
+        a_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
+        b_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
+        c_move = wsigmoid(ssp_time_start, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
 
         z_vibe         = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp, z_vibe_amp_shift);
         body_roll_swap = wsin(ssp_time_start, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
@@ -1124,12 +1124,12 @@ void RobotisOnlineWalking::process()
         }
       }
       else if(time <= ssp_time_end) {
-        x_move = wsigmoid(time, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_x,     added_step_data_[0].time_data.sigmoid_distortion_x);
-        y_move = wsigmoid(time, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_y,     added_step_data_[0].time_data.sigmoid_distortion_y);
-        z_move = wsigmoid(time, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_z,     added_step_data_[0].time_data.sigmoid_distortion_z);
-        a_move = wsigmoid(time, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_roll,  added_step_data_[0].time_data.sigmoid_distortion_roll);
-        b_move = wsigmoid(time, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_pitch, added_step_data_[0].time_data.sigmoid_distortion_pitch);
-        c_move = wsigmoid(time, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_yaw,   added_step_data_[0].time_data.sigmoid_distortion_yaw);
+        x_move = wsigmoid(time, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
+        y_move = wsigmoid(time, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
+        z_move = wsigmoid(time, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
+        a_move = wsigmoid(time, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
+        b_move = wsigmoid(time, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
+        c_move = wsigmoid(time, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
 
         z_vibe         = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
         body_roll_swap = wsin(time, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
@@ -1152,12 +1152,12 @@ void RobotisOnlineWalking::process()
         }
       }
       else {
-        x_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_x,     added_step_data_[0].time_data.sigmoid_distortion_x);
-        y_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_y,     added_step_data_[0].time_data.sigmoid_distortion_y);
-        z_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_z,     added_step_data_[0].time_data.sigmoid_distortion_z);
-        a_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_roll,  added_step_data_[0].time_data.sigmoid_distortion_roll);
-        b_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_pitch, added_step_data_[0].time_data.sigmoid_distortion_pitch);
-        c_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.sigmoid_ratio_yaw,   added_step_data_[0].time_data.sigmoid_distortion_yaw);
+        x_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, x_move_amp, x_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_x,     added_step_data_[0].time_data.finish_time_advance_ratio_x);
+        y_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, y_move_amp, y_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_y,     added_step_data_[0].time_data.finish_time_advance_ratio_y);
+        z_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, z_move_amp, z_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_z,     added_step_data_[0].time_data.finish_time_advance_ratio_z);
+        a_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, a_move_amp, a_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_roll,  added_step_data_[0].time_data.finish_time_advance_ratio_roll);
+        b_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, b_move_amp, b_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_pitch, added_step_data_[0].time_data.finish_time_advance_ratio_pitch);
+        c_move = wsigmoid(ssp_time_end, foot_move_period_time, ssp_time_start, c_move_amp, c_move_amp_shift, added_step_data_[0].time_data.start_time_delay_ratio_yaw,   added_step_data_[0].time_data.finish_time_advance_ratio_yaw);
 
         z_vibe         = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, z_vibe_amp,         z_vibe_amp_shift);
         body_roll_swap = wsin(ssp_time_end, foot_move_period_time, z_vibe_phase_shift + 2.0*M_PI*ssp_time_start/foot_move_period_time, body_roll_swap_amp, body_roll_swap_amp_shift);
@@ -1564,8 +1564,8 @@ void RobotisOnlineWalking::process()
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
 
-    rhip_to_rfoot_pose_ = getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
-    lhip_to_lfoot_pose_ = getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
+    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
+    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
 
     if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) )
     {

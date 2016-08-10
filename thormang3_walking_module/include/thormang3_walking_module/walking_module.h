@@ -107,8 +107,8 @@ private:
   bool removeExistingStepDataServiceCallback(thormang3_walking_module_msgs::RemoveExistingStepData::Request  &req,
                                              thormang3_walking_module_msgs::RemoveExistingStepData::Response &res);
 
-  int convertStepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, StepData& des);
-  int convertStepDataToStepDataMsg(StepData& src, thormang3_walking_module_msgs::StepData& des);
+  int convertStepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, robotis_framework::StepData& des);
+  int convertStepDataToStepDataMsg(robotis_framework::StepData& src, thormang3_walking_module_msgs::StepData& des);
 
   void setBalanceParam(thormang3_walking_module_msgs::BalanceParam& balance_param_msg);
 

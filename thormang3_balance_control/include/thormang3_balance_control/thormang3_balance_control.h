@@ -79,6 +79,10 @@ public:
 
   void initialize(const int control_cycle_msec);
 
+  void setGyroBalanceEnable(bool enable);
+  void setOrientationBalanceEnable(bool enable);
+  void setForceTorqueBalanceEnable(bool enable);
+
   void process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified);
 
   void setDesiredPose(const Eigen::MatrixXd &robot_to_cob, const Eigen::MatrixXd &robot_to_right_foot, const Eigen::MatrixXd &robot_to_left_foot);
@@ -136,6 +140,12 @@ public:
 private:
   int balance_control_error_;
   double control_cycle_sec_;
+
+  // balance enable
+  double gyro_enable_;
+  double orientation_enable_;
+  double ft_enable_;
+
 
   // desired pose
   Eigen::MatrixXd desired_robot_to_cob_;

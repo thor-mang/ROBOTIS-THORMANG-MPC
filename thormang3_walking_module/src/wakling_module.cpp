@@ -246,25 +246,25 @@ void WalkingMotionModule::publishStatusMsg(unsigned int type, std::string msg)
   status_msg_pub_.publish(status_msg);
 }
 
-int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, StepData& des)
+int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, robotis_framework::StepData& des)
 {
   int copy_result = thormang3_walking_module_msgs::AddStepDataArray::Response::NO_ERROR;
   des.time_data.   walking_state           = src.time_data.walking_state;
   des.time_data.abs_step_time            = src.time_data.abs_step_time;
   des.time_data.dsp_ratio               = src.time_data.dsp_ratio;
-  des.time_data.sigmoid_ratio_x         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_x;
-  des.time_data.sigmoid_ratio_y         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_y;
-  des.time_data.sigmoid_ratio_z         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_z;
-  des.time_data.sigmoid_ratio_roll      = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_roll;
-  des.time_data.sigmoid_ratio_pitch     = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_pitch;
-  des.time_data.sigmoid_ratio_yaw       = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_yaw;
+  des.time_data.start_time_delay_ratio_x         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_x;
+  des.time_data.start_time_delay_ratio_y         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_y;
+  des.time_data.start_time_delay_ratio_z         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_z;
+  des.time_data.start_time_delay_ratio_roll      = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_roll;
+  des.time_data.start_time_delay_ratio_pitch     = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_pitch;
+  des.time_data.start_time_delay_ratio_yaw       = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_yaw;
 
-  des.time_data.sigmoid_distortion_x     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_x;
-  des.time_data.sigmoid_distortion_y     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_y;
-  des.time_data.sigmoid_distortion_z     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_z;
-  des.time_data.sigmoid_distortion_roll  = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_roll;
-  des.time_data.sigmoid_distortion_pitch = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_pitch;
-  des.time_data.sigmoid_distortion_yaw   = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_yaw;
+  des.time_data.finish_time_advance_ratio_x     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_x;
+  des.time_data.finish_time_advance_ratio_y     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_y;
+  des.time_data.finish_time_advance_ratio_z     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_z;
+  des.time_data.finish_time_advance_ratio_roll  = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_roll;
+  des.time_data.finish_time_advance_ratio_pitch = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_pitch;
+  des.time_data.finish_time_advance_ratio_yaw   = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_yaw;
 
 
   des.position_data.moving_foot         = src.position_data.moving_foot;
@@ -332,7 +332,7 @@ int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_m
   return copy_result;
 }
 
-int WalkingMotionModule::convertStepDataToStepDataMsg(StepData& src, thormang3_walking_module_msgs::StepData& des)
+int WalkingMotionModule::convertStepDataToStepDataMsg(robotis_framework::StepData& src, thormang3_walking_module_msgs::StepData& des)
 {
   des.time_data.walking_state   = src.time_data.   walking_state;
   des.time_data.abs_step_time   = src.time_data.abs_step_time;
@@ -375,7 +375,7 @@ bool WalkingMotionModule::getReferenceStepDataServiceCallback(thormang3_walking_
 {
   RobotisOnlineWalking *online_walking = RobotisOnlineWalking::getInstance();
 
-  StepData refStepData;
+  robotis_framework::StepData refStepData;
 
   online_walking->getReferenceStepDatafotAddition(&refStepData);
 
@@ -416,8 +416,8 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
     return true;
   }
 
-  StepData step_data, ref_step_data;
-  std::vector<StepData> req_step_data_array;
+  robotis_framework::StepData step_data, ref_step_data;
+  std::vector<robotis_framework::StepData> req_step_data_array;
 
   online_walking->getReferenceStepDatafotAddition(&ref_step_data);
 

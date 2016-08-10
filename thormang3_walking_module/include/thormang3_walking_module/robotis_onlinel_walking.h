@@ -45,7 +45,7 @@
 #include "robotis_framework_common/singleton.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 #include "thormang3_balance_control/thormang3_balance_control.h"
-#include "math/walking_module_math.h"
+#include "robotis_math/robotis_math.h"
 
 namespace thormang3
 {
@@ -63,10 +63,10 @@ public:
   void process();
   bool isRunning();
 
-  bool addStepData(StepData step_data);
+  bool addStepData(robotis_framework::StepData step_data);
   void eraseLastStepData();
   int  getNumofRemainingUnreservedStepData();
-  void getReferenceStepDatafotAddition(StepData *ref_step_data_for_addition);
+  void getReferenceStepDatafotAddition(robotis_framework::StepData *ref_step_data_for_addition);
 
   void setRefZMPDecisionParameter(double X_ZMP_CenterShift, double Y_ZMP_CenterShift, double Y_ZMP_Convergence);
 
@@ -141,15 +141,15 @@ private:
   Eigen::MatrixXd mat_robot_to_lfoot_;
 
 
-  std::vector<StepData> added_step_data_;
+  std::vector<robotis_framework::StepData> added_step_data_;
 
   double goal_waist_yaw_angle_rad_;
-  StepData current_step_data_;
-  StepData reference_step_data_for_addition_;
-  Pose3D initial_right_foot_pose_, initial_left_foot_pose_, initial_body_pose_;
-  Pose3D present_right_foot_pose_, present_left_foot_pose_, present_body_pose_;
-  Pose3D previous_step_right_foot_pose_, previous_step_left_foot_pose_, previous_step_body_pose_;
-  Pose3D rhip_to_rfoot_pose_, lhip_to_lfoot_pose_;
+  robotis_framework::StepData current_step_data_;
+  robotis_framework::StepData reference_step_data_for_addition_;
+  robotis_framework::Pose3D initial_right_foot_pose_, initial_left_foot_pose_, initial_body_pose_;
+  robotis_framework::Pose3D present_right_foot_pose_, present_left_foot_pose_, present_body_pose_;
+  robotis_framework::Pose3D previous_step_right_foot_pose_, previous_step_left_foot_pose_, previous_step_body_pose_;
+  robotis_framework::Pose3D rhip_to_rfoot_pose_, lhip_to_lfoot_pose_;
   double present_waist_yaw_angle_rad_;
   double previous_step_waist_yaw_angle_rad_;
   double r_init_shoulder_angle_rad_, r_init_elbow_angle_rad_;

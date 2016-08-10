@@ -87,7 +87,12 @@ RobotisBalanceControl::RobotisBalanceControl()
   balance_control_error_ = BalanceControlError::NoError;
   control_cycle_sec_ = 0.008;
 
-  desired_robot_to_cob_        = Eigen::MatrixXd::Identity(4,4);
+  // balance enable
+  gyro_enable_ = 1.0;
+  orientation_enable_ = 1.0;
+  ft_enable_ = 1.0;
+
+  desired_robot_to_cob_         = Eigen::MatrixXd::Identity(4,4);
   desired_robot_to_right_foot_  = Eigen::MatrixXd::Identity(4,4);
   desired_robot_to_left_foot_   = Eigen::MatrixXd::Identity(4,4);
 
@@ -190,6 +195,30 @@ void RobotisBalanceControl::initialize(const int control_cycle_msec)
   left_foot_torque_pitch_ctrl_.control_cycle_sec_ = control_cycle_sec_;
 }
 
+void RobotisBalanceControl::setGyroBalanceEnable(bool enable)
+{
+  if(enable)
+    gyro_enable_ = 1.0;
+  else
+    gyro_enable_ = 0.0;
+}
+
+void RobotisBalanceControl::setOrientationBalanceEnable(bool enable)
+{
+  if(enable)
+    orientation_enable_ = 1.0;
+  else
+    orientation_enable_ = 0.0;
+}
+
+void RobotisBalanceControl::setForceTorqueBalanceEnable(bool enable)
+{
+  if(enable)
+    ft_enable_ = 1.0;
+  else
+    ft_enable_ = 0.0;
+}
+
 void RobotisBalanceControl::process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified)
 {
   balance_control_error_ = BalanceControlError::NoError;
@@ -202,12 +231,12 @@ void RobotisBalanceControl::process(int *balance_error, Eigen::MatrixXd *robot_t
   gyro_roll_filtered_  = current_gyro_roll_rad_per_sec_*gyro_lpf_alpha_  + (1.0 - gyro_lpf_alpha_)*gyro_roll_filtered_;
   gyro_pitch_filtered_ = current_gyro_pitch_rad_per_sec_*gyro_lpf_alpha_ + (1.0 - gyro_lpf_alpha_)*gyro_pitch_filtered_;
 
-  foot_roll_adjustment_by_gyro_roll_   = (desired_gyro_roll_  - gyro_roll_filtered_)  * gyro_balance_roll_gain_;
-  foot_pitch_adjustment_by_gyro_pitch_ = (desired_gyro_pitch_ - gyro_pitch_filtered_) * gyro_balance_pitch_gain_;
+  foot_roll_adjustment_by_gyro_roll_   = gyro_enable_ * (desired_gyro_roll_  - gyro_roll_filtered_)  * gyro_balance_roll_gain_;
+  foot_pitch_adjustment_by_gyro_pitch_ = gyro_enable_ * (desired_gyro_pitch_ - gyro_pitch_filtered_) * gyro_balance_pitch_gain_;
 
   // z by imu
-  foot_roll_adjustment_by_orientation_roll_ = foot_roll_angle_ctrl_.getDampingControllerOutput(current_orientation_roll_rad_);
-  foot_pitch_adjustment_by_orientation_pitch_ = foot_pitch_angle_ctrl_.getDampingControllerOutput(current_orientation_pitch_rad_);
+  foot_roll_adjustment_by_orientation_roll_   = orientation_enable_ * foot_roll_angle_ctrl_.getDampingControllerOutput(current_orientation_roll_rad_);
+  foot_pitch_adjustment_by_orientation_pitch_ = orientation_enable_ * foot_pitch_angle_ctrl_.getDampingControllerOutput(current_orientation_pitch_rad_);
 
   Eigen::MatrixXd mat_orientation_adjustment_by_imu = robotis_framework::getRotation4d(foot_roll_adjustment_by_gyro_roll_ + foot_roll_adjustment_by_orientation_roll_, foot_pitch_adjustment_by_gyro_pitch_ + foot_pitch_adjustment_by_orientation_pitch_, 0.0);
   Eigen::MatrixXd mat_r_xy, mat_l_xy;
@@ -226,17 +255,17 @@ void RobotisBalanceControl::process(int *balance_error, Eigen::MatrixXd *robot_t
   mat_l_xy = mat_orientation_adjustment_by_imu * mat_l_xy;
 
   // ft sensor
-  foot_z_adjustment_by_force_z_difference_ = 0.001*foot_force_z_diff_ctrl_.getDampingControllerOutput(current_left_fz_N_ - current_right_fz_N_);
+  foot_z_adjustment_by_force_z_difference_ = ft_enable_*0.001*foot_force_z_diff_ctrl_.getDampingControllerOutput(current_left_fz_N_ - current_right_fz_N_);
 
-  r_foot_x_adjustment_by_force_x_ = 0.001*right_foot_force_x_ctrl_.getDampingControllerOutput(current_right_fx_N_);
-  r_foot_y_adjustment_by_force_y_ = 0.001*right_foot_force_y_ctrl_.getDampingControllerOutput(current_right_fy_N_);
-  r_foot_roll_adjustment_by_torque_roll_ = right_foot_torque_roll_ctrl_.getDampingControllerOutput(current_right_tx_Nm_);
-  r_foot_pitch_adjustment_by_torque_pitch_ = right_foot_torque_pitch_ctrl_.getDampingControllerOutput(current_right_ty_Nm_);
+  r_foot_x_adjustment_by_force_x_ = ft_enable_*0.001*right_foot_force_x_ctrl_.getDampingControllerOutput(current_right_fx_N_);
+  r_foot_y_adjustment_by_force_y_ = ft_enable_*0.001*right_foot_force_y_ctrl_.getDampingControllerOutput(current_right_fy_N_);
+  r_foot_roll_adjustment_by_torque_roll_   = ft_enable_*right_foot_torque_roll_ctrl_.getDampingControllerOutput(current_right_tx_Nm_);
+  r_foot_pitch_adjustment_by_torque_pitch_ = ft_enable_*right_foot_torque_pitch_ctrl_.getDampingControllerOutput(current_right_ty_Nm_);
 
-  l_foot_x_adjustment_by_force_x_ = 0.001*left_foot_force_x_ctrl_.getDampingControllerOutput(current_left_fx_N_);
-  l_foot_y_adjustment_by_force_y_ = 0.001*left_foot_force_y_ctrl_.getDampingControllerOutput(current_left_fy_N_);
-  l_foot_roll_adjustment_by_torque_roll_ = left_foot_torque_roll_ctrl_.getDampingControllerOutput(current_left_tx_Nm_);
-  l_foot_pitch_adjustment_by_torque_pitch_ = left_foot_torque_pitch_ctrl_.getDampingControllerOutput(current_left_ty_Nm_);
+  l_foot_x_adjustment_by_force_x_ = ft_enable_*0.001*left_foot_force_x_ctrl_.getDampingControllerOutput(current_left_fx_N_);
+  l_foot_y_adjustment_by_force_y_ = ft_enable_*0.001*left_foot_force_y_ctrl_.getDampingControllerOutput(current_left_fy_N_);
+  l_foot_roll_adjustment_by_torque_roll_   = ft_enable_*left_foot_torque_roll_ctrl_.getDampingControllerOutput(current_left_tx_Nm_);
+  l_foot_pitch_adjustment_by_torque_pitch_ = ft_enable_*left_foot_torque_pitch_ctrl_.getDampingControllerOutput(current_left_ty_Nm_);
 
   // sum of sensory balance result
   pose_cob_adjustment_.coeffRef(0) = cob_x_manual_adjustment_m_;
