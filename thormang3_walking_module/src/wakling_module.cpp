@@ -185,7 +185,6 @@ void    WalkingMotionModule::queueThread()
 
   /* publish topics */
   robot_pose_pub_ = ros_node.advertise<thormang3_walking_module_msgs::RobotPose>("/robotis/walking/robot_pose", 1);
-  //status_msg_pub_    = _ros_node.advertise<std_msgs::String>("/robotis/walking/status_message", 1);
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
 
@@ -252,20 +251,6 @@ int WalkingMotionModule::convertStepDataMsgToStepData(thormang3_walking_module_m
   des.time_data.   walking_state           = src.time_data.walking_state;
   des.time_data.abs_step_time            = src.time_data.abs_step_time;
   des.time_data.dsp_ratio               = src.time_data.dsp_ratio;
-//  des.time_data.start_time_delay_ratio_x         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_x;
-//  des.time_data.start_time_delay_ratio_y         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_y;
-//  des.time_data.start_time_delay_ratio_z         = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_z;
-//  des.time_data.start_time_delay_ratio_roll      = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_roll;
-//  des.time_data.start_time_delay_ratio_pitch     = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_pitch;
-//  des.time_data.start_time_delay_ratio_yaw       = 1.0;//msg->step_data[i].TimeData.front_pause_ratio_yaw;
-//
-//  des.time_data.finish_time_advance_ratio_x     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_x;
-//  des.time_data.finish_time_advance_ratio_y     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_y;
-//  des.time_data.finish_time_advance_ratio_z     = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_z;
-//  des.time_data.finish_time_advance_ratio_roll  = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_roll;
-//  des.time_data.finish_time_advance_ratio_pitch = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_pitch;
-//  des.time_data.finish_time_advance_ratio_yaw   = 1.0;//msg->step_data[i].TimeData.back_pause_ratio_yaw;
-
 
   des.position_data.moving_foot         = src.position_data.moving_foot;
   des.position_data.shoulder_swing_gain = 0;
@@ -411,14 +396,6 @@ bool WalkingMotionModule::addStepDataServiceCallback(thormang3_walking_module_ms
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
     return true;
   }
-
-//  if(online_walking->isRunning() == true)
-  //  {
-//    res.result |= thormang3_walking_module_msgs::AddStepDataArray::Response::ROBOT_IS_WALKING_NOW;
-//    std::string status_msg  = WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG;
-//    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
-//    return true;
-//  }
 
   if((req.step_data_array.size() > 100)
       && (req.remove_existing_step_data == true)
