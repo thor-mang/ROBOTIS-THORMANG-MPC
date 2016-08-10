@@ -35,8 +35,8 @@ include_directories(
 
 ## Declare a C++ library
 add_library(thormang3_walking_module
-  src/robotis_online_walking.cpp
-  src/wakling_module.cpp
+  src/thormang3_robotis_online_walking.cpp
+  src/thormang3_wakling_module.cpp
 )
 
 add_dependencies(thormang3_walking_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

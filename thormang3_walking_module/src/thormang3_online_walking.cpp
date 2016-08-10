@@ -168,18 +168,18 @@ RobotisOnlineWalking::RobotisOnlineWalking()
   reference_step_data_for_addition_.time_data.walking_state = IN_WALKING_ENDING;
   reference_step_data_for_addition_.time_data.abs_step_time = 1.6;
   reference_step_data_for_addition_.time_data.dsp_ratio = 0.2;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 0.0;
 
   present_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
   previous_step_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
@@ -373,18 +373,18 @@ void RobotisOnlineWalking::initialize()
   reference_step_data_for_addition_.time_data.walking_state = IN_WALKING_ENDING;
   reference_step_data_for_addition_.time_data.abs_step_time = 0.0;
   reference_step_data_for_addition_.time_data.dsp_ratio = 0.2;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 0.0;
 
   present_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
   previous_step_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
@@ -549,18 +549,18 @@ void RobotisOnlineWalking::reInitialize()
   reference_step_data_for_addition_.time_data.walking_state = IN_WALKING_ENDING;
   reference_step_data_for_addition_.time_data.abs_step_time = 0.0;
   reference_step_data_for_addition_.time_data.dsp_ratio = 0.2;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 0.0;
 
   present_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
   previous_step_waist_yaw_angle_rad_ = goal_waist_yaw_angle_rad_;
@@ -641,18 +641,18 @@ void RobotisOnlineWalking::eraseLastStepData()
 
 void RobotisOnlineWalking::getReferenceStepDatafotAddition(robotis_framework::StepData *ref_step_data_for_addition)
 {
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 1.0;
-  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 1.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.start_time_delay_ratio_yaw = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_x = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_y = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_z = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_roll = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_pitch = 0.0;
+  reference_step_data_for_addition_.time_data.finish_time_advance_ratio_yaw = 0.0;
   (*ref_step_data_for_addition) = reference_step_data_for_addition_;
 }
 

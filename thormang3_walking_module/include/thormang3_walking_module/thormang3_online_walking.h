@@ -150,6 +150,11 @@ private:
   robotis_framework::Pose3D present_right_foot_pose_, present_left_foot_pose_, present_body_pose_;
   robotis_framework::Pose3D previous_step_right_foot_pose_, previous_step_left_foot_pose_, previous_step_body_pose_;
   robotis_framework::Pose3D rhip_to_rfoot_pose_, lhip_to_lfoot_pose_;
+  robotis_framework::FifthOrderPolynomialTrajectory foot_x_tra_,    foot_y_tra_,     foot_z_tra_;
+  robotis_framework::FifthOrderPolynomialTrajectory foot_roll_tra_, foot_pitch_tra_, foot_yaw_tra_;
+  robotis_framework::FifthOrderPolynomialTrajectory body_z_tra_, body_roll_tra_, body_pitch_tra_, body_yaw_tra_;
+  robotis_framework::FifthOrderPolynomialTrajectory waist_yaw_tra_;
+
   double present_waist_yaw_angle_rad_;
   double previous_step_waist_yaw_angle_rad_;
   double r_init_shoulder_angle_rad_, r_init_elbow_angle_rad_;
