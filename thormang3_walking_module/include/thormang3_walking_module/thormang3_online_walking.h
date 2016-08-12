@@ -125,10 +125,10 @@ private:
 
   KinematicsDynamics* thormang3_kd_;
 
-  double left_fz_sigmoid_start_time_;
-  double left_fz_sigmoid_end_time_;
-  double left_fz_sigmoid_target_;
-  double left_fz_sigmoid_shift_;
+  double left_fz_trajectory_start_time_;
+  double left_fz_trajectory_end_time_;
+  double left_fz_trajectory_target_;
+  double left_fz_trajectory_shift_;
 
   double total_mass_of_robot_;
   double right_dsp_fz_N_, right_ssp_fz_N_;
