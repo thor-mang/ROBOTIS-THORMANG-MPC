@@ -7,7 +7,7 @@
   <maintainer email="zerom@robotis.com">ROBOTIS</maintainer>
 
 
-  <license>GPLv2</license>
+  <license>BSD</license>
 
 
   <!-- <url type="website">http://wiki.ros.org/thormang3_manager</url> -->
@@ -27,6 +27,7 @@
   
   <build_depend>cmake_modules</build_depend>
   <build_depend>thormang3_feet_ft_module</build_depend>  
+  <build_depend>thormang3_balance_control</build_depend>
   <build_depend>thormang3_head_control_module</build_depend>
   <build_depend>thormang3_manipulation_module</build_depend>
   <build_depend>thormang3_walking_module</build_depend>

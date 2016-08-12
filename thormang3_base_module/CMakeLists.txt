@@ -42,8 +42,8 @@ include_directories(
 
 ## Declare a C++ library
 add_library(thormang3_base_module
-  src/BaseModule.cpp
-  src/RobotisState.cpp
+  src/base_module.cpp
+  src/base_module_state.cpp
   #src/JointState.cpp
   #src/Transformation.cpp
   #src/Trajectory.cpp
