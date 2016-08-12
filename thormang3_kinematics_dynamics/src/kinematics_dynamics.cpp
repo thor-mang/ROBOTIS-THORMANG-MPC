@@ -94,7 +94,7 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[40]->name_               =  "passive_z";
     thormang3_link_data_[40]->parent_             =  39;
     thormang3_link_data_[40]->sibling_            =  -1;
-    thormang3_link_data_[40]->child_              =  41;
+    thormang3_link_data_[40]->child_              =  43;
     thormang3_link_data_[40]->mass_               =  0.0;
     thormang3_link_data_[40]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.723 ); // 0.0 , 0.0 , 0.801
     thormang3_link_data_[40]->joint_axis_         =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
@@ -104,9 +104,9 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[40]->inertia_            =  robotis_framework::getInertiaXYZ( 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 );
 
     thormang3_link_data_[41]->name_               =  "passive_roll";
-    thormang3_link_data_[41]->parent_             =  40;
+    thormang3_link_data_[41]->parent_             =  42;
     thormang3_link_data_[41]->sibling_            =  -1;
-    thormang3_link_data_[41]->child_              =  42;
+    thormang3_link_data_[41]->child_              =  44;
     thormang3_link_data_[41]->mass_               =  0.0;
     thormang3_link_data_[41]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
     thormang3_link_data_[41]->joint_axis_         =  robotis_framework::getTransitionXYZ( 1.0 , 0.0 , 0.0 );
@@ -116,9 +116,9 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[41]->inertia_            =  robotis_framework::getInertiaXYZ( 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 );
 
     thormang3_link_data_[42]->name_               =  "passive_pitch";
-    thormang3_link_data_[42]->parent_             =  41;
+    thormang3_link_data_[42]->parent_             =  43;
     thormang3_link_data_[42]->sibling_            =  -1;
-    thormang3_link_data_[42]->child_              =  43;
+    thormang3_link_data_[42]->child_              =  41;
     thormang3_link_data_[42]->mass_               =  0.0;
     thormang3_link_data_[42]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
     thormang3_link_data_[42]->joint_axis_         =  robotis_framework::getTransitionXYZ( 0.0 , 1.0 , 0.0 );
@@ -128,9 +128,9 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[42]->inertia_            =  robotis_framework::getInertiaXYZ( 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 );
 
     thormang3_link_data_[43]->name_               =  "passive_yaw";
-    thormang3_link_data_[43]->parent_             =  42;
+    thormang3_link_data_[43]->parent_             =  40;
     thormang3_link_data_[43]->sibling_            =  -1;
-    thormang3_link_data_[43]->child_              =  44;
+    thormang3_link_data_[43]->child_              =  42;
     thormang3_link_data_[43]->mass_               =  0.0;
     thormang3_link_data_[43]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
     thormang3_link_data_[43]->joint_axis_         =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 1.0 );
@@ -143,7 +143,7 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
 
     // pelvis_link
     thormang3_link_data_[44]->name_               =  "pelvis";
-    thormang3_link_data_[44]->parent_             =  43;
+    thormang3_link_data_[44]->parent_             =  41;
     thormang3_link_data_[44]->sibling_            =  -1;
     thormang3_link_data_[44]->child_              =  27;
     thormang3_link_data_[44]->mass_               =  6.869;
