@@ -60,7 +60,6 @@ private:
   std::map<std::string, int> joint_name_to_id_;
 
   /* base parameters */
-  bool goal_initializing_;
   bool is_moving_;
 
   Eigen::VectorXd present_joint_position_;

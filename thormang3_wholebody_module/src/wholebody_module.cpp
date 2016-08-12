@@ -45,8 +45,7 @@ WholebodyModule::WholebodyModule()
     is_moving_(false),
     ik_solving_(false),
     wb_solving_(false),
-    wb_ik_solving_(false),
-    goal_initializing_(false)
+    wb_ik_solving_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -994,17 +993,11 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     else
       continue;
 
-    present_joint_position_(joint_name_to_id_[joint_name]-1) = dxl->dxl_state_->present_position_;
-    present_joint_velocity_(joint_name_to_id_[joint_name]-1) = dxl->dxl_state_->present_velocity_;
+    present_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_position_;
+    present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
 
-    goal_joint_position_(joint_name_to_id_[joint_name]-1) = dxl->dxl_state_->goal_position_;
+    goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_;
   }
-
-//  if (goal_initializing_ == false)
-//  {
-//    goal_joint_position_ = present_joint_position_;
-//    goal_initializing_ = true;
-//  }
 
   /*----- forward kinematics -----*/
   for (int id=1; id<=MAX_JOINT_ID; id++)
