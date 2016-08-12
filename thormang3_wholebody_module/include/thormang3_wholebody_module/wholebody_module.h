@@ -75,7 +75,8 @@ private:
   Eigen::MatrixXd goal_joint_tra_;
   Eigen::MatrixXd goal_task_tra_;
   Eigen::MatrixXd goal_pevlis_tra_;
-
+  Eigen::MatrixXd goal_l_foot_tra_;
+  Eigen::MatrixXd goal_r_foot_tra_;
 
   /* inverse kinematics */
   bool ik_solving_;
@@ -93,6 +94,11 @@ private:
   Eigen::MatrixXd wb_l_foot_position_, wb_l_foot_rotation_;
   Eigen::MatrixXd wb_r_foot_position_, wb_r_foot_rotation_;
   geometry_msgs::Pose pelvis_pose_msg_;
+
+  Eigen::MatrixXd wb_l_foot_target_position_, wb_l_foot_target_rotation_;
+  Eigen::Quaterniond wb_l_foot_start_quaternion_, wb_l_foot_goal_quaternion_;
+  Eigen::MatrixXd wb_r_foot_target_position_, wb_r_foot_target_rotation_;
+  Eigen::Quaterniond wb_r_foot_start_quaternion_, wb_r_foot_goal_quaternion_;
 
   int cnt_;
 
@@ -115,9 +121,12 @@ private:
   void setKinematicsGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsGroupPose::ConstPtr& msg);
 
   void setInverseKinematics(int cnt);
+  void setInverseKinematicsForLeftFoot(int cnt);
+  void setInverseKinematicsForRightFoot(int cnt);
   void setPelvisPose(int cnt);
 
   void traGeneProcForIniPose();
+  void traGeneProcForStandWheelPose();
 
   void traGeneProcForTaskSpace();
   void traGeneProcForJointSpace();
