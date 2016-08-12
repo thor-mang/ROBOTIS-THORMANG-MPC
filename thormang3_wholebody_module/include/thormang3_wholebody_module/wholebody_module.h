@@ -69,6 +69,7 @@ private:
   /* movement */
   double mov_time_;
   int all_time_steps_;
+  int cnt_;
 
   Eigen::VectorXd joint_ini_pose_;
   Eigen::MatrixXd goal_joint_tra_;
@@ -99,7 +100,9 @@ private:
   Eigen::MatrixXd wb_r_foot_target_position_, wb_r_foot_target_rotation_;
   Eigen::Quaterniond wb_r_foot_start_quaternion_, wb_r_foot_goal_quaternion_;
 
-  int cnt_;
+  /* balance */
+  bool is_balancing_;
+
 
   /* msgs */
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
@@ -118,6 +121,7 @@ private:
   void setJointGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::JointGroupPose::ConstPtr& msg);
   void setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg);
   void setKinematicsGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsGroupPose::ConstPtr& msg);
+  void setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg);
 
   void setInverseKinematics(int cnt);
   void setInverseKinematicsForLeftFoot(int cnt);

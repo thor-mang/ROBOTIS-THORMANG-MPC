@@ -45,7 +45,8 @@ WholebodyModule::WholebodyModule()
     is_moving_(false),
     ik_solving_(false),
     wb_solving_(false),
-    wb_ik_solving_(false)
+    wb_ik_solving_(false),
+    is_balancing_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -183,6 +184,8 @@ void WholebodyModule::queueThread()
                                                                 &WholebodyModule::setJointGroupPoseMsgCallback, this);
   ros::Subscriber kinematics_group_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/kinematics_group_pose_msg", 5,
                                                                      &WholebodyModule::setKinematicsGroupPoseMsgCallback, this);
+  ros::Subscriber wholebody_balance_msg_sub = ros_node.subscribe("/robotis/wholebody/wholebody_balance_msg", 5,
+                                                                 &WholebodyModule::setWholebodyBalanceMsgCallback, this);
 
   /* service */
   ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/wholebody/get_joint_pose",
@@ -419,6 +422,25 @@ void WholebodyModule::setKinematicsGroupPoseMsgCallback(const thormang3_wholebod
     ROS_INFO("previous task is alive");
 
   return;
+}
+
+void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg)
+{
+  if (msg->data == "balance_on")
+  {
+    ROS_INFO("1");
+    is_balancing_ = true;
+
+
+  }
+  else if(msg->data == "balance_off")
+  {
+    ROS_INFO("2");
+    is_balancing_ = false;
+
+
+  }
+
 }
 
 void WholebodyModule::traGeneProcForIniPose()
