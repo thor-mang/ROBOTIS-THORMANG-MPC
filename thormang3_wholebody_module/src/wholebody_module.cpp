@@ -426,10 +426,19 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
     wb_pelvis_target_position_ = robotis_->thormang3_link_data_[ID_PELVIS]->position_;
     wb_pelvis_target_rotation_ = robotis_->thormang3_link_data_[ID_PELVIS]->orientation_;
 
+    PRINT_MAT(wb_pelvis_target_position_);
+    PRINT_MAT(wb_pelvis_target_rotation_);
+
     wb_l_foot_target_position_ = robotis_->thormang3_link_data_[ID_L_LEG_END]->position_;
     wb_l_foot_target_rotation_ = robotis_->thormang3_link_data_[ID_L_LEG_END]->orientation_;
     wb_r_foot_target_position_ = robotis_->thormang3_link_data_[ID_R_LEG_END]->position_;
     wb_r_foot_target_rotation_ = robotis_->thormang3_link_data_[ID_R_LEG_END]->orientation_;
+
+    PRINT_MAT(wb_l_foot_target_position_);
+    PRINT_MAT(wb_l_foot_target_rotation_);
+
+    PRINT_MAT(wb_r_foot_target_position_);
+    PRINT_MAT(wb_r_foot_target_rotation_);
 
     is_balancing_ = true;
     on_balance_gain_ = true;
@@ -1107,6 +1116,9 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
     r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
 
+    PRINT_MAT(l_foot_pose);
+    PRINT_MAT(r_foot_pose);
+
     ROS_INFO("4");
 
     balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
@@ -1117,7 +1129,8 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
     ROS_INFO("6");
 
-    balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
+    balance_control_.setCurrentGyroSensorOutput(0.0, 0.0);
+//    balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
 
     ROS_INFO("7");
 
@@ -1127,11 +1140,23 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
                                       imu_data_msg_.orientation.z);
     Eigen::MatrixXd imu_rpy = robotis_framework::convertQuaternionToRPY(imu_quaternion);
 
-    balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
-    balance_control_.setCurrentFootForceTorqueSensorOutput(r_foot_ft_data_msg_.force.x,  r_foot_ft_data_msg_.force.y,  r_foot_ft_data_msg_.force.z,
-                                                           r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z,
-                                                           l_foot_ft_data_msg_.force.x,  l_foot_ft_data_msg_.force.y,  l_foot_ft_data_msg_.force.z,
-                                                           l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
+    balance_control_.setCurrentOrientationSensorOutput(0.0, 0.0);
+    balance_control_.setCurrentFootForceTorqueSensorOutput(0.0, 0.0, 0.0,
+                                                           0.0, 0.0, 0.0,
+                                                           0.0, 0.0, 0.0,
+                                                           0.0, 0.0, 0.0);
+
+//    Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
+//                                      imu_data_msg_.orientation.x,
+//                                      imu_data_msg_.orientation.y,
+//                                      imu_data_msg_.orientation.z);
+//    Eigen::MatrixXd imu_rpy = robotis_framework::convertQuaternionToRPY(imu_quaternion);
+
+//    balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
+//    balance_control_.setCurrentFootForceTorqueSensorOutput(r_foot_ft_data_msg_.force.x,  r_foot_ft_data_msg_.force.y,  r_foot_ft_data_msg_.force.z,
+//                                                           r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z,
+//                                                           l_foot_ft_data_msg_.force.x,  l_foot_ft_data_msg_.force.y,  l_foot_ft_data_msg_.force.z,
+//                                                           l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
 
     ROS_INFO("8");
 
@@ -1149,18 +1174,26 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block(0,0,3,3);
     Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block(0,3,3,1);
 
+    PRINT_MAT(wb_pelvis_target_rotation);
+    PRINT_MAT(wb_pelvis_target_position);
+
     Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block(0,0,3,3);
     Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block(0,3,3,1);
     Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block(0,0,3,3);
     Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block(0,3,3,1);
 
+    PRINT_MAT(wb_l_foot_target_rotation);
+    PRINT_MAT(wb_l_foot_target_position);
+    PRINT_MAT(wb_r_foot_target_rotation);
+    PRINT_MAT(wb_r_foot_target_position);
+
     ROS_INFO("11");
 
-    robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_pelvis_target_rotation.coeff(0,0);
-    robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_rotation.coeff(1,0);
-    robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_pelvis_target_rotation.coeff(2,0);
+    robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_pelvis_target_position.coeff(0,0);
+    robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_position.coeff(1,0);
+    robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_pelvis_target_position.coeff(2,0);
 
-    Eigen::MatrixXd wb_target_rpy = robotis_framework::convertRotationToRPY(wb_pelvis_target_position);
+    Eigen::MatrixXd wb_target_rpy = robotis_framework::convertRotationToRPY(wb_pelvis_target_rotation);
 
     robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_ = wb_target_rpy.coeff(0,0);
     robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_ = wb_target_rpy.coeff(1,0);
