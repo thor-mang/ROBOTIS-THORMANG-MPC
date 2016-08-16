@@ -2,7 +2,11 @@
 <package>
   <name>thormang3_action_module</name>
   <version>0.1.0</version>
-  <description>The thormang3_action_module package</description>
+  <description>
+    The thormang3_action_module package
+    This package is a motion module that can play the saved action.
+    This module is based on position control.
+  </description>
 
   <maintainer email="hjsong@robotis.com">ROBOTIS</maintainer>
   

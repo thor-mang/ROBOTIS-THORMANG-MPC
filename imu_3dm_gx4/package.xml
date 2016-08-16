@@ -2,9 +2,10 @@
 <package format="2">
   <name>imu_3dm_gx4</name>
   <version>0.0.4</version>
-  <description>Driver for Microstrain 3DM-GX4-25 IMU
-  This package is modified by robotis.
-  original version is Kumar Robotics's imu_3dm_gx4 package(https://github.com/KumarRobotics/imu_3dm_gx4)
+  <description>
+    Driver for Microstrain 3DM-GX4-25 IMU
+    This package is modified by robotis.
+    original version is Kumar Robotics's imu_3dm_gx4 package(http://wiki.ros.org/imu_3dm_gx4)      
   </description>
 
   <!-- <maintainer email="gcross.code@icloud.com">gcross</maintainer> -->

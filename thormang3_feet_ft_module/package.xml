@@ -2,7 +2,10 @@
 <package>
   <name>thormang3_feet_ft_module</name>
   <version>0.0.0</version>
-  <description>The thormang3_feet_ft_module package</description>
+  <description>
+    The thormang3_feet_ft_module package
+    This package is a sensor module for force torque sensors on feet.
+  </description>
 
   <maintainer email="hjsong@robotis.com">ROBOTIS</maintainer>
 

@@ -2,7 +2,10 @@
 <package>
   <name>thormang3_balance_control</name>
   <version>0.0.0</version>
-  <description>The thormang3_balance_control package</description>
+  <description>
+    The thormang3_balance_control package
+    This balance control is based on PD control.      
+  </description>
 
   <maintainer email="hjsong@robotis.com">ROBOTIS</maintainer>
 
