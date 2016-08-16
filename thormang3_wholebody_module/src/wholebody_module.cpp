@@ -919,7 +919,10 @@ void WholebodyModule::setBalanceControlGain(int cnt)
     balance_control_.left_foot_force_x_ctrl_.time_constant_sec_ = 0.2;
 
     if (balance_gain_cnt_ >= balance_gain_time_steps_)
+    {
+      ROS_INFO("balance gain activated");
       on_balance_gain_ == false;
+    }
   }
 
   if (off_balance_gain_ == true)
@@ -1081,14 +1084,20 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
   if (is_balancing_ == true)
   {
+    ROS_INFO("1");
+
     balance_control_.setGyroBalanceEnable(true);
     balance_control_.setOrientationBalanceEnable(true);
     balance_control_.setForceTorqueBalanceEnable(true);
+
+    ROS_INFO("2");
 
     Eigen::MatrixXd pelvis_pose = Eigen::MatrixXd::Identity(4,4);
 
     pelvis_pose.block(0,0,3,3) = wb_pelvis_target_rotation_;
     pelvis_pose.block(0,3,3,1) = wb_pelvis_target_position_;
+
+    ROS_INFO("3");
 
     Eigen::MatrixXd l_foot_pose = Eigen::MatrixXd::Identity(4,4);
     Eigen::MatrixXd r_foot_pose = Eigen::MatrixXd::Identity(4,4);
@@ -1098,11 +1107,19 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
     r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
 
+    ROS_INFO("4");
+
     balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
+
+    ROS_INFO("5");
 
     setBalanceControlGain(balance_gain_cnt_);
 
+    ROS_INFO("6");
+
     balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
+
+    ROS_INFO("7");
 
     Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
                                       imu_data_msg_.orientation.x,
@@ -1116,20 +1133,28 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
                                                            l_foot_ft_data_msg_.force.x,  l_foot_ft_data_msg_.force.y,  l_foot_ft_data_msg_.force.z,
                                                            l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
 
+    ROS_INFO("8");
+
     balance_control_.setDesiredCOBGyro(0.0, 0.0);
     balance_control_.setDesiredCOBOrientation(0.0, 0.0);
     balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
 
+    ROS_INFO("9");
+
     int error;
     balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
 
-    Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block<3,3>(0,0);
-    Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block<3,1>(0,3);
+    ROS_INFO("10");
 
-    Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block<3,3>(0,0);
-    Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block<3,1>(0,3);
-    Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block<3,3>(0,0);
-    Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block<3,1>(0,3);
+    Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block(0,0,3,3);
+    Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block(0,3,3,1);
+
+    Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block(0,0,3,3);
+    Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block(0,3,3,1);
+    Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block(0,0,3,3);
+    Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block(0,3,3,1);
+
+    ROS_INFO("11");
 
     robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_pelvis_target_rotation.coeff(0,0);
     robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_rotation.coeff(1,0);
@@ -1141,18 +1166,26 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_ = wb_target_rpy.coeff(1,0);
     robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = wb_target_rpy.coeff(2,0);
 
+    ROS_INFO("12");
+
     int max_iter = 70;
     double ik_tol = 1e-5;
     bool l_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_L_LEG_END, wb_l_foot_target_position, wb_l_foot_target_rotation, max_iter, ik_tol);
     bool r_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_R_LEG_END, wb_r_foot_target_position, wb_r_foot_target_rotation, max_iter, ik_tol);
 
+    ROS_INFO("13");
+
     if (l_foot_ik_success == true && r_foot_ik_success == true)
     {
+      ROS_INFO("14");
+
       for (int id=1; id<=MAX_JOINT_ID; id++)
         goal_joint_position_(id) = robotis_->thormang3_link_data_[id]->joint_angle_;
     }
     else
     {
+      ROS_INFO("15");
+
       ROS_INFO("----- ik failed -----");
       ROS_INFO("[end] send trajectory");
 
