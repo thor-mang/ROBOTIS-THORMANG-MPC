@@ -2,13 +2,14 @@
 <package>
   <name>thormang3_head_control_module</name>
   <version>0.0.0</version>
-  <description>The thormang3_head_control_module package</description>
+  <description>
+    A module to control the head.
+    This module is included in the Thormang3 Manager as a library. 
+  </description>
 
-  <maintainer email="kmjung@robotis.com">ROBOTIS</maintainer>
-
+  <maintainer email="kmjung@robotis.com">kayman</maintainer>
   <license>BSD</license>
-
-  <author email="kmjung@robotis.com">Jane Doe</author>
+  <author email="kmjung@robotis.com">kayman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>robotis_device</build_depend>
