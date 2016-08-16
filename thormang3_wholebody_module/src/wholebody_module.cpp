@@ -44,9 +44,10 @@ WholebodyModule::WholebodyModule()
   : control_cycle_msec_(0.008),
     is_moving_(false),
     ik_solving_(false),
-    wb_solving_(false),
     wb_ik_solving_(false),
-    is_balancing_(false)
+    is_balancing_(false),
+    on_balance_gain_(false),
+    off_balance_gain_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -86,8 +87,8 @@ WholebodyModule::WholebodyModule()
   result_["torso_y"]       = new robotis_framework::DynamixelState();
 
   /* gripper */
-  result_["r_arm_grip"]    = new robotis_framework::DynamixelState();
-  result_["l_arm_grip"]    = new robotis_framework::DynamixelState();
+//  result_["r_arm_grip"]    = new robotis_framework::DynamixelState();
+//  result_["l_arm_grip"]    = new robotis_framework::DynamixelState();
 
   /* arm */
   joint_name_to_id_["r_arm_sh_p1"]  = 1;
@@ -123,8 +124,8 @@ WholebodyModule::WholebodyModule()
   joint_name_to_id_["torso_y"]      = 27;
 
   /* gripper */
-  joint_name_to_id_["r_arm_grip"]   = 31;
-  joint_name_to_id_["l_arm_grip"]   = 30;
+//  joint_name_to_id_["r_arm_grip"]   = 31;
+//  joint_name_to_id_["l_arm_grip"]   = 30;
 
   /* end effector */
   joint_name_to_id_["r_arm_end"]    = 35;
@@ -134,12 +135,17 @@ WholebodyModule::WholebodyModule()
   present_joint_position_  = Eigen::VectorXd::Zero(MAX_JOINT_ID+1);
   present_joint_velocity_  = Eigen::VectorXd::Zero(MAX_JOINT_ID+1);
   goal_joint_position_ = Eigen::VectorXd::Zero(MAX_JOINT_ID+1);
+
+  via_num_ = 1;
+  via_time_ = Eigen::MatrixXd::Zero(via_num_, 1);
+
   joint_ini_pose_ = Eigen::VectorXd::Zero(MAX_JOINT_ID+1);
+  joint_ini_via_pose_ = Eigen::MatrixXd::Zero(via_num_,MAX_JOINT_ID+1);
+  joint_ini_via_d_pose_ = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
+  joint_ini_via_dd_pose_ = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
 
   ik_target_position_ = Eigen::MatrixXd::Zero(3,1);
-  wb_target_position_ = Eigen::MatrixXd::Zero(3,1);
-  wb_l_foot_position_ = Eigen::MatrixXd::Zero(3,1);
-  wb_r_foot_position_ = Eigen::MatrixXd::Zero(3,1);
+  wb_pelvis_target_position_ = Eigen::MatrixXd::Zero(3,1);
   wb_l_foot_target_position_ = Eigen::MatrixXd::Zero(3,1);
   wb_r_foot_target_position_ = Eigen::MatrixXd::Zero(3,1);
 
@@ -151,6 +157,16 @@ WholebodyModule::WholebodyModule()
   balance_control_.setGyroBalanceEnable(false);
   balance_control_.setOrientationBalanceEnable(false); // IMU
   balance_control_.setForceTorqueBalanceEnable(false); // FT
+
+  double balance_gain_mov_time_ = 1.0;
+  balance_gain_time_steps_ = int(balance_gain_mov_time_/control_cycle_msec_) + 1;
+
+  on_balance_gain_tra_ = robotis_framework::calcMinimumJerkTra(0.0, 0.0, 0.0,
+                                                               1.0, 0.0, 0.0,
+                                                               control_cycle_msec_, balance_gain_mov_time_);
+  off_balance_gain_tra_ = robotis_framework::calcMinimumJerkTra(1.0, 0.0, 0.0,
+                                                                0.0, 0.0, 0.0,
+                                                                control_cycle_msec_, balance_gain_mov_time_);
 }
 
 WholebodyModule::~WholebodyModule()
@@ -184,14 +200,9 @@ void WholebodyModule::queueThread()
                                                           &WholebodyModule::setJointPoseMsgCallback, this);
   ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/kinematics_pose_msg", 5,
                                                                &WholebodyModule::setKinematicsPoseMsgCallback, this);
-  ros::Subscriber joint_group_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_group_pose_msg", 5,
-                                                                &WholebodyModule::setJointGroupPoseMsgCallback, this);
-  ros::Subscriber kinematics_group_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/kinematics_group_pose_msg", 5,
-                                                                     &WholebodyModule::setKinematicsGroupPoseMsgCallback, this);
   ros::Subscriber wholebody_balance_msg_sub = ros_node.subscribe("/robotis/wholebody/wholebody_balance_msg", 5,
                                                                  &WholebodyModule::setWholebodyBalanceMsgCallback, this);
-
-  ros::Subscriber imu_msg_sub = ros_node.subscribe("/robotis/sensor/imu/imu", 5,
+  ros::Subscriber imu_data_sub = ros_node.subscribe("/robotis/sensor/imu/imu", 5,
                                                    &WholebodyModule::imuDataCallback, this);
 
   /* service */
@@ -203,7 +214,7 @@ void WholebodyModule::queueThread()
 
 
   std::string ik_weight_path = ros::package::getPath("thormang3_wholebody_module") + "/config/ik_weight.yaml";
-  parseData(ik_weight_path);
+  parseInverseKinematicsWeightData(ik_weight_path);
 
   while (ros_node.ok())
   {
@@ -221,7 +232,7 @@ void WholebodyModule::setModeMsgCallback(const std_msgs::String::ConstPtr& msg)
   return;
 }
 
-void WholebodyModule::parseData(const std::string &path)
+void WholebodyModule::parseInverseKinematicsWeightData(const std::string &path)
 {
   YAML::Node doc;
   try
@@ -251,32 +262,64 @@ void WholebodyModule::parseIniPoseData(const std::string &path)
   try
   {
     // load yaml
-    doc = YAML::LoadFile( path.c_str() );
-  }
-  catch(const std::exception& e)
+    doc = YAML::LoadFile(path.c_str());
+  } catch (const std::exception& e)
   {
     ROS_ERROR("Fail to load yaml file.");
-    return ;
+    return;
   }
 
   // parse movement time
-  double mov_time;
-  mov_time = doc["mov_time"].as< double >();
+  mov_time_ = doc["mov_time"].as<double>();
 
-  mov_time_ = mov_time;
+  // parse via-point number
+  via_num_ = doc["via_num"].as<int>();
 
-  // parse target pose
-  YAML::Node target_pose_node = doc["tar_pose"];
-  for(YAML::iterator it = target_pose_node.begin() ; it != target_pose_node.end() ; ++it)
+  // parse via-point time
+  std::vector<double> via_time;
+  via_time = doc["via_time"].as<std::vector<double> >();
+
+  via_time_.resize(via_num_, 1);
+  for (int num = 0; num < via_num_; num++)
+    via_time_.coeffRef(num, 0) = via_time[num];
+
+  // parse via-point pose
+  joint_ini_via_pose_.resize(via_num_, MAX_JOINT_ID + 1);
+  joint_ini_via_d_pose_.resize(via_num_, MAX_JOINT_ID + 1);
+  joint_ini_via_dd_pose_.resize(via_num_, MAX_JOINT_ID + 1);
+
+  joint_ini_via_pose_.fill(0.0);
+  joint_ini_via_d_pose_.fill(0.0);
+  joint_ini_via_dd_pose_.fill(0.0);
+
+  YAML::Node via_pose_node = doc["via_pose"];
+  for (YAML::iterator it = via_pose_node.begin(); it != via_pose_node.end(); ++it)
   {
-    int id = it->first.as<int>();
-    double value = it->second.as<double>();
+    int id;
+    std::vector<double> value;
 
-    joint_ini_pose_(id) = value*DEGREE2RADIAN;
+    id = it->first.as<int>();
+    value = it->second.as<std::vector<double> >();
+
+    for (int num = 0; num < via_num_; num++)
+      joint_ini_via_pose_.coeffRef(num, id) = value[num] * DEGREE2RADIAN;
   }
 
-  all_time_steps_ = int(floor((mov_time_ / control_cycle_msec_) + 1));
-  goal_joint_tra_.resize(all_time_steps_,MAX_JOINT_ID+1);
+  // parse target pose
+  YAML::Node tar_pose_node = doc["tar_pose"];
+  for (YAML::iterator it = tar_pose_node.begin(); it != tar_pose_node.end(); ++it)
+  {
+    int id;
+    double value;
+
+    id = it->first.as<int>();
+    value = it->second.as<double>();
+
+    joint_ini_pose_(id) = value * DEGREE2RADIAN;
+  }
+
+  all_time_steps_ = int(mov_time_ / control_cycle_msec_) + 1;
+  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
 }
 
 void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -286,10 +329,10 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
 
   if (is_moving_ == false)
   {
-    if (msg->data == "ini_pose")
+    if (msg->data == "ini_pose" || msg->data == "base_pose")
     {
       // parse initial pose
-      std::string ini_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/ini_pose.yaml";
+      std::string ini_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + msg->data +".yaml";
       parseIniPoseData(ini_pose_path);
 
       tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForIniPose, this));
@@ -312,24 +355,6 @@ void WholebodyModule::setJointPoseMsgCallback(const thormang3_wholebody_module_m
   if (is_moving_ == false)
   {
     tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForJointSpace, this));
-    delete tra_gene_tread_;
-  }
-  else
-    ROS_INFO("previous task is alive");
-
-  return;
-}
-
-void WholebodyModule::setJointGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::JointGroupPose::ConstPtr& msg)
-{
-  if(enable_ == false)
-    return;
-
-  goal_joint_group_pose_msg_ = *msg;
-
-  if (is_moving_ == false)
-  {
-    tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForJointGroup, this));
     delete tra_gene_tread_;
   }
   else
@@ -382,49 +407,9 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
       ik_id_start_ = ID_PELVIS;
       ik_id_end_ = ID_PELVIS;
 
-//      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForStandWheelPose, this));
-      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForKneeWheelPose, this));
+      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForStandWheelPose, this));
       delete tra_gene_tread_;
     }
-  }
-  else
-    ROS_INFO("previous task is alive");
-
-  return;
-}
-
-void WholebodyModule::setKinematicsGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsGroupPose::ConstPtr& msg)
-{
-  if(enable_ == false)
-    return;
-
-  goal_kinematics_group_pose_msg_ = *msg;
-
-  if (goal_kinematics_group_pose_msg_.name == "left_arm")
-  {
-    ik_id_start_ = ID_L_ARM_START;
-    ik_id_end_ = ID_L_ARM_END;
-  }
-  else if (goal_kinematics_group_pose_msg_.name == "right_arm")
-  {
-    ik_id_start_ = ID_R_ARM_START;
-    ik_id_end_ = ID_R_ARM_END;
-  }
-  else if (goal_kinematics_group_pose_msg_.name == "left_arm_with_torso")
-  {
-    ik_id_start_ = ID_TORSO;
-    ik_id_end_ = ID_L_ARM_END;
-  }
-  else if (goal_kinematics_group_pose_msg_.name == "right_arm_with_torso")
-  {
-    ik_id_start_ = ID_TORSO;
-    ik_id_end_ = ID_R_ARM_END;
-  }
-
-  if (is_moving_ == false)
-  {
-    tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForKinematicsGroup, this));
-    delete tra_gene_tread_;
   }
   else
     ROS_INFO("previous task is alive");
@@ -435,9 +420,33 @@ void WholebodyModule::setKinematicsGroupPoseMsgCallback(const thormang3_wholebod
 void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg)
 {
   if (msg->data == "balance_on")
-    is_balancing_ = true;    
+  {
+    wb_pelvis_target_position_ = robotis_->thormang3_link_data_[ID_PELVIS]->position_;
+    wb_pelvis_target_rotation_ = robotis_->thormang3_link_data_[ID_PELVIS]->orientation_;
+
+    wb_l_foot_target_position_ = robotis_->thormang3_link_data_[ID_L_LEG_END]->position_;
+    wb_l_foot_target_rotation_ = robotis_->thormang3_link_data_[ID_L_LEG_END]->orientation_;
+    wb_r_foot_target_position_ = robotis_->thormang3_link_data_[ID_R_LEG_END]->position_;
+    wb_r_foot_target_rotation_ = robotis_->thormang3_link_data_[ID_R_LEG_END]->orientation_;
+
+    is_balancing_ = true;
+    on_balance_gain_ = true;
+    balance_gain_cnt_ = 0;
+
+    is_moving_ = false;
+    ik_solving_ = false;
+    wb_ik_solving_ = false;
+  }
   else if(msg->data == "balance_off")
-    is_balancing_ = false;
+  {
+//    is_balancing_ = false;
+    off_balance_gain_ = true;
+    balance_gain_cnt_ = 0;
+
+    is_moving_ = false;
+    ik_solving_ = false;
+    wb_ik_solving_ = false;
+  }
 }
 
 void WholebodyModule::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
@@ -450,23 +459,38 @@ void WholebodyModule::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
 
 void WholebodyModule::traGeneProcForIniPose()
 {
-  for (int id=1; id<=MAX_JOINT_ID; id++)
+  for (int id = 1; id <= MAX_JOINT_ID; id++)
   {
     double ini_value = goal_joint_position_(id);
     double tar_value = joint_ini_pose_(id);
 
-    Eigen::MatrixXd tra =
-        robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                              tar_value , 0.0 , 0.0 ,
-                                              control_cycle_msec_, mov_time_ );
+    Eigen::MatrixXd tra;
+
+    if (via_num_ == 0)
+    {
+      tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
+                                                  tar_value, 0.0, 0.0,
+                                                  control_cycle_msec_, mov_time_);
+    }
+    else
+    {
+      Eigen::MatrixXd via_value = joint_ini_via_pose_.col(id);
+      Eigen::MatrixXd d_via_value = joint_ini_via_d_pose_.col(id);
+      Eigen::MatrixXd dd_via_value = joint_ini_via_dd_pose_.col(id);
+
+      tra = robotis_framework::calcMinimumJerkTraWithViaPoints(via_num_,
+                                                               ini_value, 0.0, 0.0,
+                                                               via_value, d_via_value, dd_via_value,
+                                                               tar_value, 0.0, 0.0,
+                                                               control_cycle_msec_, via_time_, mov_time_);
+    }
 
     goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
   }
 
-  cnt_ = 0;
   is_moving_ = true;
-
-  publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start robot movement");
+  cnt_ = 0;
+  ROS_INFO("[start] send trajectory");
 }
 
 void WholebodyModule::traGeneProcForStandWheelPose()
@@ -527,7 +551,7 @@ void WholebodyModule::traGeneProcForStandWheelPose()
   Eigen::Quaterniond pelvis_target_quaternion =
       robotis_framework::convertRotationToQuaternion(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
 
-  wb_goal_quaternion_ = pelvis_target_quaternion;
+  wb_pelvis_goal_quaternion_ = pelvis_target_quaternion;
 
   double l_foot_target_roll = -14.0 * DEGREE2RADIAN;
   double r_foot_target_roll = 14.0 * DEGREE2RADIAN;
@@ -536,92 +560,6 @@ void WholebodyModule::traGeneProcForStandWheelPose()
   {
     l_foot_target_roll = 0.0;
     r_foot_target_roll = 0.0;
-  }
-
-  Eigen::Quaterniond l_foot_target_quaternion =
-      robotis_framework::convertRPYToQuaternion(l_foot_target_roll, 0.0, 0.0);
-
-  wb_l_foot_goal_quaternion_ = l_foot_target_quaternion;
-
-  Eigen::Quaterniond r_foot_target_quaternion =
-      robotis_framework::convertRPYToQuaternion(r_foot_target_roll, 0.0, 0.0);
-
-  wb_r_foot_goal_quaternion_ = r_foot_target_quaternion;
-
-  cnt_ = 0;
-  is_moving_ = true;
-  wb_ik_solving_ = true;
-
-  ROS_INFO("[start] send trajectory");
-}
-
-void WholebodyModule::traGeneProcForKneeWheelPose()
-{
-  mov_time_ = 3.0;
-  all_time_steps_ = int(mov_time_/control_cycle_msec_) + 1;
-
-  goal_pevlis_tra_.resize(all_time_steps_, 3);
-  goal_l_foot_tra_.resize(all_time_steps_, 3);
-  goal_r_foot_tra_.resize(all_time_steps_, 3);
-
-  Eigen::MatrixXd pelvis_tar_vector = Eigen::MatrixXd::Zero(3,1);
-  pelvis_tar_vector.coeffRef(2,0) = -0.3;
-
-  if ( goal_kinematics_pose_msg_.name == "stand_wheel_pose_back" )
-  {
-    pelvis_tar_vector.coeffRef(2,0) = 0.3;
-  }
-
-  /* calculate trajectory */
-  for (int dim=0; dim<3; dim++)
-  {
-    double ini_value = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0);
-    double tar_value = ini_value + pelvis_tar_vector.coeff(dim,0);
-
-    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                                                tar_value, 0.0, 0.0,
-                                                                control_cycle_msec_, mov_time_);
-
-    goal_pevlis_tra_.block(0, dim, all_time_steps_, 1) = tra;
-  }
-
-  for (int dim=0; dim<3; dim++)
-  {
-    double ini_value = robotis_->thormang3_link_data_[ID_L_LEG_END]->position_.coeff(dim,0);
-    double tar_value = robotis_->thormang3_link_data_[ID_L_LEG_END]->position_.coeff(dim,0);
-
-    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                                                tar_value, 0.0, 0.0,
-                                                                control_cycle_msec_, mov_time_);
-
-    goal_l_foot_tra_.block(0, dim, all_time_steps_, 1) = tra;
-  }
-
-  for (int dim=0; dim<3; dim++)
-  {
-    double ini_value = robotis_->thormang3_link_data_[ID_R_LEG_END]->position_.coeff(dim,0);
-    double tar_value = robotis_->thormang3_link_data_[ID_R_LEG_END]->position_.coeff(dim,0);
-
-    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                                                tar_value, 0.0, 0.0,
-                                                                control_cycle_msec_, mov_time_);
-
-    goal_r_foot_tra_.block(0, dim, all_time_steps_, 1) = tra;
-  }
-
-  /* target quaternion */
-  Eigen::Quaterniond pelvis_target_quaternion =
-      robotis_framework::convertRotationToQuaternion(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
-
-  wb_goal_quaternion_ = pelvis_target_quaternion;
-
-  double l_foot_target_roll = 0.0 * DEGREE2RADIAN;
-  double r_foot_target_roll = 0.0 * DEGREE2RADIAN;
-
-  if ( goal_kinematics_pose_msg_.name == "stand_wheel_pose_back" )
-  {
-    l_foot_target_roll = 0.0 * DEGREE2RADIAN;
-    r_foot_target_roll = 0.0 * DEGREE2RADIAN;
   }
 
   Eigen::Quaterniond l_foot_target_quaternion =
@@ -698,92 +636,9 @@ void WholebodyModule::traGeneProcForJointSpace()
   ROS_INFO("[start] send trajectory");
 }
 
-void WholebodyModule::traGeneProcForJointGroup()
-{
-  mov_time_ = goal_joint_group_pose_msg_.mov_time;
-
-  all_time_steps_ = int(mov_time_/control_cycle_msec_) + 1;
-  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
-
-  int via_num = goal_joint_group_pose_msg_.via_num;
-
-  Eigen::MatrixXd via_time = Eigen::MatrixXd::Zero(via_num,1);
-  via_time.coeffRef(0,0) = goal_joint_group_pose_msg_.via_time;
-
-  for (int id=1; id<=MAX_JOINT_ID; id++)
-  {
-    double ini_value = goal_joint_position_(id);
-    double tar_value = goal_joint_position_(id);
-
-    Eigen::MatrixXd tra;
-
-    tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                                tar_value, 0.0, 0.0 ,
-                                                control_cycle_msec_ , mov_time_);
-
-    goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
-  }
-
-  if (via_num != 0)
-  {
-    Eigen::MatrixXd via_value = Eigen::MatrixXd::Zero(via_num, 1);
-    Eigen::MatrixXd d_via_value = Eigen::MatrixXd::Zero(via_num, 1);
-    Eigen::MatrixXd dd_via_value = Eigen::MatrixXd::Zero(via_num, 1);
-
-    for (int size=0; size<goal_joint_group_pose_msg_.joint_name.size(); size++)
-    {
-      int joint_id = joint_name_to_id_[goal_joint_group_pose_msg_.joint_name[size]];
-
-      if (joint_id != 0)
-      {
-        double ini_value = goal_joint_position_(joint_id);
-        double tar_value = goal_joint_group_pose_msg_.target_value[size] * DEGREE2RADIAN;
-
-        Eigen::MatrixXd tra;
-
-        via_value.coeffRef(0,0) = goal_joint_group_pose_msg_.via_value[size] * DEGREE2RADIAN;
-
-        tra = robotis_framework::calcMinimumJerkTraWithViaPoints(via_num,
-                                                                 ini_value, 0.0, 0.0,
-                                                                 via_value, d_via_value, dd_via_value,
-                                                                 tar_value, 0.0, 0.0,
-                                                                 control_cycle_msec_, via_time, mov_time_);
-
-        goal_joint_tra_.block(0, joint_id, all_time_steps_, 1) = tra;
-      }
-    }
-  }
-  else
-  {
-    for (int size=0; size<goal_joint_group_pose_msg_.joint_name.size(); size++)
-    {
-      int joint_id = joint_name_to_id_[goal_joint_group_pose_msg_.joint_name[size]];
-
-      if (joint_id != 0)
-      {
-        double ini_value = goal_joint_position_(joint_id);
-        double tar_value = goal_joint_group_pose_msg_.target_value[size] * DEGREE2RADIAN;
-
-        Eigen::MatrixXd tra;
-
-        tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                                    tar_value, 0.0, 0.0,
-                                                    control_cycle_msec_, mov_time_);
-
-        goal_joint_tra_.block(0, joint_id, all_time_steps_, 1) = tra;
-      }
-    }
-  }
-
-  is_moving_ = true;
-  cnt_ = 0;
-
-  ROS_INFO("[start] send trajectory");
-}
-
 void WholebodyModule::traGeneProcForTaskSpace()
 {
-  if (goal_joint_pose_msg_.time <= 0.0)
+  if (goal_kinematics_pose_msg_.time <= 0.0)
   {
     /* set movement time */
     double tol = 0.1; // m per sec
@@ -802,7 +657,7 @@ void WholebodyModule::traGeneProcForTaskSpace()
   }
   else
   {
-    mov_time_ = goal_joint_pose_msg_.time;
+    mov_time_ = goal_kinematics_pose_msg_.time;
     int all_time_steps = int(floor((mov_time_/control_cycle_msec_) + 1 ));
     mov_time_ = double (all_time_steps - 1) * control_cycle_msec_;
   }
@@ -844,97 +699,9 @@ void WholebodyModule::traGeneProcForTaskSpace()
   ROS_INFO("[start] send trajectory");
 }
 
-void WholebodyModule::traGeneProcForKinematicsGroup()
-{
-  mov_time_ = goal_kinematics_group_pose_msg_.mov_time;
-
-  all_time_steps_ = int(mov_time_ / control_cycle_msec_) + 1;
-  goal_task_tra_.resize(all_time_steps_, 3);
-
-  int via_num = goal_kinematics_group_pose_msg_.via_num;
-
-  Eigen::MatrixXd via_time = Eigen::MatrixXd::Zero(via_num, 1);
-  via_time.coeffRef(0,0) = goal_kinematics_group_pose_msg_.via_time;
-
-  /* calculate trajectory */
-  if (via_num != 0)
-  {
-    Eigen::MatrixXd via_vector = Eigen::MatrixXd::Zero(via_num,1);
-    Eigen::MatrixXd d_via_vector = Eigen::MatrixXd::Zero(via_num,1);
-    Eigen::MatrixXd dd_via_vector = Eigen::MatrixXd::Zero(via_num,1);
-
-    for (int dim=0; dim<3; dim++)
-    {
-      double ini_value = robotis_->thormang3_link_data_[ik_id_end_]->position_.coeff(dim,0);
-      double tar_value, via_value;
-      if (dim == 0)
-      {
-        tar_value = goal_kinematics_group_pose_msg_.target_pose.position.x ;
-        via_value = goal_kinematics_group_pose_msg_.via_pose.position.x;
-      }
-      else if (dim == 1)
-      {
-        tar_value = goal_kinematics_group_pose_msg_.target_pose.position.y ;
-        via_value = goal_kinematics_group_pose_msg_.via_pose.position.y;
-      }
-      else if (dim == 2)
-      {
-        tar_value = goal_kinematics_group_pose_msg_.target_pose.position.z ;
-        via_value = goal_kinematics_group_pose_msg_.via_pose.position.z;
-      }
-
-      via_vector.coeffRef(0,0) = via_value;
-
-      Eigen::MatrixXd tra;
-
-      tra = robotis_framework::calcMinimumJerkTraWithViaPoints(via_num,
-                                                               ini_value, 0.0, 0.0,
-                                                               via_vector, d_via_vector, dd_via_vector,
-                                                               tar_value, 0.0, 0.0,
-                                                               control_cycle_msec_, via_time, mov_time_);
-
-      goal_task_tra_.block(0, dim, all_time_steps_, 1) = tra;
-    }
-  }
-  else
-  {
-    for (int dim=0; dim<3; dim++)
-    {
-      double ini_value = robotis_->thormang3_link_data_[ik_id_end_]->position_.coeff(dim,0);
-      double tar_value;
-      if (dim == 0)
-        tar_value = goal_kinematics_group_pose_msg_.target_pose.position.x ;
-      else if (dim == 1)
-        tar_value = goal_kinematics_group_pose_msg_.target_pose.position.y ;
-      else if (dim == 2)
-        tar_value = goal_kinematics_group_pose_msg_.target_pose.position.z ;
-
-      Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                                                  tar_value, 0.0, 0.0,
-                                                                  control_cycle_msec_, mov_time_);
-
-      goal_task_tra_.block(0, dim, all_time_steps_, 1) = tra;
-    }
-  }
-
-  /* target quaternion */
-  Eigen::Quaterniond target_quaternion(goal_kinematics_group_pose_msg_.target_pose.orientation.w,
-                                       goal_kinematics_group_pose_msg_.target_pose.orientation.x,
-                                       goal_kinematics_group_pose_msg_.target_pose.orientation.y,
-                                       goal_kinematics_group_pose_msg_.target_pose.orientation.z);
-
-  ik_goal_quaternion_ = target_quaternion;
-
-  cnt_ = 0;
-  is_moving_ = true;
-  ik_solving_ = true;
-
-  ROS_INFO("[start] send trajectory");
-}
-
 void WholebodyModule::traGeneProcForPelvis()
 {
-  if (goal_joint_pose_msg_.time <= 0.0)
+  if (goal_kinematics_pose_msg_.time <= 0.0)
   {
     /* set movement time */
     double tol = 0.1; // m per sec
@@ -953,7 +720,7 @@ void WholebodyModule::traGeneProcForPelvis()
   }
   else
   {
-    mov_time_ = goal_joint_pose_msg_.time;
+    mov_time_ = goal_kinematics_pose_msg_.time;
     int all_time_steps = int(floor((mov_time_/control_cycle_msec_) + 1 ));
     mov_time_ = double (all_time_steps - 1) * control_cycle_msec_;
   }
@@ -985,11 +752,10 @@ void WholebodyModule::traGeneProcForPelvis()
                                        goal_kinematics_pose_msg_.pose.orientation.y,
                                        goal_kinematics_pose_msg_.pose.orientation.z);
 
-  wb_goal_quaternion_ = target_quaternion;
+  wb_pelvis_goal_quaternion_ = target_quaternion;
 
   cnt_ = 0;
   is_moving_ = true;
-  wb_solving_ = true;
 
   ROS_INFO("[start] send trajectory");
 }
@@ -1054,6 +820,17 @@ void WholebodyModule::setInverseKinematics(int cnt)
   ik_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
 }
 
+void WholebodyModule::setPelvisPose(int cnt)
+{
+  for ( int dim = 0; dim < 3; dim++ )
+    wb_pelvis_target_position_.coeffRef(dim, 0) = goal_pevlis_tra_.coeff(cnt, dim);
+
+  double time_step = ( double ) cnt / ( double ) all_time_steps_;
+  Eigen::Quaterniond quaternion = wb_pelvis_start_quaternion_.slerp(time_step, wb_pelvis_goal_quaternion_);
+
+  wb_pelvis_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
+}
+
 void WholebodyModule::setInverseKinematicsForLeftFoot(int cnt)
 {
   for (int dim=0; dim<3; dim++)
@@ -1076,17 +853,6 @@ void WholebodyModule::setInverseKinematicsForRightFoot(int cnt)
   wb_r_foot_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
 }
 
-void WholebodyModule::setPelvisPose(int cnt)
-{
-  for ( int dim = 0; dim < 3; dim++ )
-    wb_target_position_.coeffRef(dim, 0) = goal_pevlis_tra_.coeff(cnt, dim);
-
-  double time_step = ( double ) cnt / ( double ) all_time_steps_;
-  Eigen::Quaterniond quaternion = wb_start_quaternion_.slerp(time_step, wb_goal_quaternion_);
-
-  wb_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
-}
-
 void WholebodyModule::setStartTrajectory()
 {
   publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
@@ -1096,21 +862,10 @@ void WholebodyModule::setStartTrajectory()
     Eigen::MatrixXd ik_start_rotation = robotis_->thormang3_link_data_[ik_id_end_]->orientation_;
     ik_start_quaternion_ = robotis_framework::convertRotationToQuaternion(ik_start_rotation);
   }
-  else if (wb_solving_ == true)
-  {
-    Eigen::MatrixXd wb_start_rotation = robotis_->thormang3_link_data_[ik_id_end_]->orientation_;
-    wb_start_quaternion_ = robotis_framework::convertRotationToQuaternion(wb_start_rotation);
-
-    wb_l_foot_position_ = robotis_->thormang3_link_data_[ID_L_LEG_END]->position_;
-    wb_l_foot_rotation_ = robotis_->thormang3_link_data_[ID_L_LEG_END]->orientation_;
-
-    wb_r_foot_position_ = robotis_->thormang3_link_data_[ID_R_LEG_END]->position_;
-    wb_r_foot_rotation_ = robotis_->thormang3_link_data_[ID_R_LEG_END]->orientation_;
-  }
   else if (wb_ik_solving_ == true)
   {
     Eigen::MatrixXd wb_start_rotation = robotis_->thormang3_link_data_[ID_PELVIS]->orientation_;
-    wb_start_quaternion_ = robotis_framework::convertRotationToQuaternion(wb_start_rotation);
+    wb_pelvis_start_quaternion_ = robotis_framework::convertRotationToQuaternion(wb_start_rotation);
 
     Eigen::MatrixXd wb_l_foot_start_rotation = robotis_->thormang3_link_data_[ID_L_LEG_END]->orientation_;
     wb_l_foot_start_quaternion_ = robotis_framework::convertRotationToQuaternion(wb_l_foot_start_rotation);
@@ -1133,11 +888,55 @@ void WholebodyModule::setEndTrajectory()
       is_moving_ = false;
 
       ik_solving_ = false;
-      wb_solving_ = false;
       wb_ik_solving_ = false;
 
       cnt_ = 0;
     }
+  }
+}
+
+void WholebodyModule::setBalanceControlGain(int cnt)
+{
+  if (on_balance_gain_ == true)
+  {
+    balance_control_.setGyroBalanceGainRatio(0.5 * on_balance_gain_tra_.coeff(cnt,0));
+
+    balance_control_.foot_roll_angle_ctrl_.gain_ = -1.0 * on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_pitch_angle_ctrl_.gain_ = -1.0 * on_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.left_foot_force_x_ctrl_.gain_ = -0.1 * on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_force_y_ctrl_.gain_ = -0.1 * on_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * on_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.foot_force_z_diff_ctrl_.gain_ = -0.05 * on_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.left_foot_force_x_ctrl_.time_constant_sec_ = 0.2;
+
+    if (balance_gain_cnt_ >= balance_gain_time_steps_)
+      on_balance_gain_ == false;
+  }
+
+  if (off_balance_gain_ == true)
+  {
+    balance_control_.setGyroBalanceGainRatio(0.5 * off_balance_gain_tra_.coeff(cnt,0));
+
+    balance_control_.foot_roll_angle_ctrl_.gain_ = -1.0 * off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_pitch_angle_ctrl_.gain_ = -1.0 * off_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.left_foot_force_x_ctrl_.gain_ = -0.1 * off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_force_y_ctrl_.gain_ = -0.1 * off_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * off_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.foot_force_z_diff_ctrl_.gain_ = -0.05 * off_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.left_foot_force_x_ctrl_.time_constant_sec_ = 0.2;
+
+    if (balance_gain_cnt_ >= balance_gain_time_steps_)
+      off_balance_gain_ == false;
   }
 }
 
@@ -1169,103 +968,21 @@ void WholebodyModule::solveInverseKinematics()
   }
 }
 
-void WholebodyModule::solveWholebody()
-{
-  setPelvisPose(cnt_);
-
-  robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_target_position_.coeff(0,0);
-  robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_target_position_.coeff(1,0);
-  robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_target_position_.coeff(2,0);
-
-  Eigen::MatrixXd wb_target_rpy = robotis_framework::convertRotationToRPY(wb_target_rotation_);
-
-  robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_ = wb_target_rpy.coeff(0,0);
-  robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_ = wb_target_rpy.coeff(1,0);
-  robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = wb_target_rpy.coeff(2,0);
-
-  /* --- */
-
-  int max_iter = 70;
-  double ik_tol = 1e-5;
-  bool l_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_L_LEG_END, wb_l_foot_position_, wb_l_foot_rotation_, max_iter, ik_tol);
-  bool r_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_R_LEG_END, wb_r_foot_position_, wb_r_foot_rotation_, max_iter, ik_tol);
-
-  if (l_foot_ik_success == true && r_foot_ik_success == true)
-  {
-    for (int id=1; id<=MAX_JOINT_ID; id++)
-      goal_joint_position_(id) = robotis_->thormang3_link_data_[id]->joint_angle_;
-  }
-  else
-  {
-    ROS_INFO("----- ik failed -----");
-    ROS_INFO("[end] send trajectory");
-
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "IK Failed");
-
-    is_moving_ = false;
-    wb_solving_ = false;
-    cnt_ = 0;
-  }
-}
-
 void WholebodyModule::solveWholebodyInverseKinematics()
 {
   setPelvisPose(cnt_);
   setInverseKinematicsForLeftFoot(cnt_);
   setInverseKinematicsForRightFoot(cnt_);
 
-  robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_target_position_.coeff(0,0);
-  robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_target_position_.coeff(1,0);
-  robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_target_position_.coeff(2,0);
+  robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_pelvis_target_position_.coeff(0,0);
+  robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_position_.coeff(1,0);
+  robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_pelvis_target_position_.coeff(2,0);
 
-  Eigen::MatrixXd wb_target_rpy = robotis_framework::convertRotationToRPY(wb_target_rotation_);
+  Eigen::MatrixXd wb_target_rpy = robotis_framework::convertRotationToRPY(wb_pelvis_target_rotation_);
 
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_ = wb_target_rpy.coeff(0,0);
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_ = wb_target_rpy.coeff(1,0);
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = wb_target_rpy.coeff(2,0);
-
-  /* ----- */
-
-  //  balance_control_.setGyroBalanceEnable(true);
-  //  balance_control_.setOrientationBalanceEnable(true);
-  //  balance_control_.setForceTorqueBalanceEnable(true);
-
-  //  balance_control_.setDesiredCOBGyro(0.0, 0.0);
-  //  balance_control_.setDesiredCOBOrientation(0.0, 0.0);
-  //  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
-
-  //  balance_control_.setDesiredPose(A, B, C);
-
-//    balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
-
-//    Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
-//                                      imu_data_msg_.orientation.x,
-//                                      imu_data_msg_.orientation.y,
-//                                      imu_data_msg_.orientation.z);
-//    Eigen::MatrixXd imu_rpy = robotis_framework::convertQuaternionToRPY(imu_quaternion);
-
-//    balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
-//    balance_control_.setCurrentFootForceTorqueSensorOutput(r_foot_ft_data_msg_.force.x,  r_foot_ft_data_msg_.force.y,  r_foot_ft_data_msg_.force.z,
-//                                                           r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z,
-//                                                           l_foot_ft_data_msg_.force.x,  l_foot_ft_data_msg_.force.y,  l_foot_ft_data_msg_.force.z,
-//                                                           l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
-
-//    balance_control_.setGyroBalanceGainRatio(0.5);
-
-//    balance_control_.foot_roll_angle_ctrl_.gain_ = -1.0;
-//    balance_control_.foot_pitch_angle_ctrl_.gain_ = -1.0;
-
-//    balance_control_.left_foot_force_x_ctrl_.gain_ = -0.1;
-//    balance_control_.left_foot_force_y_ctrl_.gain_ = -0.1;
-
-//    balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1;
-//    balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1;
-
-//    balance_control_.foot_force_z_diff_ctrl_.gain_ = -0.05;
-
-//    balance_control_.left_foot_force_x_ctrl_.time_constant_sec_ = 0.2;
-
-  //  balance_control_.process(&error, &A, &B, &C);
 
   /* ----- */
 
@@ -1287,7 +1004,6 @@ void WholebodyModule::solveWholebodyInverseKinematics()
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "IK Failed");
 
     is_moving_ = false;
-    wb_solving_ = false;
     cnt_ = 0;
   }
 }
@@ -1298,7 +1014,7 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   if (enable_ == false)
     return;
 
-  /*----- Get Joint State -----*/
+  /*----- Get Joint Data & Sensor Data-----*/
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
        state_iter != result_.end(); state_iter++)
   {
@@ -1311,11 +1027,13 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     else
       continue;
 
+    // Get Joint Data
     present_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_position_;
     present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
 
     goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_;
 
+    // Get Sensor Data
     l_foot_ft_data_msg_.force.x = sensors["l_foot_fx_scaled_N"];
     l_foot_ft_data_msg_.force.y = sensors["l_foot_fy_scaled_N"];
     l_foot_ft_data_msg_.force.z = sensors["l_foot_fz_scaled_N"];
@@ -1331,13 +1049,13 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     r_foot_ft_data_msg_.torque.z = sensors["r_foot_tz_scaled_Nm"];
   }
 
-  /*----- forward kinematics -----*/
+  /*----- Forward Kinematics -----*/
   for (int id=1; id<=MAX_JOINT_ID; id++)
     robotis_->thormang3_link_data_[id]->joint_angle_ = goal_joint_position_(id);
 
   robotis_->calcForwardKinematics(0);
 
-  /* ----- Control Loop -----*/
+  /* ----- Movement Event -----*/
   if (is_moving_ == true)
   {
     if (cnt_ == 0)
@@ -1345,12 +1063,11 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
     if (ik_solving_ == true)
       solveInverseKinematics();
-    else if (wb_solving_ == true)
-      solveWholebody();
     else if (wb_ik_solving_ == true)
       solveWholebodyInverseKinematics();
     else
     {
+      // joint space control
       for ( int id = 1; id <= MAX_JOINT_ID; id++ )
         goal_joint_position_(id) = goal_joint_tra_(cnt_, id);
     }
@@ -1358,7 +1075,94 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     cnt_++;
   }
 
-  /* ---- Write Goal Value -----*/
+  if (is_balancing_ == true)
+  {
+    balance_control_.setGyroBalanceEnable(true);
+    balance_control_.setOrientationBalanceEnable(true);
+    balance_control_.setForceTorqueBalanceEnable(true);
+
+    Eigen::MatrixXd pelvis_pose = Eigen::MatrixXd::Identity(4,4);
+
+    pelvis_pose.block(0,0,3,3) = wb_pelvis_target_rotation_;
+    pelvis_pose.block(0,3,3,1) = wb_pelvis_target_position_;
+
+    Eigen::MatrixXd l_foot_pose = Eigen::MatrixXd::Identity(4,4);
+    Eigen::MatrixXd r_foot_pose = Eigen::MatrixXd::Identity(4,4);
+
+    l_foot_pose.block(0,0,3,3) = wb_l_foot_target_rotation_;
+    l_foot_pose.block(0,3,3,1) = wb_l_foot_target_position_;
+    r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
+    r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
+
+    balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
+
+    setBalanceControlGain(balance_gain_cnt_);
+
+    balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
+
+    Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
+                                      imu_data_msg_.orientation.x,
+                                      imu_data_msg_.orientation.y,
+                                      imu_data_msg_.orientation.z);
+    Eigen::MatrixXd imu_rpy = robotis_framework::convertQuaternionToRPY(imu_quaternion);
+
+    balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
+    balance_control_.setCurrentFootForceTorqueSensorOutput(r_foot_ft_data_msg_.force.x,  r_foot_ft_data_msg_.force.y,  r_foot_ft_data_msg_.force.z,
+                                                           r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z,
+                                                           l_foot_ft_data_msg_.force.x,  l_foot_ft_data_msg_.force.y,  l_foot_ft_data_msg_.force.z,
+                                                           l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
+
+    balance_control_.setDesiredCOBGyro(0.0, 0.0);
+    balance_control_.setDesiredCOBOrientation(0.0, 0.0);
+    balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
+
+    int error;
+    balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
+
+    Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block<3,3>(0,0);
+    Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block<3,1>(0,3);
+
+    Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block<3,3>(0,0);
+    Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block<3,1>(0,3);
+    Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block<3,3>(0,0);
+    Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block<3,1>(0,3);
+
+    robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_pelvis_target_rotation.coeff(0,0);
+    robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_rotation.coeff(1,0);
+    robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_pelvis_target_rotation.coeff(2,0);
+
+    Eigen::MatrixXd wb_target_rpy = robotis_framework::convertRotationToRPY(wb_pelvis_target_position);
+
+    robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_ = wb_target_rpy.coeff(0,0);
+    robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_ = wb_target_rpy.coeff(1,0);
+    robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = wb_target_rpy.coeff(2,0);
+
+    int max_iter = 70;
+    double ik_tol = 1e-5;
+    bool l_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_L_LEG_END, wb_l_foot_target_position, wb_l_foot_target_rotation, max_iter, ik_tol);
+    bool r_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_R_LEG_END, wb_r_foot_target_position, wb_r_foot_target_rotation, max_iter, ik_tol);
+
+    if (l_foot_ik_success == true && r_foot_ik_success == true)
+    {
+      for (int id=1; id<=MAX_JOINT_ID; id++)
+        goal_joint_position_(id) = robotis_->thormang3_link_data_[id]->joint_angle_;
+    }
+    else
+    {
+      ROS_INFO("----- ik failed -----");
+      ROS_INFO("[end] send trajectory");
+
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "IK Failed");
+
+      is_balancing_ = false;
+      cnt_ = 0;
+      balance_gain_cnt_ = 0;
+    }
+
+    balance_gain_cnt_++;
+  }
+
+  /* ---- Send Goal Joint Data -----*/
   sensor_msgs::JointState goal_joint_states_msg;
 
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
@@ -1368,7 +1172,7 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     result_[joint_name]->goal_position_ = goal_joint_position_(joint_name_to_id_[joint_name]);
   }
 
-  /*---------- movement end event ----------*/
+  /*---------- Movement End Event ----------*/
   setEndTrajectory();
 }
 
@@ -1377,7 +1181,6 @@ void WholebodyModule::stop()
   is_moving_ = false;
 
   ik_solving_ = false;
-  wb_solving_ = false;
   wb_ik_solving_ = false;
 
   cnt_ = 0;
