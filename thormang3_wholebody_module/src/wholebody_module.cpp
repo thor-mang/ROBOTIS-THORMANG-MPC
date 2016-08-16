@@ -421,6 +421,8 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
 {
   if (msg->data == "balance_on")
   {
+    ROS_INFO("balance on");
+
     wb_pelvis_target_position_ = robotis_->thormang3_link_data_[ID_PELVIS]->position_;
     wb_pelvis_target_rotation_ = robotis_->thormang3_link_data_[ID_PELVIS]->orientation_;
 
@@ -439,6 +441,8 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
   }
   else if(msg->data == "balance_off")
   {
+    ROS_INFO("balance off");
+
 //    is_balancing_ = false;
     off_balance_gain_ = true;
     balance_gain_cnt_ = 0;
