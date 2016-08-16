@@ -19,6 +19,7 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Wrench.h>
 #include <sensor_msgs/JointState.h>
+#include <sensor_msgs/Imu.h>
 #include <boost/thread.hpp>
 #include <yaml-cpp/yaml.h>
 
@@ -27,6 +28,7 @@
 #include "robotis_math/robotis_math.h"
 #include "robotis_framework_common/motion_module.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
+#include "thormang3_balance_control/thormang3_balance_control.h"
 
 #include "robotis_controller_msgs/JointCtrlModule.h"
 #include "robotis_controller_msgs/StatusMsg.h"
@@ -102,7 +104,10 @@ private:
 
   /* balance */
   bool is_balancing_;
-
+  RobotisBalanceControl balance_control_;
+  sensor_msgs::Imu imu_data_msg_;
+  geometry_msgs::Wrench l_foot_ft_data_msg_;
+  geometry_msgs::Wrench r_foot_ft_data_msg_;
 
   /* msgs */
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
@@ -123,17 +128,25 @@ private:
   void setKinematicsGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsGroupPose::ConstPtr& msg);
   void setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg);
 
+  void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
+
   void setInverseKinematics(int cnt);
   void setInverseKinematicsForLeftFoot(int cnt);
   void setInverseKinematicsForRightFoot(int cnt);
   void setPelvisPose(int cnt);
 
+  void setStartTrajectory();
+  void setEndTrajectory();
+  void solveInverseKinematics();
+  void solveWholebody();
+  void solveWholebodyInverseKinematics();
+
   void traGeneProcForIniPose();
   void traGeneProcForStandWheelPose();
+  void traGeneProcForKneeWheelPose();
 
   void traGeneProcForTaskSpace();
   void traGeneProcForJointSpace();
-
   void traGeneProcForJointGroup();
   void traGeneProcForKinematicsGroup();
 

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   thormang3_kinematics_dynamics
   thormang3_wholebody_module_msgs
+  thormang3_balance_control
   cmake_modules
 )
 

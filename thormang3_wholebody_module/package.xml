@@ -16,6 +16,7 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>thormang3_kinematics_dynamics</build_depend>
   <build_depend>thormang3_wholebody_module_msgs</build_depend>
+  <build_depend>thormang3_balance_control</build_depend>
   <build_depend>cmake_modules</build_depend>
   
   <run_depend>robotis_device</run_depend>
