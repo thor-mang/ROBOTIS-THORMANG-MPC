@@ -2,7 +2,12 @@
 <package>
   <name>thormang3_manipulation_module</name>
   <version>0.0.0</version>
-  <description>The thormang3_manipulation_module package</description>
+  <description>
+    The thormang3_manipulation_module package
+    This package describes basic function to control THORMANG3's upper-body.
+    This module is based on position control.
+    We provide joint space and task space control (forward kinematics, inverse kinematics).   
+  </description>
 
   <maintainer email="sch@robotis.com">sch</maintainer>
   <license>BSD</license>
@@ -25,9 +30,4 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>cmake_modules</run_depend>
 
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-    <!-- Other tools can request additional information be placed here -->
-
-  </export>
 </package>
