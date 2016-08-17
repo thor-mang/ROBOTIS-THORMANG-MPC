@@ -1380,9 +1380,9 @@ void RobotisOnlineWalking::process()
     mat_left_torque(2,0) = left_leg_Tz_Nm;
 
     mat_right_force  = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_force;
-    mat_right_torque = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_right_torque;
+    mat_right_torque = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_torque;
 
-    mat_left_force  = mat_robot_to_lfoot_*mat_rfoot_to_rft_*mat_left_force;
+    mat_left_force  = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_force;
     mat_left_torque = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_torque;
 
     double gyro_roll_rad_per_sec  = current_gyro_roll_rad_per_sec_;
