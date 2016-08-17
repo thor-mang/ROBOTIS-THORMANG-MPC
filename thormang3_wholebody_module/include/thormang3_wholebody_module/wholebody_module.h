@@ -27,6 +27,7 @@
 
 #include "robotis_math/robotis_math.h"
 #include "robotis_framework_common/motion_module.h"
+
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 #include "thormang3_balance_control/thormang3_balance_control.h"
 
@@ -35,10 +36,6 @@
 
 #include "thormang3_wholebody_module_msgs/JointPose.h"
 #include "thormang3_wholebody_module_msgs/KinematicsPose.h"
-
-#include "thormang3_wholebody_module_msgs/JointGroupPose.h"
-#include "thormang3_wholebody_module_msgs/KinematicsGroupPose.h"
-#include "thormang3_wholebody_module_msgs/BimanualGroupPose.h"
 
 #include "thormang3_wholebody_module_msgs/GetJointPose.h"
 #include "thormang3_wholebody_module_msgs/GetKinematicsPose.h"
@@ -73,7 +70,14 @@ private:
   int all_time_steps_;
   int cnt_;
 
+  int via_num_;
+  Eigen::MatrixXd via_time_;
+
   Eigen::VectorXd joint_ini_pose_;
+  Eigen::MatrixXd joint_ini_via_pose_;
+  Eigen::MatrixXd joint_ini_via_d_pose_;
+  Eigen::MatrixXd joint_ini_via_dd_pose_;
+
   Eigen::MatrixXd goal_joint_tra_;
   Eigen::MatrixXd goal_task_tra_;
   Eigen::MatrixXd goal_pevlis_tra_;
@@ -89,43 +93,73 @@ private:
   Eigen::Quaterniond ik_start_quaternion_, ik_goal_quaternion_;
 
   /* wholebody motion */
-  bool wb_solving_, wb_ik_solving_;
-  Eigen::MatrixXd wb_target_position_, wb_target_rotation_;
-  Eigen::Quaterniond wb_start_quaternion_, wb_goal_quaternion_;
-
-  Eigen::MatrixXd wb_l_foot_position_, wb_l_foot_rotation_;
-  Eigen::MatrixXd wb_r_foot_position_, wb_r_foot_rotation_;
-  geometry_msgs::Pose pelvis_pose_msg_;
+  bool wb_ik_solving_;
+  Eigen::MatrixXd wb_pelvis_target_position_, wb_pelvis_target_rotation_;
+  Eigen::Quaterniond wb_pelvis_start_quaternion_, wb_pelvis_goal_quaternion_;
 
   Eigen::MatrixXd wb_l_foot_target_position_, wb_l_foot_target_rotation_;
   Eigen::Quaterniond wb_l_foot_start_quaternion_, wb_l_foot_goal_quaternion_;
   Eigen::MatrixXd wb_r_foot_target_position_, wb_r_foot_target_rotation_;
   Eigen::Quaterniond wb_r_foot_start_quaternion_, wb_r_foot_goal_quaternion_;
 
+  Eigen::MatrixXd wb_l_arm_target_position_, wb_l_arm_target_rotation_;
+  Eigen::Quaterniond wb_l_arm_start_quaternion_, wb_l_arm_goal_quaternion_;
+  Eigen::MatrixXd wb_r_arm_target_position_, wb_r_arm_target_rotation_;
+  Eigen::Quaterniond wb_r_arm_start_quaternion_, wb_r_arm_goal_quaternion_;
+
   /* balance */
   bool is_balancing_;
+  bool on_balance_gain_, off_balance_gain_;
+  int balance_gain_cnt_;
+  int balance_gain_time_steps_;
+  Eigen::MatrixXd on_balance_gain_tra_, off_balance_gain_tra_;
   RobotisBalanceControl balance_control_;
   sensor_msgs::Imu imu_data_msg_;
   geometry_msgs::Wrench l_foot_ft_data_msg_;
   geometry_msgs::Wrench r_foot_ft_data_msg_;
 
+  double gyro_gain_;
+  double foot_roll_angle_gain_;
+  double foot_pitch_angle_gain_;
+  double foot_roll_angle_time_constant_;
+  double foot_pitch_angle_time_constant_;
+
+  double left_foot_force_x_gain_;
+  double left_foot_force_y_gain_;
+  double left_foot_force_x_time_constant_;
+  double left_foot_force_y_time_constant_;
+
+  double right_foot_force_x_gain_;
+  double right_foot_force_y_gain_;
+  double right_foot_force_x_time_constant_;
+  double right_foot_force_y_time_constant_;
+
+  double foot_force_z_gain_;
+  double foot_force_z_time_constant_;
+
+  double left_foot_torque_roll_gain_;
+  double left_foot_torque_pitch_gain_;
+  double left_foot_torque_roll_time_constant_;
+  double left_foot_torque_pitch_time_constant_;
+
+  double right_foot_torque_roll_gain_;
+  double right_foot_torque_pitch_gain_;
+  double right_foot_torque_roll_time_constant_;
+  double right_foot_torque_pitch_time_constant_;
+
   /* msgs */
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
   thormang3_wholebody_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
 
-  thormang3_wholebody_module_msgs::JointGroupPose goal_joint_group_pose_msg_;
-  thormang3_wholebody_module_msgs::KinematicsGroupPose goal_kinematics_group_pose_msg_;
-
   void queueThread();
 
-  void parseData(const std::string &path);
+  void parseInverseKinematicsWeightData(const std::string &path);
   void parseIniPoseData(const std::string &path);
+  void parseBalanceGainData(const std::string &path);
 
   void setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
   void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
-  void setJointGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::JointGroupPose::ConstPtr& msg);
   void setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg);
-  void setKinematicsGroupPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsGroupPose::ConstPtr& msg);
   void setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg);
 
   void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
@@ -134,23 +168,21 @@ private:
   void setInverseKinematicsForLeftFoot(int cnt);
   void setInverseKinematicsForRightFoot(int cnt);
   void setPelvisPose(int cnt);
+  void setBalanceControlGain(int cnt);
 
   void setStartTrajectory();
   void setEndTrajectory();
   void solveInverseKinematics();
-  void solveWholebody();
   void solveWholebodyInverseKinematics();
 
   void traGeneProcForIniPose();
   void traGeneProcForStandWheelPose();
-  void traGeneProcForKneeWheelPose();
 
   void traGeneProcForTaskSpace();
   void traGeneProcForJointSpace();
-  void traGeneProcForJointGroup();
-  void traGeneProcForKinematicsGroup();
 
   void traGeneProcForPelvis();
+  void traGeneProcForWholebody();
 
   bool getJointPoseCallback(thormang3_wholebody_module_msgs::GetJointPose::Request &req,
                             thormang3_wholebody_module_msgs::GetJointPose::Response &res);
