@@ -1018,9 +1018,31 @@ void WholebodyModule::setBalanceControlGain(int cnt)
       balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * on_balance_gain_tra_.coeff(cnt,0);
       balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * on_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.foot_force_z_diff_ctrl_.gain_ = -0.05 * on_balance_gain_tra_.coeff(cnt,0);
+      balance_control_.foot_force_z_diff_ctrl_.gain_ = -0.02 * on_balance_gain_tra_.coeff(cnt,0);
+
+      balance_control_.right_foot_torque_roll_ctrl_.gain_ = 0.002 * on_balance_gain_tra_.coeff(cnt,0);
+      balance_control_.right_foot_torque_pitch_ctrl_.gain_ = 0.0015 * on_balance_gain_tra_.coeff(cnt,0);
+
+      balance_control_.left_foot_torque_roll_ctrl_.gain_ = 0.002 * on_balance_gain_tra_.coeff(cnt,0);
+      balance_control_.left_foot_torque_pitch_ctrl_.gain_ = 0.0015 * on_balance_gain_tra_.coeff(cnt,0);
+
+
+      balance_control_.foot_roll_angle_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.foot_pitch_angle_ctrl_.time_constant_sec_ = 0.2;
 
       balance_control_.left_foot_force_x_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.left_foot_force_y_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.right_foot_force_y_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.right_foot_force_y_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.foot_force_z_diff_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.right_foot_torque_roll_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.right_foot_torque_pitch_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.left_foot_torque_roll_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.left_foot_torque_pitch_ctrl_.time_constant_sec_ = 0.2;
     }
   }
 
@@ -1044,9 +1066,31 @@ void WholebodyModule::setBalanceControlGain(int cnt)
       balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * off_balance_gain_tra_.coeff(cnt,0);
       balance_control_.right_foot_force_y_ctrl_.gain_ = -0.1 * off_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.foot_force_z_diff_ctrl_.gain_ = -0.05 * off_balance_gain_tra_.coeff(cnt,0);
+      balance_control_.foot_force_z_diff_ctrl_.gain_ = -0.02 * off_balance_gain_tra_.coeff(cnt,0);
+
+      balance_control_.right_foot_torque_roll_ctrl_.gain_ = 0.002 * off_balance_gain_tra_.coeff(cnt,0);
+      balance_control_.right_foot_torque_pitch_ctrl_.gain_ = 0.0015 * off_balance_gain_tra_.coeff(cnt,0);
+
+      balance_control_.left_foot_torque_roll_ctrl_.gain_ = 0.002 * off_balance_gain_tra_.coeff(cnt,0);
+      balance_control_.left_foot_torque_pitch_ctrl_.gain_ = 0.0015 * off_balance_gain_tra_.coeff(cnt,0);
+
+
+      balance_control_.foot_roll_angle_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.foot_pitch_angle_ctrl_.time_constant_sec_ = 0.2;
 
       balance_control_.left_foot_force_x_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.left_foot_force_y_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.right_foot_force_y_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.right_foot_force_y_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.foot_force_z_diff_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.right_foot_torque_roll_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.right_foot_torque_pitch_ctrl_.time_constant_sec_ = 0.2;
+
+      balance_control_.left_foot_torque_roll_ctrl_.time_constant_sec_ = 0.2;
+      balance_control_.left_foot_torque_pitch_ctrl_.time_constant_sec_ = 0.2;
     }
   }
 }
@@ -1229,12 +1273,6 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 //                                                           0.0, 0.0, 0.0,
 //                                                           0.0, 0.0, 0.0,
 //                                                           0.0, 0.0, 0.0);
-
-    Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
-                                      imu_data_msg_.orientation.x,
-                                      imu_data_msg_.orientation.y,
-                                      imu_data_msg_.orientation.z);
-    Eigen::MatrixXd imu_rpy = robotis_framework::convertQuaternionToRPY(imu_quaternion);
 
     balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
     balance_control_.setCurrentFootForceTorqueSensorOutput(r_foot_ft_data_msg_.force.x,  r_foot_ft_data_msg_.force.y,  r_foot_ft_data_msg_.force.z,
