@@ -1,4 +1,4 @@
-gyro_gain : 0.5
+gyro_gain : 1.0
 
 foot_roll_angle_gain : -1.0
 foot_pitch_angle_gain : -1.0
@@ -6,14 +6,14 @@ foot_pitch_angle_gain : -1.0
 foot_roll_angle_time_constant : 0.2
 foot_pitch_angle_time_constant : 0.2
 
-left_foot_force_x_gain : -0.1
-left_foot_force_y_gain : -0.1
+left_foot_force_x_gain : 0.1
+left_foot_force_y_gain : 0.1
 
 left_foot_force_x_time_constant : 0.2
 left_foot_force_y_time_constant : 0.2
 
-right_foot_force_x_gain : -0.1
-right_foot_force_y_gain : -0.1
+right_foot_force_x_gain : 0.1
+right_foot_force_y_gain : 0.1
 
 right_foot_force_x_time_constant : 0.2
 right_foot_force_y_time_constant : 0.2
