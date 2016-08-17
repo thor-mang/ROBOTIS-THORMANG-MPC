@@ -118,6 +118,35 @@ private:
   geometry_msgs::Wrench l_foot_ft_data_msg_;
   geometry_msgs::Wrench r_foot_ft_data_msg_;
 
+  double gyro_gain_;
+  double foot_roll_angle_gain_;
+  double foot_pitch_angle_gain_;
+  double foot_roll_angle_time_constant_;
+  double foot_pitch_angle_time_constant_;
+
+  double left_foot_force_x_gain_;
+  double left_foot_force_y_gain_;
+  double left_foot_force_x_time_constant_;
+  double left_foot_force_y_time_constant_;
+
+  double right_foot_force_x_gain_;
+  double right_foot_force_y_gain_;
+  double right_foot_force_x_time_constant_;
+  double right_foot_force_y_time_constant_;
+
+  double foot_force_z_gain_;
+  double foot_force_z_time_constant_;
+
+  double left_foot_torque_roll_gain_;
+  double left_foot_torque_pitch_gain_;
+  double left_foot_torque_roll_time_constant_;
+  double left_foot_torque_pitch_time_constant_;
+
+  double right_foot_torque_roll_gain_;
+  double right_foot_torque_pitch_gain_;
+  double right_foot_torque_roll_time_constant_;
+  double right_foot_torque_pitch_time_constant_;
+
   /* msgs */
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
   thormang3_wholebody_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
@@ -126,6 +155,7 @@ private:
 
   void parseInverseKinematicsWeightData(const std::string &path);
   void parseIniPoseData(const std::string &path);
+  void parseBalanceGainData(const std::string &path);
 
   void setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
   void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
