@@ -83,6 +83,8 @@ private:
   Eigen::MatrixXd goal_pevlis_tra_;
   Eigen::MatrixXd goal_l_foot_tra_;
   Eigen::MatrixXd goal_r_foot_tra_;
+  Eigen::MatrixXd goal_l_arm_tra_;
+  Eigen::MatrixXd goal_r_arm_tra_;
 
   /* inverse kinematics */
   bool ik_solving_;
@@ -94,6 +96,7 @@ private:
 
   /* wholebody motion */
   bool wb_ik_solving_;
+  bool wb_l_arm_planning_, wb_r_arm_planning_;
   Eigen::MatrixXd wb_pelvis_target_position_, wb_pelvis_target_rotation_;
   Eigen::Quaterniond wb_pelvis_start_quaternion_, wb_pelvis_goal_quaternion_;
 
@@ -164,7 +167,7 @@ private:
 
   void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
-  void setInverseKinematics(int cnt);
+//  void setInverseKinematics(int cnt);
   void setInverseKinematicsForLeftFoot(int cnt);
   void setInverseKinematicsForRightFoot(int cnt);
   void setPelvisPose(int cnt);
@@ -172,17 +175,20 @@ private:
 
   void setStartTrajectory();
   void setEndTrajectory();
-  void solveInverseKinematics();
+//  void solveInverseKinematics();
   void solveWholebodyInverseKinematics();
 
-  void traGeneProcForIniPose();
-  void traGeneProcForStandWheelPose();
+  void calcGoalTraPelvis();
+  void calcGoalTraLeg();
 
-  void traGeneProcForTaskSpace();
-  void traGeneProcForJointSpace();
+  void traGeneProcIniPose();
+//  void traGeneProcForStandWheelPose();
 
-  void traGeneProcForPelvis();
-  void traGeneProcForWholebody();
+//  void traGeneProcForTaskSpace();
+  void traGeneProcJointSpace();
+
+  void traGeneProcPelvis();
+  void traGeneProcWholebody();
 
   bool getJointPoseCallback(thormang3_wholebody_module_msgs::GetJointPose::Request &req,
                             thormang3_wholebody_module_msgs::GetJointPose::Response &res);
