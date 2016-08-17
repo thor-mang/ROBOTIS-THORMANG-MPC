@@ -4,23 +4,22 @@
   <version>0.1.0</version>
   <description>
     A module to control the head.
-    This module is included in the Thormang3 Manager as a library. 
+    This module is included in the Thormang3 Manager as a library.
   </description>
-
-  <maintainer email="kmjung@robotis.com">kayman</maintainer>
   <license>BSD</license>
-  <author email="kmjung@robotis.com">kayman</author>
-
+  <author email="kmjung@robotis.com">Kayman</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>
+  <url type="website">http://wiki.ros.org/thormang3_head_control_module</url>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>robotis_device</build_depend>
   <build_depend>robotis_math</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
-  
   <run_depend>robotis_device</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>cmake_modules</run_depend>
-
 </package>
