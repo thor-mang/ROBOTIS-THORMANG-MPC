@@ -1355,7 +1355,8 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
                                       imu_data_msg_.orientation.x,
                                       imu_data_msg_.orientation.y,
                                       imu_data_msg_.orientation.z);
-    Eigen::MatrixXd imu_rpy = robotis_framework::convertRotationToRPY(robotis_framework::getRotationX(M_PI) * imu_quaternion.toRotationMatrix() * robotis_framework::getRotationZ(M_PI));
+    Eigen::MatrixXd imu_rpy =
+        robotis_framework::convertRotationToRPY(robotis_framework::getRotationX(M_PI) * imu_quaternion.toRotationMatrix() * robotis_framework::getRotationZ(M_PI));
 
     Eigen::MatrixXd g_to_r_foot_force =
       robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
