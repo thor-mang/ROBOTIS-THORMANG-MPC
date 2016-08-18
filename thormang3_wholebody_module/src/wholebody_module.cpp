@@ -1250,8 +1250,6 @@ void WholebodyModule::setBalanceControlGain(int cnt)
 
     balance_control_.left_foot_torque_roll_ctrl_.gain_ *= on_balance_gain_tra_.coeff(balance_cnt,0);
     balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= on_balance_gain_tra_.coeff(balance_cnt,0);
-
-    ROS_INFO("on : %f", balance_control_.foot_roll_angle_ctrl_.gain_);
   }
   else
   {
@@ -1259,8 +1257,6 @@ void WholebodyModule::setBalanceControlGain(int cnt)
       balance_cnt = balance_gain_time_steps_-1;
     else
       balance_cnt = cnt;
-
-//    ROS_INFO("off : %f", off_balance_gain_tra_.coeff(balance_cnt,0));
 
     balance_control_.setGyroBalanceGainRatio(gyro_gain * off_balance_gain_tra_.coeff(balance_cnt,0));
 
@@ -1280,8 +1276,6 @@ void WholebodyModule::setBalanceControlGain(int cnt)
 
     balance_control_.left_foot_torque_roll_ctrl_.gain_ *= off_balance_gain_tra_.coeff(balance_cnt,0);
     balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= off_balance_gain_tra_.coeff(balance_cnt,0);
-
-    ROS_INFO("off : %f", balance_control_.foot_roll_angle_ctrl_.gain_);
   }
 }
 
@@ -1333,8 +1327,8 @@ void WholebodyModule::solveWholebodyInverseKinematics()
 
   balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
 
-  balance_control_.setCurrentGyroSensorOutput(0.0, 0.0);
-//  balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
+//  balance_control_.setCurrentGyroSensorOutput(0.0, 0.0);
+  balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
 
   Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
                                     imu_data_msg_.orientation.x,
@@ -1359,16 +1353,16 @@ void WholebodyModule::solveWholebodyInverseKinematics()
     robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
     robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
 
-  balance_control_.setCurrentOrientationSensorOutput(0.0, 0.0);
-  balance_control_.setCurrentFootForceTorqueSensorOutput(0.0, 0.0, 0.0,
-                                                         0.0, 0.0, 0.0,
-                                                         0.0, 0.0, 0.0,
-                                                         0.0, 0.0, 0.0);
-//  balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
-//  balance_control_.setCurrentFootForceTorqueSensorOutput(g_to_r_foot_force.coeff(0,0),  g_to_r_foot_force.coeff(1,0),  g_to_r_foot_force.coeff(2,0),
-//                                                         g_to_r_foot_torque.coeff(0,0),  g_to_r_foot_torque.coeff(1,0),  g_to_r_foot_torque.coeff(2,0),
-//                                                         g_to_l_foot_force.coeff(0,0),  g_to_l_foot_force.coeff(1,0),  g_to_l_foot_force.coeff(2,0),
-//                                                         g_to_l_foot_torque.coeff(0,0),  g_to_l_foot_torque.coeff(1,0),  g_to_l_foot_torque.coeff(2,0));
+//  balance_control_.setCurrentOrientationSensorOutput(0.0, 0.0);
+//  balance_control_.setCurrentFootForceTorqueSensorOutput(0.0, 0.0, 0.0,
+//                                                         0.0, 0.0, 0.0,
+//                                                         0.0, 0.0, 0.0,
+//                                                         0.0, 0.0, 0.0);
+  balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
+  balance_control_.setCurrentFootForceTorqueSensorOutput(g_to_r_foot_force.coeff(0,0),  g_to_r_foot_force.coeff(1,0),  g_to_r_foot_force.coeff(2,0),
+                                                         g_to_r_foot_torque.coeff(0,0),  g_to_r_foot_torque.coeff(1,0),  g_to_r_foot_torque.coeff(2,0),
+                                                         g_to_l_foot_force.coeff(0,0),  g_to_l_foot_force.coeff(1,0),  g_to_l_foot_force.coeff(2,0),
+                                                         g_to_l_foot_torque.coeff(0,0),  g_to_l_foot_torque.coeff(1,0),  g_to_l_foot_torque.coeff(2,0));
 
   balance_control_.setDesiredCOBGyro(0.0, 0.0);
   balance_control_.setDesiredCOBOrientation(0.0, 0.0);
