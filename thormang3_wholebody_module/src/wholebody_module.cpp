@@ -538,6 +538,8 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
         ik_id_start_ = ID_BASE;
         ik_id_end_ = ID_L_ARM_END;
 
+        wb_l_arm_planning_ = true;
+
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWholebody, this));
         delete tra_gene_tread_;
       }
@@ -545,6 +547,8 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
       {
         ik_id_start_ = ID_BASE;
         ik_id_end_ = ID_R_ARM_END;
+
+        wb_r_arm_planning_ = true;
 
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWholebody, this));
         delete tra_gene_tread_;
@@ -868,7 +872,79 @@ void WholebodyModule::traGeneProcPelvis()
 
 void WholebodyModule::traGeneProcWholebody()
 {
+  mov_time_ = goal_kinematics_pose_msg_.mov_time;
+  int all_time_steps = int(floor((mov_time_/control_cycle_msec_) + 1 ));
+  mov_time_ = double (all_time_steps - 1) * control_cycle_msec_;
 
+  all_time_steps_ = int(mov_time_/control_cycle_msec_) + 1;
+  goal_pevlis_tra_.resize(all_time_steps_, 3);
+  goal_l_foot_tra_.resize(all_time_steps_, 3);
+  goal_r_foot_tra_.resize(all_time_steps_, 3);
+  goal_l_arm_tra_.resize(all_time_steps_, 3);
+  goal_r_arm_tra_.resize(all_time_steps_, 3);
+
+  if (wb_l_arm_planning_ == true)
+  {
+    Eigen::MatrixXd l_arm_tar_value = Eigen::MatrixXd::Zero(3,1);
+    l_arm_tar_value.coeffRef(0,0) = goal_kinematics_pose_msg_.l_arm_pose.position.x;
+    l_arm_tar_value.coeffRef(1,0) = goal_kinematics_pose_msg_.l_arm_pose.position.y;
+    l_arm_tar_value.coeffRef(2,0) = goal_kinematics_pose_msg_.l_arm_pose.position.z;
+
+    /* calculate trajectory */
+    for (int dim=0; dim<3; dim++)
+    {
+      double ini_value = robotis_->thormang3_link_data_[ID_L_ARM_END]->position_.coeff(dim,0);
+      double tar_value = l_arm_tar_value.coeff(dim,0);
+
+      Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
+                                                                  tar_value, 0.0, 0.0,
+                                                                  control_cycle_msec_, mov_time_);
+
+      goal_l_arm_tra_.block(0, dim, all_time_steps_, 1) = tra;
+    }
+
+    /* target quaternion */
+    Eigen::Quaterniond l_arm_target_quaternion(goal_kinematics_pose_msg_.l_arm_pose.orientation.w,
+                                                goal_kinematics_pose_msg_.l_arm_pose.orientation.x,
+                                                goal_kinematics_pose_msg_.l_arm_pose.orientation.y,
+                                                goal_kinematics_pose_msg_.l_arm_pose.orientation.z);
+
+    wb_l_arm_goal_quaternion_ = l_arm_target_quaternion;
+  }
+  else if (wb_r_arm_planning_ == true)
+  {
+    Eigen::MatrixXd r_arm_tar_value = Eigen::MatrixXd::Zero(3,1);
+    r_arm_tar_value.coeffRef(0,0) = goal_kinematics_pose_msg_.r_arm_pose.position.x;
+    r_arm_tar_value.coeffRef(1,0) = goal_kinematics_pose_msg_.r_arm_pose.position.y;
+    r_arm_tar_value.coeffRef(2,0) = goal_kinematics_pose_msg_.r_arm_pose.position.z;
+
+    /* calculate trajectory */
+    for (int dim=0; dim<3; dim++)
+    {
+      double ini_value = robotis_->thormang3_link_data_[ID_R_ARM_END]->position_.coeff(dim,0);
+      double tar_value = r_arm_tar_value.coeff(dim,0);
+
+      Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
+                                                                  tar_value, 0.0, 0.0,
+                                                                  control_cycle_msec_, mov_time_);
+
+      goal_r_arm_tra_.block(0, dim, all_time_steps_, 1) = tra;
+    }
+
+    /* target quaternion */
+    Eigen::Quaterniond r_arm_target_quaternion(goal_kinematics_pose_msg_.r_arm_pose.orientation.w,
+                                                goal_kinematics_pose_msg_.r_arm_pose.orientation.x,
+                                                goal_kinematics_pose_msg_.r_arm_pose.orientation.y,
+                                                goal_kinematics_pose_msg_.r_arm_pose.orientation.z);
+
+    wb_r_arm_goal_quaternion_ = r_arm_target_quaternion;
+  }
+
+  calcGoalTraLeg();
+
+//  cnt_ = 0;
+//  is_moving_ = true;
+//  wb_ik_solving_ = true;
 }
 
 void WholebodyModule::calcGoalTraPelvis()
