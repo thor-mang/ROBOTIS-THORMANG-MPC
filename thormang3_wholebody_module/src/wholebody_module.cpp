@@ -411,6 +411,7 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
 
     is_balancing_ = true;
     on_balance_gain_ = true;
+    off_balance_gain_ = false;
     balance_gain_cnt_ = 0;
 
     is_moving_ = false;
@@ -422,6 +423,7 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
     ROS_INFO("balance off");
 
 //    is_balancing_ = false;
+    on_balance_gain_ = false;
     off_balance_gain_ = true;
     balance_gain_cnt_ = 0;
 
@@ -1228,29 +1230,27 @@ void WholebodyModule::setBalanceControlGain(int cnt)
     if (balance_gain_cnt_ >= balance_gain_time_steps_)
     {
       ROS_INFO("balance gain activated");
-      on_balance_gain_ = false;
+      balance_gain_cnt_ = balance_gain_time_steps_;
     }
-    else
-    {
-      balance_control_.setGyroBalanceGainRatio(gyro_gain * on_balance_gain_tra_.coeff(cnt,0));
 
-      balance_control_.foot_roll_angle_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.foot_pitch_angle_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.setGyroBalanceGainRatio(gyro_gain * on_balance_gain_tra_.coeff(cnt,0));
 
-      balance_control_.left_foot_force_x_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.left_foot_force_y_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_roll_angle_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_pitch_angle_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.right_foot_force_x_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.right_foot_force_y_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_force_x_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_force_y_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.foot_force_z_diff_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_force_x_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_force_y_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.right_foot_torque_roll_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.right_foot_torque_pitch_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_force_z_diff_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.left_foot_torque_roll_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
-    }
+    balance_control_.right_foot_torque_roll_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_torque_pitch_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.left_foot_torque_roll_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= on_balance_gain_tra_.coeff(cnt,0);
   }
 
   if (off_balance_gain_ == true)
@@ -1258,29 +1258,28 @@ void WholebodyModule::setBalanceControlGain(int cnt)
     if (balance_gain_cnt_ >= balance_gain_time_steps_)
     {
       ROS_INFO("balance gain disactivated");
-      off_balance_gain_ = false;
+      balance_gain_cnt_ = balance_gain_time_steps_;
     }
-    else
-    {
-      balance_control_.setGyroBalanceGainRatio(gyro_gain * off_balance_gain_tra_.coeff(cnt,0));
 
-      balance_control_.foot_roll_angle_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.foot_pitch_angle_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.setGyroBalanceGainRatio(gyro_gain * off_balance_gain_tra_.coeff(cnt,0));
 
-      balance_control_.left_foot_force_x_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.left_foot_force_y_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_roll_angle_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_pitch_angle_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.right_foot_force_x_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.right_foot_force_y_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_force_x_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_force_y_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.foot_force_z_diff_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_force_x_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_force_y_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.right_foot_torque_roll_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.right_foot_torque_pitch_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.foot_force_z_diff_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
 
-      balance_control_.left_foot_torque_roll_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
-      balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
-    }
+    balance_control_.right_foot_torque_roll_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.right_foot_torque_pitch_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+
+    balance_control_.left_foot_torque_roll_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+    balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= off_balance_gain_tra_.coeff(cnt,0);
+
   }
 }
 
