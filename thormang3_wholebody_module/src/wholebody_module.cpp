@@ -1365,7 +1365,8 @@ void WholebodyModule::solveWholebodyInverseKinematics()
                                                          g_to_l_foot_torque.coeff(0,0),  g_to_l_foot_torque.coeff(1,0),  g_to_l_foot_torque.coeff(2,0));
 
   balance_control_.setDesiredCOBGyro(0.0, 0.0);
-  balance_control_.setDesiredCOBOrientation(0.0, 0.0);
+  balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
+                                            robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
   balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
 
   int error;
