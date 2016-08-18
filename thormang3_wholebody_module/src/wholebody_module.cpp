@@ -411,7 +411,6 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
 
     is_balancing_ = true;
     on_balance_gain_ = true;
-    off_balance_gain_ = false;
     balance_gain_cnt_ = 0;
 
     is_moving_ = false;
@@ -424,7 +423,6 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
 
 //    is_balancing_ = false;
     on_balance_gain_ = false;
-    off_balance_gain_ = true;
     balance_gain_cnt_ = 0;
 
     is_moving_ = false;
@@ -1225,10 +1223,10 @@ void WholebodyModule::setBalanceControlGain(int cnt)
   balance_control_.left_foot_torque_roll_ctrl_.time_constant_sec_ = right_foot_torque_roll_time_constant_;
   balance_control_.left_foot_torque_pitch_ctrl_.time_constant_sec_ = right_foot_torque_pitch_time_constant_;
 
+  int balance_cnt;
+
   if (on_balance_gain_ == true)
   {
-    int balance_cnt;
-
     if (cnt >= balance_gain_time_steps_)
       balance_cnt = balance_gain_time_steps_-1;
     else
@@ -1252,16 +1250,17 @@ void WholebodyModule::setBalanceControlGain(int cnt)
 
     balance_control_.left_foot_torque_roll_ctrl_.gain_ *= on_balance_gain_tra_.coeff(balance_cnt,0);
     balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= on_balance_gain_tra_.coeff(balance_cnt,0);
+
+    ROS_INFO("on : %f", balance_control_.foot_roll_angle_ctrl_.gain_);
   }
-
-  if (off_balance_gain_ == true)
+  else
   {
-    int balance_cnt;
-
     if (cnt >= balance_gain_time_steps_)
       balance_cnt = balance_gain_time_steps_-1;
     else
       balance_cnt = cnt;
+
+//    ROS_INFO("off : %f", off_balance_gain_tra_.coeff(balance_cnt,0));
 
     balance_control_.setGyroBalanceGainRatio(gyro_gain * off_balance_gain_tra_.coeff(balance_cnt,0));
 
@@ -1282,6 +1281,7 @@ void WholebodyModule::setBalanceControlGain(int cnt)
     balance_control_.left_foot_torque_roll_ctrl_.gain_ *= off_balance_gain_tra_.coeff(balance_cnt,0);
     balance_control_.left_foot_torque_pitch_ctrl_.gain_ *= off_balance_gain_tra_.coeff(balance_cnt,0);
 
+    ROS_INFO("off : %f", balance_control_.foot_roll_angle_ctrl_.gain_);
   }
 }
 
