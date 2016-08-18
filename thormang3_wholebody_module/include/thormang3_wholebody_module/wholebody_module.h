@@ -80,15 +80,15 @@ private:
 
   Eigen::MatrixXd goal_joint_tra_;
   Eigen::MatrixXd goal_task_tra_;
-  Eigen::MatrixXd goal_pevlis_tra_;
+  Eigen::MatrixXd goal_pelvis_tra_;
   Eigen::MatrixXd goal_l_foot_tra_;
   Eigen::MatrixXd goal_r_foot_tra_;
   Eigen::MatrixXd goal_l_arm_tra_;
   Eigen::MatrixXd goal_r_arm_tra_;
 
   /* inverse kinematics */
-  bool ik_solving_;
-  int ik_id_start_, ik_id_end_;
+//  bool ik_solving_;
+//  int ik_id_start_, ik_id_end_;
 
   Eigen::MatrixXd ik_weight_;
   Eigen::MatrixXd ik_target_position_, ik_target_rotation_;
@@ -168,8 +168,10 @@ private:
   void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
 //  void setInverseKinematics(int cnt);
-  void setInverseKinematicsForLeftFoot(int cnt);
-  void setInverseKinematicsForRightFoot(int cnt);
+  void setInverseKinematicsLeftFoot(int cnt);
+  void setInverseKinematicsRightFoot(int cnt);
+  void setInverseKinematicsLeftArm(int cnt);
+  void setInverseKinematicsRightArm(int cnt);
   void setPelvisPose(int cnt);
   void setBalanceControlGain(int cnt);
 
@@ -177,6 +179,7 @@ private:
   void setEndTrajectory();
 //  void solveInverseKinematics();
   void solveWholebodyInverseKinematics();
+  void solveWholebodyInverseKinematicsFull();
 
   void calcGoalTraPelvis();
   void calcGoalTraLeg();
