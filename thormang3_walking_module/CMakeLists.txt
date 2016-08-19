@@ -25,6 +25,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_walking_module
+  CATKIN_DEPENDS robotis_math thormang3_walking_module_msgs
 )
 
 include_directories(

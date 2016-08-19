@@ -32,5 +32,7 @@
   <run_depend>geometry_msgs</run_depend> 
   <run_depend>cmake_modules</run_depend>
   <run_depend>eigen_conversions</run_depend>
+  <run_depend>robotis_math</run_depend>
+  <run_depend>thormang3_walking_module_msgs</run_depend>
 
 </package>
