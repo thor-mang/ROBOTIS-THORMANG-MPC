@@ -174,6 +174,25 @@ void WalkingMotionModule::initialize(const int control_cycle_msec, robotis_frame
   online_walking->process();
 
   previous_running_ = isRunning();
+
+  online_walking->hip_roll_feedforward_angle_rad_ = 0.0;
+
+  online_walking->balance_ctrl_.setGyroBalanceGainRatio(0.0);
+
+  online_walking->balance_ctrl_.foot_roll_angle_ctrl_.gain_  = 0.0;
+  online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.gain_ = 0.0;
+
+  online_walking->balance_ctrl_.right_foot_force_x_ctrl_.gain_ = 0.0;
+  online_walking->balance_ctrl_.right_foot_force_y_ctrl_.gain_ = 0.0;
+  online_walking->balance_ctrl_.left_foot_force_x_ctrl_.gain_  = 0.0;
+  online_walking->balance_ctrl_.left_foot_force_y_ctrl_.gain_  = 0.0;
+
+  online_walking->balance_ctrl_.foot_force_z_diff_ctrl_.gain_ = 0.0;
+
+  online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.gain_  = 0.0;
+  online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.gain_ = 0.0;
+  online_walking->balance_ctrl_.left_foot_torque_roll_ctrl_.gain_   = 0.0;
+  online_walking->balance_ctrl_.left_foot_torque_pitch_ctrl_.gain_  = 0.0;
 }
 
 void    WalkingMotionModule::queueThread()

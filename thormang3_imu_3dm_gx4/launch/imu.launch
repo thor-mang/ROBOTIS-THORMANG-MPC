@@ -27,7 +27,7 @@
     <arg name="enable_accel_update" default="true"/>
     <arg name="enable_mag_update" default="false"/>
 
-    <node pkg="imu_3dm_gx4" name="$(arg imu)" type="imu_3dm_gx4" output="$(arg output)">
+    <node pkg="thormang3_imu_3dm_gx4" name="$(arg imu)" type="thormang3_imu_3dm_gx4" output="$(arg output)">
         <param name="device" type="string" value="$(arg device)" />
         <param name="verbose" type="bool" value="$(arg verbose)"/>
         <param name="baudrate" type="int" value="$(arg baudrate)" />

@@ -1,28 +1,21 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>imu_3dm_gx4</name>
-  <version>0.0.4</version>
+  <name>thormang3_imu_3dm_gx4</name>
+  <version>0.1.0</version>
   <description>
     Driver for Microstrain 3DM-GX4-25 IMU
     This package is modified by robotis.
-    original version is Kumar Robotics's imu_3dm_gx4 package(http://wiki.ros.org/imu_3dm_gx4)      
+    The original version is Kumar Robotics's imu_3dm_gx4 package.
   </description>
-
-  <!-- <maintainer email="gcross.code@icloud.com">gcross</maintainer> -->
-  <maintainer email="hjsong@robotis.com">jaysong</maintainer>
-  <author>Gareth Cross</author>
   <license>Apache 2</license>
-
+  <author>Gareth Cross</author>
+  <maintainer email="hjsong@robotis.com">Jay Song</maintainer>
+  <maintainer email="pyo@robotis.com">pyo</maintainer>
   <buildtool_depend>catkin</buildtool_depend>
-
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
-
   <depend>diagnostic_updater</depend>
   <depend>geometry_msgs</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
-
-  <export>
-  </export>
 </package>
