@@ -52,6 +52,8 @@ private:
   boost::thread  queue_thread_;
   boost::thread* tra_gene_tread_;
 
+  bool gazebo_;
+
   /* sample subscriber & publisher */
   ros::Publisher  status_msg_pub_;
   ros::Publisher  set_ctrl_module_pub_;
