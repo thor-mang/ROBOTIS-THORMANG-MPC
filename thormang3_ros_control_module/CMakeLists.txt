@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   hardware_interface
   controller_manager
-  robotis_device
+  robotis_framework_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -92,7 +92,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_ros_control_module
-  CATKIN_DEPENDS roscpp rospy actionlib_msgs actionlib std_msgs hardware_interface controller_manager robotis_device 
+  CATKIN_DEPENDS roscpp rospy actionlib_msgs actionlib std_msgs hardware_interface controller_manager robotis_framework_common
 #  DEPENDS system_lib
 )
 
