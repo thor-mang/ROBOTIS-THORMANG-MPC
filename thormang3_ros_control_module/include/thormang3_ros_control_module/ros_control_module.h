@@ -76,7 +76,7 @@ private:
   
   // ros control
   
-  boost::shared_ptr<controller_manager::ControllerManager> controller_manager;
+  boost::shared_ptr<controller_manager_::ControllerManager> controller_manager_;
   
   hardware_interface::JointStateInterface jnt_state_interface_;
   hardware_interface::PositionJointInterface jnt_pos_interface_;
