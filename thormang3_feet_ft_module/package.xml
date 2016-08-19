@@ -1,28 +1,25 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_feet_ft_module</name>
-  <version>0.0.0</version>
-  <description>The thormang3_feet_ft_module package</description>
-
-  <maintainer email="hjsong@robotis.com">ROBOTIS</maintainer>
-
+  <version>0.1.0</version>
+  <description>
+    This package is a sensor module for force torque sensors on feet.
+  </description>
   <license>BSD</license>
-
-  <author email="hjsong.doe@robotis.com">ROBOTIS</author>
-
+  <author email="hjsong@robotis.com">Jay Song</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>
+  <url type="website">http://wiki.ros.org/thormang3_feet_ft_module</url>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>cmake_modules</build_depend>
-    
   <build_depend>robotis_device</build_depend>
   <build_depend>robotis_math</build_depend>
   <build_depend>robotis_controller_msgs</build_depend>
-
   <build_depend>thormang3_kinematics_dynamics</build_depend>
-  <build_depend>thormang3_feet_ft_module_msgs</build_depend>  
+  <build_depend>thormang3_feet_ft_module_msgs</build_depend>
   <build_depend>ati_ft_sensor</build_depend>
-  
   <run_depend>roscpp</run_depend>
   <run_depend>cmake_modules</run_depend>
-  
 </package>

@@ -226,7 +226,10 @@ RobotisOnlineWalking::RobotisOnlineWalking()
 
 
   balance_error_ = BalanceControlError::NoError;
-
+  quat_current_imu_.w() = cos(0.5*M_PI);
+  quat_current_imu_.x() = sin(0.5*M_PI);
+  quat_current_imu_.y() = 0;
+  quat_current_imu_.z() = 0;
 }
 
 RobotisOnlineWalking::~RobotisOnlineWalking()
@@ -571,7 +574,6 @@ void RobotisOnlineWalking::reInitialize()
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
-
 }
 
 void RobotisOnlineWalking::start()
