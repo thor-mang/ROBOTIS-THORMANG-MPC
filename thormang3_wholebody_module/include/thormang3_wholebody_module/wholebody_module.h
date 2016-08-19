@@ -48,7 +48,7 @@ class WholebodyModule
     public robotis_framework::Singleton<WholebodyModule>
 {
 private:
-  double control_cycle_msec_;
+  double control_cycle_sec_;
   boost::thread  queue_thread_;
   boost::thread* tra_gene_tread_;
 
@@ -79,6 +79,14 @@ private:
   Eigen::MatrixXd joint_ini_via_pose_;
   Eigen::MatrixXd joint_ini_via_d_pose_;
   Eigen::MatrixXd joint_ini_via_dd_pose_;
+
+  bool is_wheel_pose_;
+  Eigen::VectorXd wheel_joint_diff_pose_;
+
+  Eigen::VectorXd wheel_ini_pose_;
+  Eigen::MatrixXd wheel_ini_via_pose_;
+  Eigen::MatrixXd wheel_ini_via_d_pose_;
+  Eigen::MatrixXd wheel_ini_via_dd_pose_;
 
   Eigen::MatrixXd goal_joint_tra_;
   Eigen::MatrixXd goal_task_tra_;
@@ -161,6 +169,8 @@ private:
   void parseInverseKinematicsWeightData(const std::string &path);
   void parseIniPoseData(const std::string &path);
   void parseBalanceGainData(const std::string &path);
+  void parseWheelPoseData(const std::string &path);
+  void parseWheelJointPoseData(const std::string &path);
 
   void setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
   void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
@@ -187,6 +197,8 @@ private:
   void calcGoalTraLeg();
 
   void traGeneProcIniPose();
+  void traGeneProcWheelPose();
+  void traGeneProcWheelJointPose();
 //  void traGeneProcForStandWheelPose();
 
 //  void traGeneProcForTaskSpace();

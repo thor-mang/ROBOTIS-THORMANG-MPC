@@ -1,0 +1,22 @@
+# time parameter
+
+mov_time : 6.0		# movement time
+
+via_num : 1		# via-point number
+via_time : [ 3.0 ]	# via-point time
+
+
+# via-point pose [m]
+
+via_pose :
+  0 : [ 0.0 ]	# pelvis_position_x
+  1 : [ 0.0 ]	# pelvis_position_y
+  2 : [ 0.37 ]	# pelvis_position_z
+
+
+# target pose [m]
+
+tar_pose :
+  0  :  0.03 	# pelvis_position_x
+  1  :  0.0 	# pelvis_position_y
+  2  :  0.3	# pelvis_position_z

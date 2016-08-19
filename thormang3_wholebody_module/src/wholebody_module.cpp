@@ -41,7 +41,7 @@
 using namespace thormang3;
 
 WholebodyModule::WholebodyModule()
-  : control_cycle_msec_(0.008),
+  : control_cycle_sec_(0.008),
     gazebo_(false),
     is_moving_(false),
 //    ik_solving_(false),
@@ -50,7 +50,8 @@ WholebodyModule::WholebodyModule()
     wb_r_arm_planning_(false),
     is_balancing_(false),
     on_balance_gain_(false),
-    off_balance_gain_(false)
+    off_balance_gain_(false),
+    is_wheel_pose_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -147,6 +148,13 @@ WholebodyModule::WholebodyModule()
   joint_ini_via_d_pose_ = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
   joint_ini_via_dd_pose_ = Eigen::MatrixXd::Zero(via_num_, MAX_JOINT_ID + 1);
 
+  wheel_joint_diff_pose_ = Eigen::VectorXd::Zero(MAX_JOINT_ID+1);
+
+  wheel_ini_pose_ = Eigen::VectorXd::Zero(3);
+  wheel_ini_via_pose_ = Eigen::MatrixXd::Zero(via_num_,3);
+  wheel_ini_via_d_pose_ = Eigen::MatrixXd::Zero(via_num_,3);
+  wheel_ini_via_dd_pose_ = Eigen::MatrixXd::Zero(via_num_,3);
+
   ik_target_position_ = Eigen::MatrixXd::Zero(3,1);
   wb_pelvis_target_position_ = Eigen::MatrixXd::Zero(3,1);
   wb_l_foot_target_position_ = Eigen::MatrixXd::Zero(3,1);
@@ -164,14 +172,14 @@ WholebodyModule::WholebodyModule()
   balance_control_.setForceTorqueBalanceEnable(false); // FT
 
   double balance_gain_mov_time_ = 1.0;
-  balance_gain_time_steps_ = int(balance_gain_mov_time_/control_cycle_msec_) + 1;
+  balance_gain_time_steps_ = int(balance_gain_mov_time_/control_cycle_sec_) + 1;
 
   on_balance_gain_tra_ = robotis_framework::calcMinimumJerkTra(0.0, 0.0, 0.0,
                                                                1.0, 0.0, 0.0,
-                                                               control_cycle_msec_, balance_gain_mov_time_);
+                                                               control_cycle_sec_, balance_gain_mov_time_);
   off_balance_gain_tra_ = robotis_framework::calcMinimumJerkTra(1.0, 0.0, 0.0,
                                                                 0.0, 0.0, 0.0,
-                                                                control_cycle_msec_, balance_gain_mov_time_);
+                                                                control_cycle_sec_, balance_gain_mov_time_);
   // balance defalut gain
   gyro_gain_ = 0.5;
   foot_roll_angle_gain_ = -1.0;
@@ -213,7 +221,7 @@ void WholebodyModule::initialize(const int control_cycle_msec, robotis_framework
   ros::NodeHandle ros_node;
   ros_node.getParam("gazebo", gazebo_);
 
-  control_cycle_msec_ = control_cycle_msec * 0.001;
+  control_cycle_sec_ = control_cycle_msec * 0.001;
   queue_thread_ = boost::thread(boost::bind(&WholebodyModule::queueThread, this));
 }
 
@@ -358,7 +366,102 @@ void WholebodyModule::parseIniPoseData(const std::string &path)
     joint_ini_pose_(id) = value * DEGREE2RADIAN;
   }
 
-  all_time_steps_ = int(mov_time_ / control_cycle_msec_) + 1;
+  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
+  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
+}
+
+void WholebodyModule::parseWheelPoseData(const std::string &path)
+{
+  YAML::Node doc;
+  try
+  {
+    // load yaml
+    doc = YAML::LoadFile(path.c_str());
+  } catch (const std::exception& e)
+  {
+    ROS_ERROR("Fail to load yaml file.");
+    return;
+  }
+
+  // parse movement time
+  mov_time_ = doc["mov_time"].as<double>();
+
+  // parse via-point number
+  via_num_ = doc["via_num"].as<int>();
+
+  // parse via-point time
+  std::vector<double> via_time;
+  via_time = doc["via_time"].as<std::vector<double> >();
+
+  via_time_.resize(via_num_, 1);
+  for (int num = 0; num < via_num_; num++)
+    via_time_.coeffRef(num, 0) = via_time[num];
+
+  wheel_ini_via_pose_.resize(via_num_,3);
+  wheel_ini_via_d_pose_.resize(via_num_,3);
+  wheel_ini_via_dd_pose_.resize(via_num_,3);
+
+  wheel_ini_via_pose_.fill(0.0);
+  wheel_ini_via_d_pose_.fill(0.0);
+  wheel_ini_via_dd_pose_.fill(0.0);
+
+  YAML::Node via_pose_node = doc["via_pose"];
+  for (YAML::iterator it = via_pose_node.begin(); it != via_pose_node.end(); ++it)
+  {
+    int dim;
+    std::vector<double> value;
+
+    dim = it->first.as<int>();
+    value = it->second.as<std::vector<double> >();
+
+    for (int num = 0; num < via_num_; num++)
+      wheel_ini_via_pose_.coeffRef(num, dim) = value[num];
+  }
+
+  // parse target pose
+  YAML::Node tar_pose_node = doc["tar_pose"];
+  for (YAML::iterator it = tar_pose_node.begin(); it != tar_pose_node.end(); ++it)
+  {
+    int dim;
+    double value;
+
+    dim = it->first.as<int>();
+    value = it->second.as<double>();
+
+    wheel_ini_pose_(dim) = value;
+  }
+}
+
+void WholebodyModule::parseWheelJointPoseData(const std::string &path)
+{
+  YAML::Node doc;
+  try
+  {
+    // load yaml
+    doc = YAML::LoadFile(path.c_str());
+  } catch (const std::exception& e)
+  {
+    ROS_ERROR("Fail to load yaml file.");
+    return;
+  }
+
+  // parse movement time
+  mov_time_ = doc["mov_time"].as<double>();
+
+  // parse target pose
+  YAML::Node tar_pose_node = doc["tar_pose"];
+  for (YAML::iterator it = tar_pose_node.begin(); it != tar_pose_node.end(); ++it)
+  {
+    int id;
+    double value;
+
+    id = it->first.as<int>();
+    value = it->second.as<double>();
+
+    wheel_joint_diff_pose_(id) = value * DEGREE2RADIAN - goal_joint_position_(id);
+  }
+
+  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
   goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
 }
 
@@ -369,7 +472,8 @@ void WholebodyModule::parseBalanceGainData(const std::string &path)
   {
     // load yaml
     doc = YAML::LoadFile(path.c_str());
-  } catch (const std::exception& e)
+  }
+  catch (const std::exception& e)
   {
     ROS_ERROR("Fail to load yaml file.");
     return;
@@ -460,9 +564,32 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
       tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcIniPose, this));
       delete tra_gene_tread_;
     }
-    else if (msg->data == "wheel_pose" || msg->data == "wheel_pose_back")
+    else if (msg->data == "wheel_sit_down" || msg->data == "wheel_stand_up")
     {
+      if (is_balancing_ == true)
+      {
+        std::string wheel_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + msg->data +".yaml";
+        parseWheelPoseData(wheel_pose_path);
 
+        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelPose, this));
+        delete tra_gene_tread_;
+      }
+      else
+        ROS_INFO("balance is off");
+    }
+    else if (msg->data == "wheel_on_pose" || msg->data == "wheel_off_pose")
+    {
+      if (msg->data == "wheel_on_pose")
+      {
+        is_wheel_pose_ = true;
+        std::string wheel_joint_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + "wheel_joint_pose.yaml";
+        parseWheelJointPoseData(wheel_joint_pose_path);
+      }
+      else if (msg->data == "wheel_off_pose")
+        is_wheel_pose_ = false;
+
+      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
+      delete tra_gene_tread_;
     }
   }
   else
@@ -583,7 +710,7 @@ void WholebodyModule::traGeneProcIniPose()
     {
       tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                   tar_value, 0.0, 0.0,
-                                                  control_cycle_msec_, mov_time_);
+                                                  control_cycle_sec_, mov_time_);
     }
     else
     {
@@ -595,7 +722,7 @@ void WholebodyModule::traGeneProcIniPose()
                                                                ini_value, 0.0, 0.0,
                                                                via_value, d_via_value, dd_via_value,
                                                                tar_value, 0.0, 0.0,
-                                                               control_cycle_msec_, via_time_, mov_time_);
+                                                               control_cycle_sec_, via_time_, mov_time_);
     }
 
     goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
@@ -614,6 +741,79 @@ void WholebodyModule::traGeneProcIniPose()
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = 0.0;
 
   ROS_INFO("[start] send trajectory");
+}
+
+void WholebodyModule::traGeneProcWheelPose()
+{
+  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
+  goal_pelvis_tra_.resize(all_time_steps_, 3);
+  goal_l_foot_tra_.resize(all_time_steps_, 3);
+  goal_r_foot_tra_.resize(all_time_steps_, 3);
+
+  for (int dim = 0; dim < 3; dim++)
+  {
+    double ini_value = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0);
+    double tar_value = wheel_ini_pose_(dim);
+
+    Eigen::MatrixXd tra;
+    if (via_num_ == 0)
+    {
+      tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
+                                                  tar_value, 0.0, 0.0,
+                                                  control_cycle_sec_, mov_time_);
+    }
+    else
+    {
+      Eigen::MatrixXd via_value = wheel_ini_via_pose_.col(dim);
+      Eigen::MatrixXd d_via_value = wheel_ini_via_d_pose_.col(dim);
+      Eigen::MatrixXd dd_via_value = wheel_ini_via_dd_pose_.col(dim);
+
+      tra = robotis_framework::calcMinimumJerkTraWithViaPoints(via_num_,
+                                                               ini_value, 0.0, 0.0,
+                                                               via_value, d_via_value, dd_via_value,
+                                                               tar_value, 0.0, 0.0,
+                                                               control_cycle_sec_, via_time_, mov_time_);
+    }
+    goal_pelvis_tra_.block(0, dim, all_time_steps_, 1) = tra;
+  }
+
+  /* target quaternion */
+  wb_pelvis_goal_quaternion_ =
+      robotis_framework::convertRotationToQuaternion(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
+
+  calcGoalTraLeg();
+
+  cnt_ = 0;
+  is_moving_ = true;
+  wb_ik_solving_ = true;
+
+  ROS_INFO("[start] send trajectory");
+}
+
+void WholebodyModule::traGeneProcWheelJointPose()
+{
+  double constant;
+
+  if (is_wheel_pose_==true)
+    constant = 1.0;
+  else
+    constant = -1.0;
+
+  for (int id = 1; id <= MAX_JOINT_ID; id++)
+  {
+    double ini_value = goal_joint_position_(id);
+    double tar_value = goal_joint_position_(id) + constant * wheel_joint_diff_pose_(id) ;
+
+    Eigen::MatrixXd  tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
+                                                                 tar_value, 0.0, 0.0,
+                                                                 control_cycle_sec_, mov_time_);
+
+    goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
+  }
+
+  is_moving_ = true;
+  is_balancing_ = false;
+  cnt_ = 0;
 }
 
 //void WholebodyModule::traGeneProcForStandWheelPose()
@@ -720,8 +920,8 @@ void WholebodyModule::traGeneProcJointSpace()
     double diff = fabs(tar_value - ini_value);
 
     mov_time_ =  diff / tol;
-    int all_time_steps = int(floor((mov_time_ / control_cycle_msec_) + 1));
-    mov_time_ = double (all_time_steps-1) * control_cycle_msec_;
+    int all_time_steps = int(floor((mov_time_ / control_cycle_sec_) + 1));
+    mov_time_ = double (all_time_steps-1) * control_cycle_sec_;
 
     if (mov_time_ < mov_time)
       mov_time_= mov_time;
@@ -729,11 +929,11 @@ void WholebodyModule::traGeneProcJointSpace()
   else
   {
     mov_time_ = goal_joint_pose_msg_.time;
-    int all_time_steps = int(floor((mov_time_/control_cycle_msec_) + 1 ));
-    mov_time_ = double (all_time_steps - 1) * control_cycle_msec_;
+    int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
+    mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
   }
 
-  all_time_steps_ = int(mov_time_ / control_cycle_msec_) + 1;
+  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
   goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
 
   /* calculate joint trajectory */
@@ -748,7 +948,7 @@ void WholebodyModule::traGeneProcJointSpace()
     Eigen::MatrixXd tra =
         robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                               tar_value , 0.0 , 0.0 ,
-                                              control_cycle_msec_, mov_time_);
+                                              control_cycle_sec_, mov_time_);
 
     goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
   }
@@ -826,10 +1026,10 @@ void WholebodyModule::traGeneProcJointSpace()
 void WholebodyModule::traGeneProcPelvis()
 {
   mov_time_ = goal_kinematics_pose_msg_.mov_time;
-  int all_time_steps = int(floor((mov_time_/control_cycle_msec_) + 1 ));
-  mov_time_ = double (all_time_steps - 1) * control_cycle_msec_;
+  int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
+  mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
 
-  all_time_steps_ = int(mov_time_/control_cycle_msec_) + 1;
+  all_time_steps_ = int(mov_time_/control_cycle_sec_) + 1;
   goal_pelvis_tra_.resize(all_time_steps_, 3);
   goal_l_foot_tra_.resize(all_time_steps_, 3);
   goal_r_foot_tra_.resize(all_time_steps_, 3);
@@ -847,7 +1047,7 @@ void WholebodyModule::traGeneProcPelvis()
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                 tar_value, 0.0, 0.0,
-                                                                control_cycle_msec_, mov_time_);
+                                                                control_cycle_sec_, mov_time_);
 
     goal_pelvis_tra_.block(0, dim, all_time_steps_, 1) = tra;
   }
@@ -872,10 +1072,10 @@ void WholebodyModule::traGeneProcPelvis()
 void WholebodyModule::traGeneProcWholebody()
 {
   mov_time_ = goal_kinematics_pose_msg_.mov_time;
-  int all_time_steps = int(floor((mov_time_/control_cycle_msec_) + 1 ));
-  mov_time_ = double (all_time_steps - 1) * control_cycle_msec_;
+  int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
+  mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
 
-  all_time_steps_ = int(mov_time_/control_cycle_msec_) + 1;
+  all_time_steps_ = int(mov_time_/control_cycle_sec_) + 1;
   goal_pelvis_tra_.resize(all_time_steps_, 3);
   goal_l_foot_tra_.resize(all_time_steps_, 3);
   goal_r_foot_tra_.resize(all_time_steps_, 3);
@@ -897,7 +1097,7 @@ void WholebodyModule::traGeneProcWholebody()
 
       Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                   tar_value, 0.0, 0.0,
-                                                                  control_cycle_msec_, mov_time_);
+                                                                  control_cycle_sec_, mov_time_);
 
       goal_l_arm_tra_.block(0, dim, all_time_steps_, 1) = tra;
     }
@@ -925,7 +1125,7 @@ void WholebodyModule::traGeneProcWholebody()
 
       Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                   tar_value, 0.0, 0.0,
-                                                                  control_cycle_msec_, mov_time_);
+                                                                  control_cycle_sec_, mov_time_);
 
       goal_r_arm_tra_.block(0, dim, all_time_steps_, 1) = tra;
     }
@@ -958,7 +1158,7 @@ void WholebodyModule::calcGoalTraPelvis()
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                 tar_value, 0.0, 0.0,
-                                                                control_cycle_msec_, mov_time_);
+                                                                control_cycle_sec_, mov_time_);
 
     goal_pelvis_tra_.block(0, dim, all_time_steps_, 1) = tra;
   }
@@ -978,7 +1178,7 @@ void WholebodyModule::calcGoalTraLeg()
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                 tar_value, 0.0, 0.0,
-                                                                control_cycle_msec_, mov_time_);
+                                                                control_cycle_sec_, mov_time_);
 
     goal_l_foot_tra_.block(0, dim, all_time_steps_, 1) = tra;
   }
@@ -990,7 +1190,7 @@ void WholebodyModule::calcGoalTraLeg()
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                 tar_value, 0.0, 0.0,
-                                                                control_cycle_msec_, mov_time_);
+                                                                control_cycle_sec_, mov_time_);
 
     goal_r_foot_tra_.block(0, dim, all_time_steps_, 1) = tra;
   }

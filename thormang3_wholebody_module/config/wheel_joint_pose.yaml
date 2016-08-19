@@ -1,0 +1,18 @@
+# time parameter
+
+mov_time : 3.0		# movement time# target pose [deg]
+
+tar_pose :
+  15 :   0.0 		# r_leg_hip_y
+  16 :   0.0 		# l_leg_hip_y
+  17 :   0.0 		# r_leg_hip_r
+  18 :   0.0 		# l_leg_hip_r
+  19 :  77.0		# r_leg_hip_p	
+  20 : -77.0		# l_leg_hip_p
+  21 : -167.0		# r_leg_kn_p
+  22 :  167.0		# l_leg_kn_p
+  23 : -90.0		# r_leg_an_p
+  24 :  90.0		# l_leg_an_p
+  25 :  13.0		# r_leg_an_r
+  26 : -13.0		# l_leg_an_r
+
