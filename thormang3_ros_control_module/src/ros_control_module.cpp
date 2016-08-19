@@ -69,7 +69,7 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
   
   if (!enable_)
   {
-    controller_manager->update(ros::Time::now(), elapsed_time);
+    controller_manager_->update(ros::Time::now(), elapsed_time);
     return;
   }
 
@@ -82,7 +82,7 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
     eff_[joint_name] = dxls[state_iter->first]->dxl_state_->present_torque_;
   }
 
-  controller_manager->update(ros::Time::now(), elapsed_time);
+  controller_manager_->update(ros::Time::now(), elapsed_time);
   
   for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
@@ -110,7 +110,7 @@ void RosControlModule::QueueThread()
   _ros_node.setCallbackQueue(&_callback_queue);
   
   // Initialize ros control
-  controller_manager.reset(new controller_manager::ControllerManager(this, _ros_node));
+  controller_manager_.reset(new controller_manager_::ControllerManager(this, _ros_node));
 
   while(_ros_node.ok())
   {
