@@ -53,13 +53,12 @@ include_directories(
 
 add_library(thormang3_walking_module
   src/thormang3_online_walking.cpp
-  src/wakling_module.cpp
+  src/walking_module.cpp
 )
 
 add_dependencies(thormang3_walking_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(thormang3_walking_module
-  yaml-cpp
   ${catkin_LIBRARIES}
 )
 
