@@ -122,6 +122,9 @@ private:
 
   Eigen::VectorXd wb_arm_diff_position_;
 
+  Eigen::MatrixXd wb_l_foot_default_position_, wb_r_foot_default_position_;
+  Eigen::Quaterniond wb_l_foot_default_quaternion_, wb_r_foot_default_quaternion_;
+
   /* balance */
   bool is_balancing_;
   bool on_balance_gain_, off_balance_gain_;
