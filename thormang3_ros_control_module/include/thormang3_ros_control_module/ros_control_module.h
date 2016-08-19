@@ -36,7 +36,7 @@
 #include <std_msgs/Int16.h>
 
 // robotis
-#include <robotis_framework_common/MotionModule.h>
+#include <robotis_framework_common/motion_module.h>
 
 // ros control
 #include <controller_manager/controller_manager.h>
@@ -46,23 +46,26 @@
 
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 class RosControlModule
-  : public Singleton<RosControlModule>
-  , public MotionModule
+  : public robotis_framework::Singleton<RosControlModule>
+  , public robotis_framework::MotionModule
   , public hardware_interface::RobotHW
 {
 public:
   RosControlModule();
   virtual ~RosControlModule();
 
-  void Initialize(const int control_cycle_msec, Robot* robot) override;
+  void onModuleEnable() override {}
+  void onModuleDisable() override {}
 
-  void Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, double> sensors) override;
+  void initialize(const int control_cycle_msec, robotis_framework::Robot* robot) override;
 
-  void Stop() override;
-  bool IsRunning() override;
+  void process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors) override;
+
+  void stop() override;
+  bool isRunning() override;
 
 private:
   void QueueThread();

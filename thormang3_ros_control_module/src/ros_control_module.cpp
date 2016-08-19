@@ -2,14 +2,14 @@
 
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 RosControlModule::RosControlModule()
     : control_cycle_msec_(8)
 {
-  enable          = false;
-  module_name     = "ros_control_module"; // set unique module name
-  control_mode    = POSITION_CONTROL;
+  enable_          = false;
+  module_name_     = "ros_control_module"; // set unique module name
+  control_mode_    = robotis_framework::PositionControl;
   
   ros::NodeHandle nh("/thor_mang"); // TODO: Namespace handling
   
@@ -19,7 +19,7 @@ RosControlModule::RosControlModule()
   {
     for (size_t i = 0; i < joints.size(); i++)
     {
-      result[static_cast<std::string>(joints[i])] = new DynamixelState();
+      result_[static_cast<std::string>(joints[i])] = new robotis_framework::DynamixelState();
       ROS_WARN("Joint: %s", static_cast<std::string>(joints[i]).c_str());
     }
   }
@@ -35,7 +35,7 @@ RosControlModule::~RosControlModule()
   queue_thread_.join();
 }
 
-void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
+void RosControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* robot)
 {
   control_cycle_msec_ = control_cycle_msec;
   
@@ -46,7 +46,7 @@ void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
   jnt_state_interface_ = hardware_interface::JointStateInterface();
   jnt_pos_interface_ = hardware_interface::PositionJointInterface();
   
-  for(std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+  for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
     
@@ -60,44 +60,44 @@ void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
   }
 }
 
-void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, double> /*sensors*/)
+void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> /*sensors*/)
 {
   // time measurements
   ros::Time current_time = ros::Time::now();
   ros::Duration elapsed_time = current_time - last_time_stamp_;
   last_time_stamp_ = current_time;
   
-  if (!enable)
+  if (!enable_)
   {
     controller_manager->update(ros::Time::now(), elapsed_time);
     return;
   }
 
-  for(std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+  for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
     
-    pos_[joint_name] = dxls[state_iter->first]->dxl_state->present_position;
-    vel_[joint_name] = dxls[state_iter->first]->dxl_state->present_velocity;
-    eff_[joint_name] = dxls[state_iter->first]->dxl_state->present_current;
+    pos_[joint_name] = dxls[state_iter->first]->dxl_state_->present_position_;
+    vel_[joint_name] = dxls[state_iter->first]->dxl_state_->present_velocity_;
+    eff_[joint_name] = dxls[state_iter->first]->dxl_state_->present_torque_;
   }
 
   controller_manager->update(ros::Time::now(), elapsed_time);
   
-  for(std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+  for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
     
-    result[joint_name]->goal_position = cmd_[joint_name];
+    result_[joint_name]->goal_position_ = cmd_[joint_name];
   }
 }
 
-bool RosControlModule::IsRunning()
+bool RosControlModule::isRunning()
 {
   return false;
 }
 
-void RosControlModule::Stop()
+void RosControlModule::stop()
 {
   return;
 }
