@@ -10,7 +10,7 @@
 #include <geometry_msgs/QuaternionStamped.h>
 
 #include <imu_3dm_gx4/FilterOutput.h>
-#include "../../imu_3dm_gx4/src/imu.hpp"
+#include "imu.hpp"
 
 using namespace imu_3dm_gx4;
 
