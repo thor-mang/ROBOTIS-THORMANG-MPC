@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+  <name>thormang3_mpc</name>
+  <version>0.1.1</version>
+  <description>ROS packages for the thormang3_mpc (meta package)</description>
+  <license>BSD</license>
+  <author email="zerom@robotis.com">Zerom</author>
+  <author email="kmjung@robotis.com">Kayman</author>
+  <author email="sch@robotis.com">SCH</author>
+  <author email="hjsong@robotis.com">Jay Song</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>
+  <url type="website">http://wiki.ros.org/thormang3_mpc</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>ati_ft_sensor</run_depend>
+  <run_depend>motion_module_tutorial</run_depend>
+  <run_depend>sensor_module_tutorial</run_depend>
+  <run_depend>thormang3_action_module</run_depend>
+  <run_depend>thormang3_balance_control</run_depend>
+  <run_depend>thormang3_base_module</run_depend>
+  <run_depend>thormang3_feet_ft_module</run_depend>
+  <run_depend>thormang3_head_control_module</run_depend>
+  <run_depend>thormang3_imu_3dm_gx4</run_depend>
+  <run_depend>thormang3_kinematics_dynamics</run_depend>
+  <run_depend>thormang3_manager</run_depend>
+  <run_depend>thormang3_manipulation_module</run_depend>
+  <run_depend>thormang3_walking_module</run_depend>
+  <export><metapackage/></export>
+</package>
