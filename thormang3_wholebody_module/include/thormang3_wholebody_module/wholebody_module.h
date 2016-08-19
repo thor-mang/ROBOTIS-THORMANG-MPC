@@ -120,6 +120,8 @@ private:
   Eigen::MatrixXd wb_r_arm_target_position_, wb_r_arm_target_rotation_;
   Eigen::Quaterniond wb_r_arm_start_quaternion_, wb_r_arm_goal_quaternion_;
 
+  Eigen::VectorXd wb_arm_diff_position_;
+
   /* balance */
   bool is_balancing_;
   bool on_balance_gain_, off_balance_gain_;

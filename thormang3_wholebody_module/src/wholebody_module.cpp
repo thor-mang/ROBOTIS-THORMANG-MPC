@@ -162,6 +162,8 @@ WholebodyModule::WholebodyModule()
   wb_l_arm_target_position_ = Eigen::MatrixXd::Zero(3,1);
   wb_r_arm_target_position_ = Eigen::MatrixXd::Zero(3,1);
 
+  wb_arm_diff_position_ = Eigen::VectorXd::Zero(3);
+
   ik_weight_ = Eigen::MatrixXd::Zero(ALL_JOINT_ID+1,1);
 
   // robot tree
@@ -1095,6 +1097,8 @@ void WholebodyModule::traGeneProcWholebody()
       double ini_value = robotis_->thormang3_link_data_[ID_L_ARM_END]->position_.coeff(dim,0);
       double tar_value = l_arm_tar_value.coeff(dim,0);
 
+      wb_arm_diff_position_(dim) = tar_value - ini_value;
+
       Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                   tar_value, 0.0, 0.0,
                                                                   control_cycle_sec_, mov_time_);
@@ -1122,6 +1126,8 @@ void WholebodyModule::traGeneProcWholebody()
     {
       double ini_value = robotis_->thormang3_link_data_[ID_R_ARM_END]->position_.coeff(dim,0);
       double tar_value = r_arm_tar_value.coeff(dim,0);
+
+      wb_arm_diff_position_(dim) = tar_value - ini_value;
 
       Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                   tar_value, 0.0, 0.0,
@@ -1163,10 +1169,10 @@ void WholebodyModule::calcGoalTraPelvis()
     goal_pelvis_tra_.block(0, dim, all_time_steps_, 1) = tra;
   }
 
-  Eigen::Quaterniond pelvis_target_quaternion =
-      robotis_framework::convertRotationToQuaternion(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
+//  Eigen::Quaterniond pelvis_target_quaternion =
+//      robotis_framework::convertRotationToQuaternion(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
 
-  wb_pelvis_goal_quaternion_ = pelvis_target_quaternion;
+//  wb_pelvis_goal_quaternion_ = pelvis_target_quaternion;
 }
 
 void WholebodyModule::calcGoalTraLeg()
@@ -1674,46 +1680,46 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
   r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
 
-  balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
+//  balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
 
-  balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
+//  balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
 
-  Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
-                                    imu_data_msg_.orientation.x,
-                                    imu_data_msg_.orientation.y,
-                                    imu_data_msg_.orientation.z);
-  Eigen::MatrixXd imu_rpy =
-      robotis_framework::convertRotationToRPY(robotis_framework::getRotationX(M_PI) * imu_quaternion.toRotationMatrix() * robotis_framework::getRotationZ(M_PI));
+//  Eigen::Quaterniond imu_quaternion(imu_data_msg_.orientation.w,
+//                                    imu_data_msg_.orientation.x,
+//                                    imu_data_msg_.orientation.y,
+//                                    imu_data_msg_.orientation.z);
+//  Eigen::MatrixXd imu_rpy =
+//      robotis_framework::convertRotationToRPY(robotis_framework::getRotationX(M_PI) * imu_quaternion.toRotationMatrix() * robotis_framework::getRotationZ(M_PI));
 
-  Eigen::MatrixXd g_to_r_foot_force =
-    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.force.x, r_foot_ft_data_msg_.force.y, r_foot_ft_data_msg_.force.z);
+//  Eigen::MatrixXd g_to_r_foot_force =
+//    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+//    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.force.x, r_foot_ft_data_msg_.force.y, r_foot_ft_data_msg_.force.z);
 
-  Eigen::MatrixXd g_to_r_foot_torque =
-    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z);
+//  Eigen::MatrixXd g_to_r_foot_torque =
+//    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+//    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z);
 
-  Eigen::MatrixXd g_to_l_foot_force =
-    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.force.x, l_foot_ft_data_msg_.force.y, l_foot_ft_data_msg_.force.z);
+//  Eigen::MatrixXd g_to_l_foot_force =
+//    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+//    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.force.x, l_foot_ft_data_msg_.force.y, l_foot_ft_data_msg_.force.z);
 
-  Eigen::MatrixXd g_to_l_foot_torque =
-    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
+//  Eigen::MatrixXd g_to_l_foot_torque =
+//    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+//    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
 
-  balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
-  balance_control_.setCurrentFootForceTorqueSensorOutput(g_to_r_foot_force.coeff(0,0),  g_to_r_foot_force.coeff(1,0),  g_to_r_foot_force.coeff(2,0),
-                                                         g_to_r_foot_torque.coeff(0,0), g_to_r_foot_torque.coeff(1,0), g_to_r_foot_torque.coeff(2,0),
-                                                         g_to_l_foot_force.coeff(0,0),  g_to_l_foot_force.coeff(1,0),  g_to_l_foot_force.coeff(2,0),
-                                                         g_to_l_foot_torque.coeff(0,0), g_to_l_foot_torque.coeff(1,0), g_to_l_foot_torque.coeff(2,0));
+//  balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
+//  balance_control_.setCurrentFootForceTorqueSensorOutput(g_to_r_foot_force.coeff(0,0),  g_to_r_foot_force.coeff(1,0),  g_to_r_foot_force.coeff(2,0),
+//                                                         g_to_r_foot_torque.coeff(0,0), g_to_r_foot_torque.coeff(1,0), g_to_r_foot_torque.coeff(2,0),
+//                                                         g_to_l_foot_force.coeff(0,0),  g_to_l_foot_force.coeff(1,0),  g_to_l_foot_force.coeff(2,0),
+//                                                         g_to_l_foot_torque.coeff(0,0), g_to_l_foot_torque.coeff(1,0), g_to_l_foot_torque.coeff(2,0));
 
-  balance_control_.setDesiredCOBGyro(0.0, 0.0);
-  balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
-                                            robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
-  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
+//  balance_control_.setDesiredCOBGyro(0.0, 0.0);
+//  balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
+//                                            robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
+//  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
 
-  int error;
-  balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
+//  int error;
+//  balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
 
   Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block(0,0,3,3);
   Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block(0,3,3,1);
