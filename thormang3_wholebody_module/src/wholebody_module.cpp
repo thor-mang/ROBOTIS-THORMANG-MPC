@@ -1392,7 +1392,7 @@ void WholebodyModule::setBalanceControlGain(int cnt)
 {
   double gain_ratio;
   double max_pelvis = 0.723;
-  double min_pelvis = 0.4;
+  double min_pelvis = 0.3;
 
   if (robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(2,0) > max_pelvis)
     gain_ratio = 1.0;

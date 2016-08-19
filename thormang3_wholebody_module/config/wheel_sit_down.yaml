@@ -17,6 +17,6 @@ via_pose :
 # target pose [m]
 
 tar_pose :
-  0  :  0.0 	# pelvis_position_x
+  0  :  0.01 	# pelvis_position_x
   1  :  0.0 	# pelvis_position_y
   2  :  0.3	# pelvis_position_z
