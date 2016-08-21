@@ -41,7 +41,7 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
   
   last_time_stamp_ = ros::Time::now();
   
-  queue_thread_ = boost::thread(boost::bind(&RosControlModule::QueueThread, this));
+  queue_thread_ = boost::thread(boost::bind(&RosControlModule::msgQueueThread, this));
   
   jnt_state_interface_ = hardware_interface::JointStateInterface();
   jnt_pos_interface_ = hardware_interface::PositionJointInterface();
@@ -102,7 +102,7 @@ void RosControlModule::stop()
   return;
 }
 
-void RosControlModule::QueueThread()
+void RosControlModule::msgQueueThread()
 {
   ros::NodeHandle _ros_node("/thor_mang"); // TODO: Namespace handling
   ros::CallbackQueue _callback_queue;
@@ -110,7 +110,7 @@ void RosControlModule::QueueThread()
   _ros_node.setCallbackQueue(&_callback_queue);
   
   // Initialize ros control
-  controller_manager_.reset(new controller_manager_::ControllerManager(this, _ros_node));
+  controller_manager_.reset(new controller_manager::ControllerManager(this, _ros_node));
 
   while(_ros_node.ok())
   {
