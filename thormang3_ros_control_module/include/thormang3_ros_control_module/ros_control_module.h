@@ -68,7 +68,7 @@ public:
   bool isRunning() override;
 
 private:
-  void QueueThread();
+  void msgQueueThread();
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
