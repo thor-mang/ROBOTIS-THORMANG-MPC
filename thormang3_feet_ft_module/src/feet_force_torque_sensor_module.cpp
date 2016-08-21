@@ -151,8 +151,8 @@ void FeetForceTorqueSensor::initializeFeetForceTorqueSensor()
   std::string foot_ft_data_path  = ros_node.param<std::string>("ft_data_path", "");
   std::string ft_calib_data_path = ros_node.param<std::string>("ft_calibration_data_path", "");
 
-  r_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "/robotis/sensor/ft_right_foot/raw", "/robotis/sensor/ft_right_foot/scaled");
-  l_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "/robotis/sensor/ft_left_foot/raw",  "/robotis/sensor/ft_left_foot/scaled");
+  r_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_right_foot", "r_foot_ft_link" , "robotis/sensor/ft_right_foot/raw", "robotis/sensor/ft_right_foot/scaled");
+  l_foot_ft_sensor_.initialize(foot_ft_data_path, "ft_left_foot",  "l_foot_ft_link",  "robotis/sensor/ft_left_foot/raw",  "robotis/sensor/ft_left_foot/scaled");
 
 
   YAML::Node doc;
@@ -355,13 +355,13 @@ void FeetForceTorqueSensor::queueThread()
   ros_node.setCallbackQueue(&callback_queue);
 
   /* subscriber */
-  ros::Subscriber ft_calib_command_sub = ros_node.subscribe("/robotis/feet_ft/ft_calib_command", 1, &FeetForceTorqueSensor::ftSensorCalibrationCommandCallback, this);
-  ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/" + gazebo_robot_name + "/ft_left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
-  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/" + gazebo_robot_name + "/ft_right_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_calib_command_sub = ros_node.subscribe("robotis/feet_ft/ft_calib_command", 1, &FeetForceTorqueSensor::ftSensorCalibrationCommandCallback, this);
+  ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/ft_left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/ft_right_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
 
   /* publisher */
-  thormang3_foot_ft_status_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
-  thormang3_foot_ft_both_ft_pub_ = ros_node.advertise<thormang3_feet_ft_module_msgs::BothWrench>("/robotis/feet_ft/both_ft_value", 1);
+  thormang3_foot_ft_status_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
+  thormang3_foot_ft_both_ft_pub_ = ros_node.advertise<thormang3_feet_ft_module_msgs::BothWrench>("robotis/feet_ft/both_ft_value", 1);
 
   while(ros_node.ok())
   {
