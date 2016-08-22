@@ -65,12 +65,15 @@ int main(int argc, char **argv)
 
     std::string init_file   = nh.param<std::string>("init_file_path", "");
 
-    controller->gazebo_robot_name_ = nh.param<std::string>("gazebo_robot_name", controller->gazebo_robot_name_);
+    std::string gazebo_robot_name = nh.param<std::string>("gazebo_robot_name", controller->gazebo_robot_name_);
+    controller->gazebo_robot_name_ = gazebo_robot_name;
+    FeetForceTorqueSensor::getInstance()->gazebo_robot_name_ = gazebo_robot_name;
 
     /* gazebo simulation */
-    controller->gazebo_mode_ = nh.param<bool>("gazebo", false);
-    if(controller->gazebo_mode_ == true)
+    if(nh.param<bool>("gazebo", false))
     {
+        controller->gazebo_mode_ = true;
+        FeetForceTorqueSensor::getInstance()->gazebo_mode_ = true;
         ROS_WARN("SET TO GAZEBO MODE!");
     }
 

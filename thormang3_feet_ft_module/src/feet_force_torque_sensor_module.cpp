@@ -356,8 +356,8 @@ void FeetForceTorqueSensor::queueThread()
 
   /* subscriber */
   ros::Subscriber ft_calib_command_sub = ros_node.subscribe("robotis/feet_ft/ft_calib_command", 1, &FeetForceTorqueSensor::ftSensorCalibrationCommandCallback, this);
-  ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/ft_left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
-  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name + "/ft_right_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/ft_left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/ft_right_foot", 1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
 
   /* publisher */
   thormang3_foot_ft_status_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
@@ -379,7 +379,7 @@ void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dyn
   exist_l_leg_an_r_ = false;
   exist_l_leg_an_p_ = false;
 
-  if (!gazebo_mode)
+  if (!gazebo_mode_)
   {
     std::map<std::string, robotis_framework::Dynamixel*>::iterator dxls_it = dxls.find("r_leg_an_r");
     if(dxls_it != dxls.end())
@@ -427,9 +427,9 @@ void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dyn
   }
 
 
-  if (gazebo_mode || (exist_r_leg_an_r_ && exist_r_leg_an_p_))
+  if (gazebo_mode_ || (exist_r_leg_an_r_ && exist_r_leg_an_p_))
   {
-    if (!gazebo_mode)
+    if (!gazebo_mode_)
     {
       r_foot_ft_sensor_.setCurrentVoltageOutputPublish( r_foot_ft_current_voltage_[0],
         r_foot_ft_current_voltage_[1],
@@ -465,9 +465,9 @@ void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dyn
 
   }
 
-  if (gazebo_mode || (exist_l_leg_an_r_ && exist_l_leg_an_p_))
+  if (gazebo_mode_ || (exist_l_leg_an_r_ && exist_l_leg_an_p_))
   {
-    if (!gazebo_mode)
+    if (!gazebo_mode_)
     {
       l_foot_ft_sensor_.setCurrentVoltageOutputPublish(l_foot_ft_current_voltage_[0],
         l_foot_ft_current_voltage_[1],
