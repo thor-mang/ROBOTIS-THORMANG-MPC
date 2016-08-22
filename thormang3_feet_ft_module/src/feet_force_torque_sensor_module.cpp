@@ -357,7 +357,7 @@ void FeetForceTorqueSensor::queueThread()
   /* subscriber */
   ros::Subscriber ft_calib_command_sub = ros_node.subscribe("/robotis/feet_ft/ft_calib_command", 1, &FeetForceTorqueSensor::ftSensorCalibrationCommandCallback, this);
   ros::Subscriber ft_left_foot_sub	= ros_node.subscribe("/" + gazebo_robot_name + "/ft_left_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
-  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/" + gazebo_robot_name + "/ft_right_foot",	1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
+  ros::Subscriber ft_right_foot_sub	= ros_node.subscribe("/" + gazebo_robot_name + "/ft_right_foot", 1, &FeetForceTorqueSensor::gazeboFTSensorCallback, this);
 
   /* publisher */
   thormang3_foot_ft_status_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);

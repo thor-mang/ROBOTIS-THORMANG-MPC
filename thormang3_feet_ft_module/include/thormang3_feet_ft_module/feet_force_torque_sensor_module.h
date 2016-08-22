@@ -65,8 +65,8 @@ public:
   FeetForceTorqueSensor();
   ~FeetForceTorqueSensor();
 
-  bool gazebo_mode;
-  std::string gazebo_robot_name;
+  bool gazebo_mode_;
+  std::string gazebo_robot_name_;
 
   double r_foot_fx_raw_N_,  r_foot_fy_raw_N_,  r_foot_fz_raw_N_;
   double r_foot_tx_raw_Nm_, r_foot_ty_raw_Nm_, r_foot_tz_raw_Nm_;
