@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(thormang3_wrist_ft_module)
 
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -8,12 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
   cmake_modules
-  message_generation
-  
   robotis_math
-  robotis_device
+  robotis_framework_common
   thormang3_kinematics_dynamics
-
   ati_ft_sensor
 )
 
@@ -33,7 +32,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_wrist_ft_module
-#  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS roscpp robotis_framework_common
 #  DEPENDS system_lib
 )
 
@@ -42,11 +41,11 @@ catkin_package(
 ###########
 
 set(HEADERS
-  include/${PROJECT_NAME}/ThorMang3WristForceTorqueSensorModule.h
+  include/${PROJECT_NAME}/wrist_force_torque_sensor_module.h
 )
 
 set(SOURCES
-  src/ThorMang3WristForceTorqueSensorModule.cpp
+  src/wrist_force_torque_sensor_module.cpp
 )
 
 

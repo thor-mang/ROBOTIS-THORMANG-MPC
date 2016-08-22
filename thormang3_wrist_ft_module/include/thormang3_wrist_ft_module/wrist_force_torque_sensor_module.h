@@ -37,23 +37,23 @@
 
 #include <fstream>
 
-#include "robotis_math/RobotisMath.h"
+#include "robotis_math/robotis_math.h"
 
 #include "thormang3_feet_ft_module_msgs/BothWrench.h"
 
 
-#include "thormang3_kinematics_dynamics/ThorMang3KinematicsDynamics.h"
 #include "robotis_controller_msgs/StatusMsg.h"
-#include "robotis_framework_common/SensorModule.h"
+#include "robotis_framework_common/sensor_module.h"
 
-#include "ati_ft_sensor/ATIForceTorqueSensor.h"
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
+#include "ati_ft_sensor/ati_force_torque_sensor.h"
 
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 
-class ThorMang3WristForceTorqueSensor : public SensorModule, public Singleton<ThorMang3WristForceTorqueSensor>
+class WristForceTorqueSensor : public robotis_framework::SensorModule, public robotis_framework::Singleton<WristForceTorqueSensor>
 {
 enum
 {
@@ -64,20 +64,17 @@ enum
 };
 
 public:
-  ThorMang3WristForceTorqueSensor();
-  ~ThorMang3WristForceTorqueSensor();
+  WristForceTorqueSensor();
+  ~WristForceTorqueSensor();
 
   /* ROS Topic Callback Functions */
-  void  GazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg);
+  void  gazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg);
 
-  void  Initialize(const int control_cycle_msec, Robot *robot);
-  void  Process(std::map<std::string, Dynamixel *> dxls, std::map<std::string, Sensor *> sensors);
+  void  initialize(const int control_cycle_msec, robotis_framework::Robot *robot) override;
+  void  process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors) override;
 
-  void	Stop();
-  bool	IsRunning();
-
-  bool gazebo_mode;
-  std::string gazebo_robot_name;
+  bool gazebo_mode_;
+  std::string gazebo_robot_name_;
 
   double r_wrist_fx_raw_N,  r_wrist_fy_raw_N,  r_wrist_fz_raw_N;
   double r_wrist_tx_raw_Nm, r_wrist_ty_raw_Nm, r_wrist_tz_raw_Nm;
@@ -85,19 +82,19 @@ public:
   double l_wrist_tx_raw_Nm, l_wrist_ty_raw_Nm, l_wrist_tz_raw_Nm;
 
 private:
-  void WristForceTorqueSensorInitialize();
+  void wristForceTorqueSensorInitialize();
 
-  void QueueThread();
+  void msgQueueThread();
 
   void FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
-  void PublishStatusMsg(unsigned int type, std::string msg);
+  void publishStatusMsg(unsigned int type, std::string msg);
 
   int             control_cycle_msec_;
   boost::thread   queue_thread_;
   boost::mutex    publish_mutex_;
   boost::mutex    ft_sensor_mutex_;
 
-  ThorMang3KinematicsDynamics* thormang3_kd_;
+  KinematicsDynamics* thormang3_kd_;
 
   ATIForceTorqueSensorTWE r_wrist_ft_sensor_;
   ATIForceTorqueSensorTWE l_wrist_ft_sensor_;

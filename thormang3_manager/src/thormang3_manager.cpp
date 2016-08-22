@@ -39,6 +39,7 @@
 
 /* Sensor Module Header */
 #include "thormang3_feet_ft_module/feet_force_torque_sensor_module.h"
+#include "thormang3_wrist_ft_module/wrist_force_torque_sensor_module.h"
 
 /* Motion Module Header */
 #include "thormang3_base_module/base_module.h"
@@ -68,12 +69,14 @@ int main(int argc, char **argv)
     std::string gazebo_robot_name = nh.param<std::string>("gazebo_robot_name", controller->gazebo_robot_name_);
     controller->gazebo_robot_name_ = gazebo_robot_name;
     FeetForceTorqueSensor::getInstance()->gazebo_robot_name_ = gazebo_robot_name;
+    WristForceTorqueSensor::getInstance()->gazebo_robot_name_ = gazebo_robot_name;
 
     /* gazebo simulation */
     if(nh.param<bool>("gazebo", false))
     {
         controller->gazebo_mode_ = true;
         FeetForceTorqueSensor::getInstance()->gazebo_mode_ = true;
+        WristForceTorqueSensor::getInstance()->gazebo_mode_ = true;
         ROS_WARN("SET TO GAZEBO MODE!");
     }
 
@@ -96,6 +99,7 @@ int main(int argc, char **argv)
 
     /* Add Sensor Module */
     controller->addSensorModule((robotis_framework::SensorModule*)FeetForceTorqueSensor::getInstance());
+    controller->addSensorModule((robotis_framework::SensorModule*)WristForceTorqueSensor::getInstance());
 
     /* Add Motion Module */
     controller->addMotionModule((robotis_framework::MotionModule*)BaseModule::getInstance());
