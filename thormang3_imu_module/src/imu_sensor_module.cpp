@@ -111,11 +111,9 @@ void ImuSensor::msgQueueThread()
   /* publisher */
   thormang3_imu_status_pub_	= _ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
 
+  ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(_ros_node.ok())
-  {
-    _callback_queue.callAvailable();
-    usleep(100);
-  }
+    _callback_queue.callAvailable(duration);
 }
 
 void ImuSensor::process(std::map<std::string, robotis_framework::Dynamixel*> /*dxls*/, std::map<std::string, robotis_framework::Sensor*> /*sensors*/)
