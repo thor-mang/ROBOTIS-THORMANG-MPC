@@ -1901,14 +1901,14 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   }
 
   /* ---- Position P Gain Update -----*/
-//  if (is_gain_updating_ == true )
-//  {
-//    ROS_INFO("Knee P Gain Update : %d", p_gain_);
+  if (is_gain_updating_ == true )
+  {
+    ROS_INFO("Knee P Gain Update : %d", p_gain_);
 
-//    result_["r_leg_kn_p"]->position_p_gain_ = p_gain_;
-//    result_["l_leg_kn_p"]->position_p_gain_ = p_gain_;
-//    is_gain_updating_ = false;
-//  }
+    result_["r_leg_kn_p"]->position_p_gain_ = p_gain_;
+    result_["l_leg_kn_p"]->position_p_gain_ = p_gain_;
+    is_gain_updating_ = false;
+  }
 
   /* ---- Send Goal Joint Data -----*/
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
