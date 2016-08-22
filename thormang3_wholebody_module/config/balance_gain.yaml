@@ -1,0 +1,39 @@
+gyro_gain : 0.2
+
+foot_roll_angle_gain : -0.5
+foot_pitch_angle_gain : -0.5
+
+foot_roll_angle_time_constant : 1.0
+foot_pitch_angle_time_constant : 1.0
+
+left_foot_force_x_gain : 0.1
+left_foot_force_y_gain : 0.1
+
+left_foot_force_x_time_constant : 0.5
+left_foot_force_y_time_constant : 0.5
+
+right_foot_force_x_gain : 0.1
+right_foot_force_y_gain : 0.1
+
+right_foot_force_x_time_constant : 0.5
+right_foot_force_y_time_constant : 0.5
+
+foot_force_z_gain : -0.02
+
+foot_force_z_time_constant : 0.2
+
+left_foot_torque_roll_gain : 0.002
+left_foot_torque_pitch_gain : 0.0015
+
+left_foot_torque_roll_time_constant : 0.5
+left_foot_torque_pitch_time_constant : 0.5
+
+right_foot_torque_roll_gain : 0.002
+right_foot_torque_pitch_gain : 0.0015
+
+right_foot_torque_roll_time_constant : 0.5
+right_foot_torque_pitch_time_constant : 0.5
+
+wb_pelvis_diff_x_constant : -0.075
+wb_pelvis_diff_y_constant : -0.075
+wb_pelvis_diff_z_constant : 0.1
