@@ -1168,6 +1168,12 @@ void WholebodyModule::traGeneProcWholebody()
 
 void WholebodyModule::calcGoalTraPelvis()
 {
+
+  Eigen::MatrixXd wb_arm_diff_constant = Eigen::MatrixXd::Zero(3,1);
+  wb_arm_diff_constant.coeffRef(0,0) = -0.01;
+  wb_arm_diff_constant.coeffRef(1,0) = -0.01;
+  wb_arm_diff_constant.coeffRef(1,0) =  0.1;
+
   for (int dim=0; dim<3; dim++)
   {
     double ini_value = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0);
@@ -1262,7 +1268,7 @@ bool WholebodyModule::getKinematicsPoseCallback(thormang3_wholebody_module_msgs:
   res.group_pose.orientation.y = quaternion.y();
   res.group_pose.orientation.z = quaternion.z();
 
-  return  true;
+  return true;
 }
 
 //void WholebodyModule::setInverseKinematics(int cnt)

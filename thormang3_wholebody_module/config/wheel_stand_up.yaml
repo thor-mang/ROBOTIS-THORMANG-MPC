@@ -9,7 +9,7 @@ via_time : [ 3.0 ]	# via-point time
 # via-point pose [m]
 
 via_pose :
-  0 : [ 0.0 ]	# pelvis_position_x
+  0 : [ 0.005 ]	# pelvis_position_x
   1 : [ 0.0 ]	# pelvis_position_y
   2 : [ 0.4 ]	# pelvis_position_z
 
