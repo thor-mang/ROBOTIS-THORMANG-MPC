@@ -1284,11 +1284,11 @@ void WholebodyModule::calcGoalTraLeg()
 
 void WholebodyModule::calcGoalFT()
 {
-  double l_foot_distance = fabs(0.093 - default_center_of_mass_.coeff(1,0));
-  double r_foot_distance = fabs(-0.093 - default_center_of_mass_.coeff(1,0));
+  double l_foot_distance = fabs(0.093 - center_of_mass_.coeff(1,0)) + default_center_of_mass_.coeff(1,0);
+  double r_foot_distance = fabs(-0.093 - center_of_mass_.coeff(1,0)) - default_center_of_mass_.coeff(1,0);
 
-  balance_goal_l_foot_ft_ = -420.0 * l_foot_distance / 0.186;
-  balance_goal_r_foot_ft_ = -420.0 * r_foot_distance / 0.186;
+  balance_goal_l_foot_ft_ = -420.0 * r_foot_distance / 0.186;
+  balance_goal_r_foot_ft_ = -420.0 * l_foot_distance / 0.186;
 
 //  ROS_INFO("goal_l_foot_ft : %f", balance_goal_l_foot_ft_);
 //  ROS_INFO("goal_r_foot_ft : %f", balance_goal_r_foot_ft_);
@@ -1663,7 +1663,7 @@ void WholebodyModule::solveWholebodyInverseKinematics()
   balance_control_.setDesiredCOBGyro(0.0, 0.0);
   balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
                                             robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
-  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
+  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0, 0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
 
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
@@ -1799,7 +1799,7 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   balance_control_.setDesiredCOBGyro(0.0, 0.0);
   balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
                                             robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
-  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210.0, 0.0, 0.0, 0.0);
+  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0, 0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
 
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
@@ -1904,6 +1904,8 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   /*----- Center of Mass -----*/
   Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
   center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+
+  calcGoalFT();
 
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
