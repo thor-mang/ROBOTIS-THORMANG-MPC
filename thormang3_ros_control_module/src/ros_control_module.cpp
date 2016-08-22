@@ -5,7 +5,7 @@
 namespace thormang3
 {
 RosControlModule::RosControlModule()
-    : control_cycle_msec_(8)
+  : control_cycle_msec_(8)
 {
   enable_          = false;
   module_name_     = "ros_control_module"; // set unique module name
@@ -32,7 +32,7 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
   
   last_time_stamp_ = ros::Time::now();
   
-  queue_thread_ = boost::thread(boost::bind(&RosControlModule::msgQueueThread, this));
+  queue_thread_ = boost::thread(boost::bind(&RosControlModule::queueThread, this));
 
   ros::NodeHandle nh;
 
@@ -87,6 +87,7 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
   /** initialize joints */
 
   // read joints from ros param server
+  result_.clear();
   XmlRpc::XmlRpcValue joints = nh.param("joints", XmlRpc::XmlRpcValue());
   if (joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
   {
@@ -180,7 +181,7 @@ void RosControlModule::stop()
   return;
 }
 
-void RosControlModule::msgQueueThread()
+void RosControlModule::queueThread()
 {
   ros::NodeHandle nh;
   ros::CallbackQueue callback_queue;

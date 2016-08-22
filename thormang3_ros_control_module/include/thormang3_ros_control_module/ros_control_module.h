@@ -70,7 +70,7 @@ public:
   bool isRunning() override;
 
 private:
-  void msgQueueThread();
+  void queueThread();
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
