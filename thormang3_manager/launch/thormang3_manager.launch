@@ -1,11 +1,12 @@
 <?xml version="1.0" ?>
 
 <launch>    
-    <arg name="use_imu" default="true"/>
-    <arg name="use_lidar" default="true" />  
-    <arg name="gazebo" default="false" />
-    <arg name="robot_name" default="thormang3" />
+  <arg name="use_imu" default="true"/>
+  <arg name="use_lidar" default="true" />  
+  <arg name="gazebo" default="false" />
+  <arg name="robot_name" default="thormang3" />
     
+  <group ns="/$(arg robot_name)">
     <param name="gazebo"                   value="$(arg gazebo)" type="bool"/>
     <param name="gazebo_robot_name"        value="$(arg robot_name)"/>
     
@@ -17,6 +18,9 @@
     <param name="ft_calibration_data_path" value="$(find thormang3_manager)/config/ft_calibration_data.yaml"/>
 
     <param name="action_file_path"         value="$(find thormang3_action_module)/data/motion_4096.bin"/>
+
+    <!-- ros control interface -->
+    <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
                 	 
     <!-- imu sensor package -->
     <include file="$(find thormang3_imu_3dm_gx4)/launch/imu.launch" if="$(arg use_imu)"/> 
@@ -28,5 +32,8 @@
     <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen"/>
     
     <!-- Robot Model & TF -->
-    <include file="$(find thormang3_description)/launch/thormang3_mpc.launch"/> 
+    <include file="$(find thormang3_description)/launch/thormang3_mpc.launch">
+      <arg name="robot_name" value="$(arg robot_name)" />
+    </include>
+  </group>
 </launch>
