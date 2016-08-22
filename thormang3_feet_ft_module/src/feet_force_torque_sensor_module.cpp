@@ -46,6 +46,8 @@ using namespace thormang3;
 
 FeetForceTorqueSensor::FeetForceTorqueSensor()
 : control_cycle_msec_(8),
+  gazebo_robot_name_("thormang3"),
+  gazebo_mode_(false),
   FT_NONE(0),
   FT_AIR(1),
   FT_GND(2),
@@ -321,6 +323,9 @@ void FeetForceTorqueSensor::publishStatusMsg(unsigned int type, std::string msg)
 
 void FeetForceTorqueSensor::publishBothFTData(int type, Eigen::MatrixXd &ft_right, Eigen::MatrixXd &ft_left)
 {
+  if (!gazebo_mode_)
+    return;
+
   thormang3_feet_ft_module_msgs::BothWrench both_wrench_msg;
 
   if(type == FT_AIR)
