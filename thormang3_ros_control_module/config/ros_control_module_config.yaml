@@ -22,3 +22,5 @@ joints:
 ft_sensors:
   l_foot: ["l_foot", "l_foot_ft_link"]
   r_foot: ["r_foot", "r_foot_ft_link"]
+  l_arm: ["l_wrist", "l_arm_wr_p_link"]
+  r_arm: ["r_wrist", "r_arm_wr_p_link"]
