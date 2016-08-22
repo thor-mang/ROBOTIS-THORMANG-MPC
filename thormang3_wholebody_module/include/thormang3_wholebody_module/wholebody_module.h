@@ -67,6 +67,9 @@ private:
   Eigen::VectorXd present_joint_velocity_;
   Eigen::VectorXd goal_joint_position_;
 
+  bool is_gain_updating_;
+  int p_gain_;
+
   /* movement */
   double mov_time_;
   int all_time_steps_;

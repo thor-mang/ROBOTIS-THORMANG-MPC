@@ -51,7 +51,9 @@ WholebodyModule::WholebodyModule()
     is_balancing_(false),
     on_balance_gain_(false),
     off_balance_gain_(false),
-    is_wheel_pose_(false)
+    is_wheel_pose_(false),
+    is_gain_updating_(false),
+    p_gain_(32)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -603,6 +605,15 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
 
       tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
       delete tra_gene_tread_;
+    }
+    else if (msg->data == "knee_p_gain_up" || msg->data == "knee_p_gain_down")
+    {
+      if (msg->data == "knee_p_gain_up")
+        p_gain_ = 32;
+      else if (msg->data == "knee_p_gain_down")
+        p_gain_ = 8;
+
+      is_gain_updating_ = true;
     }
   }
   else
@@ -1882,9 +1893,17 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     }
   }
 
-  /* ---- Send Goal Joint Data -----*/
-  sensor_msgs::JointState goal_joint_states_msg;
+  /* ---- Position P Gain Update -----*/
+  if (is_gain_updating_ == true )
+  {
+    ROS_INFO("Knee P Gain Update : %d", p_gain_);
 
+    result_["r_leg_kn_p"]->position_p_gain_ = p_gain_;
+    result_["l_leg_kn_p"]->position_p_gain_ = p_gain_;
+    is_gain_updating_ = false;
+  }
+
+  /* ---- Send Goal Joint Data -----*/
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
        state_iter != result_.end(); state_iter++)
   {
