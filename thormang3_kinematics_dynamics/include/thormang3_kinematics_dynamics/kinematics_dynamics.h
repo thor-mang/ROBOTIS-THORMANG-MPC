@@ -64,8 +64,8 @@ public:
   std::vector<int> findRoute(int from, int to);
 
   double calcTotalMass(int joint_id);
-  Eigen::MatrixXd calcMC(int joint_id);
-  Eigen::MatrixXd calcCOM(Eigen::MatrixXd mc);
+  Eigen::MatrixXd calcMassCenter(int joint_id);
+  Eigen::MatrixXd calcCenterOfMass(Eigen::MatrixXd mc);
 
   void calcForwardKinematics(int joint_ID);
 

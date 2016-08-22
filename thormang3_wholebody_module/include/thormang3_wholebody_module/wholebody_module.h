@@ -128,6 +128,9 @@ private:
   Eigen::MatrixXd wb_l_foot_default_position_, wb_r_foot_default_position_;
   Eigen::Quaterniond wb_l_foot_default_quaternion_, wb_r_foot_default_quaternion_;
 
+  Eigen::MatrixXd default_center_of_mass_;
+  Eigen::MatrixXd center_of_mass_;
+
   /* balance */
   bool is_balancing_;
   bool on_balance_gain_, off_balance_gain_;

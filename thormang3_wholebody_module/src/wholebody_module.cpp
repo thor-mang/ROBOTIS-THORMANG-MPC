@@ -224,6 +224,9 @@ WholebodyModule::WholebodyModule()
   right_foot_torque_pitch_gain_ = 0.0015;
   right_foot_torque_roll_time_constant_ = 0.2;
   right_foot_torque_pitch_time_constant_ = 0.2;
+
+  default_center_of_mass_ = Eigen::MatrixXd::Zero(3,1);
+
 }
 
 WholebodyModule::~WholebodyModule()
@@ -1836,6 +1839,10 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
   robotis_->calcForwardKinematics(0);
 
+  /*----- Center of Mass -----*/
+  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
+  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
   {
@@ -1894,14 +1901,14 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   }
 
   /* ---- Position P Gain Update -----*/
-  if (is_gain_updating_ == true )
-  {
-    ROS_INFO("Knee P Gain Update : %d", p_gain_);
+//  if (is_gain_updating_ == true )
+//  {
+//    ROS_INFO("Knee P Gain Update : %d", p_gain_);
 
-    result_["r_leg_kn_p"]->position_p_gain_ = p_gain_;
-    result_["l_leg_kn_p"]->position_p_gain_ = p_gain_;
-    is_gain_updating_ = false;
-  }
+//    result_["r_leg_kn_p"]->position_p_gain_ = p_gain_;
+//    result_["l_leg_kn_p"]->position_p_gain_ = p_gain_;
+//    is_gain_updating_ = false;
+//  }
 
   /* ---- Send Goal Joint Data -----*/
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();

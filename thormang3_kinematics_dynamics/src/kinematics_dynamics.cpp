@@ -410,7 +410,7 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[14]->parent_             =  12;
     thormang3_link_data_[14]->sibling_            =  -1;
     thormang3_link_data_[14]->child_              =  30;
-    thormang3_link_data_[14]->mass_               =  0.08709;
+    thormang3_link_data_[14]->mass_               =  0.565;
     thormang3_link_data_[14]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.045 , -0.045 , -0.045 );
     thormang3_link_data_[14]->joint_axis_         =  robotis_framework::getTransitionXYZ( 0.0 , -1.0 , 0.0 );
     thormang3_link_data_[14]->center_of_mass_     =  robotis_framework::getTransitionXYZ( 0.065 , 0.045 , 0.000 );
@@ -730,7 +730,7 @@ double KinematicsDynamics::calcTotalMass(int joint_id)
   return mass;
 }
 
-Eigen::MatrixXd KinematicsDynamics::calcMC(int joint_id)
+Eigen::MatrixXd KinematicsDynamics::calcMassCenter(int joint_id)
 {
   Eigen::MatrixXd mc(3,1);
 
@@ -739,13 +739,13 @@ Eigen::MatrixXd KinematicsDynamics::calcMC(int joint_id)
   else
   {
     mc = thormang3_link_data_[ joint_id ]->mass_ * ( thormang3_link_data_[ joint_id ]->orientation_ * thormang3_link_data_[ joint_id ]->center_of_mass_ + thormang3_link_data_[ joint_id ]->position_ );
-    mc = mc + calcMC( thormang3_link_data_[ joint_id ]->sibling_ ) + calcMC( thormang3_link_data_[ joint_id ]->child_ );
+    mc = mc + calcMassCenter( thormang3_link_data_[ joint_id ]->sibling_ ) + calcMassCenter( thormang3_link_data_[ joint_id ]->child_ );
   }
 
   return mc;
 }
 
-Eigen::MatrixXd KinematicsDynamics::calcCOM(Eigen::MatrixXd mc)
+Eigen::MatrixXd KinematicsDynamics::calcCenterOfMass(Eigen::MatrixXd mc)
 {
   double mass ;
   Eigen::MatrixXd COM(3,1);
@@ -820,7 +820,7 @@ Eigen::MatrixXd KinematicsDynamics::calcJacobianCOM(std::vector<int> idx)
     int curr_id = idx[id];
     double mass = calcTotalMass(curr_id);
 
-    Eigen::MatrixXd og = calcMC(curr_id)/mass-thormang3_link_data_[curr_id]->position_;
+    Eigen::MatrixXd og = calcMassCenter(curr_id)/mass-thormang3_link_data_[curr_id]->position_;
     Eigen::MatrixXd tar_orientation = thormang3_link_data_[curr_id]->orientation_*thormang3_link_data_[curr_id]->joint_axis_;
 
     jacobian_com.block(0,id,3,1) = robotis_framework::calcCross(tar_orientation,og);
