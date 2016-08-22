@@ -180,6 +180,8 @@ private:
   double balance_goal_l_foot_ft_;
   double balance_goal_r_foot_ft_;
 
+  bool is_knee_torque_limit_down_;
+
   /* msgs */
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
   thormang3_wholebody_module_msgs::KinematicsPose goal_kinematics_pose_msg_;

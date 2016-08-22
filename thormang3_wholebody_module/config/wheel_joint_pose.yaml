@@ -1,6 +1,6 @@
 # time parameter
 
-mov_time : 3.0		# movement time# target pose [deg]
+mov_time : 2.0		# movement time# target pose [deg]
 
 tar_pose :
   15 :   0.0 		# r_leg_hip_y
