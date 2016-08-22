@@ -44,7 +44,6 @@ WholebodyModule::WholebodyModule()
   : control_cycle_sec_(0.008),
     gazebo_(false),
     is_moving_(false),
-//    ik_solving_(false),
     wb_ik_solving_(false),
     wb_l_arm_planning_(false),
     wb_r_arm_planning_(false),
@@ -555,19 +554,16 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
     balance_gain_cnt_ = 0;
 
     is_moving_ = false;
-//    ik_solving_ = false;
     wb_ik_solving_ = false;
   }
   else if(msg->data == "balance_off")
   {
     ROS_INFO("balance off");
 
-//    is_balancing_ = false;
     on_balance_gain_ = false;
     balance_gain_cnt_ = 0;
 
     is_moving_ = false;
-//    ik_solving_ = false;
     wb_ik_solving_ = false;
   }
 }
@@ -1990,7 +1986,6 @@ void WholebodyModule::stop()
 {
   is_moving_ = false;
 
-//  ik_solving_ = false;
   wb_ik_solving_ = false;
 
   wb_l_arm_planning_ = false;
