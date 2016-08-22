@@ -191,10 +191,8 @@ void RosControlModule::queueThread()
   // Initialize ros control
   controller_manager_.reset(new controller_manager::ControllerManager(this, nh));
 
+  ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(nh.ok())
-  {
-    callback_queue.callAvailable();
-    usleep(100);
-  }
+    callback_queue.callAvailable(duration);
 }
 }
