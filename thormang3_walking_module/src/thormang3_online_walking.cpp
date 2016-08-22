@@ -37,6 +37,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <boost/thread/mutex.hpp>
 #include "thormang3_walking_module/thormang3_online_walking.h"
 
 
@@ -302,7 +303,8 @@ void RobotisOnlineWalking::initialize()
   if(real_running)
     return;
 
-  mutex_lock_.lock();
+  boost::lock_guard<boost::mutex> lock(mutex_lock_);
+
   added_step_data_.clear();
 
   // initialize balance
@@ -473,7 +475,8 @@ void RobotisOnlineWalking::reInitialize()
   if(real_running)
     return;
 
-  mutex_lock_.lock();
+  boost::lock_guard<boost::mutex> lock(mutex_lock_);
+
   added_step_data_.clear();
 
   //Initialize Time
@@ -933,7 +936,7 @@ void RobotisOnlineWalking::process()
   }
   else
   {
-    mutex_lock_.lock();
+    boost::lock_guard<boost::mutex> lock(mutex_lock_);
 
     calcStepIdxData();
     calcRefZMP();
