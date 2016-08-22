@@ -52,7 +52,7 @@ WholebodyModule::WholebodyModule()
     off_balance_gain_(false),
     is_wheel_pose_(false),
     is_gain_updating_(false),
-    p_gain_(32)
+    is_knee_torque_limit_down_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -608,6 +608,21 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
     else if (msg->data == "wheel_on_pose" || msg->data == "wheel_off_pose")
     {
       if (msg->data == "wheel_on_pose")
+        is_knee_torque_limit_down_ = true;
+
+      if (msg->data == "wheel_off_pose")
+      {
+        robotis_controller_msgs::SyncWriteItem sync_write_msg;
+        sync_write_msg.item_name = "goal_torque";
+        sync_write_msg.joint_name.push_back("r_leg_kn_p");
+        sync_write_msg.value.push_back(1240);
+        sync_write_msg.joint_name.push_back("l_leg_kn_p");
+        sync_write_msg.value.push_back(1240);
+
+        goal_torque_limit_pub_.publish(sync_write_msg);
+      }
+
+      if (msg->data == "wheel_on_pose")
       {
         is_wheel_pose_ = true;
         std::string wheel_joint_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + "wheel_joint_pose.yaml";
@@ -619,28 +634,28 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
       tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
       delete tra_gene_tread_;
     }
-    else if (msg->data == "knee_p_gain_up" || msg->data == "knee_p_gain_down")
-    {
-      robotis_controller_msgs::SyncWriteItem sync_write_msg;
-      sync_write_msg.item_name = "goal_torque";
+//    else if (msg->data == "knee_p_gain_up" || msg->data == "knee_p_gain_down")
+//    {
+//      robotis_controller_msgs::SyncWriteItem sync_write_msg;
+//      sync_write_msg.item_name = "goal_torque";
 
-      if (msg->data == "knee_p_gain_down")
-      {
-        sync_write_msg.joint_name.push_back("r_leg_kn_p");
-        sync_write_msg.value.push_back(105);
-        sync_write_msg.joint_name.push_back("l_leg_kn_p");
-        sync_write_msg.value.push_back(105);
-      }
-      else if (msg->data == "knee_p_gain_up")
-      {
-        sync_write_msg.joint_name.push_back("r_leg_kn_p");
-        sync_write_msg.value.push_back(1240);
-        sync_write_msg.joint_name.push_back("l_leg_kn_p");
-        sync_write_msg.value.push_back(1240);
-      }
+//      if (msg->data == "knee_p_gain_down")
+//      {
+//        sync_write_msg.joint_name.push_back("r_leg_kn_p");
+//        sync_write_msg.value.push_back(105);
+//        sync_write_msg.joint_name.push_back("l_leg_kn_p");
+//        sync_write_msg.value.push_back(105);
+//      }
+//      else if (msg->data == "knee_p_gain_up")
+//      {
+//        sync_write_msg.joint_name.push_back("r_leg_kn_p");
+//        sync_write_msg.value.push_back(1240);
+//        sync_write_msg.joint_name.push_back("l_leg_kn_p");
+//        sync_write_msg.value.push_back(1240);
+//      }
 
-      goal_torque_limit_pub_.publish(sync_write_msg);
-    }
+//      goal_torque_limit_pub_.publish(sync_write_msg);
+//    }
   }
   else
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
@@ -1458,6 +1473,20 @@ void WholebodyModule::setEndTrajectory()
       wb_l_foot_target_rotation_ = robotis_framework::convertQuaternionToRotation(wb_l_foot_default_quaternion_);
       wb_r_foot_target_position_ = wb_r_foot_default_position_;
       wb_r_foot_target_rotation_ = robotis_framework::convertQuaternionToRotation(wb_r_foot_default_quaternion_);
+
+      if (is_knee_torque_limit_down_ == true)
+      {
+        robotis_controller_msgs::SyncWriteItem sync_write_msg;
+        sync_write_msg.item_name = "goal_torque";
+        sync_write_msg.joint_name.push_back("r_leg_kn_p");
+        sync_write_msg.value.push_back(105);
+        sync_write_msg.joint_name.push_back("l_leg_kn_p");
+        sync_write_msg.value.push_back(105);
+
+        goal_torque_limit_pub_.publish(sync_write_msg);
+
+        is_knee_torque_limit_down_ = false;
+      }
     }
   }
 }
