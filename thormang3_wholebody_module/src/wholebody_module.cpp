@@ -226,7 +226,9 @@ WholebodyModule::WholebodyModule()
   right_foot_torque_pitch_time_constant_ = 0.2;
 
   default_center_of_mass_ = Eigen::MatrixXd::Zero(3,1);
-
+  default_center_of_mass_.coeffRef(0,0) = 0.024;
+  default_center_of_mass_.coeffRef(1,0) = -0.004;
+  default_center_of_mass_.coeffRef(2,0) = 0.65;
 }
 
 WholebodyModule::~WholebodyModule()
@@ -1170,7 +1172,7 @@ void WholebodyModule::traGeneProcWholebody()
     wb_r_arm_goal_quaternion_ = r_arm_target_quaternion;
   }
 
-//  calcGoalTraPelvis();
+  calcGoalTraPelvis();
   calcGoalTraLeg();
 
   cnt_ = 0;
@@ -1182,16 +1184,35 @@ void WholebodyModule::traGeneProcWholebody()
 
 void WholebodyModule::calcGoalTraPelvis()
 {
-
   Eigen::MatrixXd wb_arm_diff_constant = Eigen::MatrixXd::Zero(3,1);
-  wb_arm_diff_constant.coeffRef(0,0) = -0.01;
-  wb_arm_diff_constant.coeffRef(1,0) = -0.01;
-  wb_arm_diff_constant.coeffRef(1,0) =  0.1;
+  wb_arm_diff_constant.coeffRef(0,0) = -0.05;
+  wb_arm_diff_constant.coeffRef(1,0) = -0.05;
+  wb_arm_diff_constant.coeffRef(2,0) =  0.1;
+
+  Eigen::MatrixXd wb_pelvis_limit = Eigen::MatrixXd::Zero(3,2);
+  wb_pelvis_limit.coeffRef(0,0) = 0.05;
+  wb_pelvis_limit.coeffRef(0,1) = -0.05;
+  wb_pelvis_limit.coeffRef(1,0) = 0.05;
+  wb_pelvis_limit.coeffRef(1,1) = -0.05;
+  wb_pelvis_limit.coeffRef(2,0) = 0.75;
+  wb_pelvis_limit.coeffRef(2,1) = 0.3;
+
+  Eigen::MatrixXd wb_pelvis_tar_value = Eigen::MatrixXd::Zero(3,1);
+  for (int dim=0; dim <3; dim++)
+  {
+    wb_pelvis_tar_value.coeffRef(dim,0) =
+        robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0) + wb_arm_diff_constant.coeff(dim,0) * wb_arm_diff_position_(dim);
+
+    if (wb_pelvis_tar_value.coeff(dim,0) > wb_pelvis_limit.coeff(dim,0))
+      wb_pelvis_tar_value.coeffRef(dim,0) = wb_pelvis_limit.coeff(dim,0);
+    else if (wb_pelvis_tar_value.coeff(dim,0) < wb_pelvis_limit.coeff(dim,1))
+      wb_pelvis_tar_value.coeffRef(dim,0) = wb_pelvis_limit.coeff(dim,1);
+  }
 
   for (int dim=0; dim<3; dim++)
   {
     double ini_value = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0);
-    double tar_value = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0);
+    double tar_value = wb_pelvis_tar_value.coeff(dim,0);
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                 tar_value, 0.0, 0.0,
@@ -1664,6 +1685,10 @@ void WholebodyModule::solveWholebodyInverseKinematics()
 
 void WholebodyModule::solveWholebodyInverseKinematicsFull()
 {
+  robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_pelvis_target_position_.coeff(0,0);
+  robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_position_.coeff(1,0);
+  robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_pelvis_target_position_.coeff(2,0);
+
   int max_iter = 70;
   double ik_tol = 1e-5;
 
@@ -1691,7 +1716,7 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
 
   Eigen::MatrixXd pelvis_pose = Eigen::MatrixXd::Identity(4,4);
   pelvis_pose.block(0,0,3,3) = robotis_->thormang3_link_data_[ID_PELVIS]->orientation_;
-  pelvis_pose.block(0,3,3,1) = robotis_->thormang3_link_data_[ID_PELVIS]->position_;
+  pelvis_pose.block(0,3,3,1) = wb_pelvis_target_position_;
 
   Eigen::MatrixXd l_foot_pose = Eigen::MatrixXd::Identity(4,4);
   l_foot_pose.block(0,0,3,3) = wb_l_foot_target_rotation_;
@@ -1840,8 +1865,8 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   robotis_->calcForwardKinematics(0);
 
   /*----- Center of Mass -----*/
-  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
-  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+//  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
+//  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
 
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
