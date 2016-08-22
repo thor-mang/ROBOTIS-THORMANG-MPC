@@ -173,6 +173,13 @@ private:
   double right_foot_torque_roll_time_constant_;
   double right_foot_torque_pitch_time_constant_;
 
+  double wb_pelvis_diff_x_constant_;
+  double wb_pelvis_diff_y_constant_;
+  double wb_pelvis_diff_z_constant_;
+
+  double balance_goal_l_foot_ft_;
+  double balance_goal_r_foot_ft_;
+
   /* msgs */
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
   thormang3_wholebody_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
@@ -208,6 +215,7 @@ private:
 
   void calcGoalTraPelvis();
   void calcGoalTraLeg();
+  void calcGoalFT();
 
   void traGeneProcIniPose();
   void traGeneProcWheelPose();

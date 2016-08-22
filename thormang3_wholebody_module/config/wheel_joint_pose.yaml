@@ -13,6 +13,6 @@ tar_pose :
   22 :  167.0		# l_leg_kn_p
   23 : -90.0		# r_leg_an_p
   24 :  90.0		# l_leg_an_p
-  25 :  13.0		# r_leg_an_r
-  26 : -13.0		# l_leg_an_r
+  25 :  15.0		# r_leg_an_r
+  26 : -15.0		# l_leg_an_r
 

@@ -225,6 +225,13 @@ WholebodyModule::WholebodyModule()
   right_foot_torque_roll_time_constant_ = 0.2;
   right_foot_torque_pitch_time_constant_ = 0.2;
 
+  wb_pelvis_diff_x_constant_ = -0.075;
+  wb_pelvis_diff_y_constant_ = -0.075;
+  wb_pelvis_diff_z_constant_ = 0.1;
+
+  balance_goal_l_foot_ft_ = -210.0;
+  balance_goal_r_foot_ft_ = -210.0;
+
   default_center_of_mass_ = Eigen::MatrixXd::Zero(3,1);
   default_center_of_mass_.coeffRef(0,0) = 0.024;
   default_center_of_mass_.coeffRef(1,0) = -0.004;
@@ -531,6 +538,10 @@ void WholebodyModule::parseBalanceGainData(const std::string &path)
   right_foot_torque_pitch_gain_ = doc["right_foot_torque_pitch_gain"].as<double>();
   right_foot_torque_roll_time_constant_ = doc["right_foot_torque_roll_time_constant"].as<double>();
   right_foot_torque_pitch_time_constant_ = doc["right_foot_torque_pitch_time_constant"].as<double>();
+
+  wb_pelvis_diff_x_constant_ = doc["wb_pelvis_diff_x_constant"].as<double>();
+  wb_pelvis_diff_y_constant_ = doc["wb_pelvis_diff_y_constant"].as<double>();
+  wb_pelvis_diff_z_constant_ = doc["wb_pelvis_diff_z_constant"].as<double>();
 }
 
 void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -1198,10 +1209,10 @@ void WholebodyModule::traGeneProcWholebody()
 
 void WholebodyModule::calcGoalTraPelvis()
 {
-  Eigen::MatrixXd wb_arm_diff_constant = Eigen::MatrixXd::Zero(3,1);
-  wb_arm_diff_constant.coeffRef(0,0) = -0.05;
-  wb_arm_diff_constant.coeffRef(1,0) = -0.05;
-  wb_arm_diff_constant.coeffRef(2,0) =  0.1;
+  Eigen::MatrixXd wb_pelvis_diff_constant = Eigen::MatrixXd::Zero(3,1);
+  wb_pelvis_diff_constant.coeffRef(0,0) = wb_pelvis_diff_x_constant_;
+  wb_pelvis_diff_constant.coeffRef(1,0) = wb_pelvis_diff_y_constant_;
+  wb_pelvis_diff_constant.coeffRef(2,0) = wb_pelvis_diff_z_constant_;
 
   Eigen::MatrixXd wb_pelvis_limit = Eigen::MatrixXd::Zero(3,2);
   wb_pelvis_limit.coeffRef(0,0) = 0.05;
@@ -1215,7 +1226,7 @@ void WholebodyModule::calcGoalTraPelvis()
   for (int dim=0; dim <3; dim++)
   {
     wb_pelvis_tar_value.coeffRef(dim,0) =
-        robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0) + wb_arm_diff_constant.coeff(dim,0) * wb_arm_diff_position_(dim);
+        robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(dim,0) + wb_pelvis_diff_constant.coeff(dim,0) * wb_arm_diff_position_(dim);
 
     if (wb_pelvis_tar_value.coeff(dim,0) > wb_pelvis_limit.coeff(dim,0))
       wb_pelvis_tar_value.coeffRef(dim,0) = wb_pelvis_limit.coeff(dim,0);
@@ -1269,6 +1280,18 @@ void WholebodyModule::calcGoalTraLeg()
 
   wb_l_foot_goal_quaternion_ = wb_l_foot_default_quaternion_;
   wb_r_foot_goal_quaternion_ = wb_r_foot_default_quaternion_;
+}
+
+void WholebodyModule::calcGoalFT()
+{
+  double l_foot_distance = fabs(0.093 - default_center_of_mass_.coeff(1,0));
+  double r_foot_distance = fabs(-0.093 - default_center_of_mass_.coeff(1,0));
+
+  balance_goal_l_foot_ft_ = -420.0 * l_foot_distance / 0.186;
+  balance_goal_r_foot_ft_ = -420.0 * r_foot_distance / 0.186;
+
+//  ROS_INFO("goal_l_foot_ft : %f", balance_goal_l_foot_ft_);
+//  ROS_INFO("goal_r_foot_ft : %f", balance_goal_r_foot_ft_);
 }
 
 bool WholebodyModule::getJointPoseCallback(thormang3_wholebody_module_msgs::GetJointPose::Request &req,
@@ -1776,7 +1799,7 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   balance_control_.setDesiredCOBGyro(0.0, 0.0);
   balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
                                             robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
-  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210, 0.0, 0.0, 0.0);
+  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 0.0, 0.0, -210.0, 0.0, 0.0, 0.0);
 
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
@@ -1879,8 +1902,8 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   robotis_->calcForwardKinematics(0);
 
   /*----- Center of Mass -----*/
-//  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
-//  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
+  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
 
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
