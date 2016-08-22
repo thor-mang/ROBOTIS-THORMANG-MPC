@@ -33,6 +33,7 @@
 
 #include "robotis_controller_msgs/JointCtrlModule.h"
 #include "robotis_controller_msgs/StatusMsg.h"
+#include "robotis_controller_msgs/SyncWriteItem.h"
 
 #include "thormang3_wholebody_module_msgs/JointPose.h"
 #include "thormang3_wholebody_module_msgs/KinematicsPose.h"
@@ -55,8 +56,9 @@ private:
   bool gazebo_;
 
   /* sample subscriber & publisher */
-  ros::Publisher  status_msg_pub_;
-  ros::Publisher  set_ctrl_module_pub_;
+  ros::Publisher status_msg_pub_;
+  ros::Publisher set_ctrl_module_pub_;
+  ros::Publisher goal_torque_limit_pub_;
 
   std::map<std::string, int> joint_name_to_id_;
 

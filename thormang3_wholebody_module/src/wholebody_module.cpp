@@ -255,6 +255,7 @@ void WholebodyModule::queueThread()
   /* publish topics */
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
   set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
+  goal_torque_limit_pub_ = ros_node.advertise<robotis_controller_msgs::SyncWriteItem>("/robotis/sync_write_item", 1);
 
   /* subscribe topics */
   ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/wholebody/set_mode_msg", 5,
@@ -613,12 +614,25 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
     }
     else if (msg->data == "knee_p_gain_up" || msg->data == "knee_p_gain_down")
     {
-      if (msg->data == "knee_p_gain_up")
-        p_gain_ = 32;
-      else if (msg->data == "knee_p_gain_down")
-        p_gain_ = 8;
+      robotis_controller_msgs::SyncWriteItem sync_write_msg;
+      sync_write_msg.item_name = "goal_torque";
 
-      is_gain_updating_ = true;
+      if (msg->data == "knee_p_gain_down")
+      {
+        sync_write_msg.joint_name.push_back("r_leg_kn_p");
+        sync_write_msg.value.push_back(105);
+        sync_write_msg.joint_name.push_back("l_leg_kn_p");
+        sync_write_msg.value.push_back(105);
+      }
+      else if (msg->data == "knee_p_gain_up")
+      {
+        sync_write_msg.joint_name.push_back("r_leg_kn_p");
+        sync_write_msg.value.push_back(1240);
+        sync_write_msg.joint_name.push_back("l_leg_kn_p");
+        sync_write_msg.value.push_back(1240);
+      }
+
+      goal_torque_limit_pub_.publish(sync_write_msg);
     }
   }
   else
@@ -1926,14 +1940,14 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   }
 
   /* ---- Position P Gain Update -----*/
-  if (is_gain_updating_ == true )
-  {
-    ROS_INFO("Knee P Gain Update : %d", p_gain_);
+//  if (is_gain_updating_ == true )
+//  {
+//    ROS_INFO("Knee P Gain Update : %d", p_gain_);
 
-    result_["r_leg_kn_p"]->position_p_gain_ = p_gain_;
-    result_["l_leg_kn_p"]->position_p_gain_ = p_gain_;
-    is_gain_updating_ = false;
-  }
+//    result_["r_leg_kn_p"]->position_p_gain_ = p_gain_;
+//    result_["l_leg_kn_p"]->position_p_gain_ = p_gain_;
+//    is_gain_updating_ = false;
+//  }
 
   /* ---- Send Goal Joint Data -----*/
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
