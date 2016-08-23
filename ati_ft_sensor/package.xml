@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <package>
   <name>ati_ft_sensor</name>
-  <version>0.0.0</version>
-  <description>The ati_ft_sensor package</description>
-
-  <maintainer email="hjsong@robotis.com">ROBOTIS</maintainer>
-
+  <version>0.1.0</version>
+  <description>
+    This package is a library for using ATI's transducer.
+    This package describes basic functions for sensing force and torque.
+    We provide some functions for converting and scaling.
+  </description>
   <license>BSD</license>
-
-  <author email="hjsong@robotis.com">ROBOTIS</author>
-
+  <author email="hjsong@robotis.com">Jay Song</author>
+  <maintainer email="pyo@robotis.com">pyo</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>
+  <url type="website">http://wiki.ros.org/ati_ft_sensor</url>
   <buildtool_depend>catkin</buildtool_depend>
-
   <build_depend>roscpp</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>robotis_math</build_depend>
-  
   <run_depend>roscpp</run_depend>
   <run_depend>cmake_modules</run_depend>
-
 </package>

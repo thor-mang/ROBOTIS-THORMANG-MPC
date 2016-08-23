@@ -1,24 +1,21 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_kinematics_dynamics</name>
-  <version>0.0.0</version>
-  <description>The thormang3_kinematics_dynamics package</description>
-
-  <maintainer email="sch@robotis.com">sch</maintainer>
+  <version>0.1.0</version>
+  <description>
+    This package provides a kinematics and dynamics impletation for the thormang3.
+    It can be used to calculate forward and inverse kinematics.
+  </description>
   <license>BSD</license>
-
-  <author email="sch@robotis.com">sch</author>
-
+  <author email="sch@robotis.com">SCH</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>
+  <url type="website">http://wiki.ros.org/thormang3_mpc</url>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>robotis_math</build_depend>
   <build_depend>cmake_modules</build_depend>
-  
   <run_depend>roscpp</run_depend>
   <run_depend>cmake_modules</run_depend>
-
-  <export>
-    <!-- Other tools can request additional information be placed here -->
-
-  </export>
 </package>

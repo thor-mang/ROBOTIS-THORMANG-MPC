@@ -9,8 +9,8 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <geometry_msgs/QuaternionStamped.h>
 
-#include <imu_3dm_gx4/FilterOutput.h>
-#include "../../imu_3dm_gx4/src/imu.hpp"
+#include <thormang3_imu_3dm_gx4/FilterOutput.h>
+#include "imu.hpp"
 
 using namespace imu_3dm_gx4;
 
@@ -83,7 +83,7 @@ void publishFilter(const Imu::FilterData &data) {
 	assert(data.fields & Imu::FilterData::AngleUnertainty);
 	assert(data.fields & Imu::FilterData::BiasUncertainty);
 
-	imu_3dm_gx4::FilterOutput output;
+	thormang3_imu_3dm_gx4::FilterOutput output;
 	output.header.stamp = ros::Time::now();
 	output.header.frame_id = frameId;
 	output.orientation.w = data.quaternion[0];
@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
 	pubPressure = nh.advertise<sensor_msgs::FluidPressure>("pressure", 1);
 
 	if (enableFilter) {
-		pubFilter = nh.advertise<imu_3dm_gx4::FilterOutput>("filter", 1);
+		pubFilter = nh.advertise<thormang3_imu_3dm_gx4::FilterOutput>("filter", 1);
 	}
 
 	//  new instance of the IMU
