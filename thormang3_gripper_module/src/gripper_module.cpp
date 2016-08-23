@@ -41,7 +41,8 @@
 using namespace thormang3;
 
 GripperModule::GripperModule()
-  : control_cycle_sec_(0.008)
+  : control_cycle_sec_(0.008),
+    is_moving_(false)
 {
   enable_       = false;
   module_name_  = "gripper_module";
