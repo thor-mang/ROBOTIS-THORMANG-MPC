@@ -921,8 +921,8 @@ void WholebodyModule::traGeneProcPelvis()
   calcGoalTraLeg();
 
   cnt_ = 0;
-  is_moving_ = true;
   wb_ik_solving_ = true;
+  is_moving_ = true;
 
   ROS_INFO("[start] send trajectory");
 }
@@ -1005,8 +1005,8 @@ void WholebodyModule::traGeneProcWholebody()
   calcGoalTraLeg();
 
   cnt_ = 0;
-  is_moving_ = true;
   wb_ik_solving_ = true;
+  is_moving_ = true;
 
   ROS_INFO("[start] send trajectory");
 }
@@ -1019,12 +1019,12 @@ void WholebodyModule::calcGoalTraPelvis()
   wb_pelvis_diff_constant.coeffRef(2,0) = wb_pelvis_diff_z_constant_;
 
   Eigen::MatrixXd wb_pelvis_limit = Eigen::MatrixXd::Zero(3,2);
-  wb_pelvis_limit.coeffRef(0,0) = 0.05;
-  wb_pelvis_limit.coeffRef(0,1) = -0.05;
-  wb_pelvis_limit.coeffRef(1,0) = 0.05;
-  wb_pelvis_limit.coeffRef(1,1) = -0.05;
-  wb_pelvis_limit.coeffRef(2,0) = 0.75;
-  wb_pelvis_limit.coeffRef(2,1) = 0.3;
+  wb_pelvis_limit.coeffRef(0,0) = 0.075; // x max
+  wb_pelvis_limit.coeffRef(0,1) = -0.075; // x min
+  wb_pelvis_limit.coeffRef(1,0) = 0.05; // y max
+  wb_pelvis_limit.coeffRef(1,1) = -0.05; // y min
+  wb_pelvis_limit.coeffRef(2,0) = 0.75; // z max
+  wb_pelvis_limit.coeffRef(2,1) = 0.3; // z min
 
   Eigen::MatrixXd wb_pelvis_tar_value = Eigen::MatrixXd::Zero(3,1);
   for (int dim=0; dim <3; dim++)
@@ -1673,7 +1673,6 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   /*----- Center of Mass -----*/
   Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
   center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
-
   calcGoalFT();
 
   /* ----- Movement Event -----*/
