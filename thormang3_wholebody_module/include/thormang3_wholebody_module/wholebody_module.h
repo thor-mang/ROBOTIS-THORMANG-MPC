@@ -54,6 +54,7 @@ private:
   boost::thread* tra_gene_tread_;
 
   bool gazebo_;
+  bool pelvis_initialize_;
 
   /* sample subscriber & publisher */
   ros::Publisher status_msg_pub_;

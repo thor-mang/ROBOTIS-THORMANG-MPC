@@ -1181,6 +1181,11 @@ void WholebodyModule::setInverseKinematicsLeftArm(int cnt)
   Eigen::Quaterniond quaternion = wb_l_arm_start_quaternion_.slerp(time_step, wb_l_arm_goal_quaternion_);
 
   wb_l_arm_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
+
+  ROS_INFO("-----");
+  PRINT_MAT(wb_l_arm_target_position_);
+  PRINT_MAT(wb_l_arm_target_rotation_);
+  ROS_INFO("-----");
 }
 
 void WholebodyModule::setInverseKinematicsRightArm(int cnt)
@@ -1493,11 +1498,10 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_position_.coeff(1,0);
   robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_pelvis_target_position_.coeff(2,0);
 
-  int max_iter = 70;
+  int max_iter = 100;
   double ik_tol = 1e-5;
 
-  bool l_arm_ik_success = false;
-  bool r_arm_ik_success = false;
+  bool l_arm_ik_success, r_arm_ik_success;
 
   if (wb_l_arm_planning_ == true)
   {
@@ -1506,8 +1510,15 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   }
   else if (wb_r_arm_planning_ == true)
   {
-    l_arm_ik_success = true;
     r_arm_ik_success = robotis_->calcInverseKinematics(ID_BASE, ID_R_ARM_END, wb_r_arm_target_position_, wb_r_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
+    l_arm_ik_success = true;
+  }
+
+  if (l_arm_ik_success == false || r_arm_ik_success == false)
+  {
+    ROS_INFO("1234");
+    PRINT_MAT(wb_l_arm_target_position_);
+    PRINT_MAT(wb_l_arm_target_rotation_);
   }
 
 //  robotis_->calcForwardKinematics(0);
@@ -1529,6 +1540,8 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   Eigen::MatrixXd r_foot_pose = Eigen::MatrixXd::Identity(4,4);
   r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
   r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
+
+  PRINT_MAT(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
 
   balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
 
@@ -1589,6 +1602,8 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_ = wb_target_rpy.coeff(1,0);
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = wb_target_rpy.coeff(2,0);
 
+  PRINT_MAT(wb_pelvis_target_rotation);
+
   /* ----- */
 
   bool l_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_L_LEG_END, wb_l_foot_target_position, wb_l_foot_target_rotation, max_iter, ik_tol);
@@ -1621,6 +1636,8 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
     wb_r_foot_target_position_ = wb_r_foot_default_position_;
     wb_r_foot_target_rotation_ = robotis_framework::convertQuaternionToRotation(wb_r_foot_default_quaternion_);
   }
+
+  return;
 }
 
 void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,

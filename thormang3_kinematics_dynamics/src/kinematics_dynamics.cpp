@@ -109,8 +109,8 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[41]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
     thormang3_link_data_[41]->joint_axis_         =  robotis_framework::getTransitionXYZ( 1.0 , 0.0 , 0.0 );
     thormang3_link_data_[41]->center_of_mass_     =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
-    thormang3_link_data_[41]->joint_limit_max_    =  100.0;
-    thormang3_link_data_[41]->joint_limit_min_    =  -100.0;
+    thormang3_link_data_[41]->joint_limit_max_    =  2.0 * M_PI;
+    thormang3_link_data_[41]->joint_limit_min_    =  -2.0 * M_PI;
     thormang3_link_data_[41]->inertia_            =  robotis_framework::getInertiaXYZ( 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 );
 
     thormang3_link_data_[42]->name_               =  "passive_pitch";
@@ -121,8 +121,8 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[42]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
     thormang3_link_data_[42]->joint_axis_         =  robotis_framework::getTransitionXYZ( 0.0 , 1.0 , 0.0 );
     thormang3_link_data_[42]->center_of_mass_     =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
-    thormang3_link_data_[42]->joint_limit_max_    =  100.0;
-    thormang3_link_data_[42]->joint_limit_min_    =  -100.0;
+    thormang3_link_data_[42]->joint_limit_max_    =  2.0 * M_PI;
+    thormang3_link_data_[42]->joint_limit_min_    =  -2.0 * M_PI;
     thormang3_link_data_[42]->inertia_            =  robotis_framework::getInertiaXYZ( 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 );
 
     thormang3_link_data_[43]->name_               =  "passive_yaw";
@@ -133,8 +133,8 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[43]->relative_position_  =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
     thormang3_link_data_[43]->joint_axis_         =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 1.0 );
     thormang3_link_data_[43]->center_of_mass_     =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
-    thormang3_link_data_[43]->joint_limit_max_    =  100.0;
-    thormang3_link_data_[43]->joint_limit_min_    =  -100.0;
+    thormang3_link_data_[43]->joint_limit_max_    =  2.0 * M_PI;
+    thormang3_link_data_[43]->joint_limit_min_    =  -2.0 * M_PI;
     thormang3_link_data_[43]->inertia_            =  robotis_framework::getInertiaXYZ( 0.0 , 0.0 , 0.0 , 0.0 , 0.0 , 0.0 );
 
     /* ----- body -----*/
