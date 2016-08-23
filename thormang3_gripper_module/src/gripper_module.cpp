@@ -186,6 +186,8 @@ void GripperModule::setTorqueLimit()
     std::string joint_name = goal_joint_pose_msg_.name[dim];
     int torque_limit = (int) goal_joint_pose_msg_.effort[dim];
 
+    ROS_INFO("%s : %d", joint_name.c_str(), torque_limit);
+
     sync_write_msg.joint_name.push_back(joint_name);
     sync_write_msg.value.push_back(torque_limit);
   }
