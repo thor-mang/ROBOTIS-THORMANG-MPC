@@ -268,8 +268,8 @@ void WholebodyModule::queueThread()
                                                         &WholebodyModule::setModeMsgCallback, this);
   ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/ini_pose_msg", 5,
                                                         &WholebodyModule::setIniPoseMsgCallback, this);
-  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_pose_msg", 5,
-                                                          &WholebodyModule::setJointPoseMsgCallback, this);
+//  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_pose_msg", 5,
+//                                                          &WholebodyModule::setJointPoseMsgCallback, this);
   ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/kinematics_pose_msg", 5,
                                                                &WholebodyModule::setKinematicsPoseMsgCallback, this);
   ros::Subscriber wholebody_balance_msg_sub = ros_node.subscribe("/robotis/wholebody/wholebody_balance_msg", 5,
@@ -338,7 +338,8 @@ void WholebodyModule::parseIniPoseData(const std::string &path)
   {
     // load yaml
     doc = YAML::LoadFile(path.c_str());
-  } catch (const std::exception& e)
+  }
+  catch (const std::exception& e)
   {
     ROS_ERROR("Fail to load yaml file.");
     return;
@@ -404,7 +405,8 @@ void WholebodyModule::parseWheelPoseData(const std::string &path)
   {
     // load yaml
     doc = YAML::LoadFile(path.c_str());
-  } catch (const std::exception& e)
+  }
+  catch (const std::exception& e)
   {
     ROS_ERROR("Fail to load yaml file.");
     return;
@@ -466,7 +468,8 @@ void WholebodyModule::parseWheelJointPoseData(const std::string &path)
   {
     // load yaml
     doc = YAML::LoadFile(path.c_str());
-  } catch (const std::exception& e)
+  }
+  catch (const std::exception& e)
   {
     ROS_ERROR("Fail to load yaml file.");
     return;
@@ -543,6 +546,14 @@ void WholebodyModule::parseBalanceGainData(const std::string &path)
   wb_pelvis_diff_z_constant_ = doc["wb_pelvis_diff_z_constant"].as<double>();
 }
 
+void WholebodyModule::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
+{
+  imu_data_msg_ = *msg;
+
+  imu_data_msg_.angular_velocity.x *= -1.0;
+  imu_data_msg_.angular_velocity.y *= -1.0;
+}
+
 void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg)
 {
   if (msg->data == "balance_on")
@@ -566,14 +577,6 @@ void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::Con
     is_moving_ = false;
     wb_ik_solving_ = false;
   }
-}
-
-void WholebodyModule::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
-{
-  imu_data_msg_ = *msg;
-
-  imu_data_msg_.angular_velocity.x *= -1.0;
-  imu_data_msg_.angular_velocity.y *= -1.0;
 }
 
 void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -641,23 +644,23 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
   return;
 }
 
-void WholebodyModule::setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg)
-{
-  if(enable_ == false)
-    return;
+//void WholebodyModule::setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg)
+//{
+//  if(enable_ == false)
+//    return;
 
-  goal_joint_pose_msg_ = *msg;
+//  goal_joint_pose_msg_ = *msg;
 
-  if (is_moving_ == false)
-  {
-    tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcJointSpace, this));
-    delete tra_gene_tread_;
-  }
-  else
-    ROS_INFO("previous task is alive");
+//  if (is_moving_ == false)
+//  {
+//    tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcJointSpace, this));
+//    delete tra_gene_tread_;
+//  }
+//  else
+//    ROS_INFO("previous task is alive");
 
-  return;
-}
+//  return;
+//}
 
 void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg)
 {
@@ -670,28 +673,6 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
   {
     if (is_moving_ == false)
     {
-//      if (goal_kinematics_pose_msg_.name == "left_arm" || goal_kinematics_pose_msg_.name == "left_arm_with_torso")
-//      {
-//        ik_id_start_ = ID_L_ARM_START;
-//        if (goal_kinematics_pose_msg_.name == "left_arm_with_torso")
-//          ik_id_start_ = ID_TORSO;
-
-//        ik_id_end_ = ID_L_ARM_END;
-
-//        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForTaskSpace, this));
-//        delete tra_gene_tread_;
-//      }
-//      else if (goal_kinematics_pose_msg_.name == "right_arm" || goal_kinematics_pose_msg_.name == "right_arm_with_torso")
-//      {
-//        ik_id_start_ = ID_R_ARM_START;
-//        if (goal_kinematics_pose_msg_.name == "right_arm_with_torso")
-//          ik_id_start_ = ID_TORSO;
-
-//        ik_id_end_ = ID_R_ARM_END;
-
-//        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForTaskSpace, this));
-//        delete tra_gene_tread_;
-//      }
       if (goal_kinematics_pose_msg_.name == "pelvis")
       {
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcPelvis, this));
@@ -713,14 +694,6 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWholebody, this));
         delete tra_gene_tread_;
       }
-//      else if (goal_kinematics_pose_msg_.name == "stand_wheel_pose" || goal_kinematics_pose_msg_.name == "stand_wheel_pose_back")
-//      {
-//        ik_id_start_ = ID_PELVIS;
-//        ik_id_end_ = ID_PELVIS;
-
-//        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcForStandWheelPose, this));
-//        delete tra_gene_tread_;
-//      }
     }
     else
       ROS_INFO("previous task is alive");
@@ -850,63 +823,63 @@ void WholebodyModule::traGeneProcWheelJointPose()
   cnt_ = 0;
 }
 
-void WholebodyModule::traGeneProcJointSpace()
-{
-  ROS_INFO("%s", goal_joint_pose_msg_.name.c_str() );
-  ROS_INFO("%f", goal_joint_pose_msg_.value );
+//void WholebodyModule::traGeneProcJointSpace()
+//{
+//  ROS_INFO("%s", goal_joint_pose_msg_.name.c_str() );
+//  ROS_INFO("%f", goal_joint_pose_msg_.value );
 
-  if (goal_joint_pose_msg_.time <= 0.0)
-  {
-    /* set movement time */
-    double tol = 30 * DEGREE2RADIAN; // rad per sec
-    double mov_time = 1.5;
+//  if (goal_joint_pose_msg_.time <= 0.0)
+//  {
+//    /* set movement time */
+//    double tol = 30 * DEGREE2RADIAN; // rad per sec
+//    double mov_time = 1.5;
 
-    int joint_id = joint_name_to_id_[goal_joint_pose_msg_.name];
+//    int joint_id = joint_name_to_id_[goal_joint_pose_msg_.name];
 
-    double ini_value = goal_joint_position_(joint_id);
-    double tar_value = goal_joint_pose_msg_.value;
-    double diff = fabs(tar_value - ini_value);
+//    double ini_value = goal_joint_position_(joint_id);
+//    double tar_value = goal_joint_pose_msg_.value;
+//    double diff = fabs(tar_value - ini_value);
 
-    mov_time_ =  diff / tol;
-    int all_time_steps = int(floor((mov_time_ / control_cycle_sec_) + 1));
-    mov_time_ = double (all_time_steps-1) * control_cycle_sec_;
+//    mov_time_ =  diff / tol;
+//    int all_time_steps = int(floor((mov_time_ / control_cycle_sec_) + 1));
+//    mov_time_ = double (all_time_steps-1) * control_cycle_sec_;
 
-    if (mov_time_ < mov_time)
-      mov_time_= mov_time;
-  }
-  else
-  {
-    mov_time_ = goal_joint_pose_msg_.time;
-    int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
-    mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
-  }
+//    if (mov_time_ < mov_time)
+//      mov_time_= mov_time;
+//  }
+//  else
+//  {
+//    mov_time_ = goal_joint_pose_msg_.time;
+//    int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
+//    mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
+//  }
 
-  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
-  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
+//  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
+//  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
 
-  /* calculate joint trajectory */
-  for (int id = 1; id <= MAX_JOINT_ID; id++)
-  {
-    double ini_value = goal_joint_position_(id);
-    double tar_value = goal_joint_position_(id);
+//  /* calculate joint trajectory */
+//  for (int id = 1; id <= MAX_JOINT_ID; id++)
+//  {
+//    double ini_value = goal_joint_position_(id);
+//    double tar_value = goal_joint_position_(id);
 
-    if(robotis_->thormang3_link_data_[id]->name_ == goal_joint_pose_msg_.name)
-      tar_value = goal_joint_pose_msg_.value;
+//    if(robotis_->thormang3_link_data_[id]->name_ == goal_joint_pose_msg_.name)
+//      tar_value = goal_joint_pose_msg_.value;
 
-    Eigen::MatrixXd tra =
-        robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-                                              tar_value , 0.0 , 0.0 ,
-                                              control_cycle_sec_, mov_time_);
+//    Eigen::MatrixXd tra =
+//        robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
+//                                              tar_value , 0.0 , 0.0 ,
+//                                              control_cycle_sec_, mov_time_);
 
-    goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
-  }
+//    goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
+//  }
 
-  cnt_ = 0;
-  is_balancing_ = false;
-  is_moving_ = true;
+//  cnt_ = 0;
+//  is_balancing_ = false;
+//  is_moving_ = true;
 
-  ROS_INFO("[start] send trajectory");
-}
+//  ROS_INFO("[start] send trajectory");
+//}
 
 void WholebodyModule::traGeneProcPelvis()
 {
@@ -1299,32 +1272,32 @@ void WholebodyModule::setBalanceControlGain(int cnt)
   else
     gain_ratio = (robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(2,0) - min_pelvis) / (max_pelvis - min_pelvis);
 
-  double constant;
+  double sim_constant;
   if (gazebo_ == true)
-    constant = 0.0;
+    sim_constant = 0.0;
   else
-    constant = 1.0;
+    sim_constant = 1.0;
 
-  double gyro_gain = gyro_gain_ * gain_ratio * constant;
+  double gyro_gain = gyro_gain_ * gain_ratio * sim_constant;
 
-  balance_control_.setGyroBalanceGainRatio(gyro_gain * constant);
+  balance_control_.setGyroBalanceGainRatio(gyro_gain * sim_constant);
 
-  balance_control_.foot_roll_angle_ctrl_.gain_ = foot_roll_angle_gain_ * gain_ratio * constant;
-  balance_control_.foot_pitch_angle_ctrl_.gain_ = foot_pitch_angle_gain_ * gain_ratio * constant;
+  balance_control_.foot_roll_angle_ctrl_.gain_ = foot_roll_angle_gain_ * gain_ratio * sim_constant;
+  balance_control_.foot_pitch_angle_ctrl_.gain_ = foot_pitch_angle_gain_ * gain_ratio * sim_constant;
 
-  balance_control_.left_foot_force_x_ctrl_.gain_ = left_foot_force_x_gain_ * gain_ratio * constant;
-  balance_control_.left_foot_force_y_ctrl_.gain_ = left_foot_force_y_gain_ * gain_ratio * constant;
+  balance_control_.left_foot_force_x_ctrl_.gain_ = left_foot_force_x_gain_ * gain_ratio * sim_constant;
+  balance_control_.left_foot_force_y_ctrl_.gain_ = left_foot_force_y_gain_ * gain_ratio * sim_constant;
 
-  balance_control_.right_foot_force_x_ctrl_.gain_ = right_foot_force_x_gain_ * gain_ratio * constant;
-  balance_control_.right_foot_force_y_ctrl_.gain_ = right_foot_force_y_gain_ * gain_ratio * constant;
+  balance_control_.right_foot_force_x_ctrl_.gain_ = right_foot_force_x_gain_ * gain_ratio * sim_constant;
+  balance_control_.right_foot_force_y_ctrl_.gain_ = right_foot_force_y_gain_ * gain_ratio * sim_constant;
 
-  balance_control_.foot_force_z_diff_ctrl_.gain_ = foot_force_z_gain_ * gain_ratio * constant;
+  balance_control_.foot_force_z_diff_ctrl_.gain_ = foot_force_z_gain_ * gain_ratio * sim_constant;
 
-  balance_control_.right_foot_torque_roll_ctrl_.gain_ = left_foot_torque_roll_gain_ * gain_ratio * constant;
-  balance_control_.right_foot_torque_pitch_ctrl_.gain_ = left_foot_torque_pitch_gain_ * gain_ratio * constant;
+  balance_control_.right_foot_torque_roll_ctrl_.gain_ = left_foot_torque_roll_gain_ * gain_ratio * sim_constant;
+  balance_control_.right_foot_torque_pitch_ctrl_.gain_ = left_foot_torque_pitch_gain_ * gain_ratio * sim_constant;
 
-  balance_control_.left_foot_torque_roll_ctrl_.gain_ = right_foot_torque_roll_gain_ * gain_ratio * constant;
-  balance_control_.left_foot_torque_pitch_ctrl_.gain_ = right_foot_torque_pitch_gain_ * gain_ratio * constant;
+  balance_control_.left_foot_torque_roll_ctrl_.gain_ = right_foot_torque_roll_gain_ * gain_ratio * sim_constant;
+  balance_control_.left_foot_torque_pitch_ctrl_.gain_ = right_foot_torque_pitch_gain_ * gain_ratio * sim_constant;
 
   balance_control_.foot_roll_angle_ctrl_.time_constant_sec_ = foot_roll_angle_time_constant_;
   balance_control_.foot_pitch_angle_ctrl_.time_constant_sec_ = foot_pitch_angle_time_constant_;
@@ -1498,6 +1471,8 @@ void WholebodyModule::solveWholebodyInverseKinematics()
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "IK Failed");
 
     is_moving_ = false;
+    is_balancing_ = false;
+    wb_ik_solving_ = false;
     wb_l_arm_planning_ = false;
     wb_r_arm_planning_ = false;
     cnt_ = 0;
@@ -1632,6 +1607,8 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "IK Failed");
 
     is_moving_ = false;
+    is_balancing_ = false;
+    wb_ik_solving_ = false;
     wb_l_arm_planning_ = false;
     wb_r_arm_planning_ = false;
     cnt_ = 0;
@@ -1771,7 +1748,6 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 void WholebodyModule::stop()
 {
   is_moving_ = false;
-
   wb_ik_solving_ = false;
 
   wb_l_arm_planning_ = false;

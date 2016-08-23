@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   thormang3_walking_module
   thormang3_base_module
   thormang3_wholebody_module
+  thormang3_gripper_module
 )
 
 find_package(Eigen REQUIRED)

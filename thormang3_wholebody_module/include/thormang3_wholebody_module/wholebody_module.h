@@ -195,7 +195,7 @@ private:
   void parseWheelJointPoseData(const std::string &path);
 
   void setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
-  void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
+//  void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
   void setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg);
   void setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg);
 
@@ -225,7 +225,7 @@ private:
 //  void traGeneProcForStandWheelPose();
 
 //  void traGeneProcForTaskSpace();
-  void traGeneProcJointSpace();
+//  void traGeneProcJointSpace();
 
   void traGeneProcPelvis();
   void traGeneProcWholebody();
