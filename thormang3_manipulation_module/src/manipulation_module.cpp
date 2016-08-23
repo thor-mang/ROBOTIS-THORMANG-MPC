@@ -62,8 +62,6 @@ ManipulationModule::ManipulationModule()
   result_["r_arm_wr_p"]   = new robotis_framework::DynamixelState();
   result_["l_arm_wr_p"]   = new robotis_framework::DynamixelState();
   result_["torso_y"]      = new robotis_framework::DynamixelState();
-  result_["r_arm_grip"]   = new robotis_framework::DynamixelState();
-  result_["l_arm_grip"]   = new robotis_framework::DynamixelState();
 
   /* arm */
   joint_name_to_id["r_arm_sh_p1"] = 1;
@@ -81,8 +79,6 @@ ManipulationModule::ManipulationModule()
   joint_name_to_id["r_arm_wr_p"]  = 13;
   joint_name_to_id["l_arm_wr_p"]  = 14;
   joint_name_to_id["torso_y"]     = 27;
-  joint_name_to_id["r_arm_grip"]  = 31;
-  joint_name_to_id["l_arm_grip"]  = 30;
 
   /* etc */
   joint_name_to_id["r_arm_end"]   = 35;
