@@ -1,34 +1,34 @@
 offset:
   head_p: 0
   head_y: 0
-  l_arm_el_y: 0
+  l_arm_el_y: 0.04118977034706617
   l_arm_grip: 0
-  l_arm_sh_p1: 0
-  l_arm_sh_p2: 0
-  l_arm_sh_r: 0
-  l_arm_wr_p: 0
-  l_arm_wr_r: 0
-  l_arm_wr_y: 0
-  l_leg_an_p: 0
-  l_leg_an_r: 0
-  l_leg_hip_p: 0
-  l_leg_hip_r: 0
-  l_leg_hip_y: 0
+  l_arm_sh_p1: 0.02652900463031381
+  l_arm_sh_p2: -0.001570796326794897
+  l_arm_sh_r: -0.0137881010907552
+  l_arm_wr_p: -0.00418879020478639
+  l_arm_wr_r: -0.003490658503988659
+  l_arm_wr_y: -0.02094395102393195
+  l_leg_an_p: 0.006981317007977312
+  l_leg_an_r: 0.01780235837034216
+  l_leg_hip_p: -0.01745329251994333
+  l_leg_hip_r: -0.03141592653589793
+  l_leg_hip_y: -0.01134464013796314
   l_leg_kn_p: 0
-  r_arm_el_y: 0
+  r_arm_el_y: -0.03159045946109736
   r_arm_grip: 0
-  r_arm_sh_p1: 0
-  r_arm_sh_p2: 0
-  r_arm_sh_r: 0
-  r_arm_wr_p: 0
-  r_arm_wr_r: 0
-  r_arm_wr_y: 0
-  r_leg_an_p: 0
-  r_leg_an_r: 0
+  r_arm_sh_p1: -0.04572762640225143
+  r_arm_sh_p2: 0.03717551306747922
+  r_arm_sh_r: 0.05183627878423159
+  r_arm_wr_p: -0.007853981633974483
+  r_arm_wr_r: -0.03036872898470134
+  r_arm_wr_y: -0.02617993877991494
+  r_leg_an_p: 0.01658062789394613
+  r_leg_an_r: 0.007330382858376188
   r_leg_hip_p: 0
-  r_leg_hip_r: 0
-  r_leg_hip_y: 0
-  r_leg_kn_p: 0
+  r_leg_hip_r: 0.01396263401595464
+  r_leg_hip_y: 0.006108652381980153
+  r_leg_kn_p: 0.007853981633974483
   torso_y: -0
 init_pose_for_offset_tuner:
   head_p: 0
@@ -41,12 +41,12 @@ init_pose_for_offset_tuner:
   l_arm_wr_p: 0
   l_arm_wr_r: 0
   l_arm_wr_y: 0
-  l_leg_an_p: 0
+  l_leg_an_p: -0.1047197551196598
   l_leg_an_r: 0
-  l_leg_hip_p: 0
+  l_leg_hip_p: 0.1047197551196598
   l_leg_hip_r: 0
   l_leg_hip_y: 0
-  l_leg_kn_p: 0
+  l_leg_kn_p: 0.1570796326794897
   r_arm_el_y: 0
   r_arm_grip: 0
   r_arm_sh_p1: 0
@@ -55,10 +55,10 @@ init_pose_for_offset_tuner:
   r_arm_wr_p: 0
   r_arm_wr_r: 0
   r_arm_wr_y: 0
-  r_leg_an_p: 0
+  r_leg_an_p: 0.1047197551196598
   r_leg_an_r: 0
-  r_leg_hip_p: 0
+  r_leg_hip_p: -0.1047197551196598
   r_leg_hip_r: 0
   r_leg_hip_y: 0
-  r_leg_kn_p: 0
+  r_leg_kn_p: -0.1570796326794897
   torso_y: 0
