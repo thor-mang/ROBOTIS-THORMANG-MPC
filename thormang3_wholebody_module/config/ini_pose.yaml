@@ -53,8 +53,8 @@ tar_pose :
   8  :  28.33 	    # l_arm_el_y
   9  : -59.65 	    # r_arm_wr_r
   10 :  59.65 	    # l_arm_wr_r
-  11 :   0.02 	    # r_arm_wr_y
-  12 :  -0.02 	    # l_arm_wr_y
+  11 :   9.02 	    # r_arm_wr_y
+  12 :  -9.02 	    # l_arm_wr_y
   13 :  -4.88 	    # r_arm_wr_p
   14 :   4.88 	    # l_arm_wr_p
   15 :   0.0 		# r_leg_hip_y
