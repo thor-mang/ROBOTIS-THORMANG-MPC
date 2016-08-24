@@ -1672,7 +1672,10 @@ void WholebodyModule::solveWholebodyInverseKinematics()
   balance_control_.setDesiredCOBGyro(0.0, 0.0);
   balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
                                             robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
-  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0, 0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
+  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0,
+                                             0.0, 0.0, -210.0, 0.0, 0.0, 0.0);
+//  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0,
+//                                             0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
 
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
@@ -1759,7 +1762,7 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
 
   if (wb_l_arm_planning_ == true)
   {
-    l_arm_ik_success = robotis_->calcInverseKinematics(ID_BASE, ID_L_ARM_END, wb_l_arm_target_position_, wb_l_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
+    l_arm_ik_success = robotis_->calcInverseKinematics(ID_L_ARM_START, ID_L_ARM_END, wb_l_arm_target_position_, wb_l_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
     r_arm_ik_success = true;
   }
   else if (wb_r_arm_planning_ == true)
@@ -1824,7 +1827,6 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
                                             robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
   balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 
                                              0.0, 0.0, -210.0, 0.0, 0.0, 0.0);
-
 //  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0, 
 //                                             0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
 
