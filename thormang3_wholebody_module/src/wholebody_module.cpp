@@ -1531,8 +1531,6 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
   r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
 
-  PRINT_MAT(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
-
   balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
 
   balance_control_.setCurrentGyroSensorOutput(imu_data_msg_.angular_velocity.x, imu_data_msg_.angular_velocity.y);
@@ -1591,8 +1589,6 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_ = wb_target_rpy.coeff(0,0);
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_ = wb_target_rpy.coeff(1,0);
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = wb_target_rpy.coeff(2,0);
-
-  PRINT_MAT(wb_pelvis_target_rotation);
 
   /* ----- */
 
