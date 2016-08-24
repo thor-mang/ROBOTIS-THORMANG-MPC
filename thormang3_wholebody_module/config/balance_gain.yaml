@@ -36,4 +36,4 @@ right_foot_torque_pitch_time_constant : 1.0
 
 wb_pelvis_diff_x_constant : -0.09
 wb_pelvis_diff_y_constant : -0.09
-wb_pelvis_diff_z_constant : 0.125
+wb_pelvis_diff_z_constant : 0.15

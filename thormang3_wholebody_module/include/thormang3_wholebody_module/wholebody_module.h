@@ -113,6 +113,9 @@ private:
   bool wb_ik_solving_;
   bool wb_l_arm_planning_, wb_r_arm_planning_;
   bool wb_arm_solving_;
+
+  bool wb_l_arm_both_planning_, wb_r_arm_both_planning_;
+  bool wb_arm_both_solving_;
   Eigen::MatrixXd wb_pelvis_target_position_, wb_pelvis_target_rotation_;
   Eigen::Quaterniond wb_pelvis_start_quaternion_, wb_pelvis_goal_quaternion_;
 
@@ -193,6 +196,7 @@ private:
   void parseIniPoseData(const std::string &path);
   void parseBalanceGainData(const std::string &path);
   void parseWheelPoseData(const std::string &path);
+  void parseJointPoseData(const std::string &path);
   void parseWheelJointPoseData(const std::string &path);
 
   void setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
@@ -215,12 +219,14 @@ private:
 //  void solveInverseKinematics();
   void solveWholebodyInverseKinematics();
   void solveWholebodyInverseKinematicsFull();
+  void solveWholebodyInverseKinematicsBoth();
 
   void calcGoalTraPelvis();
   void calcGoalTraLeg();
   void calcGoalFT();
 
   void traGeneProcIniPose();
+  void traGeneProcJointPose();
   void traGeneProcWheelPose();
   void traGeneProcWheelJointPose();
 //  void traGeneProcForStandWheelPose();

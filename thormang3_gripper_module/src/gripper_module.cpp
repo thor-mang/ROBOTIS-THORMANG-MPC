@@ -133,7 +133,7 @@ void GripperModule::setJointPoseMsgCallback(const sensor_msgs::JointState::Const
 
 void GripperModule::traGeneProcJointSpace()
 {
-  mov_time_ = 3.0;
+  mov_time_ = 1.5;
   int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
   mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
 
@@ -185,8 +185,6 @@ void GripperModule::setTorqueLimit()
   {
     std::string joint_name = goal_joint_pose_msg_.name[dim];
     int torque_limit = (int) goal_joint_pose_msg_.effort[dim];
-
-    ROS_INFO("%s : %d", joint_name.c_str(), torque_limit);
 
     sync_write_msg.joint_name.push_back(joint_name);
     sync_write_msg.value.push_back(torque_limit);
