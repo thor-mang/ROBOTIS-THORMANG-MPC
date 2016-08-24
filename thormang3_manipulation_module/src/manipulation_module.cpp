@@ -571,7 +571,6 @@ void ManipulationModule::process(std::map<std::string, robotis_framework::Dynami
       manipulation_module_state_->cnt_        = 0;
     }
   }
-
 }
 
 void ManipulationModule::stop()

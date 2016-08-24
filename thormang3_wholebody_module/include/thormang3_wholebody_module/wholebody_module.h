@@ -54,7 +54,6 @@ private:
   boost::thread* tra_gene_tread_;
 
   bool gazebo_;
-  bool pelvis_initialize_;
 
   /* sample subscriber & publisher */
   ros::Publisher status_msg_pub_;
@@ -113,6 +112,7 @@ private:
   /* wholebody motion */
   bool wb_ik_solving_;
   bool wb_l_arm_planning_, wb_r_arm_planning_;
+  bool wb_arm_solving_;
   Eigen::MatrixXd wb_pelvis_target_position_, wb_pelvis_target_rotation_;
   Eigen::Quaterniond wb_pelvis_start_quaternion_, wb_pelvis_goal_quaternion_;
 
