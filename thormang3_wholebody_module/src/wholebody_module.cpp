@@ -92,10 +92,6 @@ WholebodyModule::WholebodyModule()
   /* body */
   result_["torso_y"]       = new robotis_framework::DynamixelState();
 
-  /* gripper */
-//  result_["r_arm_grip"]    = new robotis_framework::DynamixelState();
-//  result_["l_arm_grip"]    = new robotis_framework::DynamixelState();
-
   /* arm */
   joint_name_to_id_["r_arm_sh_p1"]  = 1;
   joint_name_to_id_["l_arm_sh_p1"]  = 2;
@@ -128,10 +124,6 @@ WholebodyModule::WholebodyModule()
 
   /* body */
   joint_name_to_id_["torso_y"]      = 27;
-
-  /* gripper */
-//  joint_name_to_id_["r_arm_grip"]   = 31;
-//  joint_name_to_id_["l_arm_grip"]   = 30;
 
   /* end effector */
   joint_name_to_id_["r_arm_end"]    = 35;
