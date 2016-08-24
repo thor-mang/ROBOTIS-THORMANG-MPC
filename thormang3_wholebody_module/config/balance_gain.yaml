@@ -1,7 +1,7 @@
 gyro_gain : 0.5
 
-foot_roll_angle_gain : -0.5
-foot_pitch_angle_gain : -0.5
+foot_roll_angle_gain : -0.25
+foot_pitch_angle_gain : -0.25
 
 foot_roll_angle_time_constant : 1.0
 foot_pitch_angle_time_constant : 1.0
@@ -20,7 +20,7 @@ right_foot_force_y_time_constant : 1.0
 
 foot_force_z_gain : -0.017
 
-foot_force_z_time_constant : 0.5
+foot_force_z_time_constant : 1.0
 
 left_foot_torque_roll_gain : 0.0018
 left_foot_torque_pitch_gain : 0.0012
