@@ -111,11 +111,16 @@ private:
 
   /* wholebody motion */
   bool wb_ik_solving_;
+
   bool wb_l_arm_planning_, wb_r_arm_planning_;
   bool wb_arm_solving_;
 
-  bool wb_l_arm_both_planning_, wb_r_arm_both_planning_;
-  bool wb_arm_both_solving_;
+  bool wb_l_arm_pelvis_planning_, wb_r_arm_pelvis_planning_;
+  bool wb_arm_pelvis_solving_;
+
+  bool l_arm_planning_, r_arm_planning_;
+  bool l_arm_torso_planning_, r_arm_torso_planning_;
+
   Eigen::MatrixXd wb_pelvis_target_position_, wb_pelvis_target_rotation_;
   Eigen::Quaterniond wb_pelvis_start_quaternion_, wb_pelvis_goal_quaternion_;
 
@@ -135,11 +140,13 @@ private:
   Eigen::Quaterniond wb_l_foot_default_quaternion_, wb_r_foot_default_quaternion_;
 
   Eigen::MatrixXd default_center_of_mass_;
+  Eigen::MatrixXd default_l_arm_position_;
+  Eigen::MatrixXd default_r_arm_position_;
   Eigen::MatrixXd center_of_mass_;
 
   /* balance */
   bool is_balancing_;
-  bool on_balance_gain_, off_balance_gain_;
+  bool on_balance_gain_;
   int balance_gain_cnt_;
   int balance_gain_time_steps_;
   Eigen::MatrixXd on_balance_gain_tra_, off_balance_gain_tra_;
@@ -181,6 +188,13 @@ private:
   double wb_pelvis_diff_y_constant_;
   double wb_pelvis_diff_z_constant_;
 
+  double wb_pelvis_x_max_;
+  double wb_pelvis_x_min_;
+  double wb_pelvis_y_max_;
+  double wb_pelvis_y_min_;
+  double wb_pelvis_z_max_;
+  double wb_pelvis_z_min_;
+
   double balance_goal_l_foot_ft_;
   double balance_goal_r_foot_ft_;
 
@@ -219,7 +233,7 @@ private:
 //  void solveInverseKinematics();
   void solveWholebodyInverseKinematics();
   void solveWholebodyInverseKinematicsFull();
-  void solveWholebodyInverseKinematicsBoth();
+  void solveWholebodyInverseKinematicsDual();
 
   void calcGoalTraPelvis();
   void calcGoalTraLeg();

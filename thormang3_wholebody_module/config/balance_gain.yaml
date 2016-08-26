@@ -34,6 +34,13 @@ right_foot_torque_pitch_gain : 0.0012
 right_foot_torque_roll_time_constant : 1.0
 right_foot_torque_pitch_time_constant : 1.0
 
-wb_pelvis_diff_x_constant : -0.09
+wb_pelvis_diff_x_constant : -0.15
 wb_pelvis_diff_y_constant : -0.09
-wb_pelvis_diff_z_constant : 0.15
+wb_pelvis_diff_z_constant : 0.2
+
+wb_pelvis_x_max : 0.1
+wb_pelvis_x_min : -0.12
+wb_pelvis_y_max : 0.05
+wb_pelvis_y_min : -0.05
+wb_pelvis_z_max : 0.75
+wb_pelvis_z_min : 0.3

@@ -48,12 +48,15 @@ WholebodyModule::WholebodyModule()
     wb_l_arm_planning_(false),
     wb_r_arm_planning_(false),
     wb_arm_solving_(false),
-    wb_arm_both_solving_(false),
-    wb_l_arm_both_planning_(false),
-    wb_r_arm_both_planning_(false),
+    wb_arm_pelvis_solving_(false),
+    wb_l_arm_pelvis_planning_(false),
+    wb_r_arm_pelvis_planning_(false),
+    l_arm_planning_(false),
+    r_arm_planning_(false),
+    l_arm_torso_planning_(false),
+    r_arm_torso_planning_(false),
     is_balancing_(false),
     on_balance_gain_(false),
-    off_balance_gain_(false),
     is_wheel_pose_(false),
     is_gain_updating_(false),
     is_knee_torque_limit_down_(false)
@@ -190,47 +193,21 @@ WholebodyModule::WholebodyModule()
   off_balance_gain_tra_ = robotis_framework::calcMinimumJerkTra(1.0, 0.0, 0.0,
                                                                 0.0, 0.0, 0.0,
                                                                 control_cycle_sec_, balance_gain_mov_time_);
-  // balance defalut gain
-  gyro_gain_ = 0.5;
-  foot_roll_angle_gain_ = -1.0;
-  foot_pitch_angle_gain_ = -1.0;
-  foot_roll_angle_time_constant_ = 0.2;
-  foot_pitch_angle_time_constant_ = 0.2;
-
-  left_foot_force_x_gain_ = 0.1;
-  left_foot_force_y_gain_ = 0.1;
-  left_foot_force_x_time_constant_ = 0.2;
-  left_foot_force_x_time_constant_ = 0.2;
-
-  right_foot_force_x_gain_ = 0.1;
-  right_foot_force_y_gain_ = 0.1;
-  right_foot_force_x_time_constant_ = 0.2;
-  right_foot_force_x_time_constant_ = 0.2;
-
-  foot_force_z_gain_ = -0.02;
-  foot_force_z_time_constant_ = 0.2;
-
-  left_foot_torque_roll_gain_ = 0.002;
-  left_foot_torque_pitch_gain_ = 0.0015;
-  left_foot_torque_roll_time_constant_ = 0.2;
-  left_foot_torque_pitch_time_constant_ = 0.2;
-
-  right_foot_torque_roll_gain_ = 0.002;
-  right_foot_torque_pitch_gain_ = 0.0015;
-  right_foot_torque_roll_time_constant_ = 0.2;
-  right_foot_torque_pitch_time_constant_ = 0.2;
-
-  wb_pelvis_diff_x_constant_ = -0.075;
-  wb_pelvis_diff_y_constant_ = -0.075;
-  wb_pelvis_diff_z_constant_ = 0.1;
-
-  balance_goal_l_foot_ft_ = -210.0;
-  balance_goal_r_foot_ft_ = -210.0;
 
   default_center_of_mass_ = Eigen::MatrixXd::Zero(3,1);
   default_center_of_mass_.coeffRef(0,0) = 0.024;
   default_center_of_mass_.coeffRef(1,0) = -0.004;
   default_center_of_mass_.coeffRef(2,0) = 0.65;
+
+  default_l_arm_position_ = Eigen::MatrixXd::Zero(3,1);
+  default_l_arm_position_.coeffRef(0,0) = 0.3;
+  default_l_arm_position_.coeffRef(1,0) = 0.31;
+  default_l_arm_position_.coeffRef(2,0) = 0.799;
+
+  default_r_arm_position_ = Eigen::MatrixXd::Zero(3,1);
+  default_r_arm_position_.coeffRef(0,0) = 0.3;
+  default_r_arm_position_.coeffRef(1,0) = -0.31;
+  default_r_arm_position_.coeffRef(2,0) = 0.799;
 }
 
 WholebodyModule::~WholebodyModule()
@@ -264,14 +241,14 @@ void WholebodyModule::queueThread()
                                                         &WholebodyModule::setModeMsgCallback, this);
   ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/ini_pose_msg", 5,
                                                         &WholebodyModule::setIniPoseMsgCallback, this);
-//  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_pose_msg", 5,
-//                                                          &WholebodyModule::setJointPoseMsgCallback, this);
+  //  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_pose_msg", 5,
+  //                                                          &WholebodyModule::setJointPoseMsgCallback, this);
   ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/kinematics_pose_msg", 5,
                                                                &WholebodyModule::setKinematicsPoseMsgCallback, this);
   ros::Subscriber wholebody_balance_msg_sub = ros_node.subscribe("/robotis/wholebody/wholebody_balance_msg", 5,
                                                                  &WholebodyModule::setWholebodyBalanceMsgCallback, this);
   ros::Subscriber imu_data_sub = ros_node.subscribe("/robotis/sensor/imu/imu", 5,
-                                                   &WholebodyModule::imuDataCallback, this);
+                                                    &WholebodyModule::imuDataCallback, this);
 
   /* service */
   ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/wholebody/get_joint_pose",
@@ -578,6 +555,13 @@ void WholebodyModule::parseBalanceGainData(const std::string &path)
   wb_pelvis_diff_x_constant_ = doc["wb_pelvis_diff_x_constant"].as<double>();
   wb_pelvis_diff_y_constant_ = doc["wb_pelvis_diff_y_constant"].as<double>();
   wb_pelvis_diff_z_constant_ = doc["wb_pelvis_diff_z_constant"].as<double>();
+
+  wb_pelvis_x_max_ = doc["wb_pelvis_x_max"].as<double>();
+  wb_pelvis_x_min_ = doc["wb_pelvis_x_min"].as<double>();
+  wb_pelvis_y_max_ = doc["wb_pelvis_y_max"].as<double>();
+  wb_pelvis_y_min_ = doc["wb_pelvis_y_min"].as<double>();
+  wb_pelvis_z_max_ = doc["wb_pelvis_z_max"].as<double>();
+  wb_pelvis_z_min_ = doc["wb_pelvis_z_min"].as<double>();
 }
 
 void WholebodyModule::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
@@ -590,6 +574,9 @@ void WholebodyModule::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
 
 void WholebodyModule::setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg)
 {
+  std::string balance_gain_path = ros::package::getPath("thormang3_wholebody_module") + "/config/balance_gain.yaml";
+  parseBalanceGainData(balance_gain_path);
+
   if (msg->data == "balance_on")
   {
     ROS_INFO("balance on");
@@ -717,22 +704,38 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
     {
       if (goal_kinematics_pose_msg_.name == "pelvis")
       {
-        wb_l_arm_both_planning_ = false;
-        wb_r_arm_both_planning_ = false;
+        wb_l_arm_pelvis_planning_ = false;
+        wb_r_arm_pelvis_planning_ = false;
 
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcPelvis, this));
         delete tra_gene_tread_;
       }
-      else if (goal_kinematics_pose_msg_.name == "left_arm_wholebody")
+      else if (goal_kinematics_pose_msg_.name == "left_arm_wholebody" ||
+               goal_kinematics_pose_msg_.name == "left_arm_torso" ||
+               goal_kinematics_pose_msg_.name == "left_arm")
       {
+        if (goal_kinematics_pose_msg_.name == "left_arm_torso")
+          l_arm_torso_planning_ = true;
+
+        if (goal_kinematics_pose_msg_.name == "left_arm")
+          l_arm_planning_ = true;
+
         wb_l_arm_planning_ = true;
         wb_r_arm_planning_ = false;
 
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWholebody, this));
         delete tra_gene_tread_;
       }
-      else if (goal_kinematics_pose_msg_.name == "right_arm_wholebody")
+      else if (goal_kinematics_pose_msg_.name == "right_arm_wholebody" ||
+               goal_kinematics_pose_msg_.name == "right_arm_torso" ||
+               goal_kinematics_pose_msg_.name == "right_arm")
       {
+        if (goal_kinematics_pose_msg_.name == "right_arm_torso")
+          r_arm_torso_planning_ = true;
+
+        if (goal_kinematics_pose_msg_.name == "right_arm")
+          r_arm_planning_ = true;
+
         wb_l_arm_planning_ = false;
         wb_r_arm_planning_ = true;
 
@@ -741,16 +744,16 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
       }
       else if (goal_kinematics_pose_msg_.name == "left_arm_pelvis")
       {
-        wb_l_arm_both_planning_ = true;
-        wb_r_arm_both_planning_ = false;
+        wb_l_arm_pelvis_planning_ = true;
+        wb_r_arm_pelvis_planning_ = false;
 
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcPelvis, this));
         delete tra_gene_tread_;
       }
       else if (goal_kinematics_pose_msg_.name == "right_arm_pelvis")
       {
-        wb_l_arm_both_planning_ = false;
-        wb_r_arm_both_planning_ = true;
+        wb_l_arm_pelvis_planning_ = false;
+        wb_r_arm_pelvis_planning_ = true;
 
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcPelvis, this));
         delete tra_gene_tread_;
@@ -1004,7 +1007,7 @@ void WholebodyModule::traGeneProcPelvis()
 
   wb_pelvis_goal_quaternion_ = pelvis_target_quaternion;
 
-  if (wb_l_arm_both_planning_ == true)
+  if (wb_l_arm_pelvis_planning_ == true)
   {
     Eigen::MatrixXd l_arm_tar_value = Eigen::MatrixXd::Zero(3,1);
     l_arm_tar_value.coeffRef(0,0) = goal_kinematics_pose_msg_.l_arm_pose.position.x;
@@ -1033,7 +1036,7 @@ void WholebodyModule::traGeneProcPelvis()
     wb_l_arm_goal_quaternion_ = l_arm__target_quaternion;
   }
 
-  if (wb_r_arm_both_planning_ == true)
+  if (wb_r_arm_pelvis_planning_ == true)
   {
     Eigen::MatrixXd r_arm_tar_value = Eigen::MatrixXd::Zero(3,1);
     r_arm_tar_value.coeffRef(0,0) = goal_kinematics_pose_msg_.r_arm_pose.position.x;
@@ -1252,12 +1255,12 @@ void WholebodyModule::calcGoalTraPelvis()
   wb_pelvis_diff_constant.coeffRef(2,0) = wb_pelvis_diff_z_constant_;
 
   Eigen::MatrixXd wb_pelvis_limit = Eigen::MatrixXd::Zero(3,2);
-  wb_pelvis_limit.coeffRef(0,0) = 0.075; // x max
-  wb_pelvis_limit.coeffRef(0,1) = -0.075; // x min
-  wb_pelvis_limit.coeffRef(1,0) = 0.05; // y max
-  wb_pelvis_limit.coeffRef(1,1) = -0.05; // y min
-  wb_pelvis_limit.coeffRef(2,0) = 0.75; // z max
-  wb_pelvis_limit.coeffRef(2,1) = 0.3; // z min
+  wb_pelvis_limit.coeffRef(0,0) = wb_pelvis_x_max_; // x max
+  wb_pelvis_limit.coeffRef(0,1) = wb_pelvis_x_min_; // x min
+  wb_pelvis_limit.coeffRef(1,0) = wb_pelvis_y_max_; // y max
+  wb_pelvis_limit.coeffRef(1,1) = wb_pelvis_y_min_; // y min
+  wb_pelvis_limit.coeffRef(2,0) = wb_pelvis_z_max_; // z max
+  wb_pelvis_limit.coeffRef(2,1) = wb_pelvis_z_min_; // z min
 
   Eigen::MatrixXd wb_pelvis_tar_value = Eigen::MatrixXd::Zero(3,1);
   for (int dim=0; dim <3; dim++)
@@ -1349,9 +1352,13 @@ bool WholebodyModule::getKinematicsPoseCallback(thormang3_wholebody_module_msgs:
 
   int end_index;
 
-  if (req.group_name == "left_arm_wholebody")
+  if (req.group_name == "left_arm_wholebody" ||
+      req.group_name == "left_arm_torso" ||
+      req.group_name == "left_arm")
     end_index = ID_L_ARM_END;
-  else if (req.group_name == "right_arm_wholebody")
+  else if (req.group_name == "right_arm_wholebody" ||
+           req.group_name == "right_arm_torso" ||
+           req.group_name == "right_arm")
     end_index = ID_R_ARM_END;
   else if (req.group_name == "pelvis")
     end_index = ID_PELVIS;
@@ -1415,8 +1422,8 @@ void WholebodyModule::setInverseKinematicsLeftArm(int cnt)
 
   wb_l_arm_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
 
-  if (wb_l_arm_both_planning_ == true)
-    wb_arm_both_solving_ = true;
+  if (wb_l_arm_pelvis_planning_ == true)
+    wb_arm_pelvis_solving_ = true;
   else
     wb_arm_solving_ = true;
 }
@@ -1431,8 +1438,8 @@ void WholebodyModule::setInverseKinematicsRightArm(int cnt)
 
   wb_r_arm_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
 
-  if (wb_r_arm_both_planning_ == true)
-    wb_arm_both_solving_ = true;
+  if (wb_r_arm_pelvis_planning_ == true)
+    wb_arm_pelvis_solving_ = true;
   else
     wb_arm_solving_ = true;
 }
@@ -1471,10 +1478,14 @@ void WholebodyModule::setEndTrajectory()
       wb_ik_solving_ = false;
       wb_l_arm_planning_ = false;
       wb_r_arm_planning_ = false;
-      wb_l_arm_both_planning_ = false;
-      wb_r_arm_both_planning_ = false;
+      wb_l_arm_pelvis_planning_ = false;
+      wb_r_arm_pelvis_planning_ = false;
+      l_arm_planning_ = false;
+      r_arm_planning_ = false;
+      l_arm_torso_planning_ = false;
+      r_arm_torso_planning_ = false;
       wb_arm_solving_ = false;
-      wb_arm_both_solving_ = false;
+      wb_arm_pelvis_solving_ = false;
 
       cnt_ = 0;
 
@@ -1648,20 +1659,20 @@ void WholebodyModule::solveWholebodyInverseKinematics()
       robotis_framework::convertRotationToRPY(robotis_framework::getRotationX(M_PI) * imu_quaternion.toRotationMatrix() * robotis_framework::getRotationZ(M_PI));
 
   Eigen::MatrixXd g_to_r_foot_force =
-    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.force.x, r_foot_ft_data_msg_.force.y, r_foot_ft_data_msg_.force.z);
+      robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.force.x, r_foot_ft_data_msg_.force.y, r_foot_ft_data_msg_.force.z);
 
   Eigen::MatrixXd g_to_r_foot_torque =
-    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z);
+      robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z);
 
   Eigen::MatrixXd g_to_l_foot_force =
-    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.force.x, l_foot_ft_data_msg_.force.y, l_foot_ft_data_msg_.force.z);
+      robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.force.x, l_foot_ft_data_msg_.force.y, l_foot_ft_data_msg_.force.z);
 
   Eigen::MatrixXd g_to_l_foot_torque =
-    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
+      robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
 
   balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
   balance_control_.setCurrentFootForceTorqueSensorOutput(g_to_r_foot_force.coeff(0,0),  g_to_r_foot_force.coeff(1,0),  g_to_r_foot_force.coeff(2,0),
@@ -1674,8 +1685,8 @@ void WholebodyModule::solveWholebodyInverseKinematics()
                                             robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
   balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0,
                                              0.0, 0.0, -210.0, 0.0, 0.0, 0.0);
-//  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0,
-//                                             0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
+  //  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0,
+  //                                             0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
 
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
@@ -1708,11 +1719,11 @@ void WholebodyModule::solveWholebodyInverseKinematics()
   bool l_arm_ik_success = true;
   bool r_arm_ik_success = true;
 
-  if ( wb_arm_both_solving_ == true )
+  if ( wb_arm_pelvis_solving_ == true )
   {
-    if (wb_l_arm_both_planning_ == true)
+    if (wb_l_arm_pelvis_planning_ == true)
       l_arm_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_L_ARM_END, wb_l_arm_target_position_, wb_l_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
-    else if (wb_r_arm_both_planning_ == true)
+    else if (wb_r_arm_pelvis_planning_ == true)
       r_arm_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_R_ARM_END, wb_r_arm_target_position_, wb_r_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
   }
 
@@ -1731,12 +1742,14 @@ void WholebodyModule::solveWholebodyInverseKinematics()
     is_moving_ = false;
     is_balancing_ = false;
     wb_ik_solving_ = false;
-    wb_l_arm_both_planning_ = false;
-    wb_r_arm_both_planning_ = false;
-    wb_l_arm_planning_ = false;
-    wb_r_arm_planning_ = false;
+    wb_l_arm_pelvis_planning_ = false;
+    wb_r_arm_pelvis_planning_ = false;
+    l_arm_planning_ = false;
+    r_arm_planning_ = false;
+    l_arm_torso_planning_ = false;
+    r_arm_torso_planning_ = false;
     wb_arm_solving_ = false;
-    wb_arm_both_solving_ = false;
+    wb_arm_pelvis_solving_ = false;
     cnt_ = 0;
 
     wb_pelvis_target_position_ = robotis_->thormang3_link_data_[ID_PELVIS]->position_;
@@ -1762,12 +1775,28 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
 
   if (wb_l_arm_planning_ == true)
   {
-    l_arm_ik_success = robotis_->calcInverseKinematics(ID_BASE, ID_L_ARM_END, wb_l_arm_target_position_, wb_l_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
+    int start_id = ID_BASE;
+
+    if (l_arm_planning_ == true)
+      start_id = ID_L_ARM_START;
+
+    if (l_arm_torso_planning_ == true)
+      start_id = ID_TORSO;
+
+    l_arm_ik_success = robotis_->calcInverseKinematics(start_id, ID_L_ARM_END, wb_l_arm_target_position_, wb_l_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
     r_arm_ik_success = true;
   }
   else if (wb_r_arm_planning_ == true)
   {
-    r_arm_ik_success = robotis_->calcInverseKinematics(ID_BASE, ID_R_ARM_END, wb_r_arm_target_position_, wb_r_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
+    int start_id = ID_BASE;
+
+    if (r_arm_planning_ == true)
+      start_id = ID_R_ARM_START;
+
+    if (r_arm_torso_planning_ == true)
+      start_id = ID_TORSO;
+
+    r_arm_ik_success = robotis_->calcInverseKinematics(start_id, ID_R_ARM_END, wb_r_arm_target_position_, wb_r_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
     l_arm_ik_success = true;
   }
 
@@ -1801,20 +1830,20 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
       robotis_framework::convertRotationToRPY(robotis_framework::getRotationX(M_PI) * imu_quaternion.toRotationMatrix() * robotis_framework::getRotationZ(M_PI));
 
   Eigen::MatrixXd g_to_r_foot_force =
-    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.force.x, r_foot_ft_data_msg_.force.y, r_foot_ft_data_msg_.force.z);
+      robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.force.x, r_foot_ft_data_msg_.force.y, r_foot_ft_data_msg_.force.z);
 
   Eigen::MatrixXd g_to_r_foot_torque =
-    robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z);
+      robotis_->thormang3_link_data_[ID_R_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(r_foot_ft_data_msg_.torque.x, r_foot_ft_data_msg_.torque.y, r_foot_ft_data_msg_.torque.z);
 
   Eigen::MatrixXd g_to_l_foot_force =
-    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.force.x, l_foot_ft_data_msg_.force.y, l_foot_ft_data_msg_.force.z);
+      robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.force.x, l_foot_ft_data_msg_.force.y, l_foot_ft_data_msg_.force.z);
 
   Eigen::MatrixXd g_to_l_foot_torque =
-    robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
-    robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
+      robotis_->thormang3_link_data_[ID_L_LEG_FT]->orientation_ * robotis_framework::getRotationX(M_PI) *
+      robotis_framework::getTransitionXYZ(l_foot_ft_data_msg_.torque.x, l_foot_ft_data_msg_.torque.y, l_foot_ft_data_msg_.torque.z);
 
   balance_control_.setCurrentOrientationSensorOutput(imu_rpy.coeff(0,0), imu_rpy.coeff(1,0));
   balance_control_.setCurrentFootForceTorqueSensorOutput(g_to_r_foot_force.coeff(0,0),  g_to_r_foot_force.coeff(1,0),  g_to_r_foot_force.coeff(2,0),
@@ -1825,10 +1854,10 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   balance_control_.setDesiredCOBGyro(0.0, 0.0);
   balance_control_.setDesiredCOBOrientation(robotis_->thormang3_link_data_[ID_PELVIS_ROT_X]->joint_angle_,
                                             robotis_->thormang3_link_data_[ID_PELVIS_ROT_Y]->joint_angle_);
-  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0, 
+  balance_control_.setDesiredFootForceTorque(0.0, 0.0, -210.0, 0.0, 0.0, 0.0,
                                              0.0, 0.0, -210.0, 0.0, 0.0, 0.0);
-//  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0, 
-//                                             0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
+  //  balance_control_.setDesiredFootForceTorque(0.0, 0.0, balance_goal_r_foot_ft_, 0.0, 0.0, 0.0,
+  //                                             0.0, 0.0, balance_goal_l_foot_ft_, 0.0, 0.0, 0.0);
 
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
@@ -1873,6 +1902,10 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
     wb_ik_solving_ = false;
     wb_l_arm_planning_ = false;
     wb_r_arm_planning_ = false;
+    l_arm_planning_ = false;
+    r_arm_planning_ = false;
+    l_arm_torso_planning_ = false;
+    r_arm_torso_planning_ = false;
     wb_arm_solving_ = false;
     cnt_ = 0;
 
@@ -1886,6 +1919,15 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   }
 
   return;
+}
+
+void WholebodyModule::solveWholebodyInverseKinematicsDual()
+{
+
+
+
+
+
 }
 
 //void WholebodyModule::solveWholebodyInverseKinematicsBoth()
@@ -2023,8 +2065,8 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   if (enable_ == false)
     return;
 
-  ros::Time start_time = ros::Time::now();
-  ros::Duration time_duration;
+  //  ros::Time start_time = ros::Time::now();
+  //  ros::Duration time_duration;
 
   /*----- Get Joint Data & Sensor Data-----*/
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
@@ -2041,7 +2083,7 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
     // Get Joint Data
     present_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_position_;
-//    present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
+    //    present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
 
     goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_;
 
@@ -2068,9 +2110,9 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   robotis_->calcForwardKinematics(0);
 
   /*----- Center of Mass -----*/
-//  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
-//  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
-//  calcGoalFT();
+  //  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
+  //  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+  //  calcGoalFT();
 
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
@@ -2097,9 +2139,9 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
         setInverseKinematicsLeftFoot(cnt_);
         setInverseKinematicsRightFoot(cnt_);
 
-        if(wb_l_arm_planning_ == true || wb_l_arm_both_planning_ == true)
+        if(wb_l_arm_planning_ == true || wb_l_arm_pelvis_planning_ == true)
           setInverseKinematicsLeftArm(cnt_);
-        else if (wb_r_arm_planning_ == true || wb_r_arm_both_planning_ == true)
+        else if (wb_r_arm_planning_ == true || wb_r_arm_pelvis_planning_ == true)
           setInverseKinematicsRightArm(cnt_);
       }
       cnt_++;
@@ -2140,11 +2182,11 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   /*---------- Movement End Event ----------*/
   setEndTrajectory();
 
-  time_duration = ros::Time::now() - start_time;
-  double cycle = time_duration.sec * 1000.0 + time_duration.nsec * 0.000001;
+  //  time_duration = ros::Time::now() - start_time;
+  //  double cycle = time_duration.sec * 1000.0 + time_duration.nsec * 0.000001;
 
-  if (cycle > 4.0)
-    fprintf(stderr,"Time Duration : %f \n", cycle );
+  //  if (cycle > 4.0)
+  //    fprintf(stderr,"Time Duration : %f \n", cycle );
 }
 
 void WholebodyModule::stop()
