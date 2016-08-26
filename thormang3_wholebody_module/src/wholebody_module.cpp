@@ -2140,7 +2140,6 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   /*---------- Movement End Event ----------*/
   setEndTrajectory();
 
-
   time_duration = ros::Time::now() - start_time;
   double cycle = time_duration.sec * 1000.0 + time_duration.nsec * 0.000001;
 

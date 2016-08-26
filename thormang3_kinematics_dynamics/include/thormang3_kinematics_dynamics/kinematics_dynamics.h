@@ -38,6 +38,9 @@
 #ifndef THORMANG3_KINEMATICS_DYNAMICS_KINEMATICS_DYNAMICS_H_
 #define THORMANG3_KINEMATICS_DYNAMICS_KINEMATICS_DYNAMICS_H_
 
+#define EIGEN_NO_DEBUG
+#define EIGEN_NO_STATIC_ASSERT
+
 #include <vector>
 
 #include "kinematics_dynamics_define.h"

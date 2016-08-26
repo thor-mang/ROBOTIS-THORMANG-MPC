@@ -38,6 +38,9 @@
 #ifndef THORMANG3_KINEMATICS_DYNAMICS_LINK_DATA_H_
 #define THORMANG3_KINEMATICS_DYNAMICS_LINK_DATA_H_
 
+#define EIGEN_NO_DEBUG
+#define EIGEN_NO_STATIC_ASSERT
+
 #include "robotis_math/robotis_math.h"
 
 namespace thormang3
