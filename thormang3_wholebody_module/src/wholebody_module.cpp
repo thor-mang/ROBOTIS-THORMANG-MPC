@@ -2062,10 +2062,10 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   }
 
   /*----- Forward Kinematics -----*/
-  for (int id=1; id<=MAX_JOINT_ID; id++)
-    robotis_->thormang3_link_data_[id]->joint_angle_ = goal_joint_position_(id);
+//  for (int id=1; id<=MAX_JOINT_ID; id++)
+//    robotis_->thormang3_link_data_[id]->joint_angle_ = goal_joint_position_(id);
 
-  robotis_->calcForwardKinematics(0);
+//  robotis_->calcForwardKinematics(0);
 
   /*----- Center of Mass -----*/
 //  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
