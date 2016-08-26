@@ -2145,8 +2145,7 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
   double cycle = time_duration.sec * 1000.0 + time_duration.nsec * 0.000001;
 
-  if (cycle > 4.0)
-    ROS_INFO("Time Duration : %f", cycle);
+  fprintf(stderr,"Time Duration : %f \n", cycle );
 }
 
 void WholebodyModule::stop()
