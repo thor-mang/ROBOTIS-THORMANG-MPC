@@ -1762,7 +1762,7 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
 
   if (wb_l_arm_planning_ == true)
   {
-    l_arm_ik_success = robotis_->calcInverseKinematics(ID_L_ARM_START, ID_L_ARM_END, wb_l_arm_target_position_, wb_l_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
+    l_arm_ik_success = robotis_->calcInverseKinematics(ID_BASE, ID_L_ARM_END, wb_l_arm_target_position_, wb_l_arm_target_rotation_, max_iter, ik_tol, ik_weight_);
     r_arm_ik_success = true;
   }
   else if (wb_r_arm_planning_ == true)
