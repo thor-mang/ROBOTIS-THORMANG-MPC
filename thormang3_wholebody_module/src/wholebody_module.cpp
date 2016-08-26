@@ -1625,16 +1625,16 @@ void WholebodyModule::solveWholebodyInverseKinematics()
   balance_control_.setForceTorqueBalanceEnable(true);
 
   Eigen::MatrixXd pelvis_pose = Eigen::MatrixXd::Identity(4,4);
-  pelvis_pose.block(0,0,3,3) = wb_pelvis_target_rotation_;
-  pelvis_pose.block(0,3,3,1) = wb_pelvis_target_position_;
+  pelvis_pose.block<3,3>(0,0) = wb_pelvis_target_rotation_;
+  pelvis_pose.block<3,1>(0,3) = wb_pelvis_target_position_;
 
   Eigen::MatrixXd l_foot_pose = Eigen::MatrixXd::Identity(4,4);
-  l_foot_pose.block(0,0,3,3) = wb_l_foot_target_rotation_;
-  l_foot_pose.block(0,3,3,1) = wb_l_foot_target_position_;
+  l_foot_pose.block<3,3>(0,0) = wb_l_foot_target_rotation_;
+  l_foot_pose.block<3,1>(0,3) = wb_l_foot_target_position_;
 
   Eigen::MatrixXd r_foot_pose = Eigen::MatrixXd::Identity(4,4);
-  r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
-  r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
+  r_foot_pose.block<3,3>(0,0) = wb_r_foot_target_rotation_;
+  r_foot_pose.block<3,1>(0,3) = wb_r_foot_target_position_;
 
   balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
 
@@ -1680,13 +1680,13 @@ void WholebodyModule::solveWholebodyInverseKinematics()
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
 
-  Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block(0,0,3,3);
-  Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block(0,3,3,1);
+  Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block<3,3>(0,0);
+  Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block<3,1>(0,3);
 
-  Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block(0,0,3,3);
-  Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block(0,3,3,1);
-  Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block(0,0,3,3);
-  Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block(0,3,3,1);
+  Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block<3,3>(0,0);
+  Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block<3,1>(0,3);
+  Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block<3,3>(0,0);
+  Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block<3,1>(0,3);
 
   /* ----- */
 
@@ -1778,16 +1778,16 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   balance_control_.setForceTorqueBalanceEnable(true);
 
   Eigen::MatrixXd pelvis_pose = Eigen::MatrixXd::Identity(4,4);
-  pelvis_pose.block(0,0,3,3) = robotis_->thormang3_link_data_[ID_PELVIS]->orientation_;
-  pelvis_pose.block(0,3,3,1) = wb_pelvis_target_position_;
+  pelvis_pose.block<3,3>(0,0) = robotis_->thormang3_link_data_[ID_PELVIS]->orientation_;
+  pelvis_pose.block<3,1>(0,3) = wb_pelvis_target_position_;
 
   Eigen::MatrixXd l_foot_pose = Eigen::MatrixXd::Identity(4,4);
-  l_foot_pose.block(0,0,3,3) = wb_l_foot_target_rotation_;
-  l_foot_pose.block(0,3,3,1) = wb_l_foot_target_position_;
+  l_foot_pose.block<3,3>(0,0) = wb_l_foot_target_rotation_;
+  l_foot_pose.block<3,1>(0,3) = wb_l_foot_target_position_;
 
   Eigen::MatrixXd r_foot_pose = Eigen::MatrixXd::Identity(4,4);
-  r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
-  r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
+  r_foot_pose.block<3,3>(0,0) = wb_r_foot_target_rotation_;
+  r_foot_pose.block<3,1>(0,3) = wb_r_foot_target_position_;
 
   balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
 
@@ -1833,13 +1833,13 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   int error;
   balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
 
-  Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block(0,0,3,3);
-  Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block(0,3,3,1);
+  Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block<3,3>(0,0);
+  Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block<3,1>(0,3);
 
-  Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block(0,0,3,3);
-  Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block(0,3,3,1);
-  Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block(0,0,3,3);
-  Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block(0,3,3,1);
+  Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block<3,3>(0,0);
+  Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block<3,1>(0,3);
+  Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block<3,3>(0,0);
+  Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block<3,1>(0,3);
 
   robotis_->thormang3_link_data_[ID_PELVIS_POS_X]->relative_position_.coeffRef(0,0) = wb_pelvis_target_position.coeff(0,0);
   robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_position.coeff(1,0);
@@ -1897,16 +1897,16 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
 //  balance_control_.setForceTorqueBalanceEnable(true);
 
 //  Eigen::MatrixXd pelvis_pose = Eigen::MatrixXd::Identity(4,4);
-//  pelvis_pose.block(0,0,3,3) = wb_pelvis_target_rotation_;
-//  pelvis_pose.block(0,3,3,1) = wb_pelvis_target_position_;
+//  pelvis_pose.block<3,3>(0,0) = wb_pelvis_target_rotation_;
+//  pelvis_pose.block<3,1>(0,3) = wb_pelvis_target_position_;
 
 //  Eigen::MatrixXd l_foot_pose = Eigen::MatrixXd::Identity(4,4);
-//  l_foot_pose.block(0,0,3,3) = wb_l_foot_target_rotation_;
-//  l_foot_pose.block(0,3,3,1) = wb_l_foot_target_position_;
+//  l_foot_pose.block<3,3>(0,0) = wb_l_foot_target_rotation_;
+//  l_foot_pose.block<3,1>(0,3) = wb_l_foot_target_position_;
 
 //  Eigen::MatrixXd r_foot_pose = Eigen::MatrixXd::Identity(4,4);
-//  r_foot_pose.block(0,0,3,3) = wb_r_foot_target_rotation_;
-//  r_foot_pose.block(0,3,3,1) = wb_r_foot_target_position_;
+//  r_foot_pose.block<3,3>(0,0) = wb_r_foot_target_rotation_;
+//  r_foot_pose.block<3,1>(0,3) = wb_r_foot_target_position_;
 
 //  balance_control_.setDesiredPose(pelvis_pose, r_foot_pose, l_foot_pose);
 
@@ -1949,13 +1949,13 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
 //  int error;
 //  balance_control_.process(&error, &pelvis_pose, &r_foot_pose, &l_foot_pose);
 
-//  Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block(0,0,3,3);
-//  Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block(0,3,3,1);
+//  Eigen::MatrixXd wb_pelvis_target_rotation = pelvis_pose.block<3,3>(0,0);
+//  Eigen::MatrixXd wb_pelvis_target_position = pelvis_pose.block<3,1>(0,3);
 
-//  Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block(0,0,3,3);
-//  Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block(0,3,3,1);
-//  Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block(0,0,3,3);
-//  Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block(0,3,3,1);
+//  Eigen::MatrixXd wb_l_foot_target_rotation = l_foot_pose.block<3,3>(0,0);
+//  Eigen::MatrixXd wb_l_foot_target_position = l_foot_pose.block<3,1>(0,3);
+//  Eigen::MatrixXd wb_r_foot_target_rotation = r_foot_pose.block<3,3>(0,0);
+//  Eigen::MatrixXd wb_r_foot_target_position = r_foot_pose.block<3,1>(0,3);
 
 //  /* ----- */
 
