@@ -2041,7 +2041,7 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
     // Get Joint Data
     present_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_position_;
-    present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
+//    present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
 
     goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_;
 
@@ -2068,9 +2068,9 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   robotis_->calcForwardKinematics(0);
 
   /*----- Center of Mass -----*/
-  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
-  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
-  calcGoalFT();
+//  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
+//  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+//  calcGoalFT();
 
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
@@ -2142,7 +2142,6 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
 
   time_duration = ros::Time::now() - start_time;
-
   double cycle = time_duration.sec * 1000.0 + time_duration.nsec * 0.000001;
 
   fprintf(stderr,"Time Duration : %f \n", cycle );
