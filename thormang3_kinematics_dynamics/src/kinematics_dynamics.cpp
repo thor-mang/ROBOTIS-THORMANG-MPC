@@ -778,8 +778,8 @@ void KinematicsDynamics::calcForwardKinematics(int joint_id)
         thormang3_link_data_[ parent ]->orientation_ *
         robotis_framework::calcRodrigues(robotis_framework::calcHatto(thormang3_link_data_[joint_id]->joint_axis_), thormang3_link_data_[joint_id]->joint_angle_);
 
-    thormang3_link_data_[joint_id]->transformation_.block<3,1>(0,3) = thormang3_link_data_[joint_id]->position_;
-    thormang3_link_data_[joint_id]->transformation_.block<3,3>(0,0) = thormang3_link_data_[joint_id]->orientation_;
+    //    thormang3_link_data_[joint_id]->transformation_.block<3,1>(0,3) = thormang3_link_data_[joint_id]->position_;
+    //    thormang3_link_data_[joint_id]->transformation_.block<3,3>(0,0) = thormang3_link_data_[joint_id]->orientation_;
   }
 
   calcForwardKinematics(thormang3_link_data_[joint_id]->sibling_);
