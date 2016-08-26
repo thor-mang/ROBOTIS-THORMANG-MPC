@@ -1701,7 +1701,7 @@ void WholebodyModule::solveWholebodyInverseKinematics()
   robotis_->thormang3_link_data_[ID_PELVIS_ROT_Z]->joint_angle_ = wb_target_rpy.coeff(2,0);
 
   int max_iter = 70;
-  double ik_tol = 1e-5;
+  double ik_tol = 1e-4;
   bool l_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_L_LEG_END, wb_l_foot_target_position, wb_l_foot_target_rotation, max_iter, ik_tol);
   bool r_foot_ik_success = robotis_->calcInverseKinematics(ID_PELVIS, ID_R_LEG_END, wb_r_foot_target_position, wb_r_foot_target_rotation, max_iter, ik_tol);
 
@@ -1755,8 +1755,8 @@ void WholebodyModule::solveWholebodyInverseKinematicsFull()
   robotis_->thormang3_link_data_[ID_PELVIS_POS_Y]->relative_position_.coeffRef(1,0) = wb_pelvis_target_position_.coeff(1,0);
   robotis_->thormang3_link_data_[ID_PELVIS_POS_Z]->relative_position_.coeffRef(2,0) = wb_pelvis_target_position_.coeff(2,0);
 
-  int max_iter = 100;
-  double ik_tol = 1e-5;
+  int max_iter = 70;
+  double ik_tol = 1e-4;
 
   bool l_arm_ik_success, r_arm_ik_success;
 
@@ -2023,6 +2023,9 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   if (enable_ == false)
     return;
 
+  ros::Time start_time = ros::Time::now();
+  ros::Duration time_duration;
+
   /*----- Get Joint Data & Sensor Data-----*/
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
        state_iter != result_.end(); state_iter++)
@@ -2136,6 +2139,13 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
 
   /*---------- Movement End Event ----------*/
   setEndTrajectory();
+
+
+  time_duration = ros::Time::now() - start_time;
+
+  double cycle = time_duration.sec * 1000.0 + time_duration.nsec * 0.000001;
+
+  ROS_INFO("Time Duration : %f", cycle);
 }
 
 void WholebodyModule::stop()
