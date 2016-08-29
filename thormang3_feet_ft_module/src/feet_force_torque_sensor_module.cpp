@@ -291,15 +291,19 @@ void FeetForceTorqueSensor::gazeboFTSensorCallback(const geometry_msgs::WrenchSt
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
   geometry_msgs::Wrench msg_transformed;
-  msg_transformed.force.x =  msg->wrench.force.x;
-  msg_transformed.force.y = -msg->wrench.force.y;
-  msg_transformed.force.z = -msg->wrench.force.z;
+  msg_transformed.force.x = msg->wrench.force.x;
+  msg_transformed.force.y = msg->wrench.force.y;
+  msg_transformed.force.z = msg->wrench.force.z;
 
-  if (msg->header.frame_id == "l_leg_an_r_link")
+  msg_transformed.torque.x = msg->wrench.torque.x;
+  msg_transformed.torque.y = msg->wrench.torque.y;
+  msg_transformed.torque.z = msg->wrench.torque.z;
+
+  if (msg->header.frame_id == "l_foot_ft_link")
   {
     l_foot_ft_sensor_.setCurrentForceTorqueRaw(msg_transformed);
   }
-  else if (msg->header.frame_id == "r_leg_an_r_link")
+  else if (msg->header.frame_id == "r_foot_ft_link")
   {
     r_foot_ft_sensor_.setCurrentForceTorqueRaw(msg_transformed);
   }
@@ -481,7 +485,7 @@ void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dyn
     }
     else
     {
-      r_foot_ft_sensor_.publishForceTorque();
+      l_foot_ft_sensor_.publishForceTorque();
     }
 
     l_foot_ft_sensor_.getCurrentForceTorqueRaw(&l_foot_fx_raw_N_,  &l_foot_fy_raw_N_,  &l_foot_fz_raw_N_,

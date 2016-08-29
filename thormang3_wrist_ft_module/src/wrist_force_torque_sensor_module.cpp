@@ -120,6 +120,10 @@ void WristForceTorqueSensor::gazeboFTSensorCallback(const geometry_msgs::WrenchS
   msg_transformed.force.y = msg->wrench.force.y;
   msg_transformed.force.z = msg->wrench.force.z;
 
+  msg_transformed.torque.x = msg->wrench.torque.x;
+  msg_transformed.torque.y = msg->wrench.torque.y;
+  msg_transformed.torque.z = msg->wrench.torque.z;
+
   if (msg->header.frame_id == "l_arm_wr_p_link")
   {
     l_wrist_ft_sensor_.setCurrentForceTorqueRaw(msg_transformed);
