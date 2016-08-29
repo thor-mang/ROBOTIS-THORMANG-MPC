@@ -1625,6 +1625,14 @@ void WholebodyModule::setEndTrajectory()
       ROS_INFO("l_arm_wr_y : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_y"]) * RADIAN2DEGREE );
       ROS_INFO("l_arm_wr_p : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_p"]) * RADIAN2DEGREE );
 
+      ROS_INFO("r_arm_sh_p1 : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) * RADIAN2DEGREE );
+      ROS_INFO("r_arm_sh_r : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_r"]) * RADIAN2DEGREE );
+      ROS_INFO("r_arm_sh_p2 : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) * RADIAN2DEGREE );
+      ROS_INFO("r_arm_el_y : %f", goal_joint_position_(joint_name_to_id_["r_arm_el_y"]) * RADIAN2DEGREE );
+      ROS_INFO("r_arm_wr_r : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_r"]) * RADIAN2DEGREE );
+      ROS_INFO("r_arm_wr_y : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_y"]) * RADIAN2DEGREE );
+      ROS_INFO("r_arm_wr_p : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_p"]) * RADIAN2DEGREE );
+
     }
   }
 }
