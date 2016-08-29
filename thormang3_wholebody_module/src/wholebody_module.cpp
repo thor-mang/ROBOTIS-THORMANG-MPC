@@ -1530,6 +1530,15 @@ void WholebodyModule::setEndTrajectory()
 
         is_knee_torque_limit_down_ = false;
       }
+
+//      ROS_INFO("l_arm_sh_p1 : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_p1"]) * RADIAN2DEGREE );
+//      ROS_INFO("l_arm_sh_r : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_r"]) * RADIAN2DEGREE );
+//      ROS_INFO("l_arm_sh_p2 : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_p2"]) * RADIAN2DEGREE );
+//      ROS_INFO("l_arm_el_y : %f", goal_joint_position_(joint_name_to_id_["l_arm_el_y"]) * RADIAN2DEGREE );
+//      ROS_INFO("l_arm_wr_r : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_r"]) * RADIAN2DEGREE );
+//      ROS_INFO("l_arm_wr_y : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_y"]) * RADIAN2DEGREE );
+//      ROS_INFO("l_arm_wr_p : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_p"]) * RADIAN2DEGREE );
+
     }
   }
 }
@@ -2105,7 +2114,7 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     present_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_position_;
     //    present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
 
-    goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_;
+    goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_; 
 
     // Get Sensor Data
     l_foot_ft_data_msg_.force.x = sensors["l_foot_fx_scaled_N"];
