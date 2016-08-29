@@ -1128,6 +1128,9 @@ void WholebodyModule::traGeneProcWholebody()
 
         wb_arm_diff_position_(dim) = tar_value - ini_value;
 
+        if (l_arm_planning_  == true || l_arm_torso_planning_ == true)
+          wb_arm_diff_position_(dim) = 0.0;
+
         Eigen::MatrixXd via_value = l_arm_via_value.col(dim);
         Eigen::MatrixXd d_via_value = l_arm_via_d_value.col(dim);
 
@@ -1149,6 +1152,9 @@ void WholebodyModule::traGeneProcWholebody()
         double tar_value = l_arm_tar_value.coeff(dim,0);
 
         wb_arm_diff_position_(dim) = tar_value - ini_value;
+
+        if (l_arm_planning_  == true || l_arm_torso_planning_ == true)
+          wb_arm_diff_position_(dim) = 0.0;
 
         Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                     tar_value, 0.0, 0.0,
@@ -1198,6 +1204,9 @@ void WholebodyModule::traGeneProcWholebody()
 
         wb_arm_diff_position_(dim) = tar_value - ini_value;
 
+        if (r_arm_planning_  == true || r_arm_torso_planning_ == true)
+          wb_arm_diff_position_(dim) = 0.0;
+
         Eigen::MatrixXd via_value = r_arm_via_value.col(dim);
         Eigen::MatrixXd d_via_value = r_arm_via_d_value.col(dim);
 
@@ -1219,6 +1228,9 @@ void WholebodyModule::traGeneProcWholebody()
         double tar_value = r_arm_tar_value.coeff(dim,0);
 
         wb_arm_diff_position_(dim) = tar_value - ini_value;
+
+        if (r_arm_planning_  == true || r_arm_torso_planning_ == true)
+          wb_arm_diff_position_(dim) = 0.0;
 
         Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
                                                                     tar_value, 0.0, 0.0,
@@ -1245,6 +1257,14 @@ void WholebodyModule::traGeneProcWholebody()
   is_moving_ = true;
 
   ROS_INFO("[start] send trajectory");
+}
+
+void WholebodyModule::traGeneProcArm()
+{
+
+
+
+
 }
 
 void WholebodyModule::calcGoalTraPelvis()

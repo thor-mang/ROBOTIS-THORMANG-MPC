@@ -6,17 +6,17 @@ mov_time : 3.0		# movement time
 
 tar_pose :
   1  : -32.60 	    # r_arm_sh_p1
-  2  :  4.44 	    # l_arm_sh_p1
+  2  : -17.61 	    # l_arm_sh_p1
   3  : -59.11 	    # r_arm_sh_r
-  4  :  71.83	    # l_arm_sh_r
+  4  :  78.17	    # l_arm_sh_r
   5  :   6.61 	    # r_arm_sh_p2
-  6  :   2.86 	    # l_arm_sh_p2
+  6  :   3.5 	    # l_arm_sh_p2
   7  : -28.33 	    # r_arm_el_y
-  8  :  37.54 	    # l_arm_el_y
+  8  :  51.29 	    # l_arm_el_y
   9  : -59.65 	    # r_arm_wr_r
-  10 : -20.78 	    # l_arm_wr_r
+  10 : -30.85 	    # l_arm_wr_r
   11 :   9.02 	    # r_arm_wr_y
-  12 : -30.24	    # l_arm_wr_y
+  12 : -65.42	    # l_arm_wr_y
   13 :  -4.88 	    # r_arm_wr_p
-  14 : -74.74 	    # l_arm_wr_p
+  14 : -61.71 	    # l_arm_wr_p
   27 :   0.0	    # torso_y

@@ -250,6 +250,7 @@ private:
 
   void traGeneProcPelvis();
   void traGeneProcWholebody();
+  void traGeneProcArm();
 
   bool getJointPoseCallback(thormang3_wholebody_module_msgs::GetJointPose::Request &req,
                             thormang3_wholebody_module_msgs::GetJointPose::Response &res);
