@@ -68,9 +68,11 @@ public:
 
   void process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors) override;
 
+  bool gazebo_mode_;
+
 private:
   void queueThread();
-  void dynamicReconfigureCallback(thormang3_walk_control_module::BalanceParametersConfig &config, uint32_t level);
+  void dynamicReconfigureCallback(thormang3_walk_control_module::BalanceParametersConfig& config, uint32_t level);
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
