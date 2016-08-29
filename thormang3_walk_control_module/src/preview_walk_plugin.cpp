@@ -193,11 +193,11 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     last_step_data_ = step_data;
 
     // add final step
-#warning figure out correct parameters
-    ///TODO: step_data.position_data.dZ_Swap_Amplitude = 0.0;
+    step_data.position_data.foot_z_swap = 0.0;
+    step_data.position_data.body_z_swap = 0.0;
     step_data.position_data.moving_foot = thormang3_walking_module_msgs::StepPositionData::STANDING;
     step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
-    step_data.time_data.abs_step_time += 2.0;
+    step_data.time_data.abs_step_time += 1.0;
     if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding (temp) final step.");
@@ -209,10 +209,10 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     // remove final step to be updated
     online_walking->eraseLastStepData();
 
+    // add step
     /// TODO: use robotis reference step here?
     robotis_framework::StepData step_data = last_step_data_;
     step_data << step;
-    step_data.time_data.abs_step_time += last_step_data_.time_data.abs_step_time;
     if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding step %i.", step.step_index);
@@ -221,7 +221,8 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     last_step_data_ = step_data;
 
     // readd updated final step
-    ///TODO: step_data.position_data.dZ_Swap_Amplitude = 0.0;
+    step_data.position_data.foot_z_swap = 0.0;
+    step_data.position_data.body_z_swap = 0.0;
     step_data.position_data.moving_foot = thormang3_walking_module_msgs::StepPositionData::STANDING;
     step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
     step_data.time_data.abs_step_time += 2.0;
