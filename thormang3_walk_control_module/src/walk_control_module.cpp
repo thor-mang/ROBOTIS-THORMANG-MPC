@@ -61,13 +61,14 @@ void WalkControlModule::queueThread()
   // dynamic reconfigure
   dynamic_reconfigure::Server<thormang3_walk_control_module::BalanceParametersConfig> server(nh);
   dynamic_reconfigure::Server<thormang3_walk_control_module::BalanceParametersConfig>::CallbackType callback_f;
-  callback_f = boost::bind(&WalkControlModule::dynamicReconfigureCallback, this, _1, _2);
-  server.setCallback(callback_f);
 
   // start walk controller
   walk_controller_.reset(new vigir_walk_control::WalkController(nh, false));
 
-  walk_control_mutex_.unlock();
+  walk_control_mutex_.unlock();  
+
+  callback_f = boost::bind(&WalkControlModule::dynamicReconfigureCallback, this, _1, _2);
+  server.setCallback(callback_f);
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(nh.ok())
