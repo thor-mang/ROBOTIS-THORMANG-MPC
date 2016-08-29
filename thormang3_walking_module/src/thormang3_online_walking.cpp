@@ -1237,6 +1237,7 @@ void RobotisOnlineWalking::process()
         calcStepIdxData();
         lock.unlock();
         reInitialize();
+        lock.lock();
       }
 
       if(balancing_index_ == BalancingPhase0 || balancing_index_ == BalancingPhase9)
