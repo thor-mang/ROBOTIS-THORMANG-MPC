@@ -3,8 +3,8 @@
 weight_value :
   1 : 1.0		# r_arm_sh_p1
   2 : 1.0		# l_arm_sh_p1
-  3 : 0.5		# r_arm_sh_r
-  4 : 0.5		# l_arm_sh_r
+  3 : 0.4		# r_arm_sh_r
+  4 : 0.4		# l_arm_sh_r
   5 : 1.0		# r_arm_sh_p2
   6 : 1.0		# l_arm_sh_p2
   7 : 3.0		# r_arm_el_y
