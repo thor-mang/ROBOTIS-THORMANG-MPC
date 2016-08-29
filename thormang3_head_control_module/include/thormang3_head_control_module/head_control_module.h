@@ -42,6 +42,7 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <std_msgs/Empty.h>
+#include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/JointState.h>
 #include <boost/thread.hpp>
@@ -66,15 +67,19 @@ public:
   bool isRunning();
 
 private:
+  const double SCAN_START_ANGLE = -10 * M_PI / 180;
+  const double SCAN_END_ANGLE = 85 * M_PI / 180;
+
   /* ROS Topic Callback Functions */
   void get3DLidarCallback(const std_msgs::String::ConstPtr &msg);
+  void get3DLidarRangeCallback(const std_msgs::Float64::ConstPtr &msg);
   void setHeadJointCallback(const sensor_msgs::JointState::ConstPtr &msg);
 
   void queueThread();
   void jointTraGeneThread();
 
-  void beforeMoveLidar();
-  void startMoveLidar();
+  void beforeMoveLidar(double start_angle);
+  void startMoveLidar(double target_angle);
   void afterMoveLidar();
   void publishLidarMoveMsg(std::string msg_data);
 
@@ -102,6 +107,7 @@ private:
   double         moving_time_;
   int            current_state_;
   double         original_position_lidar_;
+  double         scan_range_;
 
   Eigen::MatrixXd target_position_;
   Eigen::MatrixXd current_position_;
