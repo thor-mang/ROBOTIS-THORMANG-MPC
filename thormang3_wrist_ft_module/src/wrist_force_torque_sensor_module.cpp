@@ -70,8 +70,8 @@ void WristForceTorqueSensor::wristForceTorqueSensorInitialize()
   std::string _wrist_ft_data_path  = _ros_node.param<std::string>("ft_data_path", "");
   std::string _ft_calib_data_path = _ros_node.param<std::string>("ft_calibration_data_path", "");
 
-  r_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_right_wrist", "r_arm_wr_p_link" , "sensor/ft/right_wrist/raw", "sensor/ft/right_wrist/scaled");
-  l_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_left_wrist",  "l_arm_wr_p_link",  "sensor/ft/left_wrist/raw",  "sensor/ft/left_wrist/scaled");
+  r_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_right_wrist", "r_wrist_ft_link" , "sensor/ft/right_wrist/raw", "sensor/ft/right_wrist/scaled");
+  l_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_left_wrist",  "l_wrist_ft_link",  "sensor/ft/left_wrist/raw",  "sensor/ft/left_wrist/scaled");
 }
 
 
@@ -124,11 +124,11 @@ void WristForceTorqueSensor::gazeboFTSensorCallback(const geometry_msgs::WrenchS
   msg_transformed.torque.y = msg->wrench.torque.y;
   msg_transformed.torque.z = msg->wrench.torque.z;
 
-  if (msg->header.frame_id == "l_arm_wr_p_link")
+  if (msg->header.frame_id == "l_wrist_ft_link")
   {
     l_wrist_ft_sensor_.setCurrentForceTorqueRaw(msg_transformed);
   }
-  else if (msg->header.frame_id == "r_arm_wr_p_link")
+  else if (msg->header.frame_id == "r_wrist_ft_link")
   {
     r_wrist_ft_sensor_.setCurrentForceTorqueRaw(msg_transformed);
   }
