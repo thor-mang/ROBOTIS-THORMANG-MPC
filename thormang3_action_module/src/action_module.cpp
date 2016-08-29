@@ -131,14 +131,14 @@ void ActionModule::queueThread()
   ros_node.setCallbackQueue(&callback_queue);
 
   /* publisher */
-  status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 0);
+  status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 0);
 
   /* subscriber */
-  ros::Subscriber action_page_sub = ros_node.subscribe("/robotis/action/page_num", 0, &ActionModule::pageNumberCallback, this);
-  ros::Subscriber start_action_sub = ros_node.subscribe("/robotis/action/start_action", 0, &ActionModule::startActionCallback, this);
+  ros::Subscriber action_page_sub = ros_node.subscribe("robotis/action/page_num", 0, &ActionModule::pageNumberCallback, this);
+  ros::Subscriber start_action_sub = ros_node.subscribe("robotis/action/start_action", 0, &ActionModule::startActionCallback, this);
 
   /* ROS Service Callback Functions */
-  ros::ServiceServer is_running_server = ros_node.advertiseService("/robotis/action/is_running", &ActionModule::isRunningServiceCallback, this);
+  ros::ServiceServer is_running_server = ros_node.advertiseService("robotis/action/is_running", &ActionModule::isRunningServiceCallback, this);
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
   while(ros_node.ok())
