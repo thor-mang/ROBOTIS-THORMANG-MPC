@@ -1,0 +1,23 @@
+# time parameter
+
+mov_time : 3.0		# movement time
+
+# target pose [deg]
+
+tar_pose :
+  1  : -32.60 	    # r_arm_sh_p1
+  2  :  -1.10 	    # l_arm_sh_p1
+  3  : -59.11 	    # r_arm_sh_r
+  4  :  76.36	    # l_arm_sh_r
+  5  :   6.61 	    # r_arm_sh_p2
+  6  : -38.77	    # l_arm_sh_p2
+  7  : -28.33 	    # r_arm_el_y
+  8  :  66.91 	    # l_arm_el_y
+  9  : -59.65 	    # r_arm_wr_r
+  10 : -36.13 	    # l_arm_wr_r
+  11 :   9.02 	    # r_arm_wr_y
+  12 : -73.24	    # l_arm_wr_y
+  13 :  -4.88 	    # r_arm_wr_p
+  14 :  -4.76 	    # l_arm_wr_p
+  27 :   0.0	    # torso_y
+

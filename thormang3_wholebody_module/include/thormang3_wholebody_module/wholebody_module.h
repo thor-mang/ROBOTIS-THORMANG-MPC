@@ -118,6 +118,9 @@ private:
   bool wb_l_arm_pelvis_planning_, wb_r_arm_pelvis_planning_;
   bool wb_arm_pelvis_solving_;
 
+  bool wb_l_arm_pelvis_dual_planning_, wb_r_arm_pelvis_dual_planning_;
+  bool wb_arm_pelvis_dual_solving_;
+
   bool l_arm_planning_, r_arm_planning_;
   bool l_arm_torso_planning_, r_arm_torso_planning_;
 
@@ -225,6 +228,7 @@ private:
   void setInverseKinematicsRightFoot(int cnt);
   void setInverseKinematicsLeftArm(int cnt);
   void setInverseKinematicsRightArm(int cnt);
+  void setInverseKinematicsDualArm(int cnt);
   void setPelvisPose(int cnt);
   void setBalanceControlGain(int cnt);
 
@@ -232,8 +236,8 @@ private:
   void setEndTrajectory();
 //  void solveInverseKinematics();
   void solveWholebodyInverseKinematics();
-  void solveWholebodyInverseKinematicsFull();
-  void solveWholebodyInverseKinematicsDual();
+  void solveWholebodyInverseKinematicsWithSingleArm();
+  void solveWholebodyInverseKinematicsWithDualArm();
 
   void calcGoalTraPelvis();
   void calcGoalTraLeg();
