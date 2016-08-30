@@ -2,28 +2,28 @@
 
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 RosControlModule::RosControlModule()
   : control_cycle_msec_(8)
   , last_time_stamp_(ros::Time::now())
   , reset_controllers_(false)
 {
-  enable = false;
-  module_name = "ros_control_module"; // set unique module name
-  control_mode = POSITION_CONTROL;
+  enable_ = false;
+  module_name_ = "ros_control_module"; // set unique module name
+  control_mode_ = robotis_framework::PositionControl;
 }
 
 RosControlModule::~RosControlModule()
 {
-  for (auto& kv : result)
+  for (auto& kv : result_)
     delete kv.second;
 
   controller_manager_thread_.join();
   queue_thread_.join();
 }
 
-void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
+void RosControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* robot)
 {
   boost::mutex::scoped_lock lock(ros_control_mutex_);
 
@@ -32,9 +32,9 @@ void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
   ros::NodeHandle nh("joints/ros_control_module");
 
   // clear already exisiting outputs
-  for (auto& kv : result)
+  for (auto& kv : result_)
     delete kv.second;
-  result.clear();
+  result_.clear();
 
   /** initialize IMU */
 
@@ -87,27 +87,27 @@ void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
 
   // read joints from ros param server
   /// TODO: Check available joints with 'robot' parameter
-  result.clear();
+  result_.clear();
   XmlRpc::XmlRpcValue joints = nh.param("joints", XmlRpc::XmlRpcValue());
   if (joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
   {
     for (size_t i = 0; i < joints.size(); i++)
-      result[static_cast<std::string>(joints[i])] = new DynamixelState();
+      result_[static_cast<std::string>(joints[i])] = new robotis_framework::DynamixelState();
   }
   else
     ROS_ERROR("[RosControlModule] Joints must be given as an array of strings.");
-
+  
   jnt_state_interface_ = hardware_interface::JointStateInterface();
   jnt_pos_interface_ = hardware_interface::PositionJointInterface();
-
-  for (std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+  
+  for (std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
-
+    
     // connect and register the joint state interface
     hardware_interface::JointStateHandle state_handle(joint_name, &pos_[joint_name], &vel_[joint_name], &eff_[joint_name]);
     jnt_state_interface_.registerHandle(state_handle);
-
+    
     // connect and register the joint position interface
     hardware_interface::JointHandle pos_handle(state_handle, &cmd_[joint_name]);
     jnt_pos_interface_.registerHandle(pos_handle);
@@ -117,11 +117,11 @@ void RosControlModule::Initialize(const int control_cycle_msec, Robot* robot)
   registerInterface(&jnt_pos_interface_);
 
   /** start secondary controller manager and ros thread */
-  controller_manager_thread_ = boost::thread(boost::bind(&RosControlModule::ControllerManagerThread, this));
-  queue_thread_ = boost::thread(boost::bind(&RosControlModule::QueueThread, this));
+  controller_manager_thread_ = boost::thread(boost::bind(&RosControlModule::controllerManagerThread, this));
+  queue_thread_ = boost::thread(boost::bind(&RosControlModule::queueThread, this));
 }
 
-void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, double> sensors)
+void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors)
 {
   boost::mutex::scoped_lock lock(ros_control_mutex_);
 
@@ -145,17 +145,18 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
   }
 
   /** update joints */
-  for(std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+
+  for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
-
-    const Dynamixel* dxl = dxls[joint_name];
+    
+    const robotis_framework::Dynamixel* dxl = dxls[joint_name];
     if (dxl)
     {
-      pos_[joint_name] = dxl->dxl_state->present_position;
+      pos_[joint_name] = dxl->dxl_state_->present_position_;
       cmd_[joint_name] = NAN;
-      vel_[joint_name] = dxl->dxl_state->present_velocity;
-      eff_[joint_name] = dxl->dxl_state->present_current;
+      vel_[joint_name] = dxl->dxl_state_->present_velocity_;
+      eff_[joint_name] = dxl->dxl_state_->present_torque_;
     }
     else
       ROS_WARN_ONCE("[RosControlModule] Joint '%s' is not available!", joint_name.c_str());
@@ -175,42 +176,43 @@ void RosControlModule::Process(std::map<std::string, Dynamixel*> dxls, std::map<
   }
 
   /** write back commands */
-
-  for(std::map<std::string, DynamixelState*>::iterator state_iter = result.begin(); state_iter != result.end(); state_iter++)
+  
+  for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
-    result[joint_name]->goal_position = cmd_[joint_name];
+    
+    result_[joint_name]->goal_position_ = cmd_[joint_name];
   }
 }
 
-bool RosControlModule::IsRunning()
+bool RosControlModule::isRunning()
 {
   return false; // hacky, return always false to signal release of resources
 }
 
-void RosControlModule::Stop()
+void RosControlModule::stop()
 {
   return;
 }
 
-void RosControlModule::ControllerManagerThread()
+void RosControlModule::controllerManagerThread()
 {
   // this thread keeps the controller manager active for loading and unloading controllers
   while (ros::ok())
   {
     usleep(control_cycle_msec_);
-    
+
     boost::mutex::scoped_lock lock(ros_control_mutex_);
-    
+
     // skip if enabled as Process will update controller
-    if (enable)
+    if (enable_)
       continue;
-    
+
     // time measurements
     ros::Time current_time = ros::Time::now();
     ros::Duration elapsed_time = current_time - last_time_stamp_;
     last_time_stamp_ = current_time;
-  
+
     if (controller_manager_)
     {
       controller_manager_->update(current_time, elapsed_time);
@@ -219,23 +221,23 @@ void RosControlModule::ControllerManagerThread()
   }
 }
 
-void RosControlModule::QueueThread()
+void RosControlModule::queueThread()
 {
   ros_control_mutex_.lock();
 
-  ros::NodeHandle _ros_node("joints");
-  ros::CallbackQueue _callback_queue;
+  ros::NodeHandle nh("joints");
+  ros::CallbackQueue callback_queue;
 
-  _ros_node.setCallbackQueue(&_callback_queue);
-
+  nh.setCallbackQueue(&callback_queue);
+  
   // Initialize ros control
   last_time_stamp_ = ros::Time::now();
-  controller_manager_.reset(new controller_manager::ControllerManager(this, _ros_node));
+  controller_manager_.reset(new controller_manager::ControllerManager(this, nh));
 
   ros_control_mutex_.unlock();
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
-  while(_ros_node.ok())
-    _callback_queue.callAvailable(duration);
+  while(nh.ok())
+    callback_queue.callAvailable(duration);
 }
 }

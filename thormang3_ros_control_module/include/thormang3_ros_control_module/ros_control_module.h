@@ -33,9 +33,10 @@
 
 #include <boost/thread.hpp>
 #include <ros/callback_queue.h>
+#include <std_msgs/Int16.h>
 
 // robotis
-#include <robotis_framework_common/MotionModule.h>
+#include <robotis_framework_common/motion_module.h>
 
 // ros control
 #include <controller_manager/controller_manager.h>
@@ -47,36 +48,40 @@
 
 
 
-namespace ROBOTIS
+namespace thormang3
 {
 class RosControlModule
-  : public Singleton<RosControlModule>
-  , public MotionModule
+  : public robotis_framework::Singleton<RosControlModule>
+  , public robotis_framework::MotionModule
   , public hardware_interface::RobotHW
 {
 public:
   RosControlModule();
   virtual ~RosControlModule();
 
-  void Initialize(const int control_cycle_msec, Robot* robot) override;
+  void onModuleEnable() override {}
+  void onModuleDisable() override {}
 
-  void Process(std::map<std::string, Dynamixel*> dxls, std::map<std::string, double> sensors) override;
+  void initialize(const int control_cycle_msec, robotis_framework::Robot* robot) override;
 
-  void Stop() override;
-  bool IsRunning() override;
+  void process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors) override;
+
+  void stop() override;
+  bool isRunning() override;
 
 private:
-  void ControllerManagerThread();
-  void QueueThread();
+  void controllerManagerThread();
+  void queueThread();
 
   int control_cycle_msec_;
   boost::thread controller_manager_thread_;
   boost::thread queue_thread_;
   ros::Time last_time_stamp_;
+
   bool reset_controllers_;
 
   boost::mutex ros_control_mutex_;
-
+  
   /** ROS CONTROL PART */
   boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
@@ -91,7 +96,7 @@ private:
   hardware_interface::ForceTorqueSensorInterface force_torque_sensor_interface_;
   std::map<std::string, double[3]> force_;
   std::map<std::string, double[3]> torque_;
-
+  
   // joint interfaces
   hardware_interface::JointStateInterface jnt_state_interface_;
   hardware_interface::PositionJointInterface jnt_pos_interface_;

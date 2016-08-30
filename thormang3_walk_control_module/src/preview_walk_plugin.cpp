@@ -1,8 +1,8 @@
 #include <thormang3_walk_control_module/preview_walk_plugin.h>
 
-#include <thormang3_walking_module/PreviewControlWalking.h>
+#include <thormang3_walking_module/thormang3_online_walking.h>
 
-#include <thormang3_walking_module/WalkingModuleCommon.h>
+#include <thormang3_walking_module/walking_module.h>
 
 
 
@@ -41,16 +41,16 @@ void PreviewWalkPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
   {
     const msgs::Step& step = step_plan.steps.front();
 
-    ROBOTIS::StepData ref_step;
+    robotis_framework::StepData ref_step;
     initStepData(ref_step);
     /// TODO: use robotis reference step here?
-    //ROBOTIS::PreviewControlWalking::GetInstance()->GetReferenceStepDatafotAddition(&ref_step);
+    //robotis_framework::RobotisOnlineWalking::GetInstance()->GetReferenceStepDatafotAddition(&ref_step);
 
     geometry_msgs::Pose ref_pose;
     if (step.foot.foot_index == msgs::Foot::LEFT)
-      thor_mang_footstep_planning::toRos(ref_step.PositionData.stLeftFootPosition, ref_pose);
+      thor_mang_footstep_planning::toRos(ref_step.position_data.left_foot_pose, ref_pose);
     else if (step.foot.foot_index == msgs::Foot::RIGHT)
-      thor_mang_footstep_planning::toRos(ref_step.PositionData.stRightFootPosition, ref_pose);
+      thor_mang_footstep_planning::toRos(ref_step.position_data.right_foot_pose, ref_pose);
     else
     {
       ROS_ERROR("[PreviewWalkPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
@@ -75,23 +75,23 @@ void PreviewWalkPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 
 void PreviewWalkPlugin::initWalk()
 {
-  ROBOTIS::PreviewControlWalking* prev_walking = ROBOTIS::PreviewControlWalking::GetInstance();
+  thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
 
-  if (prev_walking->IsRunning())
+  if (online_walking->isRunning())
   {
     ROS_INFO("[PreviewWalkPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
 
-  prev_walking->Initialize();
-  //prev_walking->SetInitialPose();
-  //prev_walking->SetInitalWaistYawAngle();
+  online_walking->initialize();
+  //online_walking->setInitialPose();
+  //online_walking->setInitalWaistYawAngle();
 
   int min_steps_in_queue = 2;
 
   // initialize with +min_steps_in_queue that will cause trigger to fill step data of walking engine in preProcess() step
-  last_remaining_unreserved_steps_ = prev_walking->GetNumofRemainingUnreservedStepData() + min_steps_in_queue;
+  last_remaining_unreserved_steps_ = online_walking->getNumofRemainingUnreservedStepData() + min_steps_in_queue;
 
   // init feedback states
   msgs::ExecuteStepPlanFeedback feedback;
@@ -103,7 +103,7 @@ void PreviewWalkPlugin::initWalk()
 
   setState(ACTIVE);
 
-  prev_walking->Start();
+  online_walking->start();
 
   ROS_INFO("[PreviewWalkPlugin] Starting walking.");
 }
@@ -115,17 +115,17 @@ void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
   if (getState() != ACTIVE)
     return;
 
-  ROBOTIS::PreviewControlWalking* prev_walking = ROBOTIS::PreviewControlWalking::GetInstance();
+  thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
 
   // first check if walking engine is still running
-  if (!prev_walking->IsRunning())
+  if (!online_walking->isRunning())
   {
     ROS_INFO("[PreviewWalkPlugin] Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
 
-  int remaining_unreserved_steps = prev_walking->GetNumofRemainingUnreservedStepData();
+  int remaining_unreserved_steps = online_walking->getNumofRemainingUnreservedStepData();
 
   int diff = last_remaining_unreserved_steps_ - remaining_unreserved_steps;
   last_remaining_unreserved_steps_ = remaining_unreserved_steps;
@@ -176,16 +176,16 @@ void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
 bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
 {
   /// TODO: flush step
-  ROBOTIS::PreviewControlWalking* prev_walking = ROBOTIS::PreviewControlWalking::GetInstance();
+  thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
 
   // add initial step
   if (step.step_index == 0)
   {
-    ROBOTIS::StepData step_data;
+    robotis_framework::StepData step_data;
     initStepData(step_data);
     /// TODO: use robotis reference step here?
-    //prev_walking->GetReferenceStepDatafotAddition(&_refStepData);
-    if (!prev_walking->AddStepData(step_data))
+    //online_walking->getReferenceStepDatafotAddition(&_refStepData);
+    if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding initial step.");
       return false;
@@ -193,11 +193,12 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     last_step_data_ = step_data;
 
     // add final step
-    step_data.PositionData.dZ_Swap_Amplitude = 0.0;
-    step_data.PositionData.bMovingFoot = ROBOTIS::MovingFootFlag::NFootMove;
-    step_data.TimeData.bWalkingState = ROBOTIS::WalkingStateFlag::InWalkingEnding;
-    step_data.TimeData.dAbsStepTime += 2.0;
-    if (!prev_walking->AddStepData(step_data))
+    step_data.position_data.foot_z_swap = 0.0;
+    step_data.position_data.body_z_swap = 0.0;
+    step_data.position_data.moving_foot = thormang3_walking_module_msgs::StepPositionData::STANDING;
+    step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
+    step_data.time_data.abs_step_time += 1.0;
+    if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding (temp) final step.");
       return false;
@@ -206,13 +207,13 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
   else
   {
     // remove final step to be updated
-    prev_walking->EraseLastStepData();
+    online_walking->eraseLastStepData();
 
+    // add step
     /// TODO: use robotis reference step here?
-    ROBOTIS::StepData step_data = last_step_data_;
+    robotis_framework::StepData step_data = last_step_data_;
     step_data << step;
-    step_data.TimeData.dAbsStepTime += last_step_data_.TimeData.dAbsStepTime;
-    if (!prev_walking->AddStepData(step_data))
+    if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding step %i.", step.step_index);
       return false;
@@ -220,18 +221,19 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     last_step_data_ = step_data;
 
     // readd updated final step
-    step_data.PositionData.dZ_Swap_Amplitude = 0.0;
-    step_data.PositionData.bMovingFoot = ROBOTIS::MovingFootFlag::NFootMove;
-    step_data.TimeData.bWalkingState = ROBOTIS::WalkingStateFlag::InWalkingEnding;
-    step_data.TimeData.dAbsStepTime += 2.0;
-    if (!prev_walking->AddStepData(step_data))
+    step_data.position_data.foot_z_swap = 0.0;
+    step_data.position_data.body_z_swap = 0.0;
+    step_data.position_data.moving_foot = thormang3_walking_module_msgs::StepPositionData::STANDING;
+    step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
+    step_data.time_data.abs_step_time += 2.0;
+    if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding (temp) final step.");
       return false;
     }
   }
 
-  last_remaining_unreserved_steps_ = ROBOTIS::PreviewControlWalking::GetInstance()->GetNumofRemainingUnreservedStepData();
+  last_remaining_unreserved_steps_ = online_walking->getNumofRemainingUnreservedStepData();
 
   msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
   feedback.first_changeable_step_index++;
@@ -247,7 +249,7 @@ void PreviewWalkPlugin::stop()
 
   /// TODO: Stop when both feet on ground
 
-  ROBOTIS::PreviewControlWalking::GetInstance()->Stop();
+  thormang3::RobotisOnlineWalking::getInstance()->stop();
 }
 } // namespace
 

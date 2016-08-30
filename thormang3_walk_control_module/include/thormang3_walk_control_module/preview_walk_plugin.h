@@ -101,7 +101,7 @@ public:
 
 protected:
   ThorMangStepPlanMsgPlugin::ConstPtr thor_mang_step_plan_msg_plugin_;
-  ROBOTIS::StepData last_step_data_;
+  robotis_framework::StepData last_step_data_;
 
   int last_remaining_unreserved_steps_;
 };

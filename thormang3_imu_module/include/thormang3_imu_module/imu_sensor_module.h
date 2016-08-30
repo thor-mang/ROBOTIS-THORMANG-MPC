@@ -36,42 +36,40 @@
 
 #include <sensor_msgs/Imu.h>
 
-#include <robotis_framework_common/SensorModule.h>
+#include <robotis_framework_common/sensor_module.h>
 
 
 
-namespace ROBOTIS
+namespace thormang3
 {
-class ImuSensor : public SensorModule, public Singleton<ImuSensor>
+class ImuSensor : public robotis_framework::SensorModule, public robotis_framework::Singleton<ImuSensor>
 {
 public:
   ImuSensor();
   ~ImuSensor();
 
   /* ROS Topic Callback Functions */
-  void ImuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag);
+  void imuSensorCallback(const sensor_msgs::Imu::ConstPtr msg, const std::string& tag);
 
-  void Initialize(const int control_cycle_msec, Robot* robot);
-  void Process(std::map<std::string, Dynamixel* > dxls, std::map<std::string, Sensor*> sensors);
+  void initialize(const int control_cycle_msec, robotis_framework::Robot* robot) override;
+  void process(std::map<std::string, robotis_framework::Dynamixel* > dxls, std::map<std::string, robotis_framework::Sensor*> sensors) override;
 
-  void Stop();
-  bool IsRunning();
+  void stop();
+  bool isRunning();
 
-  bool gazebo_mode;
-  std::string gazebo_robot_name;
+  bool gazebo_mode_;
+  std::string gazebo_robot_name_;
 
 private:
-  void WristForceTorqueSensorInitialize();
+  void msgQueueThread();
 
-  void QueueThread();
-
-  void PublishStatusMsg(unsigned int type, std::string msg);
+  void publishStatusMsg(unsigned int type, std::string msg);
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
   boost::mutex imu_sensor_mutex_;
 
-  ros::Publisher imu_status_pub_;
+  ros::Publisher  imu_status_pub_;
 };
 }
 

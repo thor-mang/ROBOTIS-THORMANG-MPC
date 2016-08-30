@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(thormang3_imu_module)
 
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -9,8 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   geometry_msgs
   sensor_msgs
-  robotis_device
   robotis_controller_msgs
+  robotis_framework_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -84,7 +86,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_imu_module
-  CATKIN_DEPENDS roscpp cmake_modules geometry_msgs sensor_msgs robotis_device robotis_controller_msgs
+  CATKIN_DEPENDS roscpp cmake_modules geometry_msgs sensor_msgs robotis_controller_msgs robotis_framework_common
 #  DEPENDS system_lib
 )
 
