@@ -62,7 +62,8 @@ WholebodyModule::WholebodyModule()
     on_balance_gain_(false),
     is_wheel_pose_(false),
     is_gain_updating_(false),
-    is_knee_torque_limit_down_(false)
+    is_knee_torque_limit_down_(false),
+    arm_angle_display_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -244,8 +245,10 @@ void WholebodyModule::queueThread()
                                                         &WholebodyModule::setModeMsgCallback, this);
   ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/ini_pose_msg", 5,
                                                         &WholebodyModule::setIniPoseMsgCallback, this);
-  //  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_pose_msg", 5,
-  //                                                          &WholebodyModule::setJointPoseMsgCallback, this);
+  ros::Subscriber wheel_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/wheel_pose_msg", 5,
+                                                        &WholebodyModule::setWheelPoseMsgCallback, this);
+  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_pose_msg", 5,
+                                                          &WholebodyModule::setJointPoseMsgCallback, this);
   ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/kinematics_pose_msg", 5,
                                                                &WholebodyModule::setKinematicsPoseMsgCallback, this);
   ros::Subscriber wholebody_balance_msg_sub = ros_node.subscribe("/robotis/wholebody/wholebody_balance_msg", 5,
@@ -254,8 +257,6 @@ void WholebodyModule::queueThread()
                                                     &WholebodyModule::imuDataCallback, this);
 
   /* service */
-  ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/wholebody/get_joint_pose",
-                                                                       &WholebodyModule::getJointPoseCallback, this);
   ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/wholebody/get_kinematics_pose",
                                                                             &WholebodyModule::getKinematicsPoseCallback, this);
 
@@ -374,135 +375,17 @@ void WholebodyModule::parseIniPoseData(const std::string &path)
   goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
 }
 
-void WholebodyModule::parseWheelPoseData(const std::string &path)
+void WholebodyModule::parseWheelJointPoseData()
 {
-  YAML::Node doc;
-  try
-  {
-    // load yaml
-    doc = YAML::LoadFile(path.c_str());
-  }
-  catch (const std::exception& e)
-  {
-    ROS_ERROR("Fail to load yaml file.");
-    return;
-  }
-
   // parse movement time
-  mov_time_ = doc["mov_time"].as<double>();
+  mov_time_ = goal_wheel_pose_msg_.mov_time;
 
-  // parse via-point number
-  via_num_ = doc["via_num"].as<int>();
-
-  // parse via-point time
-  std::vector<double> via_time;
-  via_time = doc["via_time"].as<std::vector<double> >();
-
-  via_time_.resize(via_num_, 1);
-  for (int num = 0; num < via_num_; num++)
-    via_time_.coeffRef(num, 0) = via_time[num];
-
-  wheel_ini_via_pose_.resize(via_num_,3);
-  wheel_ini_via_d_pose_.resize(via_num_,3);
-  wheel_ini_via_dd_pose_.resize(via_num_,3);
-
-  wheel_ini_via_pose_.fill(0.0);
-  wheel_ini_via_d_pose_.fill(0.0);
-  wheel_ini_via_dd_pose_.fill(0.0);
-
-  YAML::Node via_pose_node = doc["via_pose"];
-  for (YAML::iterator it = via_pose_node.begin(); it != via_pose_node.end(); ++it)
+  for (int it=0; it<goal_wheel_pose_msg_.goal_joint_state.name.size(); it++)
   {
-    int dim;
-    std::vector<double> value;
+    int id = joint_name_to_id_[goal_wheel_pose_msg_.goal_joint_state.name[it]];
+    double value = goal_wheel_pose_msg_.goal_joint_state.position[it];
 
-    dim = it->first.as<int>();
-    value = it->second.as<std::vector<double> >();
-
-    for (int num = 0; num < via_num_; num++)
-      wheel_ini_via_pose_.coeffRef(num, dim) = value[num];
-  }
-
-  // parse target pose
-  YAML::Node tar_pose_node = doc["tar_pose"];
-  for (YAML::iterator it = tar_pose_node.begin(); it != tar_pose_node.end(); ++it)
-  {
-    int dim;
-    double value;
-
-    dim = it->first.as<int>();
-    value = it->second.as<double>();
-
-    wheel_ini_pose_(dim) = value;
-  }
-}
-
-void WholebodyModule::parseJointPoseData(const std::string &path)
-{
-  YAML::Node doc;
-  try
-  {
-    // load yaml
-    doc = YAML::LoadFile(path.c_str());
-  }
-  catch (const std::exception& e)
-  {
-    ROS_ERROR("Fail to load yaml file.");
-    return;
-  }
-
-  // parse movement time
-  mov_time_ = doc["mov_time"].as<double>();
-
-  // parse target pose
-
-  for (int id = 1; id<=MAX_JOINT_ID; id++)
-    joint_ini_pose_(id) = goal_joint_position_(id);
-
-  YAML::Node tar_pose_node = doc["tar_pose"];
-  for (YAML::iterator it = tar_pose_node.begin(); it != tar_pose_node.end(); ++it)
-  {
-    int id;
-    double value;
-
-    id = it->first.as<int>();
-    value = it->second.as<double>();
-
-    joint_ini_pose_(id) = value * DEGREE2RADIAN;
-  }
-
-  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
-  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
-}
-
-void WholebodyModule::parseWheelJointPoseData(const std::string &path)
-{
-  YAML::Node doc;
-  try
-  {
-    // load yaml
-    doc = YAML::LoadFile(path.c_str());
-  }
-  catch (const std::exception& e)
-  {
-    ROS_ERROR("Fail to load yaml file.");
-    return;
-  }
-
-  // parse movement time
-  mov_time_ = doc["mov_time"].as<double>();
-
-  // parse target pose
-  YAML::Node tar_pose_node = doc["tar_pose"];
-  for (YAML::iterator it = tar_pose_node.begin(); it != tar_pose_node.end(); ++it)
-  {
-    int id;
-    double value;
-
-    id = it->first.as<int>();
-    value = it->second.as<double>();
-
-    wheel_joint_diff_pose_(id) = value * DEGREE2RADIAN - goal_joint_position_(id);
+    wheel_joint_diff_pose_(id) = value - goal_joint_position_(id);
   }
 
   all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
@@ -619,25 +502,42 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
       tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcIniPose, this));
       delete tra_gene_tread_;
     }
-    else if (msg->data == "wheel_sit_down" || msg->data == "wheel_stand_up")
+  }
+  else
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
+
+  return;
+}
+
+void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_msgs::WheelPose::ConstPtr& msg)
+{
+  ROS_INFO("Set Wheel Pose Msg");
+
+  goal_wheel_pose_msg_ = *msg;
+
+  if (is_moving_ == false)
+  {
+    if (msg->name == "wheel_sit_down" || msg->name == "wheel_stand_up")
     {
       if (is_balancing_ == true)
       {
-        std::string wheel_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + msg->data +".yaml";
-        parseWheelPoseData(wheel_pose_path);
-
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelPose, this));
         delete tra_gene_tread_;
       }
       else
         ROS_INFO("balance is off");
     }
-    else if (msg->data == "wheel_on_pose" || msg->data == "wheel_off_pose")
-    {
-      if (msg->data == "wheel_on_pose")
+      else if (msg->name == "wheel_on_pose")
+      {
         is_knee_torque_limit_down_ = true;
+        is_wheel_pose_ = true;
 
-      if (msg->data == "wheel_off_pose")
+        parseWheelJointPoseData();
+
+        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
+        delete tra_gene_tread_;
+      }
+      else if (msg->name == "wheel_off_pose")
       {
         robotis_controller_msgs::SyncWriteItem sync_write_msg;
         sync_write_msg.item_name = "goal_torque";
@@ -647,52 +547,81 @@ void WholebodyModule::setIniPoseMsgCallback(const std_msgs::String::ConstPtr& ms
         sync_write_msg.value.push_back(1240);
 
         goal_torque_limit_pub_.publish(sync_write_msg);
-      }
 
-      if (msg->data == "wheel_on_pose")
-      {
-        is_wheel_pose_ = true;
-        std::string wheel_joint_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + "wheel_joint_pose.yaml";
-        parseWheelJointPoseData(wheel_joint_pose_path);
-      }
-      else if (msg->data == "wheel_off_pose")
         is_wheel_pose_ = false;
 
-      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
-      delete tra_gene_tread_;
+        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
+        delete tra_gene_tread_;
+      }
     }
-    else if (msg->data == "drive_pose" || msg->data == "drive_scan_pose")
-    {
-      std::string drive_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + msg->data +".yaml";
-      parseJointPoseData(drive_pose_path);
+    else
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
 
-      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcJointPose, this));
-      delete tra_gene_tread_;
-    }
-  }
-  else
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
-
-  return;
-}
-
-//void WholebodyModule::setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg)
-//{
-//  if(enable_ == false)
-//    return;
-
-//  goal_joint_pose_msg_ = *msg;
 
 //  if (is_moving_ == false)
 //  {
-//    tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcJointSpace, this));
-//    delete tra_gene_tread_;
+//    if (msg->data == "wheel_sit_down" || msg->data == "wheel_stand_up")
+//    {
+//      if (is_balancing_ == true)
+//      {
+//        std::string wheel_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + msg->data +".yaml";
+//        parseWheelPoseData(wheel_pose_path);
+
+//        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelPose, this));
+//        delete tra_gene_tread_;
+//      }
+//      else
+//        ROS_INFO("balance is off");
+//    }
+//    else if (msg->data == "wheel_on_pose")
+//    {
+//      is_knee_torque_limit_down_ = true;
+//      is_wheel_pose_ = true;
+
+//      std::string wheel_joint_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + "wheel_joint_pose.yaml";
+//      parseWheelJointPoseData(wheel_joint_pose_path);
+
+//      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
+//      delete tra_gene_tread_;
+//    }
+//    else if (msg->data == "wheel_off_pose")
+//    {
+//      robotis_controller_msgs::SyncWriteItem sync_write_msg;
+//      sync_write_msg.item_name = "goal_torque";
+//      sync_write_msg.joint_name.push_back("r_leg_kn_p");
+//      sync_write_msg.value.push_back(1240);
+//      sync_write_msg.joint_name.push_back("l_leg_kn_p");
+//      sync_write_msg.value.push_back(1240);
+
+//      goal_torque_limit_pub_.publish(sync_write_msg);
+
+//      is_wheel_pose_ = false;
+
+//      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
+//      delete tra_gene_tread_;
+//    }
 //  }
 //  else
-//    ROS_INFO("previous task is alive");
+//    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
+}
 
-//  return;
-//}
+void WholebodyModule::setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg)
+{
+  if(enable_ == false)
+    return;
+
+  goal_joint_pose_msg_ = *msg;
+
+  if (is_moving_ == false)
+  {
+    tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcJointPose, this));
+    delete tra_gene_tread_;
+  }
+  else
+    ROS_INFO("previous task is alive");
+
+  return;
+}
 
 void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg)
 {
@@ -835,6 +764,23 @@ void WholebodyModule::traGeneProcIniPose()
 
 void WholebodyModule::traGeneProcJointPose()
 {
+  mov_time_ = goal_joint_pose_msg_.mov_time;
+
+  for (int id = 1; id<=MAX_JOINT_ID; id++)
+    joint_ini_pose_(id) = goal_joint_position_(id);
+
+  for (int it = 0; it <goal_joint_pose_msg_.joint_state.name.size(); it++)
+  {
+    std::string joint_name = goal_joint_pose_msg_.joint_state.name[it];
+    double joint_value = goal_joint_pose_msg_.joint_state.position[it];
+
+    joint_ini_pose_(joint_name_to_id_[joint_name]) = joint_value;
+  }
+
+  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
+  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
+
+
   for (int id = 1; id <= MAX_JOINT_ID; id++)
   {
     double ini_value = goal_joint_position_(id);
@@ -858,6 +804,30 @@ void WholebodyModule::traGeneProcJointPose()
 
 void WholebodyModule::traGeneProcWheelPose()
 {
+  mov_time_ = goal_wheel_pose_msg_.mov_time;
+
+  // parse via-point number
+  via_num_ = 1;
+
+  via_time_.resize(via_num_, 1);
+  via_time_.coeffRef(0, 0) = goal_wheel_pose_msg_.via_time;
+
+  wheel_ini_via_pose_.resize(via_num_,3);
+  wheel_ini_via_d_pose_.resize(via_num_,3);
+  wheel_ini_via_dd_pose_.resize(via_num_,3);
+
+  wheel_ini_via_pose_.fill(0.0);
+  wheel_ini_via_d_pose_.fill(0.0);
+  wheel_ini_via_dd_pose_.fill(0.0);
+
+  wheel_ini_via_pose_.coeffRef(0,0) = goal_wheel_pose_msg_.via_pevlis_pose.position.x;
+  wheel_ini_via_pose_.coeffRef(0,1) = goal_wheel_pose_msg_.via_pevlis_pose.position.y;
+  wheel_ini_via_pose_.coeffRef(0,2) = goal_wheel_pose_msg_.via_pevlis_pose.position.z;
+
+  wheel_ini_pose_(0) = goal_wheel_pose_msg_.goal_pevlis_pose.position.x;
+  wheel_ini_pose_(1) = goal_wheel_pose_msg_.goal_pevlis_pose.position.y;
+  wheel_ini_pose_(2) = goal_wheel_pose_msg_.goal_pevlis_pose.position.z;
+
   all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
   goal_pelvis_tra_.resize(all_time_steps_, 3);
   goal_l_foot_tra_.resize(all_time_steps_, 3);
@@ -881,11 +851,11 @@ void WholebodyModule::traGeneProcWheelPose()
       Eigen::MatrixXd d_via_value = wheel_ini_via_d_pose_.col(dim);
       Eigen::MatrixXd dd_via_value = wheel_ini_via_dd_pose_.col(dim);
 
-      tra = robotis_framework::calcMinimumJerkTraWithViaPoints(via_num_,
-                                                               ini_value, 0.0, 0.0,
-                                                               via_value, d_via_value, dd_via_value,
-                                                               tar_value, 0.0, 0.0,
-                                                               control_cycle_sec_, via_time_, mov_time_);
+      tra = robotis_framework::calcMinimumJerkTraWithViaPointsPosition(via_num_,
+                                                                       ini_value, 0.0, 0.0,
+                                                                       via_value,
+                                                                       tar_value, 0.0, 0.0,
+                                                                       control_cycle_sec_, via_time_, mov_time_);
     }
     goal_pelvis_tra_.block(0, dim, all_time_steps_, 1) = tra;
   }
@@ -1409,24 +1379,6 @@ void WholebodyModule::calcGoalFT()
   balance_goal_r_foot_ft_ = -420.0 * l_foot_distance / 0.186;
 }
 
-bool WholebodyModule::getJointPoseCallback(thormang3_wholebody_module_msgs::GetJointPose::Request &req,
-                                           thormang3_wholebody_module_msgs::GetJointPose::Response &res)
-{
-  if(enable_ == false)
-    return false;
-
-  for (int id=1; id<=MAX_JOINT_ID; id++)
-  {
-    if(robotis_->thormang3_link_data_[id]->name_ == req.joint_name)
-    {
-      res.joint_value = goal_joint_position_(id);
-      return true;
-    }
-  }
-
-  return false;
-}
-
 bool WholebodyModule::getKinematicsPoseCallback(thormang3_wholebody_module_msgs::GetKinematicsPose::Request &req,
                                                 thormang3_wholebody_module_msgs::GetKinematicsPose::Response &res)
 {
@@ -1617,22 +1569,24 @@ void WholebodyModule::setEndTrajectory()
         is_knee_torque_limit_down_ = false;
       }
 
-      ROS_INFO("l_arm_sh_p1 : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_p1"]) * RADIAN2DEGREE );
-      ROS_INFO("l_arm_sh_r : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_r"]) * RADIAN2DEGREE );
-      ROS_INFO("l_arm_sh_p2 : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_p2"]) * RADIAN2DEGREE );
-      ROS_INFO("l_arm_el_y : %f", goal_joint_position_(joint_name_to_id_["l_arm_el_y"]) * RADIAN2DEGREE );
-      ROS_INFO("l_arm_wr_r : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_r"]) * RADIAN2DEGREE );
-      ROS_INFO("l_arm_wr_y : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_y"]) * RADIAN2DEGREE );
-      ROS_INFO("l_arm_wr_p : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_p"]) * RADIAN2DEGREE );
+      if (arm_angle_display_ == true)
+      {
+        ROS_INFO("l_arm_sh_p1 : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_p1"]) * RADIAN2DEGREE );
+        ROS_INFO("l_arm_sh_r  : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_r"])  * RADIAN2DEGREE );
+        ROS_INFO("l_arm_sh_p2 : %f", goal_joint_position_(joint_name_to_id_["l_arm_sh_p2"]) * RADIAN2DEGREE );
+        ROS_INFO("l_arm_el_y  : %f", goal_joint_position_(joint_name_to_id_["l_arm_el_y"])  * RADIAN2DEGREE );
+        ROS_INFO("l_arm_wr_r  : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_r"])  * RADIAN2DEGREE );
+        ROS_INFO("l_arm_wr_y  : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_y"])  * RADIAN2DEGREE );
+        ROS_INFO("l_arm_wr_p  : %f", goal_joint_position_(joint_name_to_id_["l_arm_wr_p"])  * RADIAN2DEGREE );
 
-      ROS_INFO("r_arm_sh_p1 : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) * RADIAN2DEGREE );
-      ROS_INFO("r_arm_sh_r : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_r"]) * RADIAN2DEGREE );
-      ROS_INFO("r_arm_sh_p2 : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) * RADIAN2DEGREE );
-      ROS_INFO("r_arm_el_y : %f", goal_joint_position_(joint_name_to_id_["r_arm_el_y"]) * RADIAN2DEGREE );
-      ROS_INFO("r_arm_wr_r : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_r"]) * RADIAN2DEGREE );
-      ROS_INFO("r_arm_wr_y : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_y"]) * RADIAN2DEGREE );
-      ROS_INFO("r_arm_wr_p : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_p"]) * RADIAN2DEGREE );
-
+        ROS_INFO("r_arm_sh_p1 : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) * RADIAN2DEGREE );
+        ROS_INFO("r_arm_sh_r  : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  * RADIAN2DEGREE );
+        ROS_INFO("r_arm_sh_p2 : %f", goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) * RADIAN2DEGREE );
+        ROS_INFO("r_arm_el_y  : %f", goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  * RADIAN2DEGREE );
+        ROS_INFO("r_arm_wr_r  : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  * RADIAN2DEGREE );
+        ROS_INFO("r_arm_wr_y  : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  * RADIAN2DEGREE );
+        ROS_INFO("r_arm_wr_p  : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  * RADIAN2DEGREE );
+      }
     }
   }
 }

@@ -37,8 +37,8 @@
 
 #include "thormang3_wholebody_module_msgs/JointPose.h"
 #include "thormang3_wholebody_module_msgs/KinematicsPose.h"
+#include "thormang3_wholebody_module_msgs/WheelPose.h"
 
-#include "thormang3_wholebody_module_msgs/GetJointPose.h"
 #include "thormang3_wholebody_module_msgs/GetKinematicsPose.h"
 
 namespace thormang3
@@ -54,6 +54,7 @@ private:
   boost::thread* tra_gene_tread_;
 
   bool gazebo_;
+  bool arm_angle_display_;
 
   /* sample subscriber & publisher */
   ros::Publisher status_msg_pub_;
@@ -206,18 +207,18 @@ private:
   /* msgs */
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
   thormang3_wholebody_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
+  thormang3_wholebody_module_msgs::WheelPose goal_wheel_pose_msg_;
 
   void queueThread();
 
   void parseInverseKinematicsWeightData(const std::string &path);
   void parseIniPoseData(const std::string &path);
   void parseBalanceGainData(const std::string &path);
-  void parseWheelPoseData(const std::string &path);
-  void parseJointPoseData(const std::string &path);
-  void parseWheelJointPoseData(const std::string &path);
+  void parseWheelJointPoseData();
 
   void setIniPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
-//  void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
+  void setWheelPoseMsgCallback(const thormang3_wholebody_module_msgs::WheelPose::ConstPtr& msg);
+  void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
   void setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg);
   void setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg);
 
@@ -256,8 +257,6 @@ private:
   void traGeneProcWholebody();
   void traGeneProcArm();
 
-  bool getJointPoseCallback(thormang3_wholebody_module_msgs::GetJointPose::Request &req,
-                            thormang3_wholebody_module_msgs::GetJointPose::Response &res);
   bool getKinematicsPoseCallback(thormang3_wholebody_module_msgs::GetKinematicsPose::Request &req,
                                  thormang3_wholebody_module_msgs::GetKinematicsPose::Response &res);
 
