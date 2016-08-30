@@ -13,7 +13,7 @@ WalkControlModule::WalkControlModule()
   , control_cycle_msec_(8)
 {
   enable_ = false;
-  module_name_ = "walk_control_module"; // set unique module name
+  module_name_ = "walking_module"; // set unique module name
   control_mode_ = robotis_framework::PositionControl;
 }
 
