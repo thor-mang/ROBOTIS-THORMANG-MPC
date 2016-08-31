@@ -60,19 +60,18 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
   {
     for (XmlRpc::XmlRpcValue::iterator itr = ft_sensors.begin(); itr != ft_sensors.end(); itr++)
     {
-      const std::string& sensor = itr->first;
       XmlRpc::XmlRpcValue val = itr->second;
 
-      if (val.getType() == XmlRpc::XmlRpcValue::TypeArray && val.size() >= 2)
+      if (val.getType() == XmlRpc::XmlRpcValue::TypeArray && val.size() == 2)
       {
-        for (size_t i = 0; i < val.size(); i++)
-        {
-          const std::string& name = val[0];
-          const std::string& frame_id = val[1];
+        const std::string& name = val[0];
+        const std::string& frame_id = val[1];
 
-          hardware_interface::ForceTorqueSensorHandle ft_sensor_handle(name, frame_id, force_[sensor], torque_[sensor]);
-          force_torque_sensor_interface_.registerHandle(ft_sensor_handle);
-        }
+        hardware_interface::ForceTorqueSensorHandle ft_sensor_handle(name, frame_id, force_[name], torque_[name]);
+        force_torque_sensor_interface_.registerHandle(ft_sensor_handle);
+
+        hardware_interface::ForceTorqueSensorHandle ft_sensor_handle_scaled(name + "_scaled", frame_id, force_scaled_[name], torque_scaled_[name]);
+        force_torque_sensor_interface_.registerHandle(ft_sensor_handle_scaled);
       }
       else
         ROS_ERROR("[RosControlModule] FT-Sensors info must be given as array of strings.");
@@ -142,6 +141,20 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
     kv.second[0] = sensors[kv.first + "_tx_raw_Nm"];
     kv.second[1] = sensors[kv.first + "_ty_raw_Nm"];
     kv.second[2] = sensors[kv.first + "_tz_raw_Nm"];
+  }
+
+  for (auto& kv : force_scaled_)
+  {
+    kv.second[0] = sensors[kv.first + "_fx_scaled_N"];
+    kv.second[1] = sensors[kv.first + "_fy_scaled_N"];
+    kv.second[2] = sensors[kv.first + "_fz_scaled_N"];
+    //ROS_INFO_STREAM("Sensor: " << kv.first << "Force: " << kv.second[0] << ", " << kv.second[1] << "; " << kv.second[2]);
+  }
+  for (auto& kv : torque_scaled_)
+  {
+    kv.second[0] = sensors[kv.first + "_tx_scaled_Nm"];
+    kv.second[1] = sensors[kv.first + "_ty_scaled_Nm"];
+    kv.second[2] = sensors[kv.first + "_tz_scaled_Nm"];
   }
 
   /** update joints */

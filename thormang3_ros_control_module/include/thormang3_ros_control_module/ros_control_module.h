@@ -96,6 +96,9 @@ private:
   hardware_interface::ForceTorqueSensorInterface force_torque_sensor_interface_;
   std::map<std::string, double[3]> force_;
   std::map<std::string, double[3]> torque_;
+
+  std::map<std::string, double[3]> force_scaled_;
+  std::map<std::string, double[3]> torque_scaled_;
   
   // joint interfaces
   hardware_interface::JointStateInterface jnt_state_interface_;

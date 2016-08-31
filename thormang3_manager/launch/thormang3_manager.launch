@@ -20,6 +20,7 @@
 
   <param name="ft_data_path"             value="$(find thormang3_manager)/config/ft_data.yaml" />
   <param name="ft_calibration_data_path" value="$(find thormang3_manager)/config/ft_calibration_data.yaml" />
+  <param name="wrist_ft_calibration_data_path" value="$(find thormang3_manager)/config/wrist_ft_calibration_data.yaml" />
 
   <param name="action_file_path"         value="$(find thormang3_action_module)/data/motion_4096.bin" />
 

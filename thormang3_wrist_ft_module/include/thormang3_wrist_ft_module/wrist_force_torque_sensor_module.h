@@ -81,11 +81,17 @@ public:
   double l_wrist_fx_raw_N,  l_wrist_fy_raw_N,  l_wrist_fz_raw_N;
   double l_wrist_tx_raw_Nm, l_wrist_ty_raw_Nm, l_wrist_tz_raw_Nm;
 
+  double r_wrist_fx_scaled_N_,  r_wrist_fy_scaled_N_,  r_wrist_fz_scaled_N_;
+  double r_wrist_tx_scaled_Nm_, r_wrist_ty_scaled_Nm_, r_wrist_tz_scaled_Nm_;
+  double l_wrist_fx_scaled_N_,  l_wrist_fy_scaled_N_,  l_wrist_fz_scaled_N_;
+  double l_wrist_tx_scaled_Nm_, l_wrist_ty_scaled_Nm_, l_wrist_tz_scaled_Nm_;
+
 private:
   void wristForceTorqueSensorInitialize();
 
   void msgQueueThread();
 
+  void saveFTCalibrationData(const std::string &path);
   void FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
   void publishStatusMsg(unsigned int type, std::string msg);
 

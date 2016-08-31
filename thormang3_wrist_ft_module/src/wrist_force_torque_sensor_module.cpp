@@ -19,6 +19,11 @@ WristForceTorqueSensor::WristForceTorqueSensor()
   l_wrist_fx_raw_N  = l_wrist_fy_raw_N  = l_wrist_fz_raw_N  = 0;
   l_wrist_tx_raw_Nm = l_wrist_ty_raw_Nm = l_wrist_tz_raw_Nm = 0;
 
+  r_wrist_fx_scaled_N_  = r_wrist_fy_scaled_N_  = r_wrist_fz_scaled_N_  = 0;
+  r_wrist_tx_scaled_Nm_ = r_wrist_ty_scaled_Nm_ = r_wrist_tz_scaled_Nm_ = 0;
+  l_wrist_fx_scaled_N_  = l_wrist_fy_scaled_N_  = l_wrist_fz_scaled_N_  = 0;
+  l_wrist_tx_scaled_Nm_ = l_wrist_ty_scaled_Nm_ = l_wrist_tz_scaled_Nm_ = 0;
+
   result_["r_wrist_fx_raw_N"]	= r_wrist_fx_raw_N;
   result_["r_wrist_fy_raw_N"]	= r_wrist_fy_raw_N;
   result_["r_wrist_fz_raw_N"]	= r_wrist_fz_raw_N;
@@ -32,6 +37,20 @@ WristForceTorqueSensor::WristForceTorqueSensor()
   result_["l_wrist_tx_raw_Nm"]	= l_wrist_tx_raw_Nm;
   result_["l_wrist_ty_raw_Nm"]	= l_wrist_ty_raw_Nm;
   result_["l_wrist_tz_raw_Nm"]	= l_wrist_tz_raw_Nm;
+
+  result_["r_wrist_fx_scaled_N"]  = r_wrist_fx_scaled_N_;
+  result_["r_wrist_fy_scaled_N"]  = r_wrist_fy_scaled_N_;
+  result_["r_wrist_fz_scaled_N"]  = r_wrist_fz_scaled_N_;
+  result_["r_wrist_tx_scaled_Nm"] = r_wrist_tx_scaled_Nm_;
+  result_["r_wrist_ty_scaled_Nm"] = r_wrist_ty_scaled_Nm_;
+  result_["r_wrist_tz_scaled_Nm"] = r_wrist_tz_scaled_Nm_;
+
+  result_["l_wrist_fx_scaled_N"]  = l_wrist_fx_scaled_N_;
+  result_["l_wrist_fy_scaled_N"]  = l_wrist_fy_scaled_N_;
+  result_["l_wrist_fz_scaled_N"]  = l_wrist_fz_scaled_N_;
+  result_["l_wrist_tx_scaled_Nm"] = l_wrist_tx_scaled_Nm_;
+  result_["l_wrist_ty_scaled_Nm"] = l_wrist_ty_scaled_Nm_;
+  result_["l_wrist_tz_scaled_Nm"] = l_wrist_tz_scaled_Nm_;
 
   exist_r_wrist_an_r_ = false;
   exist_r_wrist_an_p_ = false;
@@ -65,13 +84,56 @@ void WristForceTorqueSensor::wristForceTorqueSensorInitialize()
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
   ros::NodeHandle _ros_node;
+  std::string wrist_ft_data_path  = _ros_node.param<std::string>("ft_data_path", "");
+  std::string ft_calib_data_path = _ros_node.param<std::string>("wrist_ft_calibration_data_path", "");
 
+  r_wrist_ft_sensor_.initialize(wrist_ft_data_path, "ft_right_wrist", "r_wrist_ft_link" , "sensor/ft/right_wrist/raw", "sensor/ft/right_wrist/scaled");
+  l_wrist_ft_sensor_.initialize(wrist_ft_data_path, "ft_left_wrist",  "l_wrist_ft_link",  "sensor/ft/left_wrist/raw",  "sensor/ft/left_wrist/scaled");
 
-  std::string _wrist_ft_data_path  = _ros_node.param<std::string>("ft_data_path", "");
-  std::string _ft_calib_data_path = _ros_node.param<std::string>("ft_calibration_data_path", "");
+  YAML::Node doc;
+  doc = YAML::LoadFile(ft_calib_data_path.c_str());
 
-  r_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_right_wrist", "r_wrist_ft_link" , "sensor/ft/right_wrist/raw", "sensor/ft/right_wrist/scaled");
-  l_wrist_ft_sensor_.initialize(_wrist_ft_data_path, "ft_left_wrist",  "l_wrist_ft_link",  "sensor/ft/left_wrist/raw",  "sensor/ft/left_wrist/scaled");
+  std::vector<double> ft;
+  ft = doc["ft_right_wrist_air"].as<std::vector<double> >();
+  r_wrist_ft_air_ = Eigen::Map<Eigen::MatrixXd>(ft.data(), 6, 1);
+
+  ft.clear();
+  ft = doc["ft_left_wrist_air"].as<std::vector<double> >();
+  l_wrist_ft_air_ = Eigen::Map<Eigen::MatrixXd>(ft.data(), 6, 1);
+
+  r_wrist_ft_sensor_.setScaleParam(1, r_wrist_ft_air_);
+  l_wrist_ft_sensor_.setScaleParam(1, l_wrist_ft_air_);
+  publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Loaded wrist FT Calibration Data");
+}
+
+void WristForceTorqueSensor::saveFTCalibrationData(const std::string &path)
+{
+  if(!has_ft_air_) return;
+
+  YAML::Emitter out;
+
+  out << YAML::BeginMap;
+
+  // air - right
+  std::vector<double> ft_calibration;
+  for(int ix = 0; ix < 6; ix++)
+    ft_calibration.push_back(r_wrist_ft_air_.coeff(ix, 0));
+  out << YAML::Key << "ft_right_wrist_air" << YAML::Value << ft_calibration;
+
+  // air - left
+  ft_calibration.clear();
+  for(int ix = 0; ix < 6; ix++)
+    ft_calibration.push_back(l_wrist_ft_air_.coeff(ix, 0));
+  out << YAML::Key << "ft_left_wrist_air" << YAML::Value << ft_calibration;
+
+  out << YAML::EndMap;
+
+  // output to file
+  std::ofstream fout(path.c_str());
+  fout << out.c_str();
+
+  ROS_INFO("Save FT wrist calibration data");
+  publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Saved wrist FT Calibration Data");
 }
 
 
@@ -81,9 +143,9 @@ void WristForceTorqueSensor::FTSensorCalibrationCommandCallback(const std_msgs::
 
   if( (ft_command_ == FT_NONE) && (ft_period_ == ft_get_count_) )
   {
-    std::string _command = msg->data;
+    std::string command = msg->data;
 
-    if(_command == "ft_air")
+    if(command == "ft_air")
     {
       ft_get_count_ = 0;
       ft_command_ = FT_AIR;
@@ -91,6 +153,26 @@ void WristForceTorqueSensor::FTSensorCalibrationCommandCallback(const std_msgs::
       has_ft_air_		= false;
       r_wrist_ft_air_.fill(0);
       l_wrist_ft_air_.fill(0);
+    }
+    else if(command == "ft_send")
+    {
+      if(has_ft_air_)
+      {
+        r_wrist_ft_sensor_.setScaleParam(1, r_wrist_ft_air_);
+        l_wrist_ft_sensor_.setScaleParam(1, l_wrist_ft_air_);
+
+        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Applied wrist FT Calibration");
+      }
+      else
+      {
+        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "There is no value for calibration");
+      }
+    }
+    else if(command == "ft_save")
+    {
+      ros::NodeHandle ros_node;
+      std::string ft_calib_data_path = ros_node.param<std::string>("wrist_ft_calibration_data_path", "");
+      saveFTCalibrationData(ft_calib_data_path);
     }
   }
   else
@@ -104,6 +186,8 @@ void WristForceTorqueSensor::publishStatusMsg(unsigned int type, std::string msg
   _status.type = type;
   _status.module_name = "WristFT";
   _status.status_msg = msg;
+
+  ROS_INFO_STREAM("Status: " << msg);
 
   thormang3_wrist_ft_status_pub_.publish(_status);
 }
@@ -147,7 +231,7 @@ void WristForceTorqueSensor::msgQueueThread()
   _ros_node.setCallbackQueue(&_callback_queue);
 
   /* subscriber */
-  ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &WristForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
+  ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrists_ft/ft_calib_command",	1, &WristForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
   ros::Subscriber ft_left_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/left_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
   ros::Subscriber ft_right_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/right_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
 
@@ -230,6 +314,8 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
 
     r_wrist_ft_sensor_.getCurrentForceTorqueRaw(&r_wrist_fx_raw_N,  &r_wrist_fy_raw_N,  &r_wrist_fz_raw_N,
                                                &r_wrist_tx_raw_Nm, &r_wrist_ty_raw_Nm, &r_wrist_tz_raw_Nm);
+    r_wrist_ft_sensor_.getCurrentForceTorqueScaled(&r_wrist_fx_scaled_N_,  &r_wrist_fy_scaled_N_,  &r_wrist_fz_scaled_N_,
+        &r_wrist_tx_scaled_Nm_, &r_wrist_ty_scaled_Nm_, &r_wrist_tz_scaled_Nm_);
 
     result_["r_wrist_fx_raw_N"]	= r_wrist_fx_raw_N;
     result_["r_wrist_fy_raw_N"]	= r_wrist_fy_raw_N;
@@ -237,6 +323,13 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     result_["r_wrist_tx_raw_Nm"]	= r_wrist_tx_raw_Nm;
     result_["r_wrist_ty_raw_Nm"]	= r_wrist_ty_raw_Nm;
     result_["r_wrist_tz_raw_Nm"]	= r_wrist_tz_raw_Nm;
+
+    result_["r_wrist_fx_scaled_N"]  = r_wrist_fx_scaled_N_;
+    result_["r_wrist_fy_scaled_N"]  = r_wrist_fy_scaled_N_;
+    result_["r_wrist_fz_scaled_N"]  = r_wrist_fz_scaled_N_;
+    result_["r_wrist_tx_scaled_Nm"] = r_wrist_tx_scaled_Nm_;
+    result_["r_wrist_ty_scaled_Nm"] = r_wrist_ty_scaled_Nm_;
+    result_["r_wrist_tz_scaled_Nm"] = r_wrist_tz_scaled_Nm_;
 
   }
 
@@ -258,6 +351,8 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
 
     l_wrist_ft_sensor_.getCurrentForceTorqueRaw(&l_wrist_fx_raw_N,  &l_wrist_fy_raw_N,  &l_wrist_fz_raw_N,
                                                &l_wrist_tx_raw_Nm, &l_wrist_ty_raw_Nm, &l_wrist_tz_raw_Nm);
+    l_wrist_ft_sensor_.getCurrentForceTorqueScaled(&l_wrist_fx_scaled_N_,  &l_wrist_fy_scaled_N_,  &l_wrist_fz_scaled_N_,
+        &l_wrist_tx_scaled_Nm_, &l_wrist_ty_scaled_Nm_, &l_wrist_tz_scaled_Nm_);
 
     result_["l_wrist_fx_raw_N"]	= l_wrist_fx_raw_N;
     result_["l_wrist_fy_raw_N"]	= l_wrist_fy_raw_N;
@@ -265,6 +360,13 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     result_["l_wrist_tx_raw_Nm"]	= l_wrist_tx_raw_Nm;
     result_["l_wrist_ty_raw_Nm"]	= l_wrist_ty_raw_Nm;
     result_["l_wrist_tz_raw_Nm"]	= l_wrist_tz_raw_Nm;
+
+    result_["l_wrist_fx_scaled_N"]  = l_wrist_fx_scaled_N_;
+    result_["l_wrist_fy_scaled_N"]  = l_wrist_fy_scaled_N_;
+    result_["l_wrist_fz_scaled_N"]  = l_wrist_fz_scaled_N_;
+    result_["l_wrist_tx_scaled_Nm"] = l_wrist_tx_scaled_Nm_;
+    result_["l_wrist_ty_scaled_Nm"] = l_wrist_ty_scaled_Nm_;
+    result_["l_wrist_tz_scaled_Nm"] = l_wrist_tz_scaled_Nm_;
   }
 
 
