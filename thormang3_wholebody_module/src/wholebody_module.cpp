@@ -739,19 +739,19 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     robotis_controller_msgs::SyncWriteItem sync_write_msg;
     sync_write_msg.item_name = "goal_torque";
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
-    sync_write_msg.value.push_back(160);
+    sync_write_msg.value.push_back(100);
     sync_write_msg.joint_name.push_back("r_arm_sh_r");
-    sync_write_msg.value.push_back(160);
+    sync_write_msg.value.push_back(100);
     sync_write_msg.joint_name.push_back("r_arm_sh_p2");
-    sync_write_msg.value.push_back(160);
+    sync_write_msg.value.push_back(100);
     sync_write_msg.joint_name.push_back("r_arm_el_y");
-    sync_write_msg.value.push_back(160);
+    sync_write_msg.value.push_back(100);
     sync_write_msg.joint_name.push_back("r_arm_wr_r");
-    sync_write_msg.value.push_back(150);
+    sync_write_msg.value.push_back(70);
     sync_write_msg.joint_name.push_back("r_arm_wr_y");
-    sync_write_msg.value.push_back(150);
+    sync_write_msg.value.push_back(70);
     sync_write_msg.joint_name.push_back("r_arm_wr_p");
-    sync_write_msg.value.push_back(150);
+    sync_write_msg.value.push_back(70);
 
     goal_torque_limit_pub_.publish(sync_write_msg);
 
