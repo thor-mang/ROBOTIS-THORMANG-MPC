@@ -103,3 +103,69 @@
       r_arm_wr_p:
         goal: *goal_pos_constraint
         trajectory: *trajectory_pos_constraint
+
+# -------------------- left leg controller -------------------
+ left_leg_traj_controller:
+    type: "position_controllers/JointTrajectoryController"
+    joints:
+      - l_leg_hip_y
+      - l_leg_hip_r
+      - l_leg_hip_p
+      - l_leg_kn_p
+      - l_leg_an_r
+      - l_leg_an_p
+      
+    constraints:
+      goal_time: *goal_time_constraint
+      stopped_velocity_tolerance: 1.0
+      l_leg_hip_y:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      l_leg_hip_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      l_leg_hip_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      l_leg_kn_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      l_leg_an_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      l_leg_an_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+        
+# -------------------- right leg controller -------------------
+ right_leg_traj_controller:
+    type: "position_controllers/JointTrajectoryController"
+    joints:
+      - r_leg_hip_y
+      - r_leg_hip_r
+      - r_leg_hip_p
+      - r_leg_kn_p
+      - r_leg_an_r
+      - r_leg_an_p
+      
+    constraints:
+      goal_time: *goal_time_constraint
+      stopped_velocity_tolerance: 1.0
+      r_leg_hip_y:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      r_leg_hip_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      r_leg_hip_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      r_leg_kn_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint        
+      r_leg_an_r:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint
+      r_leg_an_p:
+        goal: *goal_pos_constraint
+        trajectory: *trajectory_pos_constraint

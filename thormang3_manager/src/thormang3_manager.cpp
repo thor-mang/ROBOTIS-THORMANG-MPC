@@ -91,7 +91,7 @@ int main(int argc, char **argv)
     }
 
     if(offset_file != "")
-        controller->loadOffsets(offset_file);
+        controller->loadOffset(offset_file);
 
     sleep(1);
 

@@ -29,7 +29,7 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
 
   control_cycle_msec_ = control_cycle_msec;
 
-  ros::NodeHandle nh("joints/ros_control_module");
+  ros::NodeHandle nh("ros_control_module");
 
   // clear already exisiting outputs
   for (auto& kv : result_)
@@ -224,7 +224,7 @@ void RosControlModule::queueThread()
 {
   ros_control_mutex_.lock();
 
-  ros::NodeHandle nh("joints");
+  ros::NodeHandle nh;
   ros::CallbackQueue callback_queue;
 
   nh.setCallbackQueue(&callback_queue);
