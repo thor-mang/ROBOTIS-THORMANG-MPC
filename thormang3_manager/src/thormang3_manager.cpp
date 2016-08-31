@@ -49,7 +49,7 @@
 #include "thormang3_manipulation_module/manipulation_module.h"
 #include "thormang3_walking_module/walking_module.h"
 #include "thormang3_ros_control_module/ros_control_module.h"
-#include "thormang3_walk_control_module/walk_control_module.h"
+#include "thormang3_step_control_module/step_control_module.h"
 
 
 using namespace thormang3;
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
         ImuSensor::getInstance()->gazebo_mode_ = true;
         FeetForceTorqueSensor::getInstance()->gazebo_mode_ = true;
         WristForceTorqueSensor::getInstance()->gazebo_mode_ = true;
-        WalkControlModule::getInstance()->gazebo_mode_ = true;
+        StepControlModule::getInstance()->gazebo_mode_ = true;
         ROS_WARN("SET TO GAZEBO MODE!");
     }
 
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
     controller->addMotionModule((robotis_framework::MotionModule*)ManipulationModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)HeadControlModule::getInstance());
     //controller->addMotionModule((robotis_framework::MotionModule*)WalkingMotionModule::getInstance()); // Encaspulated by WalkControlModule
-    controller->addMotionModule((robotis_framework::MotionModule*)WalkControlModule::getInstance());
+    controller->addMotionModule((robotis_framework::MotionModule*)StepControlModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)RosControlModule::getInstance());
 
     controller->startTimer();

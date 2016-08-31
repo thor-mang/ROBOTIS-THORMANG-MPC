@@ -1,4 +1,4 @@
-#include <thormang3_walk_control_module/preview_walk_plugin.h>
+#include <thormang3_step_control_module/robotis_online_walking_plugin.h>
 
 #include <thormang3_walking_module/thormang3_online_walking.h>
 
@@ -10,28 +10,28 @@ namespace thormang3
 {
 using namespace vigir_footstep_planning;
 
-PreviewWalkPlugin::PreviewWalkPlugin()
-  : WalkControllerPlugin()
+RobotisOnlineWalkingPlugin::RobotisOnlineWalkingPlugin()
+  : StepControllerPlugin()
 {
 }
 
-PreviewWalkPlugin::~PreviewWalkPlugin()
+RobotisOnlineWalkingPlugin::~RobotisOnlineWalkingPlugin()
 {
 }
 
-void PreviewWalkPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
+void RobotisOnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
 {
-  WalkControllerPlugin::setStepPlanMsgPlugin(plugin);
+  StepControllerPlugin::setStepPlanMsgPlugin(plugin);
 
   boost::unique_lock<boost::shared_mutex> lock(plugin_mutex_);
 
   thor_mang_step_plan_msg_plugin_ = boost::dynamic_pointer_cast<ThorMangStepPlanMsgPlugin>(plugin);
 
   if (!thor_mang_step_plan_msg_plugin_)
-    ROS_ERROR("[PreviewWalkPlugin] StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
+    ROS_ERROR("[RobotisOnlineWalkingPlugin] StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
 }
 
-void PreviewWalkPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
+void RobotisOnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 {
   if (step_plan.steps.empty())
     return;
@@ -53,7 +53,7 @@ void PreviewWalkPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
       thor_mang_footstep_planning::toRos(ref_step.position_data.right_foot_pose, ref_pose);
     else
     {
-      ROS_ERROR("[PreviewWalkPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
+      ROS_ERROR("[RobotisOnlineWalkingPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
       return;
     }
 
@@ -63,23 +63,23 @@ void PreviewWalkPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
     msgs::StepPlan step_plan_transformed = step_plan;
     vigir_footstep_planning::StepPlan::transformStepPlan(step_plan_transformed, transform);
 
-    WalkControllerPlugin::updateStepPlan(step_plan_transformed);
+    StepControllerPlugin::updateStepPlan(step_plan_transformed);
   }
   else
   {
     /// TODO: Handle reverse spooling correctly
 
-    WalkControllerPlugin::updateStepPlan(step_plan);
+    StepControllerPlugin::updateStepPlan(step_plan);
   }
 }
 
-void PreviewWalkPlugin::initWalk()
+void RobotisOnlineWalkingPlugin::initWalk()
 {
   thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
 
   if (online_walking->isRunning())
   {
-    ROS_INFO("[PreviewWalkPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
+    ROS_INFO("[RobotisOnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
@@ -105,12 +105,12 @@ void PreviewWalkPlugin::initWalk()
 
   online_walking->start();
 
-  ROS_INFO("[PreviewWalkPlugin] Starting walking.");
+  ROS_INFO("[RobotisOnlineWalkingPlugin] Starting walking.");
 }
 
-void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
+void RobotisOnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
 {
-  WalkControllerPlugin::preProcess(event);
+  StepControllerPlugin::preProcess(event);
 
   if (getState() != ACTIVE)
     return;
@@ -120,7 +120,7 @@ void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
   // first check if walking engine is still running
   if (!online_walking->isRunning())
   {
-    ROS_INFO("[PreviewWalkPlugin] Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
+    ROS_INFO("[RobotisOnlineWalkingPlugin] Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
@@ -158,7 +158,7 @@ void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
       // check for successful execution of queue
       if (step_queue_->lastStepIndex() == feedback.last_performed_step_index)
       {
-        ROS_INFO("[PreviewWalkPlugin] Walking finished.");
+        ROS_INFO("[RobotisOnlineWalkingPlugin] Walking finished.");
 
         feedback.currently_executing_step_index = -1;
         feedback.first_changeable_step_index = -1;
@@ -173,7 +173,7 @@ void PreviewWalkPlugin::preProcess(const ros::TimerEvent& event)
   }
 }
 
-bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
+bool RobotisOnlineWalkingPlugin::executeStep(const msgs::Step& step)
 {
   /// TODO: flush step
   thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
@@ -187,7 +187,7 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     //online_walking->getReferenceStepDatafotAddition(&_refStepData);
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding initial step.");
+      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding initial step.");
       return false;
     }
     last_step_data_ = step_data;
@@ -200,7 +200,7 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     step_data.time_data.abs_step_time += 1.0;
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding (temp) final step.");
+      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
       return false;
     }
   }
@@ -215,7 +215,7 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     step_data << step;
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding step %i.", step.step_index);
+      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding step %i.", step.step_index);
       return false;
     }
     last_step_data_ = step_data;
@@ -228,7 +228,7 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
     step_data.time_data.abs_step_time += 2.0;
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[PreviewWalkPlugin] executeStep: Error while adding (temp) final step.");
+      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
       return false;
     }
   }
@@ -239,13 +239,13 @@ bool PreviewWalkPlugin::executeStep(const msgs::Step& step)
   feedback.first_changeable_step_index++;
   setFeedbackState(feedback);
 
-  ROS_INFO("[PreviewWalkPlugin] Send step %i to walking engine.", step.step_index);
+  ROS_INFO("[RobotisOnlineWalkingPlugin] Send step %i to walking engine.", step.step_index);
   return true;
 }
 
-void PreviewWalkPlugin::stop()
+void RobotisOnlineWalkingPlugin::stop()
 {
-  WalkControllerPlugin::stop();
+  StepControllerPlugin::stop();
 
   /// TODO: Stop when both feet on ground
 
@@ -254,4 +254,5 @@ void PreviewWalkPlugin::stop()
 } // namespace
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(thormang3::PreviewWalkPlugin, vigir_walk_control::WalkControllerPlugin)
+PLUGINLIB_EXPORT_CLASS(thormang3::RobotisOnlineWalkingPlugin, vigir_step_control::StepControllerPlugin)
+

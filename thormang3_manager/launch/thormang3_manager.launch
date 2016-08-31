@@ -32,7 +32,7 @@
   </include>
 
   <!-- walk control module -->
-  <include file="$(find thormang3_walk_control_module)/launch/load_walk_controller.launch" />
+  <include file="$(find thormang3_step_control_module)/launch/load_step_controller.launch" />
 
   <!-- ros control module -->
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />

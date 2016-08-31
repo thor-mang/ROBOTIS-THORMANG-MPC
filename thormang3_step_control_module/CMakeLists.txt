@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(thormang3_walk_control_module)
+project(thormang3_step_control_module)
 
 #set(CMAKE_BUILD_TYPE Debug)
 #set(CMAKE_BUILD_TYPE Release)
@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   std_msgs
   thormang3_walking_module
-  vigir_walk_control
+  vigir_step_control
   thor_mang_footstep_planning_plugins
   dynamic_reconfigure
 )
@@ -34,7 +34,7 @@ find_package(catkin REQUIRED COMPONENTS
 ########### Dynamic Reconfigure
 
 generate_dynamic_reconfigure_options(
-  cfg/BalanceParameters.cfg
+  config/BalanceParameters.cfg
 )
 
 
@@ -100,8 +100,8 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES thormang3_walk_control_module
-  CATKIN_DEPENDS roscpp actionlib_msgs actionlib std_msgs thormang3_walking_module vigir_walk_control thor_mang_footstep_planning_plugins
+  LIBRARIES thormang3_step_control_module
+  CATKIN_DEPENDS roscpp actionlib_msgs actionlib std_msgs thormang3_walking_module vigir_step_control thor_mang_footstep_planning_plugins
 #  DEPENDS system_lib
 )
 
@@ -115,13 +115,13 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Specify additional locations of header files
 set(HEADERS
-    include/${PROJECT_NAME}/preview_walk_plugin.h
-    include/${PROJECT_NAME}/walk_control_module.h
+    include/${PROJECT_NAME}/robotis_online_walking_plugin.h
+    include/${PROJECT_NAME}/step_control_module.h
 )
 
 set(SOURCES
-    src/preview_walk_plugin.cpp
-    src/walk_control_module.cpp
+    src/robotis_online_walking_plugin.cpp
+    src/step_control_module.cpp
 )
 
 ## Declare a cpp library
@@ -150,7 +150,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS thormang3_walk_control_module thormang3_walk_control_module_node
+# install(TARGETS thormang3_step_control_module thormang3_step_control_module_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -175,7 +175,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_thormang3_walk_control_module.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_thormang3_step_control_module.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

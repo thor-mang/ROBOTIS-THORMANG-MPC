@@ -1,4 +1,4 @@
-#include <thormang3_walk_control_module/walk_control_module.h>
+#include <thormang3_step_control_module/step_control_module.h>
 
 #include <vigir_generic_params/parameter_manager.h>
 #include <vigir_pluginlib/plugin_manager.h>
@@ -7,7 +7,7 @@
 
 namespace thormang3
 {
-WalkControlModule::WalkControlModule()
+StepControlModule::StepControlModule()
   : WalkingMotionModule()
   , gazebo_mode_(false)
   , control_cycle_msec_(8)
@@ -17,14 +17,14 @@ WalkControlModule::WalkControlModule()
   control_mode_ = robotis_framework::PositionControl;
 }
 
-WalkControlModule::~WalkControlModule()
+StepControlModule::~StepControlModule()
 {
   queue_thread_.join();
 }
 
-void WalkControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* robot)
+void StepControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* robot)
 {
-  boost::mutex::scoped_lock lock(walk_control_mutex_);
+  boost::mutex::scoped_lock lock(step_control_mutex_);
 
   // init basic walking
   WalkingMotionModule::initialize(control_cycle_msec, robot);
@@ -32,25 +32,25 @@ void WalkControlModule::initialize(const int control_cycle_msec, robotis_framewo
   control_cycle_msec_ = control_cycle_msec;
 
   /** start ros thread */
-  queue_thread_ = boost::thread(boost::bind(&WalkControlModule::queueThread, this));
+  queue_thread_ = boost::thread(boost::bind(&StepControlModule::queueThread, this));
 }
 
-void WalkControlModule::process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors)
+void StepControlModule::process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors)
 {
-  boost::mutex::scoped_lock lock(walk_control_mutex_);
+  boost::mutex::scoped_lock lock(step_control_mutex_);
 
-  if (walk_controller_)
-    walk_controller_->update();
+  if (step_controller_)
+    step_controller_->update();
 
   // finally run low level process
   WalkingMotionModule::process(dxls, sensors);
 }
 
-void WalkControlModule::queueThread()
+void StepControlModule::queueThread()
 {
-  walk_control_mutex_.lock();
+  step_control_mutex_.lock();
 
-  ros::NodeHandle nh("walk_control_module");
+  ros::NodeHandle nh("step_control_module");
   ros::CallbackQueue callback_queue;
 
   nh.setCallbackQueue(&callback_queue);
@@ -60,15 +60,15 @@ void WalkControlModule::queueThread()
   vigir_pluginlib::PluginManager::initialize(nh);
 
   // dynamic reconfigure
-  dynamic_reconfigure::Server<thormang3_walk_control_module::BalanceParametersConfig> server(nh);
-  dynamic_reconfigure::Server<thormang3_walk_control_module::BalanceParametersConfig>::CallbackType callback_f;
+  dynamic_reconfigure::Server<thormang3_step_control_module::BalanceParametersConfig> server(nh);
+  dynamic_reconfigure::Server<thormang3_step_control_module::BalanceParametersConfig>::CallbackType callback_f;
 
   // start walk controller
-  walk_controller_.reset(new vigir_walk_control::WalkController(nh, false));
+  step_controller_.reset(new vigir_step_control::StepController(nh, false));
 
-  walk_control_mutex_.unlock();  
+  step_control_mutex_.unlock();
 
-  callback_f = boost::bind(&WalkControlModule::dynamicReconfigureCallback, this, _1, _2);
+  callback_f = boost::bind(&StepControlModule::dynamicReconfigureCallback, this, _1, _2);
   server.setCallback(callback_f);
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
@@ -76,9 +76,9 @@ void WalkControlModule::queueThread()
     callback_queue.callAvailable(duration);
 }
 
-void WalkControlModule::dynamicReconfigureCallback(thormang3_walk_control_module::BalanceParametersConfig& config, uint32_t level)
+void StepControlModule::dynamicReconfigureCallback(thormang3_step_control_module::BalanceParametersConfig& config, uint32_t level)
 {
-  boost::mutex::scoped_lock lock(walk_control_mutex_);
+  boost::mutex::scoped_lock lock(step_control_mutex_);
 
   thormang3_walking_module_msgs::SetBalanceParam balance_param_update;
 
