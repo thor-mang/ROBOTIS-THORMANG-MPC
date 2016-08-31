@@ -221,6 +221,7 @@ private:
   void setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg);
   void setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg);
   void setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg);
+  void setArmTorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg);
 
   void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
