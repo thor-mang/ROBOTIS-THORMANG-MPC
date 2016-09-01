@@ -28,7 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
   thormang3_walking_module
   thormang3_base_module
   thormang3_ros_control_module
-  thormang3_walk_control_module
+  thormang3_step_control_module
 )
 
 find_package(Eigen REQUIRED)

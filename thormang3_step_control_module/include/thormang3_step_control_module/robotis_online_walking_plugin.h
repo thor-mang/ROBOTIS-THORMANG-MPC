@@ -26,12 +26,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#ifndef WALK_CONTROLLER_TEST_PLUGIN_H__
-#define WALK_CONTROLLER_TEST_PLUGIN_H__
+#ifndef ROBOTIS_ONLINE_WALKING_PLUGIN_H__
+#define ROBOTIS_ONLINE_WALKING_PLUGIN_H__
 
 #include <ros/ros.h>
 
-#include <vigir_walk_control/walk_controller_plugin.h>
+#include <vigir_step_control/step_controller_plugin.h>
 
 #include <thor_mang_footstep_planning_plugins/thor_mang_step_plan_msg_plugin.h>
 
@@ -41,19 +41,19 @@ namespace thormang3
 {
 using namespace vigir_footstep_planning;
 using namespace vigir_footstep_planning_msgs;
-using namespace vigir_walk_control;
+using namespace vigir_step_control;
 using namespace thor_mang_footstep_planning;
 
-class PreviewWalkPlugin
-  : public WalkControllerPlugin
+class RobotisOnlineWalkingPlugin
+  : public StepControllerPlugin
 {
 public:
   // typedefs
-  typedef boost::shared_ptr<PreviewWalkPlugin> Ptr;
-  typedef boost::shared_ptr<const PreviewWalkPlugin> ConstPtr;
+  typedef boost::shared_ptr<RobotisOnlineWalkingPlugin> Ptr;
+  typedef boost::shared_ptr<const RobotisOnlineWalkingPlugin> ConstPtr;
 
-  PreviewWalkPlugin();
-  virtual ~PreviewWalkPlugin();
+  RobotisOnlineWalkingPlugin();
+  virtual ~RobotisOnlineWalkingPlugin();
 
   /**
    * @brief Sets the StepPlanMsgPlugin to be used.

@@ -26,8 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //=================================================================================================
 
-#ifndef WALK_CONTROL_MODULE_H_
-#define WALK_CONTROL_MODULE_H_
+#ifndef STEP_CONTROL_MODULE_H_
+#define STEP_CONTROL_MODULE_H_
 
 #include <ros/ros.h>
 
@@ -40,28 +40,28 @@
 #include <thormang3_walking_module/walking_module.h>
 
 // vigir walk control
-#include <vigir_walk_control/walk_controller.h>
+#include <vigir_step_control/step_controller.h>
 
 // dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
-#include <thormang3_walk_control_module/BalanceParametersConfig.h>
+#include <thormang3_step_control_module/BalanceParametersConfig.h>
 
 
 
 namespace thormang3
 {
-class WalkControlModule
+class StepControlModule
   : public WalkingMotionModule
-  , private robotis_framework::Singleton<WalkControlModule>
+  , private robotis_framework::Singleton<StepControlModule>
 {
 public:
-  WalkControlModule();
+  StepControlModule();
 
-  ~WalkControlModule();
+  ~StepControlModule();
 
-  static WalkControlModule* getInstance()
+  static StepControlModule* getInstance()
   {
-     Singleton<WalkControlModule>::getInstance();
+     Singleton<StepControlModule>::getInstance();
   }
 
   void initialize(const int control_cycle_msec, robotis_framework::Robot* robot) override;
@@ -72,13 +72,13 @@ public:
 
 private:
   void queueThread();
-  void dynamicReconfigureCallback(thormang3_walk_control_module::BalanceParametersConfig& config, uint32_t level);
+  void dynamicReconfigureCallback(thormang3_step_control_module::BalanceParametersConfig& config, uint32_t level);
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
-  boost::mutex walk_control_mutex_;
+  boost::mutex step_control_mutex_;
 
-  vigir_walk_control::WalkController::Ptr walk_controller_;
+  vigir_step_control::StepController::Ptr step_controller_;
 };
 }
 
