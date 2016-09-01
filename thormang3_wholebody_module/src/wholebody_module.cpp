@@ -257,6 +257,8 @@ void WholebodyModule::queueThread()
                                                     &WholebodyModule::imuDataCallback, this);
   ros::Subscriber arm_torque_limit_sub = ros_node.subscribe("/robotis/wholebody/arm_torque_limit_msg", 5,
                                                             &WholebodyModule::setArmTorqueLimitMsgCallback, this);
+  ros::Subscriber circle_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/circle_pose_msg", 5,
+                                                           &WholebodyModule::setCirclePoseMsgCallback, this);
 
   /* service */
   ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/wholebody/get_kinematics_pose",
@@ -558,53 +560,6 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
     }
     else
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
-
-
-//  if (is_moving_ == false)
-//  {
-//    if (msg->data == "wheel_sit_down" || msg->data == "wheel_stand_up")
-//    {
-//      if (is_balancing_ == true)
-//      {
-//        std::string wheel_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + msg->data +".yaml";
-//        parseWheelPoseData(wheel_pose_path);
-
-//        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelPose, this));
-//        delete tra_gene_tread_;
-//      }
-//      else
-//        ROS_INFO("balance is off");
-//    }
-//    else if (msg->data == "wheel_on_pose")
-//    {
-//      is_knee_torque_limit_down_ = true;
-//      is_wheel_pose_ = true;
-
-//      std::string wheel_joint_pose_path = ros::package::getPath("thormang3_wholebody_module") + "/config/" + "wheel_joint_pose.yaml";
-//      parseWheelJointPoseData(wheel_joint_pose_path);
-
-//      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
-//      delete tra_gene_tread_;
-//    }
-//    else if (msg->data == "wheel_off_pose")
-//    {
-//      robotis_controller_msgs::SyncWriteItem sync_write_msg;
-//      sync_write_msg.item_name = "goal_torque";
-//      sync_write_msg.joint_name.push_back("r_leg_kn_p");
-//      sync_write_msg.value.push_back(1240);
-//      sync_write_msg.joint_name.push_back("l_leg_kn_p");
-//      sync_write_msg.value.push_back(1240);
-
-//      goal_torque_limit_pub_.publish(sync_write_msg);
-
-//      is_wheel_pose_ = false;
-
-//      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
-//      delete tra_gene_tread_;
-//    }
-//  }
-//  else
-//    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
 }
 
 void WholebodyModule::setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg)
@@ -716,6 +671,45 @@ void WholebodyModule::setKinematicsPoseMsgCallback(const thormang3_wholebody_mod
     ROS_INFO("balance is off");
 
   return;
+}
+
+void WholebodyModule::setCirclePoseMsgCallback(const thormang3_wholebody_module_msgs::CirclePose::ConstPtr& msg)
+{
+  if(enable_ == false)
+    return;
+
+  goal_circle_pose_msg_ = *msg;
+
+  if (is_balancing_ == true)
+  {
+    if (is_moving_ == false)
+    {
+      if (msg->name == "right_arm_torso")
+      {
+        if (goal_kinematics_pose_msg_.name == "right_arm_torso")
+          r_arm_torso_planning_ = true;
+
+        if (goal_kinematics_pose_msg_.name == "right_arm")
+          r_arm_planning_ = true;
+
+        wb_l_arm_planning_ = false;
+        wb_r_arm_planning_ = true;
+
+        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWholebodyCircle, this));
+        delete tra_gene_tread_;
+      }
+    }
+    else
+      ROS_INFO("previous task is alive");
+  }
+  else
+    ROS_INFO("balance is off");
+
+
+
+
+
+
 }
 
 void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -979,64 +973,6 @@ void WholebodyModule::traGeneProcWheelJointPose()
   is_balancing_ = false;
   cnt_ = 0;
 }
-
-//void WholebodyModule::traGeneProcJointSpace()
-//{
-//  ROS_INFO("%s", goal_joint_pose_msg_.name.c_str() );
-//  ROS_INFO("%f", goal_joint_pose_msg_.value );
-
-//  if (goal_joint_pose_msg_.time <= 0.0)
-//  {
-//    /* set movement time */
-//    double tol = 30 * DEGREE2RADIAN; // rad per sec
-//    double mov_time = 1.5;
-
-//    int joint_id = joint_name_to_id_[goal_joint_pose_msg_.name];
-
-//    double ini_value = goal_joint_position_(joint_id);
-//    double tar_value = goal_joint_pose_msg_.value;
-//    double diff = fabs(tar_value - ini_value);
-
-//    mov_time_ =  diff / tol;
-//    int all_time_steps = int(floor((mov_time_ / control_cycle_sec_) + 1));
-//    mov_time_ = double (all_time_steps-1) * control_cycle_sec_;
-
-//    if (mov_time_ < mov_time)
-//      mov_time_= mov_time;
-//  }
-//  else
-//  {
-//    mov_time_ = goal_joint_pose_msg_.time;
-//    int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
-//    mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
-//  }
-
-//  all_time_steps_ = int(mov_time_ / control_cycle_sec_) + 1;
-//  goal_joint_tra_.resize(all_time_steps_, MAX_JOINT_ID + 1);
-
-//  /* calculate joint trajectory */
-//  for (int id = 1; id <= MAX_JOINT_ID; id++)
-//  {
-//    double ini_value = goal_joint_position_(id);
-//    double tar_value = goal_joint_position_(id);
-
-//    if(robotis_->thormang3_link_data_[id]->name_ == goal_joint_pose_msg_.name)
-//      tar_value = goal_joint_pose_msg_.value;
-
-//    Eigen::MatrixXd tra =
-//        robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
-//                                              tar_value , 0.0 , 0.0 ,
-//                                              control_cycle_sec_, mov_time_);
-
-//    goal_joint_tra_.block(0, id, all_time_steps_, 1) = tra;
-//  }
-
-//  cnt_ = 0;
-//  is_balancing_ = false;
-//  is_moving_ = true;
-
-//  ROS_INFO("[start] send trajectory");
-//}
 
 void WholebodyModule::traGeneProcPelvis()
 {
@@ -1373,11 +1309,80 @@ void WholebodyModule::traGeneProcWholebody()
   ROS_INFO("[start] send trajectory");
 }
 
+void WholebodyModule::traGeneProcWholebodyCircle()
+{
+  mov_time_ = goal_circle_pose_msg_.mov_time;
+  int all_time_steps = int(floor((mov_time_/control_cycle_sec_) + 1 ));
+  mov_time_ = double (all_time_steps - 1) * control_cycle_sec_;
+
+  all_time_steps_ = int(mov_time_/control_cycle_sec_) + 1;
+  goal_pelvis_tra_.resize(all_time_steps_, 3);
+  goal_l_foot_tra_.resize(all_time_steps_, 3);
+  goal_r_foot_tra_.resize(all_time_steps_, 3);
+  goal_l_arm_tra_.resize(all_time_steps_, 3);
+  goal_r_arm_tra_.resize(all_time_steps_, 3);
+
+  if (wb_r_arm_planning_ == true)
+  {
+    Eigen::MatrixXd center_point = Eigen::MatrixXd::Zero(3,1);
+    center_point.coeffRef(0,0) =
+        robotis_->thormang3_link_data_[ID_R_ARM_END]->position_.coeff(0,0) + goal_circle_pose_msg_.center_point.x;
+    center_point.coeffRef(1,0) =
+        robotis_->thormang3_link_data_[ID_R_ARM_END]->position_.coeff(1,0) + goal_circle_pose_msg_.center_point.y;
+    center_point.coeffRef(2,0) =
+        robotis_->thormang3_link_data_[ID_R_ARM_END]->position_.coeff(2,0) + goal_circle_pose_msg_.center_point.z;
+
+    PRINT_MAT(center_point);
+
+    Eigen::MatrixXd normal_vector = Eigen::MatrixXd::Zero(3,1);
+    normal_vector.coeffRef(0,0) = goal_circle_pose_msg_.normal_vector.x;
+    normal_vector.coeffRef(1,0) = goal_circle_pose_msg_.normal_vector.y;
+    normal_vector.coeffRef(2,0) = goal_circle_pose_msg_.normal_vector.z;
+
+    PRINT_MAT(normal_vector);
+
+    Eigen::MatrixXd start_point = Eigen::MatrixXd::Zero(3,1);
+    for (int dim=0; dim<3; dim++)
+      start_point.coeffRef(dim,0) = robotis_->thormang3_link_data_[ID_R_ARM_END]->position_.coeff(dim,0);
+
+    PRINT_MAT(start_point);
+
+    double roration_angle = goal_circle_pose_msg_.rotation_angle;
+    double cross_ratio = goal_circle_pose_msg_.cross_ratio;
+
+    Eigen::MatrixXd circle_tra = robotis_framework::calcArc3dTra(control_cycle_sec_, mov_time_,
+                                                                 center_point, normal_vector, start_point,
+                                                                 roration_angle, cross_ratio);
+
+    goal_r_arm_tra_ = circle_tra;
+
+    if (r_arm_planning_  == true || r_arm_torso_planning_ == true)
+    {
+      for (int dim=0; dim<3; dim++)
+        wb_arm_diff_position_(dim) = 0.0;
+    }
+
+    /* target quaternion */
+    Eigen::Quaterniond r_arm_target_quaternion(goal_circle_pose_msg_.target_orientation.w,
+                                               goal_circle_pose_msg_.target_orientation.x,
+                                               goal_circle_pose_msg_.target_orientation.y,
+                                               goal_circle_pose_msg_.target_orientation.z);
+
+    wb_r_arm_goal_quaternion_ = r_arm_target_quaternion;
+  }
+
+  calcGoalTraPelvis();
+  calcGoalTraLeg();
+
+  cnt_ = 0;
+  wb_ik_solving_ = true;
+  is_moving_ = true;
+
+  ROS_INFO("[start] send trajectory");
+}
+
 void WholebodyModule::traGeneProcArm()
 {
-
-
-
 
 }
 
@@ -1553,6 +1558,12 @@ void WholebodyModule::setInverseKinematicsRightArm(int cnt)
   Eigen::Quaterniond quaternion = wb_r_arm_start_quaternion_.slerp(time_step, wb_r_arm_goal_quaternion_);
 
   wb_r_arm_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
+
+  if (cnt == 0)
+  {
+    PRINT_MAT(wb_r_arm_target_position_);
+    PRINT_MAT(wb_r_arm_target_rotation_);
+  }
 
   if (wb_r_arm_pelvis_planning_ == true)
     wb_arm_pelvis_solving_ = true;
