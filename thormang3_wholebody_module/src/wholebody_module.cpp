@@ -684,12 +684,13 @@ void WholebodyModule::setCirclePoseMsgCallback(const thormang3_wholebody_module_
   {
     if (is_moving_ == false)
     {
-      if (msg->name == "right_arm_torso")
+      if ( msg->name == "right_arm_torso" ||
+           msg->name == "right_arm")
       {
-        if (goal_kinematics_pose_msg_.name == "right_arm_torso")
+        if (goal_circle_pose_msg_.name == "right_arm_torso")
           r_arm_torso_planning_ = true;
 
-        if (goal_kinematics_pose_msg_.name == "right_arm")
+        if (goal_circle_pose_msg_.name == "right_arm")
           r_arm_planning_ = true;
 
         wb_l_arm_planning_ = false;
@@ -704,12 +705,6 @@ void WholebodyModule::setCirclePoseMsgCallback(const thormang3_wholebody_module_
   }
   else
     ROS_INFO("balance is off");
-
-
-
-
-
-
 }
 
 void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -1623,19 +1618,24 @@ void WholebodyModule::setEndTrajectory()
 
       is_moving_ = false;
       wb_ik_solving_ = false;
+
+      wb_arm_solving_ = false;
       wb_l_arm_planning_ = false;
       wb_r_arm_planning_ = false;
+
+      wb_arm_pelvis_solving_ = false;
       wb_l_arm_pelvis_planning_ = false;
       wb_r_arm_pelvis_planning_ = false;
+
+      wb_arm_pelvis_dual_solving_ = false;
+      wb_l_arm_pelvis_dual_planning_ = false;
+      wb_r_arm_pelvis_dual_planning_ = false;
+
       l_arm_planning_ = false;
       r_arm_planning_ = false;
       l_arm_torso_planning_ = false;
       r_arm_torso_planning_ = false;
-      wb_arm_solving_ = false;
-      wb_arm_pelvis_solving_ = false;
-      wb_l_arm_pelvis_dual_planning_ = false;
-      wb_r_arm_pelvis_dual_planning_ = false;
-      wb_arm_pelvis_dual_solving_ = false;
+
 
       cnt_ = 0;
 
