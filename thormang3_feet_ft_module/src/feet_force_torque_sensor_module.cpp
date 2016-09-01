@@ -291,11 +291,11 @@ void FeetForceTorqueSensor::gazeboFTSensorCallback(const geometry_msgs::WrenchSt
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
   geometry_msgs::Wrench msg_transformed;
-  msg_transformed.force.x = msg->wrench.force.x;
+  msg_transformed.force.x = -msg->wrench.force.x;
   msg_transformed.force.y = msg->wrench.force.y;
   msg_transformed.force.z = msg->wrench.force.z;
 
-  msg_transformed.torque.x = msg->wrench.torque.x;
+  msg_transformed.torque.x = -msg->wrench.torque.x;
   msg_transformed.torque.y = msg->wrench.torque.y;
   msg_transformed.torque.z = msg->wrench.torque.z;
 

@@ -215,20 +215,20 @@ void ATIForceTorqueSensorTWE::setCurrentForceTorqueRaw(const geometry_msgs::Wren
     ft_raw_.coeffRef(5, 0) = ft_msg.torque.z;
 
     ft_raw_msg_.header.stamp = ros::Time::now();
-    ft_raw_msg_.wrench.force.x = ft_msg.force.x;
+    ft_raw_msg_.wrench.force.x = -ft_msg.force.x;
     ft_raw_msg_.wrench.force.y = ft_msg.force.y;
     ft_raw_msg_.wrench.force.z = ft_msg.force.z;
 
-    ft_raw_msg_.wrench.torque.x = ft_msg.torque.x;
+    ft_raw_msg_.wrench.torque.x = -ft_msg.torque.x;
     ft_raw_msg_.wrench.torque.y = ft_msg.torque.y;
     ft_raw_msg_.wrench.torque.z = ft_msg.torque.z;
 
     ft_scaled_	= ft_scale_factor_ * (ft_raw_ - ft_null_ );
     ft_scaled_msg_.header.stamp = ros::Time::now();
-    ft_scaled_msg_.wrench.force.x	= ft_scaled_.coeff(0,0);
+    ft_scaled_msg_.wrench.force.x	= -ft_scaled_.coeff(0,0);
     ft_scaled_msg_.wrench.force.y	= ft_scaled_.coeff(1,0);
     ft_scaled_msg_.wrench.force.z	= ft_scaled_.coeff(2,0);
-    ft_scaled_msg_.wrench.torque.x	= ft_scaled_.coeff(3,0);
+    ft_scaled_msg_.wrench.torque.x	= -ft_scaled_.coeff(3,0);
     ft_scaled_msg_.wrench.torque.y	= ft_scaled_.coeff(4,0);
     ft_scaled_msg_.wrench.torque.z	= ft_scaled_.coeff(5,0);
 }
