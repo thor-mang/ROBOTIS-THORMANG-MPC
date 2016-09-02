@@ -38,6 +38,7 @@
 #include "thormang3_wholebody_module_msgs/JointPose.h"
 #include "thormang3_wholebody_module_msgs/KinematicsPose.h"
 #include "thormang3_wholebody_module_msgs/WheelPose.h"
+#include "thormang3_wholebody_module_msgs/CirclePose.h"
 
 #include "thormang3_wholebody_module_msgs/GetKinematicsPose.h"
 
@@ -208,6 +209,7 @@ private:
   thormang3_wholebody_module_msgs::JointPose goal_joint_pose_msg_;
   thormang3_wholebody_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
   thormang3_wholebody_module_msgs::WheelPose goal_wheel_pose_msg_;
+  thormang3_wholebody_module_msgs::CirclePose goal_circle_pose_msg_;
 
   void queueThread();
 
@@ -222,6 +224,7 @@ private:
   void setKinematicsPoseMsgCallback(const thormang3_wholebody_module_msgs::KinematicsPose::ConstPtr& msg);
   void setWholebodyBalanceMsgCallback(const std_msgs::String::ConstPtr& msg);
   void setArmTorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg);
+  void setCirclePoseMsgCallback(const thormang3_wholebody_module_msgs::CirclePose::ConstPtr& msg);
 
   void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
@@ -256,6 +259,7 @@ private:
 
   void traGeneProcPelvis();
   void traGeneProcWholebody();
+  void traGeneProcWholebodyCircle();
   void traGeneProcArm();
 
   bool getKinematicsPoseCallback(thormang3_wholebody_module_msgs::GetKinematicsPose::Request &req,
