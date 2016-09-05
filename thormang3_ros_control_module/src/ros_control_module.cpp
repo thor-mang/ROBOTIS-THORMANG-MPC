@@ -130,31 +130,33 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
 
   /** update FT-Sensors */
 
+  // robotis internally uses the raw data of the ft sensors
+  // therefore we need to switch the z axis for ros modules
   for (auto& kv : force_)
   {
     kv.second[0] = sensors[kv.first + "_fx_raw_N"];
     kv.second[1] = sensors[kv.first + "_fy_raw_N"];
-    kv.second[2] = sensors[kv.first + "_fz_raw_N"];
+    kv.second[2] = -sensors[kv.first + "_fz_raw_N"];
   }
   for (auto& kv : torque_)
   {
     kv.second[0] = sensors[kv.first + "_tx_raw_Nm"];
     kv.second[1] = sensors[kv.first + "_ty_raw_Nm"];
-    kv.second[2] = sensors[kv.first + "_tz_raw_Nm"];
+    kv.second[2] = -sensors[kv.first + "_tz_raw_Nm"];
   }
 
   for (auto& kv : force_scaled_)
   {
     kv.second[0] = sensors[kv.first + "_fx_scaled_N"];
     kv.second[1] = sensors[kv.first + "_fy_scaled_N"];
-    kv.second[2] = sensors[kv.first + "_fz_scaled_N"];
+    kv.second[2] = -sensors[kv.first + "_fz_scaled_N"];
     //ROS_INFO_STREAM("Sensor: " << kv.first << "Force: " << kv.second[0] << ", " << kv.second[1] << "; " << kv.second[2]);
   }
   for (auto& kv : torque_scaled_)
   {
     kv.second[0] = sensors[kv.first + "_tx_scaled_Nm"];
     kv.second[1] = sensors[kv.first + "_ty_scaled_Nm"];
-    kv.second[2] = sensors[kv.first + "_tz_scaled_Nm"];
+    kv.second[2] = -sensors[kv.first + "_tz_scaled_Nm"];
   }
 
   /** update joints */
