@@ -333,11 +333,16 @@ void FeetForceTorqueSensor::queueThread()
   thormang3_foot_ft_status_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
   thormang3_foot_ft_both_ft_pub_ = ros_node.advertise<thormang3_feet_ft_module_msgs::BothWrench>("/robotis/feet_ft/both_ft_value", 1);
 
+  ros::WallDuration duration(control_cycle_msec_ / 1000.0);
   while(ros_node.ok())
-  {
-    callback_queue.callAvailable();
-    usleep(1000);
-  }
+    callback_queue.callAvailable(duration);
+
+//  while (ros_node.ok())
+//  {
+//    callback_queue.callAvailable();
+//    usleep(1000);
+//  }
+
 }
 
 void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors)
