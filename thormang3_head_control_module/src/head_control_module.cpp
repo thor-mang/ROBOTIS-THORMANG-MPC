@@ -101,7 +101,7 @@ void HeadControlModule::queueThread()
   ros::Subscriber get_3d_lidar_sub = ros_node.subscribe("/robotis/head_control/move_lidar", 1,
                                                         &HeadControlModule::get3DLidarCallback, this);
   ros::Subscriber get_3d_lidar_range_sub = ros_node.subscribe("/robotis/head_control/move_lidar_with_range", 1,
-                                                        &HeadControlModule::get3DLidarRangeCallback, this);
+                                                              &HeadControlModule::get3DLidarRangeCallback, this);
   ros::Subscriber set_head_joint_sub = ros_node.subscribe("/robotis/head_control/set_joint_states", 1,
                                                           &HeadControlModule::setHeadJointCallback, this);
 
@@ -184,10 +184,10 @@ void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::Cons
   }
 
   // moving time
-  moving_time_ = 1.0;        // default : 1 sec
+  moving_time_ = 1.0;  // default : 1 sec
 
   // set target joint angle
-  target_position_ = goal_position_;    // default
+  target_position_ = goal_position_;  // default
 
   for (int ix = 0; ix < msg->name.size(); ix++)
   {
@@ -247,7 +247,7 @@ void HeadControlModule::process(std::map<std::string, robotis_framework::Dynamix
     int index = using_joint_name_[joint_name];
 
     robotis_framework::Dynamixel *dxl = NULL;
-    std::map<std::string, robotis_framework::Dynamixel*>::iterator dxl_it = dxls.find(joint_name);
+    std::map<std::string, robotis_framework::Dynamixel *>::iterator dxl_it = dxls.find(joint_name);
     if (dxl_it != dxls.end())
       dxl = dxl_it->second;
     else
@@ -343,8 +343,9 @@ void HeadControlModule::finishMoving()
     case BeforeStart:
     {
       // generate start trajectory
-      double target_angle = (scan_range_ == 0) ?
-              SCAN_END_ANGLE : current_position_.coeffRef(0, using_joint_name_["head_p"]) + scan_range_;
+      double target_angle =
+          (scan_range_ == 0) ?
+              SCAN_END_ANGLE : current_position_.coeffRef(0, using_joint_name_["head_p"]) + scan_range_ * 2;
       startMoveLidar(target_angle);
       break;
     }
@@ -410,7 +411,7 @@ void HeadControlModule::beforeMoveLidar(double start_angle)
 
   moving_time_ = (moving_time_ < min_moving_time) ? min_moving_time : moving_time_;
 
-  //moving_time_ = 1.0;
+  // moving_time_ = 1.0;
 
   // set target joint angle : pitch
   target_position_ = goal_position_;
@@ -435,7 +436,7 @@ void HeadControlModule::startMoveLidar(double target_angle)
 
   moving_time_ = (moving_time_ < max_moving_time) ? moving_time_ : max_moving_time;
 
-  //moving_time_ = 8.0;        // 8 secs
+  // moving_time_ = 8.0;        // 8 secs
 
   // set target joint angle
   target_position_ = goal_position_;
