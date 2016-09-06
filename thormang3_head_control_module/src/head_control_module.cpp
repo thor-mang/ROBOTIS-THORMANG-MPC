@@ -406,7 +406,7 @@ void HeadControlModule::beforeMoveLidar(double start_angle)
 {
   // angle and moving time
   original_position_lidar_ = goal_position_.coeff(0, using_joint_name_["head_p"]);
-  moving_time_ = fabs(current_position_.coeffRef(0, using_joint_name_["head_p"]) - start_angle) / (10 * M_PI / 180);
+  moving_time_ = fabs(current_position_.coeffRef(0, using_joint_name_["head_p"]) - start_angle) / (30 * DEGREE2RADIAN);
   double min_moving_time = 1.0;
 
   moving_time_ = (moving_time_ < min_moving_time) ? min_moving_time : moving_time_;
@@ -431,7 +431,7 @@ void HeadControlModule::beforeMoveLidar(double start_angle)
 void HeadControlModule::startMoveLidar(double target_angle)
 {
   // angle and moving time
-  moving_time_ = fabs(current_position_.coeffRef(0, using_joint_name_["head_p"]) - target_angle) / (10 * M_PI / 180);
+  moving_time_ = fabs(current_position_.coeffRef(0, using_joint_name_["head_p"]) - target_angle) / (10 * DEGREE2RADIAN);
   double max_moving_time = 8.0;
 
   moving_time_ = (moving_time_ < max_moving_time) ? moving_time_ : max_moving_time;
@@ -447,7 +447,8 @@ void HeadControlModule::startMoveLidar(double target_angle)
   goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
 
   // generate trajectory
-  tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::jointTraGeneThread, this));
+  //tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::jointTraGeneThread, this));
+  tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::lidarJointTraGeneThread, this));
   delete tra_gene_thread_;
 
   ROS_INFO("Go to Lidar end position");
@@ -543,6 +544,20 @@ Eigen::MatrixXd HeadControlModule::calcMinimumJerkTraPVA(double pos_start, doubl
   return minimum_jer_tra;
 }
 
+Eigen::MatrixXd HeadControlModule::calcLinearInterpolationTra(double pos_start, double pos_end, double smp_time, double mov_time)
+{
+  double time_steps = mov_time / smp_time;
+  int all_time_steps = round(time_steps + 1);
+  double next_step = (pos_end - pos_start) / all_time_steps;
+
+  Eigen::MatrixXd minimum_jerk_tra = Eigen::MatrixXd::Zero(all_time_steps, 1);
+
+  for (int step = 0; step < all_time_steps; step++)
+    minimum_jerk_tra.coeffRef(step, 0) = pos_start + next_step * (step + 1);
+
+  return minimum_jerk_tra;
+}
+
 void HeadControlModule::jointTraGeneThread()
 {
   tra_lock_.lock();
@@ -572,6 +587,41 @@ void HeadControlModule::jointTraGeneThread()
     calc_joint_tra_.block(0, index, all_time_steps, 1) = tra.block(0, 0, all_time_steps, 1);
     calc_joint_vel_tra_.block(0, index, all_time_steps, 1) = tra.block(0, 1, all_time_steps, 1);
     calc_joint_accel_tra_.block(0, index, all_time_steps, 1) = tra.block(0, 2, all_time_steps, 1);
+  }
+
+  tra_size_ = calc_joint_tra_.rows();
+  tra_count_ = 0;
+
+  if (DEBUG)
+    ROS_INFO("[ready] make trajectory : %d, %d", tra_size_, tra_count_);
+
+  // init value
+  // moving_time_ = 0;
+
+  tra_lock_.unlock();
+}
+
+void HeadControlModule::lidarJointTraGeneThread()
+{
+  tra_lock_.lock();
+
+  double smp_time = control_cycle_msec_ * 0.001;  // ms -> s
+  int all_time_steps = int(moving_time_ / smp_time) + 1;
+
+  calc_joint_tra_.resize(all_time_steps, result_.size());
+
+  for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
+      state_iter != result_.end(); state_iter++)
+  {
+    std::string joint_name = state_iter->first;
+    int index = using_joint_name_[joint_name];
+
+    double ini_value = goal_position_.coeff(0, index);
+    double tar_value = target_position_.coeff(0, index);
+
+    Eigen::MatrixXd tra = calcLinearInterpolationTra(ini_value, tar_value, smp_time, moving_time_);
+
+    calc_joint_tra_.block(0, index, all_time_steps, 1) = tra.block(0, 0, all_time_steps, 1);
   }
 
   tra_size_ = calc_joint_tra_.rows();
