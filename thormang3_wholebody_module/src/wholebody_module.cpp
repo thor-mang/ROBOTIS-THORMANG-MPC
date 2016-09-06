@@ -540,7 +540,8 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
       else if (msg->name == "wheel_on_pose" ||
                msg->name == "wheel_knee_on_pose")
       {
-        is_knee_torque_limit_down_ = true;
+        if (msg->name == "wheel_on_pose")
+          is_knee_torque_limit_down_ = true;
         is_wheel_pose_ = true;
 
         parseWheelJointPoseData();
@@ -551,14 +552,17 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
       else if (msg->name == "wheel_off_pose" ||
                msg->name == "wheel_knee_off_pose")
       {
-        robotis_controller_msgs::SyncWriteItem sync_write_msg;
-        sync_write_msg.item_name = "goal_torque";
-        sync_write_msg.joint_name.push_back("r_leg_kn_p");
-        sync_write_msg.value.push_back(1240);
-        sync_write_msg.joint_name.push_back("l_leg_kn_p");
-        sync_write_msg.value.push_back(1240);
+        if (msg->name == "wheel_off_pose")
+        {
+          robotis_controller_msgs::SyncWriteItem sync_write_msg;
+          sync_write_msg.item_name = "goal_torque";
+          sync_write_msg.joint_name.push_back("r_leg_kn_p");
+          sync_write_msg.value.push_back(1240);
+          sync_write_msg.joint_name.push_back("l_leg_kn_p");
+          sync_write_msg.value.push_back(1240);
 
-        goal_torque_limit_pub_.publish(sync_write_msg);
+          goal_torque_limit_pub_.publish(sync_write_msg);
+        }
 
         is_wheel_pose_ = false;
 
