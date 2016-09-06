@@ -63,7 +63,7 @@ WholebodyModule::WholebodyModule()
     is_wheel_pose_(false),
     is_gain_updating_(false),
     is_knee_torque_limit_down_(false),
-    arm_angle_display_(true)
+    arm_angle_display_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
