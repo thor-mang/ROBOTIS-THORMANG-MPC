@@ -239,6 +239,7 @@ void WholebodyModule::queueThread()
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
   set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
   goal_torque_limit_pub_ = ros_node.advertise<robotis_controller_msgs::SyncWriteItem>("/robotis/sync_write_item", 1);
+  movement_done_pub_ = ros_node.advertise<std_msgs::String>("/robotis/wholebody/movement_done", 1);
 
   /* subscribe topics */
   ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/wholebody/set_mode_msg", 5,
@@ -259,6 +260,8 @@ void WholebodyModule::queueThread()
                                                             &WholebodyModule::setArmTorqueLimitMsgCallback, this);
   ros::Subscriber circle_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/circle_pose_msg", 5,
                                                            &WholebodyModule::setCirclePoseMsgCallback, this);
+
+//  done
 
   /* service */
   ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/wholebody/get_kinematics_pose",
@@ -521,7 +524,10 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
 
   if (is_moving_ == false)
   {
-    if (msg->name == "wheel_sit_down" || msg->name == "wheel_stand_up")
+    if (msg->name == "wheel_sit_down" ||
+        msg->name == "wheel_stand_up" ||
+        msg->name == "wheel_go_down" ||
+        msg->name == "wheel_go_up")
     {
       if (is_balancing_ == true)
       {
@@ -531,7 +537,8 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
       else
         ROS_INFO("balance is off");
     }
-      else if (msg->name == "wheel_on_pose")
+      else if (msg->name == "wheel_on_pose" ||
+               msg->name == "wheel_knee_on_pose")
       {
         is_knee_torque_limit_down_ = true;
         is_wheel_pose_ = true;
@@ -541,7 +548,8 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
         delete tra_gene_tread_;
       }
-      else if (msg->name == "wheel_off_pose")
+      else if (msg->name == "wheel_off_pose" ||
+               msg->name == "wheel_knee_off_pose")
       {
         robotis_controller_msgs::SyncWriteItem sync_write_msg;
         sync_write_msg.item_name = "goal_torque";
@@ -1609,6 +1617,8 @@ void WholebodyModule::setEndTrajectory()
 {
   if (is_moving_ == true)
   {
+//    done
+
     if (cnt_ >= all_time_steps_)
     {
       ROS_INFO("[end] send trajectory");
@@ -1678,6 +1688,11 @@ void WholebodyModule::setEndTrajectory()
         ROS_INFO("r_arm_wr_y  : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  * RADIAN2DEGREE );
         ROS_INFO("r_arm_wr_p  : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  * RADIAN2DEGREE );
       }
+
+      std_msgs::String movement_done_msg;
+      movement_done_msg.data = "done";
+
+      movement_done_pub_.publish(movement_done_msg);
     }
   }
 }

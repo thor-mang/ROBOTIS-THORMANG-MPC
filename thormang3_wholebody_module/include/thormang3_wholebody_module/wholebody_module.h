@@ -61,6 +61,7 @@ private:
   ros::Publisher status_msg_pub_;
   ros::Publisher set_ctrl_module_pub_;
   ros::Publisher goal_torque_limit_pub_;
+  ros::Publisher movement_done_pub_;
 
   std::map<std::string, int> joint_name_to_id_;
 
