@@ -256,8 +256,8 @@ void WholebodyModule::queueThread()
                                                                  &WholebodyModule::setWholebodyBalanceMsgCallback, this);
   ros::Subscriber imu_data_sub = ros_node.subscribe("/robotis/sensor/imu/imu", 5,
                                                     &WholebodyModule::imuDataCallback, this);
-  ros::Subscriber arm_torque_limit_sub = ros_node.subscribe("/robotis/wholebody/arm_torque_limit_msg", 5,
-                                                            &WholebodyModule::setArmTorqueLimitMsgCallback, this);
+  ros::Subscriber joint_torque_limit_sub = ros_node.subscribe("/robotis/wholebody/joint_torque_limit_msg", 5,
+                                                              &WholebodyModule::setJointorqueLimitMsgCallback, this);
   ros::Subscriber circle_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/circle_pose_msg", 5,
                                                            &WholebodyModule::setCirclePoseMsgCallback, this);
 
@@ -719,8 +719,11 @@ void WholebodyModule::setCirclePoseMsgCallback(const thormang3_wholebody_module_
     ROS_INFO("balance is off");
 }
 
-void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg)
+void WholebodyModule::setJointorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg)
 {
+  robotis_controller_msgs::SyncWriteItem sync_write_msg;
+  sync_write_msg.item_name = "goal_torque";
+
   if (msg->data == "left_arm_torque_down")
   {
 
@@ -745,8 +748,6 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
     goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
 
-    robotis_controller_msgs::SyncWriteItem sync_write_msg;
-    sync_write_msg.item_name = "goal_torque";
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
     sync_write_msg.value.push_back(100);
     sync_write_msg.joint_name.push_back("r_arm_sh_r");
@@ -761,8 +762,6 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     sync_write_msg.value.push_back(70);
     sync_write_msg.joint_name.push_back("r_arm_wr_p");
     sync_write_msg.value.push_back(70);
-
-    goal_torque_limit_pub_.publish(sync_write_msg);
   }
   else if (msg->data == "right_arm_torque_up")
   {
@@ -776,8 +775,6 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
     goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
 
-    robotis_controller_msgs::SyncWriteItem sync_write_msg;
-    sync_write_msg.item_name = "goal_torque";
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
     sync_write_msg.value.push_back(310);
     sync_write_msg.joint_name.push_back("r_arm_sh_r");
@@ -792,9 +789,23 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     sync_write_msg.value.push_back(372);
     sync_write_msg.joint_name.push_back("r_arm_wr_p");
     sync_write_msg.value.push_back(372);
-
-    goal_torque_limit_pub_.publish(sync_write_msg);
   }
+  else if (msg->data == "knee_torque_down")
+  {
+    sync_write_msg.joint_name.push_back("r_leg_kn_p");
+    sync_write_msg.value.push_back(105);
+    sync_write_msg.joint_name.push_back("l_leg_kn_p");
+    sync_write_msg.value.push_back(105);
+  }
+  else if (msg->data == "knee_torque_up" )
+  {
+    sync_write_msg.joint_name.push_back("r_leg_kn_p");
+    sync_write_msg.value.push_back(1240);
+    sync_write_msg.joint_name.push_back("l_leg_kn_p");
+    sync_write_msg.value.push_back(1240);
+  }
+
+  goal_torque_limit_pub_.publish(sync_write_msg);
 }
 
 void WholebodyModule::traGeneProcIniPose()
