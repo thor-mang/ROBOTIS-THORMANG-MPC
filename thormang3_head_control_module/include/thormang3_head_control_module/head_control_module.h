@@ -76,6 +76,7 @@ class HeadControlModule : public robotis_framework::MotionModule, public robotis
 
   void queueThread();
   void jointTraGeneThread();
+  void lidarJointTraGeneThread();
 
   void beforeMoveLidar(double start_angle);
   void startMoveLidar(double target_angle);
@@ -90,6 +91,8 @@ class HeadControlModule : public robotis_framework::MotionModule, public robotis
 
   Eigen::MatrixXd calcMinimumJerkTraPVA(double pos_start, double vel_start, double accel_start, double pos_end,
                                         double vel_end, double accel_end, double smp_time, double mov_time);
+
+  Eigen::MatrixXd calcLinearInterpolationTra(double pos_start, double pos_end, double smp_time, double mov_time);
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
