@@ -725,6 +725,14 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
   {
     ROS_INFO("r_arm_torque_down");
 
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
+
     robotis_controller_msgs::SyncWriteItem sync_write_msg;
     sync_write_msg.item_name = "goal_torque";
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
@@ -743,20 +751,19 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     sync_write_msg.value.push_back(70);
 
     goal_torque_limit_pub_.publish(sync_write_msg);
-
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
-
   }
   else if (msg->data == "right_arm_torque_up")
   {
     ROS_INFO("r_arm_torque_up");
 
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
+
     robotis_controller_msgs::SyncWriteItem sync_write_msg;
     sync_write_msg.item_name = "goal_torque";
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
@@ -775,14 +782,6 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     sync_write_msg.value.push_back(372);
 
     goal_torque_limit_pub_.publish(sync_write_msg);
-
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
   }
 }
 
