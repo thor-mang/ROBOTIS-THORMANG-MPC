@@ -63,7 +63,7 @@ WholebodyModule::WholebodyModule()
     is_wheel_pose_(false),
     is_gain_updating_(false),
     is_knee_torque_limit_down_(false),
-    arm_angle_display_(true)
+    arm_angle_display_(false)
 {
   enable_       = false;
   module_name_  = "wholebody_module";
@@ -239,6 +239,7 @@ void WholebodyModule::queueThread()
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
   set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
   goal_torque_limit_pub_ = ros_node.advertise<robotis_controller_msgs::SyncWriteItem>("/robotis/sync_write_item", 1);
+  movement_done_pub_ = ros_node.advertise<std_msgs::String>("/robotis/wholebody/movement_done", 1);
 
   /* subscribe topics */
   ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/wholebody/set_mode_msg", 5,
@@ -255,10 +256,12 @@ void WholebodyModule::queueThread()
                                                                  &WholebodyModule::setWholebodyBalanceMsgCallback, this);
   ros::Subscriber imu_data_sub = ros_node.subscribe("/robotis/sensor/imu/imu", 5,
                                                     &WholebodyModule::imuDataCallback, this);
-  ros::Subscriber arm_torque_limit_sub = ros_node.subscribe("/robotis/wholebody/arm_torque_limit_msg", 5,
-                                                            &WholebodyModule::setArmTorqueLimitMsgCallback, this);
+  ros::Subscriber joint_torque_limit_sub = ros_node.subscribe("/robotis/wholebody/joint_torque_limit_msg", 5,
+                                                              &WholebodyModule::setJointorqueLimitMsgCallback, this);
   ros::Subscriber circle_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/circle_pose_msg", 5,
                                                            &WholebodyModule::setCirclePoseMsgCallback, this);
+
+//  done
 
   /* service */
   ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/wholebody/get_kinematics_pose",
@@ -521,7 +524,10 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
 
   if (is_moving_ == false)
   {
-    if (msg->name == "wheel_sit_down" || msg->name == "wheel_stand_up")
+    if (msg->name == "wheel_sit_down" ||
+        msg->name == "wheel_stand_up" ||
+        msg->name == "wheel_go_down" ||
+        msg->name == "wheel_go_up")
     {
       if (is_balancing_ == true)
       {
@@ -531,9 +537,11 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
       else
         ROS_INFO("balance is off");
     }
-      else if (msg->name == "wheel_on_pose")
+      else if (msg->name == "wheel_on_pose" ||
+               msg->name == "wheel_knee_on_pose")
       {
-        is_knee_torque_limit_down_ = true;
+        if (msg->name == "wheel_on_pose")
+          is_knee_torque_limit_down_ = true;
         is_wheel_pose_ = true;
 
         parseWheelJointPoseData();
@@ -541,16 +549,20 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
         tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
         delete tra_gene_tread_;
       }
-      else if (msg->name == "wheel_off_pose")
+      else if (msg->name == "wheel_off_pose" ||
+               msg->name == "wheel_knee_off_pose")
       {
-        robotis_controller_msgs::SyncWriteItem sync_write_msg;
-        sync_write_msg.item_name = "goal_torque";
-        sync_write_msg.joint_name.push_back("r_leg_kn_p");
-        sync_write_msg.value.push_back(1240);
-        sync_write_msg.joint_name.push_back("l_leg_kn_p");
-        sync_write_msg.value.push_back(1240);
+        if (msg->name == "wheel_off_pose")
+        {
+          robotis_controller_msgs::SyncWriteItem sync_write_msg;
+          sync_write_msg.item_name = "goal_torque";
+          sync_write_msg.joint_name.push_back("r_leg_kn_p");
+          sync_write_msg.value.push_back(1240);
+          sync_write_msg.joint_name.push_back("l_leg_kn_p");
+          sync_write_msg.value.push_back(1240);
 
-        goal_torque_limit_pub_.publish(sync_write_msg);
+          goal_torque_limit_pub_.publish(sync_write_msg);
+        }
 
         is_wheel_pose_ = false;
 
@@ -707,8 +719,11 @@ void WholebodyModule::setCirclePoseMsgCallback(const thormang3_wholebody_module_
     ROS_INFO("balance is off");
 }
 
-void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg)
+void WholebodyModule::setJointorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg)
 {
+  robotis_controller_msgs::SyncWriteItem sync_write_msg;
+  sync_write_msg.item_name = "goal_torque";
+
   if (msg->data == "left_arm_torque_down")
   {
 
@@ -725,8 +740,14 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
   {
     ROS_INFO("r_arm_torque_down");
 
-    robotis_controller_msgs::SyncWriteItem sync_write_msg;
-    sync_write_msg.item_name = "goal_torque";
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
+
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
     sync_write_msg.value.push_back(100);
     sync_write_msg.joint_name.push_back("r_arm_sh_r");
@@ -741,24 +762,19 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     sync_write_msg.value.push_back(70);
     sync_write_msg.joint_name.push_back("r_arm_wr_p");
     sync_write_msg.value.push_back(70);
-
-    goal_torque_limit_pub_.publish(sync_write_msg);
-
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
-
   }
   else if (msg->data == "right_arm_torque_up")
   {
     ROS_INFO("r_arm_torque_up");
 
-    robotis_controller_msgs::SyncWriteItem sync_write_msg;
-    sync_write_msg.item_name = "goal_torque";
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
+    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
+
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
     sync_write_msg.value.push_back(310);
     sync_write_msg.joint_name.push_back("r_arm_sh_r");
@@ -773,17 +789,23 @@ void WholebodyModule::setArmTorqueLimitMsgCallback(const std_msgs::String::Const
     sync_write_msg.value.push_back(372);
     sync_write_msg.joint_name.push_back("r_arm_wr_p");
     sync_write_msg.value.push_back(372);
-
-    goal_torque_limit_pub_.publish(sync_write_msg);
-
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p1"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p1"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_r"])  = present_joint_position_(joint_name_to_id_["r_arm_sh_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_sh_p2"]) = present_joint_position_(joint_name_to_id_["r_arm_sh_p2"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_el_y"])  = present_joint_position_(joint_name_to_id_["r_arm_el_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_r"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_r"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_y"]);
-    goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  = present_joint_position_(joint_name_to_id_["r_arm_wr_p"]);
   }
+  else if (msg->data == "knee_torque_down")
+  {
+    sync_write_msg.joint_name.push_back("r_leg_kn_p");
+    sync_write_msg.value.push_back(105);
+    sync_write_msg.joint_name.push_back("l_leg_kn_p");
+    sync_write_msg.value.push_back(105);
+  }
+  else if (msg->data == "knee_torque_up" )
+  {
+    sync_write_msg.joint_name.push_back("r_leg_kn_p");
+    sync_write_msg.value.push_back(1240);
+    sync_write_msg.joint_name.push_back("l_leg_kn_p");
+    sync_write_msg.value.push_back(1240);
+  }
+
+  goal_torque_limit_pub_.publish(sync_write_msg);
 }
 
 void WholebodyModule::traGeneProcIniPose()
@@ -1610,6 +1632,8 @@ void WholebodyModule::setEndTrajectory()
 {
   if (is_moving_ == true)
   {
+//    done
+
     if (cnt_ >= all_time_steps_)
     {
       ROS_INFO("[end] send trajectory");
@@ -1679,6 +1703,11 @@ void WholebodyModule::setEndTrajectory()
         ROS_INFO("r_arm_wr_y  : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_y"])  * RADIAN2DEGREE );
         ROS_INFO("r_arm_wr_p  : %f", goal_joint_position_(joint_name_to_id_["r_arm_wr_p"])  * RADIAN2DEGREE );
       }
+
+      std_msgs::String movement_done_msg;
+      movement_done_msg.data = "done";
+
+      movement_done_pub_.publish(movement_done_msg);
     }
   }
 }
