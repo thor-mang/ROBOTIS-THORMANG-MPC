@@ -49,6 +49,7 @@
 
 #include "thormang3_manipulation_module_msgs/JointPose.h"
 #include "thormang3_manipulation_module_msgs/KinematicsPose.h"
+#include "thormang3_manipulation_module_msgs/JointGroupPose.h"
 
 namespace thormang3
 {
@@ -78,6 +79,7 @@ public:
 
   /* msgs */
   thormang3_manipulation_module_msgs::JointPose goal_joint_pose_msg_;
+  thormang3_manipulation_module_msgs::JointGroupPose goal_joint_group_pose_msg_;
   thormang3_manipulation_module_msgs::KinematicsPose goal_kinematics_pose_msg_;
 
   /* ik */
