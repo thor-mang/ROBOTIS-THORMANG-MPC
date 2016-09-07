@@ -676,6 +676,10 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
                               + thormang3_link_data_[ID_R_LEG_END]->relative_position_.coeff(2,0));
   leg_side_offset_m_ 	= 2.0*(std::fabs(thormang3_link_data_[ID_R_LEG_START]->relative_position_.coeff(1, 0)));
 
+  for(int joint_idx = 0; joint_idx < ALL_JOINT_ID; joint_idx++)
+  {
+    thormang3_link_data_[joint_idx]->joint_center_of_mass_ = thormang3_link_data_[joint_idx]->center_of_mass_;
+  }
 }
 
 std::vector<int> KinematicsDynamics::findRoute(int to)
@@ -743,6 +747,21 @@ Eigen::MatrixXd KinematicsDynamics::calcMassCenter(int joint_id)
   }
 
   return mc;
+}
+
+void KinematicsDynamics::calcJointsCenterOfMass(int joint_id)
+{
+  if(joint_id != -1)
+  {
+    LinkData *temp_data = thormang3_link_data_[ joint_id ];
+    temp_data->joint_center_of_mass_
+      = ( temp_data->orientation_ * temp_data->center_of_mass_ + temp_data->position_ );
+
+    calcJointsCenterOfMass(temp_data->sibling_);
+    calcJointsCenterOfMass(temp_data->child_);
+  }
+  else
+    return;
 }
 
 Eigen::MatrixXd KinematicsDynamics::calcCenterOfMass(Eigen::MatrixXd mc)
