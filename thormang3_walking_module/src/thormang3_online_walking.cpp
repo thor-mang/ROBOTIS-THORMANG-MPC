@@ -1440,7 +1440,7 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = 0;
 
       l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
       right_roll_dir = -1.0;
@@ -1453,7 +1453,7 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = 0;
 
       l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
       right_roll_dir = -1.0;
@@ -1486,7 +1486,7 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
-      l_target_fx_N = 0;
+      l_target_fy_N = 0;
       l_target_fz_N = 0;
       target_fz_N = -right_ssp_fz_N_;
       right_roll_dir = 1.0;
@@ -1499,7 +1499,7 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
-      l_target_fx_N = 0;
+      l_target_fy_N = 0;
       l_target_fz_N = 0;
       target_fz_N =  -right_ssp_fz_N_;
       right_roll_dir = 1.0;

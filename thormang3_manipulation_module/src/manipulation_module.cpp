@@ -174,6 +174,8 @@ void ManipulationModule::queueThread()
 
   ros_node.setCallbackQueue(&callback_queue);
 
+  goal_torque_limit_pub_ = ros_node.advertise<robotis_controller_msgs::SyncWriteItem>("/robotis/sync_write_item", 1);
+
   /* subscribe topics */
   ros::Subscriber ini_pose_msg_sub        = ros_node.subscribe("/robotis/manipulation/ini_pose_msg", 5,
                                                                &ManipulationModule::initPoseMsgCallback, this);
@@ -181,6 +183,8 @@ void ManipulationModule::queueThread()
                                                                &ManipulationModule::jointPoseMsgCallback, this);
   ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/manipulation/kinematics_pose_msg", 5,
                                                                &ManipulationModule::kinematicsPoseMsgCallback, this);
+  ros::Subscriber joint_torque_limit_sub = ros_node.subscribe("/robotis/manipulation/joint_torque_limit_msg", 5,
+                                                              &ManipulationModule::setJointorqueLimitMsgCallback, this);
 
   /* service */
   ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/manipulation/get_joint_pose",
@@ -197,7 +201,6 @@ void ManipulationModule::queueThread()
 //    callback_queue.callAvailable();
 //    usleep(1000);
 //  }
-
 }
 
 void ManipulationModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -330,11 +333,86 @@ void ManipulationModule::jointPoseMsgCallback(const thormang3_manipulation_modul
     delete traj_generate_tread_;
   }
   else
-  {
     ROS_INFO("previous task is alive");
-  }
 
   return;
+}
+
+void ManipulationModule::setJointorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg)
+{
+  robotis_controller_msgs::SyncWriteItem sync_write_msg;
+  sync_write_msg.item_name = "goal_torque";
+
+  if (msg->data == "right_arm_torque_down")
+  {
+    ROS_INFO("r_arm_torque_down");
+
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_el_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_el_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_p"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_p"]].position_;
+
+    sync_write_msg.joint_name.push_back("r_arm_sh_p1");
+    sync_write_msg.value.push_back(85);
+    sync_write_msg.joint_name.push_back("r_arm_sh_r");
+    sync_write_msg.value.push_back(85);
+    sync_write_msg.joint_name.push_back("r_arm_sh_p2");
+    sync_write_msg.value.push_back(85);
+    sync_write_msg.joint_name.push_back("r_arm_el_y");
+    sync_write_msg.value.push_back(85);
+    sync_write_msg.joint_name.push_back("r_arm_wr_r");
+    sync_write_msg.value.push_back(35);
+    sync_write_msg.joint_name.push_back("r_arm_wr_y");
+    sync_write_msg.value.push_back(35);
+    sync_write_msg.joint_name.push_back("r_arm_wr_p");
+    sync_write_msg.value.push_back(35);
+  }
+  else if (msg->data == "right_arm_torque_up")
+  {
+    ROS_INFO("r_arm_torque_up");
+
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_el_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_el_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_p"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_p"]].position_;
+
+    sync_write_msg.joint_name.push_back("r_arm_sh_p1");
+    sync_write_msg.value.push_back(310);
+    sync_write_msg.joint_name.push_back("r_arm_sh_r");
+    sync_write_msg.value.push_back(310);
+    sync_write_msg.joint_name.push_back("r_arm_sh_p2");
+    sync_write_msg.value.push_back(310);
+    sync_write_msg.joint_name.push_back("r_arm_el_y");
+    sync_write_msg.value.push_back(310);
+    sync_write_msg.joint_name.push_back("r_arm_wr_r");
+    sync_write_msg.value.push_back(372);
+    sync_write_msg.joint_name.push_back("r_arm_wr_y");
+    sync_write_msg.value.push_back(372);
+    sync_write_msg.joint_name.push_back("r_arm_wr_p");
+    sync_write_msg.value.push_back(372);
+  }
+
+  goal_torque_limit_pub_.publish(sync_write_msg);
 }
 
 void ManipulationModule::initPoseTrajGenerateProc()

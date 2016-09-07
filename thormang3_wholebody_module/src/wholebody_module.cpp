@@ -2328,9 +2328,9 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   robotis_->calcForwardKinematics(0);
 
   /*----- Center of Mass -----*/
-  //  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
-  //  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
-  //  calcGoalFT();
+//  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
+//  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+//  calcGoalFT();
 
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
