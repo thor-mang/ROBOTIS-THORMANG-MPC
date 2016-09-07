@@ -49,6 +49,7 @@
 #include "robotis_framework_common/motion_module.h"
 #include "robotis_math/robotis_math.h"
 #include "robotis_controller_msgs/StatusMsg.h"
+#include "thormang3_head_control_module_msgs/HeadJointPose.h"
 
 namespace thormang3
 {
@@ -73,6 +74,7 @@ class HeadControlModule : public robotis_framework::MotionModule, public robotis
   void get3DLidarCallback(const std_msgs::String::ConstPtr &msg);
   void get3DLidarRangeCallback(const std_msgs::Float64::ConstPtr &msg);
   void setHeadJointCallback(const sensor_msgs::JointState::ConstPtr &msg);
+  void setHeadJointTimeCallback(const thormang3_head_control_module_msgs::HeadJointPose::ConstPtr &msg);
 
   void queueThread();
   void jointTraGeneThread();
