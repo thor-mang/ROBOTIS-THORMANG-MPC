@@ -648,7 +648,7 @@ KinematicsDynamics::KinematicsDynamics(TreeSelect tree)
     thormang3_link_data_[36]->parent_             =  26;
     thormang3_link_data_[36]->sibling_            =  -1;
     thormang3_link_data_[36]->child_              =  46;
-    thormang3_link_data_[36]->mass_               =  0.0;
+    thormang3_link_data_[36]->mass_               =  1.689;
     thormang3_link_data_[36]->relative_position_  =  robotis_framework::getTransitionXYZ( -0.057 , 0.000 , -0.087 );
     thormang3_link_data_[36]->joint_axis_         =  robotis_framework::getTransitionXYZ( 0.0 , 0.0 , 0.0 );
     thormang3_link_data_[36]->center_of_mass_     =  robotis_framework::getTransitionXYZ( 0.000 , 0.009 , -0.013 );
