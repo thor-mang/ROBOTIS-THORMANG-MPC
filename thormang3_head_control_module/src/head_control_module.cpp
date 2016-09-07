@@ -104,6 +104,8 @@ void HeadControlModule::queueThread()
                                                               &HeadControlModule::get3DLidarRangeCallback, this);
   ros::Subscriber set_head_joint_sub = ros_node.subscribe("/robotis/head_control/set_joint_states", 1,
                                                           &HeadControlModule::setHeadJointCallback, this);
+  ros::Subscriber set_head_joint_time_sub = ros_node.subscribe("/robotis/head_control/set_joint_states_time", 1,
+                                                          &HeadControlModule::setHeadJointTimeCallback, this);
 
   while (ros_node.ok())
   {
@@ -208,6 +210,70 @@ void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::Cons
       if (DEBUG)
       {
         std::cout << "joint : " << joint_name << ", Index : " << iter->second << ", Angle : " << msg->position[ix]
+                  << ", Time : " << moving_time_ << std::endl;
+      }
+    }
+  }
+
+  // set init joint vel, accel
+  goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
+  goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
+
+  if (is_moving_ == true && is_direct_control_ == true)
+  {
+    goal_velocity_ = calc_joint_vel_tra_.block(tra_count_, 0, 1, result_.size());
+    goal_acceleration_ = calc_joint_accel_tra_.block(tra_count_, 0, 1, result_.size());
+  }
+
+  // set mode
+  is_direct_control_ = true;
+
+  // generate trajectory
+  tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::jointTraGeneThread, this));
+  delete tra_gene_thread_;
+}
+
+void HeadControlModule::setHeadJointTimeCallback(const thormang3_head_control_module_msgs::HeadJointPose::ConstPtr &msg)
+{
+  if (enable_ == false)
+  {
+    ROS_INFO("Head module is not enable.");
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Not Enable");
+    return;
+  }
+
+  if (is_moving_ == true && is_direct_control_ == false)
+  {
+    ROS_INFO("Head is moving now.");
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Head is busy.");
+    return;
+  }
+
+  // moving time
+  moving_time_ = msg->mov_time;
+
+  // set target joint angle
+  target_position_ = goal_position_;  // default
+
+  for (int ix = 0; ix < msg->angle.name.size(); ix++)
+  {
+    std::string joint_name = msg->angle.name[ix];
+    std::map<std::string, int>::iterator iter = using_joint_name_.find(joint_name);
+
+    if (iter != using_joint_name_.end())
+    {
+      // set target position
+      target_position_.coeffRef(0, iter->second) = msg->angle.position[ix];
+
+      // set time
+      int calc_moving_time = fabs(goal_position_.coeff(0, iter->second) - target_position_.coeff(0, iter->second))
+          / 0.45;
+      if (moving_time_ == 0)
+        moving_time_ = calc_moving_time;
+
+      if (DEBUG)
+      {
+        std::cout << "joint : " << joint_name << ", Index : " << iter->second << ", Angle : " << msg->angle.position[ix]
                   << ", Time : " << moving_time_ << std::endl;
       }
     }
