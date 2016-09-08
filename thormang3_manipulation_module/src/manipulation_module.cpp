@@ -64,25 +64,25 @@ ManipulationModule::ManipulationModule()
   result_["torso_y"]      = new robotis_framework::DynamixelState();
 
   /* arm */
-  joint_name_to_id["r_arm_sh_p1"] = 1;
-  joint_name_to_id["l_arm_sh_p1"] = 2;
-  joint_name_to_id["r_arm_sh_r"]  = 3;
-  joint_name_to_id["l_arm_sh_r"]  = 4;
-  joint_name_to_id["r_arm_sh_p2"] = 5;
-  joint_name_to_id["l_arm_sh_p2"] = 6;
-  joint_name_to_id["r_arm_el_y"]  = 7;
-  joint_name_to_id["l_arm_el_y"]  = 8;
-  joint_name_to_id["r_arm_wr_r"]  = 9;
-  joint_name_to_id["l_arm_wr_r"]  = 10;
-  joint_name_to_id["r_arm_wr_y"]  = 11;
-  joint_name_to_id["l_arm_wr_y"]  = 12;
-  joint_name_to_id["r_arm_wr_p"]  = 13;
-  joint_name_to_id["l_arm_wr_p"]  = 14;
-  joint_name_to_id["torso_y"]     = 27;
+  joint_name_to_id_["r_arm_sh_p1"] = 1;
+  joint_name_to_id_["l_arm_sh_p1"] = 2;
+  joint_name_to_id_["r_arm_sh_r"]  = 3;
+  joint_name_to_id_["l_arm_sh_r"]  = 4;
+  joint_name_to_id_["r_arm_sh_p2"] = 5;
+  joint_name_to_id_["l_arm_sh_p2"] = 6;
+  joint_name_to_id_["r_arm_el_y"]  = 7;
+  joint_name_to_id_["l_arm_el_y"]  = 8;
+  joint_name_to_id_["r_arm_wr_r"]  = 9;
+  joint_name_to_id_["l_arm_wr_r"]  = 10;
+  joint_name_to_id_["r_arm_wr_y"]  = 11;
+  joint_name_to_id_["l_arm_wr_y"]  = 12;
+  joint_name_to_id_["r_arm_wr_p"]  = 13;
+  joint_name_to_id_["l_arm_wr_p"]  = 14;
+  joint_name_to_id_["torso_y"]     = 27;
 
   /* etc */
-  joint_name_to_id["r_arm_end"]   = 35;
-  joint_name_to_id["l_arm_end"]   = 34;
+  joint_name_to_id_["r_arm_end"]   = 35;
+  joint_name_to_id_["l_arm_end"]   = 34;
 
   /* parameter */
   humanoid_                   = new KinematicsDynamics(WholeBody);
@@ -177,15 +177,16 @@ void ManipulationModule::queueThread()
   goal_torque_limit_pub_ = ros_node.advertise<robotis_controller_msgs::SyncWriteItem>("/robotis/sync_write_item", 1);
 
   /* subscribe topics */
-  ros::Subscriber ini_pose_msg_sub        = ros_node.subscribe("/robotis/manipulation/ini_pose_msg", 5,
-                                                               &ManipulationModule::initPoseMsgCallback, this);
-  ros::Subscriber joint_pose_msg_sub      = ros_node.subscribe("/robotis/manipulation/joint_pose_msg", 5,
-                                                               &ManipulationModule::jointPoseMsgCallback, this);
+  ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/manipulation/ini_pose_msg", 5,
+                                                        &ManipulationModule::initPoseMsgCallback, this);
+  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/manipulation/joint_pose_msg", 5,
+                                                          &ManipulationModule::jointPoseMsgCallback, this);
   ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/manipulation/kinematics_pose_msg", 5,
                                                                &ManipulationModule::kinematicsPoseMsgCallback, this);
   ros::Subscriber joint_torque_limit_sub = ros_node.subscribe("/robotis/manipulation/joint_torque_limit_msg", 5,
                                                               &ManipulationModule::setJointorqueLimitMsgCallback, this);
-
+  ros::Subscriber joint_group_pose_msg_sub = ros_node.subscribe("/robotis/manipulation/joint_group_pose_msg", 5,
+                                                                &ManipulationModule::jointGroupPoseMsgCallback, this);
   /* service */
   ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/manipulation/get_joint_pose",
                                                                        &ManipulationModule::getJointPoseCallback, this);
@@ -347,20 +348,20 @@ void ManipulationModule::setJointorqueLimitMsgCallback(const std_msgs::String::C
   {
     ROS_INFO("r_arm_torque_down");
 
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_r"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_r"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_el_y"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_el_y"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_r"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_r"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_y"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_y"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_p"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_p"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_sh_p1"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_sh_p1"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_sh_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_sh_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_sh_p2"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_sh_p2"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_el_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_el_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_wr_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_wr_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_wr_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_wr_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_wr_p"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_wr_p"]].position_;
 
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
     sync_write_msg.value.push_back(85);
@@ -381,20 +382,20 @@ void ManipulationModule::setJointorqueLimitMsgCallback(const std_msgs::String::C
   {
     ROS_INFO("r_arm_torque_up");
 
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p1"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_r"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_r"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_sh_p2"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_el_y"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_el_y"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_r"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_r"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_y"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_y"]].position_;
-    joint_state_->goal_joint_state[joint_name_to_id["r_arm_wr_p"]].position_ =
-        joint_state_->curr_joint_state[joint_name_to_id["r_arm_wr_p"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_sh_p1"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_sh_p1"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_sh_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_sh_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_sh_p2"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_sh_p2"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_el_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_el_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_wr_r"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_wr_r"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_wr_y"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_wr_y"]].position_;
+    joint_state_->goal_joint_state[joint_name_to_id_["r_arm_wr_p"]].position_ =
+        joint_state_->curr_joint_state[joint_name_to_id_["r_arm_wr_p"]].position_;
 
     sync_write_msg.joint_name.push_back("r_arm_sh_p1");
     sync_write_msg.value.push_back(310);
@@ -413,6 +414,24 @@ void ManipulationModule::setJointorqueLimitMsgCallback(const std_msgs::String::C
   }
 
   goal_torque_limit_pub_.publish(sync_write_msg);
+}
+
+void ManipulationModule::jointGroupPoseMsgCallback(const thormang3_manipulation_module_msgs::JointGroupPose::ConstPtr& msg)
+{
+  if(enable_ == false)
+    return;
+
+  manipulation_module_state_->goal_joint_group_pose_msg_ = *msg;
+
+  if (manipulation_module_state_->is_moving_ == false)
+  {
+    traj_generate_tread_ = new boost::thread(boost::bind(&ManipulationModule::traGeneProcJointGroupPose, this));
+    delete traj_generate_tread_;
+  }
+  else
+    ROS_INFO("previous task is alive");
+
+  return;
 }
 
 void ManipulationModule::initPoseTrajGenerateProc()
@@ -443,7 +462,7 @@ void ManipulationModule::jointTrajGenerateProc()
     double tol        = 10 * DEGREE2RADIAN; // rad per sec
     double mov_time   = 2.0;
 
-    int    ctrl_id    = joint_name_to_id[manipulation_module_state_->goal_joint_pose_msg_.name];
+    int    ctrl_id    = joint_name_to_id_[manipulation_module_state_->goal_joint_pose_msg_.name];
 
     double ini_value  = joint_state_->goal_joint_state[ctrl_id].position_;
     double tar_value  = manipulation_module_state_->goal_joint_pose_msg_.value;
@@ -545,6 +564,56 @@ void ManipulationModule::taskTrajGenerateProc()
   ROS_INFO("[start] send trajectory");
 }
 
+void ManipulationModule::traGeneProcJointGroupPose()
+{
+  manipulation_module_state_->mov_time_ = 5.0;
+
+  manipulation_module_state_->mov_time_ =
+      manipulation_module_state_->goal_joint_group_pose_msg_.mov_time;
+
+  Eigen::VectorXd joint_ini_pose = Eigen::VectorXd::Zero(MAX_JOINT_ID+1);
+
+  for (int id = 1; id<=MAX_JOINT_ID; id++)
+    joint_ini_pose(id) = joint_state_->goal_joint_state[id].position_;
+
+  for (int it = 0;
+       it < manipulation_module_state_->goal_joint_group_pose_msg_.joint_state.name.size(); it++)
+  {
+    std::string joint_name =
+        manipulation_module_state_->goal_joint_group_pose_msg_.joint_state.name[it];
+    double joint_value =
+        manipulation_module_state_->goal_joint_group_pose_msg_.joint_state.position[it];
+
+    joint_ini_pose(joint_name_to_id_[joint_name]) = joint_value;
+  }
+
+  manipulation_module_state_->all_time_steps_ =
+      int(manipulation_module_state_->mov_time_ / manipulation_module_state_->smp_time_) + 1;
+  manipulation_module_state_->calc_joint_tra_.resize(manipulation_module_state_->all_time_steps_, MAX_JOINT_ID + 1);
+
+  ROS_INFO("%d", manipulation_module_state_->all_time_steps_);
+
+  for (int id = 1; id <= MAX_JOINT_ID; id++)
+  {
+    double ini_value = joint_state_->goal_joint_state[id].position_;
+    double tar_value = joint_ini_pose(id);
+
+    Eigen::MatrixXd tra;
+
+    tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0,
+                                                tar_value, 0.0, 0.0,
+                                                manipulation_module_state_->smp_time_,
+                                                manipulation_module_state_->mov_time_);
+
+    manipulation_module_state_->calc_joint_tra_.block(0, id, manipulation_module_state_->all_time_steps_, 1) = tra;
+  }
+
+  manipulation_module_state_->cnt_        = 0;
+  manipulation_module_state_->is_moving_  = true;
+
+  ROS_INFO("[start] send trajectory");
+}
+
 void ManipulationModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
                                  std::map<std::string, double> sensors)
 {
@@ -568,8 +637,8 @@ void ManipulationModule::process(std::map<std::string, robotis_framework::Dynami
     double joint_curr_position = dxl->dxl_state_->present_position_;
     double joint_goal_position = dxl->dxl_state_->goal_position_;
 
-    joint_state_->curr_joint_state[joint_name_to_id[joint_name]].position_ = joint_curr_position;
-    joint_state_->goal_joint_state[joint_name_to_id[joint_name]].position_ = joint_goal_position;
+    joint_state_->curr_joint_state[joint_name_to_id_[joint_name]].position_ = joint_curr_position;
+    joint_state_->goal_joint_state[joint_name_to_id_[joint_name]].position_ = joint_goal_position;
   }
 
   /*----- forward kinematics -----*/
@@ -637,7 +706,7 @@ void ManipulationModule::process(std::map<std::string, robotis_framework::Dynami
       state_iter != result_.end(); state_iter++)
   {
     std::string joint_name = state_iter->first;
-    result_[joint_name]->goal_position_ = joint_state_->goal_joint_state[joint_name_to_id[joint_name]].position_;
+    result_[joint_name]->goal_position_ = joint_state_->goal_joint_state[joint_name_to_id_[joint_name]].position_;
   }
 
   /*---------- initialize count number ----------*/
