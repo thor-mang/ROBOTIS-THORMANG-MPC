@@ -247,7 +247,7 @@ void WholebodyModule::queueThread()
   ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/ini_pose_msg", 5,
                                                         &WholebodyModule::setIniPoseMsgCallback, this);
   ros::Subscriber wheel_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/wheel_pose_msg", 5,
-                                                        &WholebodyModule::setWheelPoseMsgCallback, this);
+                                                          &WholebodyModule::setWheelPoseMsgCallback, this);
   ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/joint_pose_msg", 5,
                                                           &WholebodyModule::setJointPoseMsgCallback, this);
   ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/kinematics_pose_msg", 5,
@@ -261,7 +261,7 @@ void WholebodyModule::queueThread()
   ros::Subscriber circle_pose_msg_sub = ros_node.subscribe("/robotis/wholebody/circle_pose_msg", 5,
                                                            &WholebodyModule::setCirclePoseMsgCallback, this);
 
-//  done
+  //  done
 
   /* service */
   ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/wholebody/get_kinematics_pose",
@@ -413,7 +413,7 @@ void WholebodyModule::parseBalanceGainData(const std::string &path)
     return;
   }
 
-//  ROS_INFO("Parse Balance Gain Data");
+  //  ROS_INFO("Parse Balance Gain Data");
 
   gyro_gain_ = doc["gyro_gain"].as<double>();
 
@@ -537,41 +537,42 @@ void WholebodyModule::setWheelPoseMsgCallback(const thormang3_wholebody_module_m
       else
         ROS_INFO("balance is off");
     }
-      else if (msg->name == "wheel_on_pose" ||
-               msg->name == "wheel_knee_on_pose")
-      {
-        if (msg->name == "wheel_on_pose")
-          is_knee_torque_limit_down_ = true;
-        is_wheel_pose_ = true;
+    else if (msg->name == "wheel_on_pose" ||
+             msg->name == "wheel_knee_on_pose")
+    {
+      if (msg->name == "wheel_on_pose")
+        is_knee_torque_limit_down_ = true;
+      is_wheel_pose_ = true;
 
-        parseWheelJointPoseData();
+      parseWheelJointPoseData();
 
-        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
-        delete tra_gene_tread_;
-      }
-      else if (msg->name == "wheel_off_pose" ||
-               msg->name == "wheel_knee_off_pose")
-      {
-        if (msg->name == "wheel_off_pose")
-        {
-          robotis_controller_msgs::SyncWriteItem sync_write_msg;
-          sync_write_msg.item_name = "goal_torque";
-          sync_write_msg.joint_name.push_back("r_leg_kn_p");
-          sync_write_msg.value.push_back(1240);
-          sync_write_msg.joint_name.push_back("l_leg_kn_p");
-          sync_write_msg.value.push_back(1240);
-
-          goal_torque_limit_pub_.publish(sync_write_msg);
-        }
-
-        is_wheel_pose_ = false;
-
-        tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
-        delete tra_gene_tread_;
-      }
+      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
+      delete tra_gene_tread_;
     }
-    else
-      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
+    else if (msg->name == "wheel_off_pose" ||
+             msg->name == "wheel_knee_off_pose")
+    {
+      if (msg->name == "wheel_off_pose")
+      {
+        ROS_INFO("knee torque up");
+        robotis_controller_msgs::SyncWriteItem sync_write_msg;
+        sync_write_msg.item_name = "goal_torque";
+        sync_write_msg.joint_name.push_back("r_leg_kn_p");
+        sync_write_msg.value.push_back(1240);
+        sync_write_msg.joint_name.push_back("l_leg_kn_p");
+        sync_write_msg.value.push_back(1240);
+
+        goal_torque_limit_pub_.publish(sync_write_msg);
+      }
+
+      is_wheel_pose_ = false;
+
+      tra_gene_tread_ = new boost::thread(boost::bind(&WholebodyModule::traGeneProcWheelJointPose, this));
+      delete tra_gene_tread_;
+    }
+  }
+  else
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Previous task is alive");
 }
 
 void WholebodyModule::setJointPoseMsgCallback(const thormang3_wholebody_module_msgs::JointPose::ConstPtr& msg)
@@ -1632,7 +1633,7 @@ void WholebodyModule::setEndTrajectory()
 {
   if (is_moving_ == true)
   {
-//    done
+    //    done
 
     if (cnt_ >= all_time_steps_)
     {
@@ -1673,6 +1674,7 @@ void WholebodyModule::setEndTrajectory()
 
       if (is_knee_torque_limit_down_ == true)
       {
+        ROS_INFO("knee torque down");
         robotis_controller_msgs::SyncWriteItem sync_write_msg;
         sync_write_msg.item_name = "goal_torque";
         sync_write_msg.joint_name.push_back("r_leg_kn_p");
@@ -2303,7 +2305,7 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     present_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_position_;
     //    present_joint_velocity_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->present_velocity_;
 
-    goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_; 
+    goal_joint_position_(joint_name_to_id_[joint_name]) = dxl->dxl_state_->goal_position_;
 
     // Get Sensor Data
     l_foot_ft_data_msg_.force.x = sensors["l_foot_fx_scaled_N"];
@@ -2328,9 +2330,9 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
   robotis_->calcForwardKinematics(0);
 
   /*----- Center of Mass -----*/
-//  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
-//  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
-//  calcGoalFT();
+  //  Eigen::MatrixXd mass_center = robotis_->calcMassCenter(0);
+  //  center_of_mass_ = robotis_->calcCenterOfMass(mass_center);
+  //  calcGoalFT();
 
   /* ----- Movement Event -----*/
   if (is_balancing_ == true)
