@@ -2427,6 +2427,11 @@ void WholebodyModule::stop()
   return;
 }
 
+void WholebodyModule::onModuleEnable()
+{
+  goal_joint_position_ = present_joint_position_;
+}
+
 bool WholebodyModule::isRunning()
 {
   return is_moving_;
