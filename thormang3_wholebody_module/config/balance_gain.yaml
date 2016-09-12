@@ -1,4 +1,4 @@
-gyro_gain : 0.5
+gyro_gain : 0.25
 
 foot_roll_angle_gain : -0.25
 foot_pitch_angle_gain : -0.25
