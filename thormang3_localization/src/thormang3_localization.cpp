@@ -7,7 +7,7 @@ namespace thormang3
 
 Thormang3Localization::Thormang3Localization()
  : ros_node_(),
-   transform_tolerance_(0.0)
+   transform_tolerance_(0.01)
 {
   initialize();
 
@@ -53,10 +53,10 @@ void Thormang3Localization::process()
 
   pelvis_trans_.setRotation(q);
 
-  ros::Duration transformTolerance(transform_tolerance_);
-  ros::Time transformExpiration = (thormang3_pelvis_pose_.header.stamp + transformTolerance);
+  ros::Duration transform_tolerance(transform_tolerance_);
+  ros::Time transform_expiration = (thormang3_pelvis_pose_.header.stamp + transform_tolerance);
 
-  tf::StampedTransform tmp_tf_stamped(pelvis_trans_, transformExpiration, "world", "pelvis_link");
+  tf::StampedTransform tmp_tf_stamped(pelvis_trans_, transform_expiration, "world", "pelvis_link");
 
   broadcaster_.sendTransform(tmp_tf_stamped);
 }
