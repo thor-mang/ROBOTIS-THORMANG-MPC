@@ -35,8 +35,6 @@ void Thormang3Localization::initialize()
 void Thormang3Localization::thormang3PelvisPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
   thormang3_pelvis_pose_ = *msg;
-
-//  process();
 }
 
 void Thormang3Localization::process()
