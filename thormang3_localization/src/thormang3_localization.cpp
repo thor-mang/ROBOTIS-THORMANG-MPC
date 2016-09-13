@@ -7,7 +7,7 @@ namespace thormang3
 
 Thormang3Localization::Thormang3Localization()
  : ros_node_(),
-   transform_tolerance_(0.01)
+   transform_tolerance_(0.0)
 {
   initialize();
 
