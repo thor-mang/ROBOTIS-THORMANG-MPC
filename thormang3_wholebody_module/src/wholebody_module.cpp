@@ -241,6 +241,8 @@ void WholebodyModule::queueThread()
   goal_torque_limit_pub_ = ros_node.advertise<robotis_controller_msgs::SyncWriteItem>("/robotis/sync_write_item", 1);
   movement_done_pub_ = ros_node.advertise<std_msgs::String>("/robotis/wholebody/movement_done", 1);
 
+  thormang3_pelvis_msg_pub_ = ros_node.advertise<geometry_msgs::PoseStamped>("/robotis/pelvis_pose", 1);
+
   /* subscribe topics */
   ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/wholebody/set_mode_msg", 5,
                                                         &WholebodyModule::setModeMsgCallback, this);
@@ -2402,6 +2404,23 @@ void WholebodyModule::process(std::map<std::string, robotis_framework::Dynamixel
     std::string joint_name = state_iter->first;
     result_[joint_name]->goal_position_ = goal_joint_position_(joint_name_to_id_[joint_name]);
   }
+
+  /* --- Send Pelvis Pose --- */
+  thormang3_pelvis_pose_msg_.header.stamp = ros::Time::now();
+
+  thormang3_pelvis_pose_msg_.pose.position.x = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(0,0);
+  thormang3_pelvis_pose_msg_.pose.position.y = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(1,0);
+  thormang3_pelvis_pose_msg_.pose.position.z = robotis_->thormang3_link_data_[ID_PELVIS]->position_.coeff(2,0);
+
+  Eigen::Quaterniond thormang3_pelvis_quaternion =
+      robotis_framework::convertRotationToQuaternion(robotis_->thormang3_link_data_[ID_PELVIS]->orientation_);
+
+  thormang3_pelvis_pose_msg_.pose.orientation.x = thormang3_pelvis_quaternion.x();
+  thormang3_pelvis_pose_msg_.pose.orientation.y = thormang3_pelvis_quaternion.y();
+  thormang3_pelvis_pose_msg_.pose.orientation.z = thormang3_pelvis_quaternion.z();
+  thormang3_pelvis_pose_msg_.pose.orientation.w = thormang3_pelvis_quaternion.w();
+
+  thormang3_pelvis_msg_pub_.publish(thormang3_pelvis_pose_msg_);
 
   /*---------- Movement End Event ----------*/
   setEndTrajectory();

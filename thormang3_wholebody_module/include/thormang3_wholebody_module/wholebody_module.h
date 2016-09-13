@@ -18,6 +18,7 @@
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Wrench.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Imu.h>
 #include <boost/thread.hpp>
@@ -62,6 +63,7 @@ private:
   ros::Publisher set_ctrl_module_pub_;
   ros::Publisher goal_torque_limit_pub_;
   ros::Publisher movement_done_pub_;
+  ros::Publisher thormang3_pelvis_msg_pub_;
 
   std::map<std::string, int> joint_name_to_id_;
 
@@ -149,6 +151,9 @@ private:
   Eigen::MatrixXd default_l_arm_position_;
   Eigen::MatrixXd default_r_arm_position_;
   Eigen::MatrixXd center_of_mass_;
+
+  geometry_msgs::PoseStamped thormang3_pelvis_pose_msg_;
+
 
   /* balance */
   bool is_balancing_;
