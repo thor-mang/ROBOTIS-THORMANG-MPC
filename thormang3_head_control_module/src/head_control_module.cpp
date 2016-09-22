@@ -100,7 +100,7 @@ void HeadControlModule::queueThread()
   ros::Subscriber get_3d_lidar_sub   = ros_node.subscribe("robotis/head_control/move_lidar", 1, &HeadControlModule::get3DLidarCallback, this);
   ros::Subscriber set_head_joint_sub = ros_node.subscribe("robotis/head_control/set_joint_states", 1, &HeadControlModule::setHeadJointCallback, this);
 
-  ros::WallDuration duration(control_cycle_msec_/1000.0);
+  ros::WallDuration duration(control_cycle_msec_ / 1000.0);
   while(ros_node.ok())
     callback_queue.callAvailable(duration);
 }

@@ -218,7 +218,7 @@ void    WalkingMotionModule::queueThread()
   /* sensor topic subscribe */
   ros::Subscriber imu_data_sub    = ros_node.subscribe("sensor/imu/raw",    3, &WalkingMotionModule::imuDataOutputCallback,        this);
 
-  ros::WallDuration duration(control_cycle_msec_/1000.0);
+  ros::WallDuration duration(control_cycle_msec_ / 1000.0);
   while(ros_node.ok())
     callback_queue.callAvailable(duration);
 }

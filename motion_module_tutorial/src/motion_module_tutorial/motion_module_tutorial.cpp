@@ -76,7 +76,7 @@ void MotionModuleTutorial::queueThread()
   /* publisher */
   pub1_ = ros_node.advertise<std_msgs::Int16>("/tutorial_publish", 1, true);
 
-  ros::WallDuration duration(control_cycle_msec_/1000.0);
+  ros::WallDuration duration(control_cycle_msec_ / 1000.0);
   while(ros_node.ok())
     callback_queue.callAvailable(duration);
 }
