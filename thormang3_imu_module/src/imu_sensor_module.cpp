@@ -58,7 +58,7 @@ void ImuSensor::initialize(const int control_cycle_msec, robotis_framework::Robo
 {
   control_cycle_msec_ = control_cycle_msec;
 
-  queue_thread_       = boost::thread(boost::bind(&ImuSensor::msgQueueThread, this));
+  queue_thread_ = boost::thread(boost::bind(&ImuSensor::msgQueueThread, this));
 }
 
 void ImuSensor::publishStatusMsg(unsigned int type, std::string msg)
@@ -104,7 +104,6 @@ void ImuSensor::msgQueueThread()
   ros_node.setCallbackQueue(&callback_queue);
 
   /* subscriber */
-  //ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrist_ft/ft_calib_command",	1, &ThorMang3ImuSensor::FTSensorCalibrationCommandCallback, this);
   ros::Subscriber imu_raw_sub = ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode_ ? "/gazebo/" + gazebo_robot_name_ + "/sensor/imu" : "sensor/imu/raw",	1,
                                                     boost::bind(&ImuSensor::imuSensorCallback, this, _1, std::string("raw")));
   ros::Subscriber imu_filtered_sub = ros_node.subscribe<sensor_msgs::Imu>(gazebo_mode_ ? "/gazebo/" + gazebo_robot_name_ + "/sensor/imu" : "sensor/imu/filtered",	1,

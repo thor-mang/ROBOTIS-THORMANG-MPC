@@ -42,7 +42,9 @@
 
 namespace thormang3
 {
-class ImuSensor : public robotis_framework::SensorModule, public robotis_framework::Singleton<ImuSensor>
+class ImuSensor
+  : public robotis_framework::SensorModule
+  , public robotis_framework::Singleton<ImuSensor>
 {
 public:
   ImuSensor();
@@ -74,4 +76,4 @@ private:
 }
 
 
-#endif /* THORMANG3_FEET_FORCE_TORQUE_SENSOR_MODULE_H_ */
+#endif /* THORMANG3_IMU_SENSOR_MODULE_H_ */
