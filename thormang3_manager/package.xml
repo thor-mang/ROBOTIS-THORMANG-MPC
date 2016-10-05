@@ -18,6 +18,7 @@
   <build_depend>robotis_controller_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>thormang3_imu_module</build_depend>
+  <build_depend>thormang3_diagnostic_module</build_depend>
   <build_depend>thormang3_feet_ft_module</build_depend>
   <build_depend>thormang3_wrist_ft_module</build_depend>
   <build_depend>thormang3_balance_control</build_depend>

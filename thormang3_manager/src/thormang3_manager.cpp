@@ -39,6 +39,7 @@
 
 /* Sensor Module Header */
 #include "thormang3_imu_module/imu_sensor_module.h"
+#include "thormang3_diagnostic_module/diagnostic_sensor_module.h"
 #include "thormang3_feet_ft_module/feet_force_torque_sensor_module.h"
 #include "thormang3_wrist_ft_module/wrist_force_torque_sensor_module.h"
 
