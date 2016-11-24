@@ -9,12 +9,10 @@ project(thormang3_feet_ft_module)
 ################################################################################
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  geometry_msgs
+  std_msgs
   cmake_modules
-  message_generation
-  dynamixel_sdk
   robotis_math
-  robotis_device
+  robotis_controller_msgs
   robotis_framework_common
   thormang3_kinematics_dynamics
   thormang3_feet_ft_module_msgs
@@ -37,6 +35,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_feet_ft_module
+  CATKIN_DEPENDS roscpp std_msgs robotis_framework_common
 )
 
 ################################################################################
