@@ -65,6 +65,17 @@ namespace thormang3
 #define ID_R_LEG_FT     (37)
 #define ID_L_LEG_FT     (36)
 
+#define ID_BASE         (0)
+#define ID_PELVIS       (44)
+
+#define ID_PELVIS_POS_X (38)
+#define ID_PELVIS_POS_Y (39)
+#define ID_PELVIS_POS_Z (40)
+#define ID_PELVIS_ROT_X (41)
+#define ID_PELVIS_ROT_Y (42)
+#define ID_PELVIS_ROT_Z (43)
+
+
 #define GRAVITY_ACCELERATION (9.8)
 
 }
