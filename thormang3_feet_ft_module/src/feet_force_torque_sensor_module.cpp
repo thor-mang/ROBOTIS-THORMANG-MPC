@@ -173,7 +173,7 @@ void FeetForceTorqueSensor::initializeFeetForceTorqueSensor()
   ft = doc["ft_left_foot_gnd"].as<std::vector<double> >();
   l_foot_ft_gnd_ = Eigen::Map<Eigen::MatrixXd>(ft.data(), 6, 1);
 
-  double scale = ( r_foot_ft_gnd_.coeff(2, 0) + l_foot_ft_gnd_.coeff(2, 0) - r_foot_ft_air_.coeff(2, 0) - l_foot_ft_air_.coeff(2, 0) ) / (total_mass_ * GRAVITY_ACCELERATION);
+  double scale = (total_mass_ * GRAVITY_ACCELERATION) / ( r_foot_ft_gnd_.coeff(2, 0) + l_foot_ft_gnd_.coeff(2, 0) - r_foot_ft_air_.coeff(2, 0) - l_foot_ft_air_.coeff(2, 0) );
   r_foot_ft_scale_factor_ = l_foot_ft_scale_factor_ = scale;
 
   r_foot_ft_sensor_.setScaleParam(r_foot_ft_scale_factor_, r_foot_ft_air_);
@@ -252,13 +252,16 @@ void  FeetForceTorqueSensor::ftSensorCalibrationCommandCallback(const std_msgs::
       if(has_ft_air_ && has_ft_gnd_)
       {
         double scale = 1.0;
-        scale = ( r_foot_ft_gnd_.coeff(2, 0) + l_foot_ft_gnd_.coeff(2, 0) - r_foot_ft_air_.coeff(2, 0) - l_foot_ft_air_.coeff(2, 0) ) / (total_mass_ * GRAVITY_ACCELERATION);
+        scale = (total_mass_ * GRAVITY_ACCELERATION) / ( r_foot_ft_gnd_.coeff(2, 0) + l_foot_ft_gnd_.coeff(2, 0) - r_foot_ft_air_.coeff(2, 0) - l_foot_ft_air_.coeff(2, 0) );
         r_foot_ft_scale_factor_ = l_foot_ft_scale_factor_ = scale;
 
+        ROS_INFO_STREAM("Total Mass : " << total_mass_);
         ROS_INFO_STREAM("r_foot_ft_scale_factor_ : " << r_foot_ft_scale_factor_);
         ROS_INFO_STREAM("l_foot_ft_scale_factor_ : " << l_foot_ft_scale_factor_);
         ROS_INFO_STREAM("r_foot_ft_air_ : " << r_foot_ft_air_.transpose());
         ROS_INFO_STREAM("l_foot_ft_air_ : " << l_foot_ft_air_.transpose());
+        ROS_INFO_STREAM("r_foot_ft_gnd_ : " << r_foot_ft_gnd_.transpose());
+        ROS_INFO_STREAM("l_foot_ft_gnd_ : " << l_foot_ft_gnd_.transpose());
         r_foot_ft_sensor_.setScaleParam(r_foot_ft_scale_factor_, r_foot_ft_air_);
         l_foot_ft_sensor_.setScaleParam(l_foot_ft_scale_factor_, l_foot_ft_air_);
 

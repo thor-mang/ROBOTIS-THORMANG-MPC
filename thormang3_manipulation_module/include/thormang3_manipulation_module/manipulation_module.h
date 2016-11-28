@@ -55,12 +55,9 @@
 #include "robotis_framework_common/motion_module.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
-#include "robotis_controller_msgs/JointCtrlModule.h"
 #include "robotis_controller_msgs/StatusMsg.h"
-#include "robotis_controller_msgs/SyncWriteItem.h"
 
 #include "thormang3_manipulation_module_msgs/JointPose.h"
-#include "thormang3_manipulation_module_msgs/JointGroupPose.h"
 #include "thormang3_manipulation_module_msgs/KinematicsPose.h"
 
 #include "thormang3_manipulation_module_msgs/GetJointPose.h"
@@ -100,8 +97,6 @@ public:
   void initPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
   void jointPoseMsgCallback(const thormang3_manipulation_module_msgs::JointPose::ConstPtr& msg);
   void kinematicsPoseMsgCallback(const thormang3_manipulation_module_msgs::KinematicsPose::ConstPtr& msg);
-  void setJointorqueLimitMsgCallback(const std_msgs::String::ConstPtr& msg);
-  void jointGroupPoseMsgCallback(const thormang3_manipulation_module_msgs::JointGroupPose::ConstPtr& msg);
 
   bool getJointPoseCallback(thormang3_manipulation_module_msgs::GetJointPose::Request &req,
                             thormang3_manipulation_module_msgs::GetJointPose::Response &res);
@@ -112,7 +107,6 @@ public:
   void initPoseTrajGenerateProc();
   void jointTrajGenerateProc();
   void taskTrajGenerateProc();
-  void traGeneProcJointGroupPose();
 
   /* ROS Framework Functions */
   void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
@@ -138,9 +132,8 @@ private:
   boost::thread  *traj_generate_tread_;
 
   ros::Publisher  status_msg_pub_;
-  ros::Publisher  goal_torque_limit_pub_;
 
-  std::map<std::string, int> joint_name_to_id_;
+  std::map<std::string, int> joint_name_to_id;
 };
 
 }
