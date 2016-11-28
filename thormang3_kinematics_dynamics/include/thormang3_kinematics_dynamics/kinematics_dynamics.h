@@ -38,6 +38,9 @@
 #ifndef THORMANG3_KINEMATICS_DYNAMICS_KINEMATICS_DYNAMICS_H_
 #define THORMANG3_KINEMATICS_DYNAMICS_KINEMATICS_DYNAMICS_H_
 
+#define EIGEN_NO_DEBUG
+#define EIGEN_NO_STATIC_ASSERT
+
 #include <vector>
 
 #include "kinematics_dynamics_define.h"
@@ -64,8 +67,10 @@ public:
   std::vector<int> findRoute(int from, int to);
 
   double calcTotalMass(int joint_id);
-  Eigen::MatrixXd calcMC(int joint_id);
-  Eigen::MatrixXd calcCOM(Eigen::MatrixXd mc);
+  Eigen::MatrixXd calcMassCenter(int joint_id);
+  Eigen::MatrixXd calcCenterOfMass(Eigen::MatrixXd mc);
+
+  void calcJointsCenterOfMass(int joint_id);
 
   void calcForwardKinematics(int joint_ID);
 

@@ -38,6 +38,9 @@
 #ifndef THORMANG3_KINEMATICS_DYNAMICS_LINK_DATA_H_
 #define THORMANG3_KINEMATICS_DYNAMICS_LINK_DATA_H_
 
+#define EIGEN_NO_DEBUG
+#define EIGEN_NO_STATIC_ASSERT
+
 #include "robotis_math/robotis_math.h"
 
 namespace thormang3
@@ -62,6 +65,7 @@ public:
   Eigen::MatrixXd joint_axis_;
   Eigen::MatrixXd center_of_mass_;
   Eigen::MatrixXd inertia_;
+  Eigen::MatrixXd joint_center_of_mass_;
 
   double joint_limit_max_;
   double joint_limit_min_;

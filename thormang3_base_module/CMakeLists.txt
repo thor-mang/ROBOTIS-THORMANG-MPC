@@ -8,13 +8,13 @@ project(thormang3_base_module)
 # Packages
 ################################################################################
 find_package(catkin REQUIRED COMPONENTS
-  robotis_math
-  robotis_controller_msgs
-  robotis_framework_common
   roscpp
   std_msgs
   geometry_msgs
   cmake_modules
+  robotis_math
+  robotis_framework_common
+  robotis_controller_msgs
   thormang3_kinematics_dynamics
 )
 
@@ -34,7 +34,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_base_module
-  CATKIN_DEPENDS roscpp std_msgs robotis_framework_common
+  CATKIN_DEPENDS roscpp std_msgs geometry_msgs robotis_framework_common
 )
 
 ################################################################################
