@@ -1,10 +1,10 @@
 [ port info ]
 # PORT NAME  | BAUDRATE | DEFAULT JOINT
-/dev/ttyUSB0 | 3000000  | r_arm_sh_p1
-/dev/ttyUSB1 | 3000000  | l_arm_sh_p1
-/dev/ttyUSB2 | 3000000  | r_leg_hip_y
-/dev/ttyUSB3 | 3000000  | l_leg_hip_y
-/dev/ttyUSB4 | 3000000  | head_lidar_spinning_joint
+/dev/ttyCH0 | 3000000  | r_arm_sh_p1
+/dev/ttyCH1 | 3000000  | l_arm_sh_p1
+/dev/ttyCH2 | 3000000  | r_leg_hip_y
+/dev/ttyCH3 | 3000000  | l_leg_hip_y
+/dev/ttyCH4 | 3000000  | head_lidar_spinning_joint
 
 [ device info ]
 # TYPE    | PORT NAME    | ID  | MODEL          | PROTOCOL | DEV NAME     | BULK READ ITEMS
