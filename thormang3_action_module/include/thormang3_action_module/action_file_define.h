@@ -44,7 +44,7 @@ namespace thormang3
 namespace action_file_define
 {
 
-const int MAXNUM_PAGE   =  256;
+const int MAXNUM_PAGE   = 256;
 const int MAXNUM_STEP   = 7;
 const int MAXNUM_NAME   = 13;
 const int MAXNUM_JOINTS = 38;
