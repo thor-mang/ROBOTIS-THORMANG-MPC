@@ -49,7 +49,6 @@ include_directories(
 
 add_library(thormang3_manipulation_module
   src/manipulation_module.cpp
-  src/manipulation_module_state.cpp
 )
 
 add_dependencies(thormang3_manipulation_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
