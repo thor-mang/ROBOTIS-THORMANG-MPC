@@ -132,6 +132,7 @@ void ActionModule::queueThread()
 
   /* publisher */
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 0);
+  done_msg_pub_   = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
 
   /* subscriber */
   ros::Subscriber action_page_sub = ros_node.subscribe("/robotis/action/page_num", 0, &ActionModule::pageNumberCallback, this);
@@ -186,6 +187,7 @@ void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
       std::string status_msg = "Failed to start page " + convertIntToString(msg->data);
       ROS_ERROR_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+      publishDoneMsg("action_playing_failed");
     }
   }
 }
@@ -224,6 +226,7 @@ void ActionModule::startActionCallback(const thormang3_action_module_msgs::Start
         std::string status_msg = "Invalid Joint Name : " + msg->joint_name_array[joint_idx];
         ROS_INFO_STREAM(status_msg);
         publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+        publishDoneMsg("action_playing_failed");
         return;
       }
       else
@@ -243,6 +246,7 @@ void ActionModule::startActionCallback(const thormang3_action_module_msgs::Start
       std::string status_msg = "Failed to start page " + convertIntToString(msg->page_num);
       ROS_ERROR_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+      publishDoneMsg("action_playing_failed");
     }
   }
 }
@@ -297,6 +301,7 @@ void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
       std::string status_msg = "Action_Finish";
       ROS_INFO_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+      publishDoneMsg("action_play_completed");
     }
   }
 }
@@ -422,9 +427,6 @@ bool ActionModule::start(int page_number)
 {
   if( page_number < 1 || page_number >= action_file_define::MAXNUM_PAGE )
   {
-    std::string _status_msg = "Can not play page.(" + convertIntToString(page_number) + " is invalid index)";
-    ROS_ERROR_STREAM(_status_msg);
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
     return false;
   }
 
@@ -449,11 +451,8 @@ bool ActionModule::start(std::string page_name)
       break;
   }
 
-  if(index == action_file_define::MAXNUM_PAGE) {
-    std::string _str_name_page = page_name;
-    std::string _status_msg = "Can not play page.(" + _str_name_page + " is invalid name)\n";
-    ROS_ERROR_STREAM(_status_msg);
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
+  if(index == action_file_define::MAXNUM_PAGE)
+  {
     return false;
   }
   else
@@ -462,7 +461,8 @@ bool ActionModule::start(std::string page_name)
 
 bool ActionModule::start(int page_number, action_file_define::Page* page)
 {
-  if(enable_ == false)	{
+  if(enable_ == false)
+  {
     std::string status_msg = "Action Module is disabled";
     ROS_ERROR_STREAM(status_msg);
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
@@ -1037,5 +1037,13 @@ void ActionModule::publishStatusMsg(unsigned int type, std::string msg)
   status.status_msg = msg;
 
   status_msg_pub_.publish(status);
+}
+
+void ActionModule::publishDoneMsg(std::string msg)
+{
+  std_msgs::String done_msg;
+  done_msg.data = msg;
+
+  done_msg_pub_.publish(done_msg);
 }
 
