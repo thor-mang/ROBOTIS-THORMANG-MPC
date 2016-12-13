@@ -47,6 +47,7 @@
 #include <ros/callback_queue.h>
 #include <std_msgs/Int32.h>
 #include <boost/thread.hpp>
+#include <std_msgs/String.h>
 
 #include "robotis_framework_common/motion_module.h"
 #include "robotis_controller_msgs/StatusMsg.h"
@@ -96,6 +97,7 @@ private:
   void setChecksum( action_file_define::Page* page );
 
   void publishStatusMsg(unsigned int type, std::string msg);
+  void publishDoneMsg(std::string msg);
 
   bool isRunningServiceCallback(thormang3_action_module_msgs::IsRunning::Request  &req,
                                 thormang3_action_module_msgs::IsRunning::Response &res);
@@ -113,6 +115,7 @@ private:
   boost::thread   queue_thread_;
 
   ros::Publisher  status_msg_pub_;
+  ros::Publisher  done_msg_pub_;
 
   std::map<std::string, int> joint_name_to_id_;
   std::map<int, std::string> joint_id_to_name_;
