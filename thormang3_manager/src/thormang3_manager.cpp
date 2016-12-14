@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     controller->addMotionModule((robotis_framework::MotionModule*)ManipulationModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)GripperModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)HeadControlModule::getInstance());
-    controller->addMotionModule((robotis_framework::MotionModule*)WalkingMotionModule::getInstance());
+    controller->addMotionModule((robotis_framework::MotionModule*)OnlineWalkingModule::getInstance());
 
     controller->startTimer();
 
