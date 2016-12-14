@@ -531,7 +531,6 @@ bool OnlineWalkingModule::addStepDataServiceCallback(thormang3_walking_module_ms
     req_step_data_array.push_back(step_data);
   }
 
-
   if(req.remove_existing_step_data == true)
   {
     int exist_num_of_step_data = online_walking->getNumofRemainingUnreservedStepData();
@@ -1008,7 +1007,6 @@ void OnlineWalkingModule::updateJointFeedBackGain()
 
 bool OnlineWalkingModule::checkBalanceOnOff()
 {
-  return true;
   if(gazebo_)
     return true;
 
