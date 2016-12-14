@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_math
   robotis_controller_msgs
   robotis_framework_common
+  thormang3_head_control_module_msgs
 )
 
 find_package(Eigen REQUIRED)
