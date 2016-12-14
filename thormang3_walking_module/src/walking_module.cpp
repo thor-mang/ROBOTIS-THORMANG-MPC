@@ -46,8 +46,10 @@ class WalkingStatusMSG
 {
 public:
   static const std::string FAILED_TO_ADD_STEP_DATA_MSG;
-  static const std::string BALANCE_PARAM_SETTING_START_MSG;
-  static const std::string BALANCE_PARAM_SETTING_FINISH_MSG;
+  static const std::string BALANCE_PARAM_SETTING_STARTED_MSG;
+  static const std::string BALANCE_PARAM_SETTING_FINISHED_MSG;
+  static const std::string JOINT_FEEDBACK_GAIN_UPDATE_STARTED_MSG;
+  static const std::string JOINT_FEEDBACK_GAIN_UPDATE_FINISHED_MSG;
   static const std::string WALKING_MODULE_IS_ENABLED_MSG;
   static const std::string WALKING_MODULE_IS_DISABLED_MSG;
   static const std::string BALANCE_HAS_BEEN_TURNED_OFF;
@@ -56,8 +58,10 @@ public:
 };
 
 const std::string WalkingStatusMSG::FAILED_TO_ADD_STEP_DATA_MSG = "Failed_to_add_Step_Data";
-const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_START_MSG = "Balance_Param_Setting_Started";
-const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISH_MSG = "Balance_Param_Setting_Finished";
+const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_STARTED_MSG = "Balance_Param_Setting_Started";
+const std::string WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISHED_MSG = "Balance_Param_Setting_Finished";
+const std::string WalkingStatusMSG::JOINT_FEEDBACK_GAIN_UPDATE_STARTED_MSG = "Joint_FeedBack_Gain_Update_Started";
+const std::string WalkingStatusMSG::JOINT_FEEDBACK_GAIN_UPDATE_FINISHED_MSG = "Joint_FeedBack_Gain_Update_Finished";
 const std::string WalkingStatusMSG::WALKING_MODULE_IS_ENABLED_MSG = "Walking_Module_is_enabled";
 const std::string WalkingStatusMSG::WALKING_MODULE_IS_DISABLED_MSG = "Walking_Module_is_disabled";
 const std::string WalkingStatusMSG::BALANCE_HAS_BEEN_TURNED_OFF = "Balance_has_been_turned_off";
@@ -232,7 +236,7 @@ void OnlineWalkingModule::queueThread()
   robot_pose_pub_ = ros_node.advertise<thormang3_walking_module_msgs::RobotPose>("/robotis/walking/robot_pose", 1);
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
   pelvis_base_msg_pub_ = ros_node.advertise<geometry_msgs::PoseStamped>("/robotis/pelvis_pose_base_walking", 1);
-  movement_done_pub_ = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
+  done_msg_pub_ = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
 #ifdef WALKING_TUNE
   walking_joint_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::WalkingJointStatesStamped>("/robotis/walking/walking_joint_states", 1);
 #endif
@@ -316,6 +320,14 @@ void OnlineWalkingModule::publishStatusMsg(unsigned int type, std::string msg)
   status_msg.status_msg = msg;
 
   status_msg_pub_.publish(status_msg);
+}
+
+void OnlineWalkingModule::publishDoneMsg(std::string msg)
+{
+  std_msgs::String done_msg;
+  done_msg.data = msg;
+
+  done_msg_pub_.publish(done_msg);
 }
 
 int OnlineWalkingModule::convertStepDataMsgToStepData(thormang3_walking_module_msgs::StepData& src, robotis_framework::StepData& des)
@@ -623,11 +635,25 @@ bool OnlineWalkingModule::setJointFeedBackGainServiceCallback(thormang3_walking_
     res.result |= thormang3_walking_module_msgs::SetJointFeedBackGain::Response::PREV_REQUEST_IS_NOT_FINISHED;
 
   if( res.result != thormang3_walking_module_msgs::SetJointFeedBackGain::Response::NO_ERROR)
+  {
+    publishDoneMsg("walking_joint_feedback_failed");
     return true;
+  }
 
-  process_mutex_.lock();
+  if( req.updating_duration < 0.0 )
+  {
+    // under 8ms apply immediately
+    setJointFeedBackGain(req.feedback_gain);
+    std::string status_msg = WalkingStatusMSG::JOINT_FEEDBACK_GAIN_UPDATE_FINISHED_MSG;
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+    publishDoneMsg("walking_joint_feedback");
+    return true;
+  }
+  else
+  {
+    joint_feedback_update_duration_ = req.updating_duration;
+  }
 
-  joint_feedback_update_duration_ = req.updating_duration;
   joint_feedback_update_sys_time_ = 0.0;
   joint_feedback_update_polynomial_coeff_.resize(6, 1);
 
@@ -674,11 +700,8 @@ bool OnlineWalkingModule::setJointFeedBackGainServiceCallback(thormang3_walking_
   joint_feedback_update_with_loop_ = true;
   joint_feedback_update_sys_time_  = 0.0;
 
-  process_mutex_.unlock();
-
   return true;
 }
-
 
 bool OnlineWalkingModule::setBalanceParamServiceCallback(thormang3_walking_module_msgs::SetBalanceParam::Request  &req,
                                                          thormang3_walking_module_msgs::SetBalanceParam::Response &res)
@@ -707,97 +730,98 @@ bool OnlineWalkingModule::setBalanceParamServiceCallback(thormang3_walking_modul
     res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::CUT_OFF_FREQUENCY_IS_ZERO_OR_NEGATIVE;
   }
 
-
-  if(res.result == thormang3_walking_module_msgs::SetBalanceParam::Response::NO_ERROR)
+  if(res.result != thormang3_walking_module_msgs::SetBalanceParam::Response::NO_ERROR)
   {
-    if( req.updating_duration < 0.0 )
-    {
-      // under 8ms apply immediately
-      setBalanceParam(req.balance_param);
-      std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISH_MSG;
-      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
-      std_msgs::String done_msg;
-      done_msg.data = "balance_updated";
-      movement_done_pub_.publish(done_msg);
-      return true;
-    }
-    else
-    {
-      balance_update_duration_ = req.updating_duration;
-    }
-
-    balance_update_sys_time_ = 0.0;
-    balance_update_polynomial_coeff_.resize(6, 1);
-
-    double tf = balance_update_duration_;
-    Eigen::MatrixXd A(6,6), B(6, 1);
-    A <<  0.0,     0.0,     0.0,    0.0,    0.0, 1.0,
-        0.0,   0.0,    0.0,    0.0,       1.0, 0.0,
-        0.0,   0.0,    0.0,    2.0,       0.0, 0.0,
-        tf*tf*tf*tf*tf,     tf*tf*tf*tf,      tf*tf*tf,        tf*tf,     tf, 1.0,
-        5.0*tf*tf*tf*tf,    4.0*tf*tf*tf,    3.0*tf*tf,    2.0*tf,        1.0, 0.0,
-        20.0*tf*tf*tf,      12.0*tf*tf,       6.0*tf,        2.0,        0.0, 0.0;
-
-    B << 0, 0, 0, 1.0, 0, 0;
-    balance_update_polynomial_coeff_ = A.inverse() * B;
-
-    desired_balance_param_ = req.balance_param;
-
-    previous_balance_param_.cob_x_offset_m                  = online_walking->balance_ctrl_.getCOBManualAdjustmentX();
-    previous_balance_param_.cob_y_offset_m                  = online_walking->balance_ctrl_.getCOBManualAdjustmentY();
-
-    previous_balance_param_.hip_roll_swap_angle_rad         = online_walking->hip_roll_feedforward_angle_rad_;
-
-    ////gain
-    //gyro
-    previous_balance_param_.foot_roll_gyro_p_gain           = online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.p_gain_;
-    previous_balance_param_.foot_roll_gyro_d_gain           = online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.d_gain_;
-    previous_balance_param_.foot_pitch_gyro_p_gain          = online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_;
-    previous_balance_param_.foot_pitch_gyro_d_gain          = online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_;
-
-    //orientation
-    previous_balance_param_.foot_roll_angle_p_gain          = online_walking->balance_ctrl_.foot_roll_angle_ctrl_.p_gain_;
-    previous_balance_param_.foot_roll_angle_d_gain          = online_walking->balance_ctrl_.foot_roll_angle_ctrl_.d_gain_;
-    previous_balance_param_.foot_pitch_angle_p_gain         = online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.p_gain_;
-    previous_balance_param_.foot_pitch_angle_d_gain         = online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.d_gain_;
-
-    //force torque
-    previous_balance_param_.foot_x_force_p_gain               = online_walking->balance_ctrl_.right_foot_force_x_ctrl_.p_gain_;
-    previous_balance_param_.foot_y_force_p_gain               = online_walking->balance_ctrl_.right_foot_force_y_ctrl_.p_gain_;
-    previous_balance_param_.foot_z_force_p_gain               = online_walking->balance_ctrl_.right_foot_force_z_ctrl_.p_gain_;
-    previous_balance_param_.foot_roll_torque_p_gain           = online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.p_gain_;
-    previous_balance_param_.foot_pitch_torque_p_gain          = online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.p_gain_;
-
-    previous_balance_param_.foot_x_force_d_gain               = online_walking->balance_ctrl_.right_foot_force_x_ctrl_.d_gain_;
-    previous_balance_param_.foot_y_force_d_gain               = online_walking->balance_ctrl_.right_foot_force_y_ctrl_.d_gain_;
-    previous_balance_param_.foot_z_force_d_gain               = online_walking->balance_ctrl_.right_foot_force_z_ctrl_.d_gain_;
-    previous_balance_param_.foot_roll_torque_d_gain           = online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.d_gain_;
-    previous_balance_param_.foot_pitch_torque_d_gain          = online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.d_gain_;
-
-    ////cut off freq
-    //gyro
-    previous_balance_param_.roll_gyro_cut_off_frequency  = online_walking->balance_ctrl_.roll_gyro_lpf_.getCutOffFrequency();
-    previous_balance_param_.pitch_gyro_cut_off_frequency = online_walking->balance_ctrl_.pitch_gyro_lpf_.getCutOffFrequency();
-
-    //orientation
-    previous_balance_param_.roll_angle_cut_off_frequency  = online_walking->balance_ctrl_.roll_angle_lpf_.getCutOffFrequency();
-    previous_balance_param_.pitch_angle_cut_off_frequency = online_walking->balance_ctrl_.pitch_angle_lpf_.getCutOffFrequency();
-
-    //force torque
-    previous_balance_param_.foot_x_force_cut_off_frequency     = online_walking->balance_ctrl_.right_foot_force_x_lpf_.getCutOffFrequency();
-    previous_balance_param_.foot_y_force_cut_off_frequency     = online_walking->balance_ctrl_.right_foot_force_y_lpf_.getCutOffFrequency();
-    previous_balance_param_.foot_z_force_cut_off_frequency     = online_walking->balance_ctrl_.right_foot_force_z_lpf_.getCutOffFrequency();
-    previous_balance_param_.foot_roll_torque_cut_off_frequency  = online_walking->balance_ctrl_.right_foot_torque_roll_lpf_.getCutOffFrequency();
-    previous_balance_param_.foot_pitch_torque_cut_off_frequency = online_walking->balance_ctrl_.right_foot_torque_pitch_lpf_.getCutOffFrequency();
-
-    balance_update_with_loop_ = true;
-
-    std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_START_MSG;
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+    publishDoneMsg("walking_balance_failed");
+    return true;
   }
+
+  if( req.updating_duration < 0.0 )
+  {
+    // under 8ms apply immediately
+    setBalanceParam(req.balance_param);
+    std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISHED_MSG;
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+    publishDoneMsg("walking_balance");
+    return true;
+  }
+  else
+  {
+    balance_update_duration_ = req.updating_duration;
+  }
+
+  balance_update_sys_time_ = 0.0;
+  balance_update_polynomial_coeff_.resize(6, 1);
+
+  double tf = balance_update_duration_;
+  Eigen::MatrixXd A(6,6), B(6, 1);
+  A <<  0.0,     0.0,     0.0,    0.0,    0.0, 1.0,
+      0.0,   0.0,    0.0,    0.0,       1.0, 0.0,
+      0.0,   0.0,    0.0,    2.0,       0.0, 0.0,
+      tf*tf*tf*tf*tf,     tf*tf*tf*tf,      tf*tf*tf,        tf*tf,     tf, 1.0,
+      5.0*tf*tf*tf*tf,    4.0*tf*tf*tf,    3.0*tf*tf,    2.0*tf,        1.0, 0.0,
+      20.0*tf*tf*tf,      12.0*tf*tf,       6.0*tf,        2.0,        0.0, 0.0;
+
+  B << 0, 0, 0, 1.0, 0, 0;
+  balance_update_polynomial_coeff_ = A.inverse() * B;
+
+  desired_balance_param_ = req.balance_param;
+
+  previous_balance_param_.cob_x_offset_m                  = online_walking->balance_ctrl_.getCOBManualAdjustmentX();
+  previous_balance_param_.cob_y_offset_m                  = online_walking->balance_ctrl_.getCOBManualAdjustmentY();
+
+  previous_balance_param_.hip_roll_swap_angle_rad         = online_walking->hip_roll_feedforward_angle_rad_;
+
+  ////gain
+  //gyro
+  previous_balance_param_.foot_roll_gyro_p_gain           = online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.p_gain_;
+  previous_balance_param_.foot_roll_gyro_d_gain           = online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.d_gain_;
+  previous_balance_param_.foot_pitch_gyro_p_gain          = online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_;
+  previous_balance_param_.foot_pitch_gyro_d_gain          = online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_;
+
+  //orientation
+  previous_balance_param_.foot_roll_angle_p_gain          = online_walking->balance_ctrl_.foot_roll_angle_ctrl_.p_gain_;
+  previous_balance_param_.foot_roll_angle_d_gain          = online_walking->balance_ctrl_.foot_roll_angle_ctrl_.d_gain_;
+  previous_balance_param_.foot_pitch_angle_p_gain         = online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.p_gain_;
+  previous_balance_param_.foot_pitch_angle_d_gain         = online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.d_gain_;
+
+  //force torque
+  previous_balance_param_.foot_x_force_p_gain               = online_walking->balance_ctrl_.right_foot_force_x_ctrl_.p_gain_;
+  previous_balance_param_.foot_y_force_p_gain               = online_walking->balance_ctrl_.right_foot_force_y_ctrl_.p_gain_;
+  previous_balance_param_.foot_z_force_p_gain               = online_walking->balance_ctrl_.right_foot_force_z_ctrl_.p_gain_;
+  previous_balance_param_.foot_roll_torque_p_gain           = online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.p_gain_;
+  previous_balance_param_.foot_pitch_torque_p_gain          = online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.p_gain_;
+
+  previous_balance_param_.foot_x_force_d_gain               = online_walking->balance_ctrl_.right_foot_force_x_ctrl_.d_gain_;
+  previous_balance_param_.foot_y_force_d_gain               = online_walking->balance_ctrl_.right_foot_force_y_ctrl_.d_gain_;
+  previous_balance_param_.foot_z_force_d_gain               = online_walking->balance_ctrl_.right_foot_force_z_ctrl_.d_gain_;
+  previous_balance_param_.foot_roll_torque_d_gain           = online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.d_gain_;
+  previous_balance_param_.foot_pitch_torque_d_gain          = online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.d_gain_;
+
+  ////cut off freq
+  //gyro
+  previous_balance_param_.roll_gyro_cut_off_frequency  = online_walking->balance_ctrl_.roll_gyro_lpf_.getCutOffFrequency();
+  previous_balance_param_.pitch_gyro_cut_off_frequency = online_walking->balance_ctrl_.pitch_gyro_lpf_.getCutOffFrequency();
+
+  //orientation
+  previous_balance_param_.roll_angle_cut_off_frequency  = online_walking->balance_ctrl_.roll_angle_lpf_.getCutOffFrequency();
+  previous_balance_param_.pitch_angle_cut_off_frequency = online_walking->balance_ctrl_.pitch_angle_lpf_.getCutOffFrequency();
+
+  //force torque
+  previous_balance_param_.foot_x_force_cut_off_frequency     = online_walking->balance_ctrl_.right_foot_force_x_lpf_.getCutOffFrequency();
+  previous_balance_param_.foot_y_force_cut_off_frequency     = online_walking->balance_ctrl_.right_foot_force_y_lpf_.getCutOffFrequency();
+  previous_balance_param_.foot_z_force_cut_off_frequency     = online_walking->balance_ctrl_.right_foot_force_z_lpf_.getCutOffFrequency();
+  previous_balance_param_.foot_roll_torque_cut_off_frequency  = online_walking->balance_ctrl_.right_foot_torque_roll_lpf_.getCutOffFrequency();
+  previous_balance_param_.foot_pitch_torque_cut_off_frequency = online_walking->balance_ctrl_.right_foot_torque_pitch_lpf_.getCutOffFrequency();
+
+  balance_update_with_loop_ = true;
+
+  std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_STARTED_MSG;
+  publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
 
   return true;
 }
+
 
 void OnlineWalkingModule::setBalanceParam(thormang3_walking_module_msgs::BalanceParam& balance_param_msg)
 {
@@ -862,6 +886,7 @@ void OnlineWalkingModule::setBalanceParam(thormang3_walking_module_msgs::Balance
   online_walking->balance_ctrl_.left_foot_torque_pitch_lpf_.setCutOffFrequency(balance_param_msg.foot_pitch_torque_cut_off_frequency);
 }
 
+
 void OnlineWalkingModule::updateBalanceParam()
 {
   double current_update_gain =  balance_update_polynomial_coeff_.coeff(0,0) * robotis_framework::powDI(balance_update_sys_time_ , 5)
@@ -908,6 +933,7 @@ void OnlineWalkingModule::updateBalanceParam()
   setBalanceParam(current_balance_param_);
 }
 
+
 void OnlineWalkingModule::setJointFeedBackGain(thormang3_walking_module_msgs::JointFeedBackGain& msg)
 {
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
@@ -937,6 +963,7 @@ void OnlineWalkingModule::setJointFeedBackGain(thormang3_walking_module_msgs::Jo
   online_walking->leg_angle_feed_back_[11].p_gain_ = msg.l_leg_an_r_p_gain  ;
   online_walking->leg_angle_feed_back_[11].d_gain_ = msg.l_leg_an_r_d_gain  ;
 }
+
 
 void OnlineWalkingModule::updateJointFeedBackGain()
 {
@@ -977,6 +1004,7 @@ void OnlineWalkingModule::updateJointFeedBackGain()
 
   setJointFeedBackGain(current_joint_feedback_gain_);
 }
+
 
 bool OnlineWalkingModule::checkBalanceOnOff()
 {
@@ -1021,6 +1049,7 @@ bool OnlineWalkingModule::checkBalanceOnOff()
     return true;
 }
 
+
 bool OnlineWalkingModule::removeExistingStepDataServiceCallback(thormang3_walking_module_msgs::RemoveExistingStepData::Request  &req,
                                                                 thormang3_walking_module_msgs::RemoveExistingStepData::Response &res)
 {
@@ -1042,6 +1071,7 @@ bool OnlineWalkingModule::removeExistingStepDataServiceCallback(thormang3_walkin
   return true;
 }
 
+
 void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr &msg)
 {
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
@@ -1051,11 +1081,13 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
                                             msg->orientation.w);
 }
 
+
 void OnlineWalkingModule::onModuleEnable()
 {
   std::string status_msg = WalkingStatusMSG::WALKING_MODULE_IS_ENABLED_MSG;
   publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
 }
+
 
 void OnlineWalkingModule::onModuleDisable()
 {
@@ -1169,11 +1201,9 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
       balance_update_sys_time_ = balance_update_duration_;
       balance_update_with_loop_ = false;
       setBalanceParam(desired_balance_param_);
-      std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISH_MSG;
+      std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISHED_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
-      std_msgs::String done_msg;
-      done_msg.data = "balance_updated";
-      movement_done_pub_.publish(done_msg);
+      publishDoneMsg("walking_balance");
     }
     else
     {
@@ -1189,11 +1219,8 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
       joint_feedback_update_sys_time_ = joint_feedback_update_duration_;
       joint_feedback_update_with_loop_ = false;
       setJointFeedBackGain(desired_joint_feedback_gain_);
-
-      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Joint FeedBack Gain Update Finished");
-      std_msgs::String done_msg;
-      done_msg.data = "joint_feedback_gain_updated";
-      movement_done_pub_.publish(done_msg);
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, WalkingStatusMSG::JOINT_FEEDBACK_GAIN_UPDATE_FINISHED_MSG);
+      publishDoneMsg("walking_joint_feedback");
     }
     else
     {
@@ -1304,6 +1331,7 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
     {
       std::string status_msg = WalkingStatusMSG::WALKING_FINISH_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+      publishDoneMsg("walking_completed");
     }
   }
   previous_running_ = present_running;

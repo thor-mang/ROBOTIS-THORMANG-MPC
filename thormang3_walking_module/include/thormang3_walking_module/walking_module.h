@@ -93,8 +93,11 @@ public:
 
 private:
   void publishRobotPose(void);
-
   void publishStatusMsg(unsigned int type, std::string msg);
+  void publishDoneMsg(std::string msg);
+#ifdef WALKING_TUNE
+  void publishWalkingTuningData();
+#endif
 
   /* ROS Topic Callback Functions */
   void imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr &msg);
@@ -151,7 +154,7 @@ private:
   ros::Publisher robot_pose_pub_;
   ros::Publisher status_msg_pub_;
   ros::Publisher pelvis_base_msg_pub_;
-  ros::Publisher movement_done_pub_;
+  ros::Publisher done_msg_pub_;
 #ifdef WALKING_TUNE
   ros::Publisher walking_joint_states_pub_;
   ros::Publisher imu_orientation_states_pub_;

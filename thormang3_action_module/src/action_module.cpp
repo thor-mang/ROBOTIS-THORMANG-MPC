@@ -187,7 +187,7 @@ void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
       std::string status_msg = "Failed to start page " + convertIntToString(msg->data);
       ROS_ERROR_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
-      publishDoneMsg("action_playing_failed");
+      publishDoneMsg("action_failed");
     }
   }
 }
@@ -226,7 +226,7 @@ void ActionModule::startActionCallback(const thormang3_action_module_msgs::Start
         std::string status_msg = "Invalid Joint Name : " + msg->joint_name_array[joint_idx];
         ROS_INFO_STREAM(status_msg);
         publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
-        publishDoneMsg("action_playing_failed");
+        publishDoneMsg("action_failed");
         return;
       }
       else
@@ -246,7 +246,7 @@ void ActionModule::startActionCallback(const thormang3_action_module_msgs::Start
       std::string status_msg = "Failed to start page " + convertIntToString(msg->page_num);
       ROS_ERROR_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
-      publishDoneMsg("action_playing_failed");
+      publishDoneMsg("action_failed");
     }
   }
 }
@@ -301,7 +301,7 @@ void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
       std::string status_msg = "Action_Finish";
       ROS_INFO_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
-      publishDoneMsg("action_play_completed");
+      publishDoneMsg("action");
     }
   }
 }
