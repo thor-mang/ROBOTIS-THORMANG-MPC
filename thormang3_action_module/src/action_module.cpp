@@ -557,12 +557,12 @@ void ActionModule::resetPage(action_file_define::Page* page)
   page->header.speed = 32;
   page->header.accel = 32;
 
-  for(int i=0; i < 38; i++)
+  for(int i=0; i < action_file_define::MAXNUM_JOINTS; i++)
     page->header.pgain[i] = 0x55;
 
   for(int i=0; i < action_file_define::MAXNUM_STEP; i++)
   {
-    for(int j=0; j < 38; j++)
+    for(int j=0; j < action_file_define::MAXNUM_JOINTS; j++)
       page->step[i].position[j] = action_file_define::INVALID_BIT_MASK;
 
     page->step[i].pause = 0;
