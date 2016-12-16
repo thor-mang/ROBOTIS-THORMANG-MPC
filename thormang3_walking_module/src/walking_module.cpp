@@ -639,7 +639,7 @@ bool OnlineWalkingModule::setJointFeedBackGainServiceCallback(thormang3_walking_
     return true;
   }
 
-  if( req.updating_duration < 0.0 )
+  if( req.updating_duration <= 0.0 )
   {
     // under 8ms apply immediately
     setJointFeedBackGain(req.feedback_gain);
@@ -735,7 +735,7 @@ bool OnlineWalkingModule::setBalanceParamServiceCallback(thormang3_walking_modul
     return true;
   }
 
-  if( req.updating_duration < 0.0 )
+  if( req.updating_duration <= 0.0 )
   {
     // under 8ms apply immediately
     setBalanceParam(req.balance_param);
