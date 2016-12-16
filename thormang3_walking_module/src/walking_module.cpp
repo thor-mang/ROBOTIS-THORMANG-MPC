@@ -630,7 +630,7 @@ bool OnlineWalkingModule::setJointFeedBackGainServiceCallback(thormang3_walking_
   if( enable_ == false)
     res.result |= thormang3_walking_module_msgs::SetJointFeedBackGain::Response::NOT_ENABLED_WALKING_MODULE;
 
-  if( balance_update_with_loop_ == true)
+  if( joint_feedback_update_with_loop_ == true)
     res.result |= thormang3_walking_module_msgs::SetJointFeedBackGain::Response::PREV_REQUEST_IS_NOT_FINISHED;
 
   if( res.result != thormang3_walking_module_msgs::SetJointFeedBackGain::Response::NO_ERROR)
