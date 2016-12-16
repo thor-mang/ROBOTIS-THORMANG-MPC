@@ -53,20 +53,20 @@ HeadControlModule::HeadControlModule()
       scan_range_(0.0),
       DEBUG(false)
 {
-  enable_       = false;
-  module_name_  = "head_control_module";
+  enable_ = false;
+  module_name_ = "head_control_module";
   control_mode_ = robotis_framework::PositionControl;
 
-  result_["head_y"]    = new robotis_framework::DynamixelState();
-  result_["head_p"]    = new robotis_framework::DynamixelState();
+  result_["head_y"] = new robotis_framework::DynamixelState();
+  result_["head_p"] = new robotis_framework::DynamixelState();
 
   using_joint_name_["head_y"] = 0;
   using_joint_name_["head_p"] = 1;
 
-  target_position_   = Eigen::MatrixXd::Zero(1, result_.size());
-  current_position_  = Eigen::MatrixXd::Zero(1, result_.size());
-  goal_position_     = Eigen::MatrixXd::Zero(1, result_.size());
-  goal_velocity_     = Eigen::MatrixXd::Zero(1, result_.size());
+  target_position_ = Eigen::MatrixXd::Zero(1, result_.size());
+  current_position_ = Eigen::MatrixXd::Zero(1, result_.size());
+  goal_position_ = Eigen::MatrixXd::Zero(1, result_.size());
+  goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
   goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
 
   tra_gene_thread_ = 0;
@@ -86,14 +86,16 @@ void HeadControlModule::initialize(const int control_cycle_msec, robotis_framewo
   ros::NodeHandle ros_node;
 
   /* publish topics */
-  moving_head_pub_ = ros_node.advertise<std_msgs::String>("/robotis/sensor/move_lidar", 0);  // todo : change topic name
-  status_msg_pub_  = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 0);
+  moving_head_pub_ = ros_node.advertise<std_msgs::String>("/robotis/sensor/move_lidar", 0);
+  status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 0);
+
+  movement_done_pub_ = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
 }
 
 void HeadControlModule::queueThread()
 {
-  ros::NodeHandle     ros_node;
-  ros::CallbackQueue  callback_queue;
+  ros::NodeHandle ros_node;
+  ros::CallbackQueue callback_queue;
 
   ros_node.setCallbackQueue(&callback_queue);
 
@@ -105,25 +107,26 @@ void HeadControlModule::queueThread()
   ros::Subscriber set_head_joint_sub = ros_node.subscribe("/robotis/head_control/set_joint_states", 1,
                                                           &HeadControlModule::setHeadJointCallback, this);
   ros::Subscriber set_head_joint_time_sub = ros_node.subscribe("/robotis/head_control/set_joint_states_time", 1,
-                                                          &HeadControlModule::setHeadJointTimeCallback, this);
-  
+                                                               &HeadControlModule::setHeadJointTimeCallback, this);
+
   ros::WallDuration duration(control_cycle_msec_ / 1000.0);
-  while(ros_node.ok())
+  while (ros_node.ok())
     callback_queue.callAvailable(duration);
 }
 
 void HeadControlModule::get3DLidarCallback(const std_msgs::String::ConstPtr &msg)
 {
-  if(enable_ == false || is_moving_ == true)
+  if (enable_ == false || is_moving_ == true)
   {
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Fail to move Lidar");
+    publishDoneMsg("scan_failed");
     return;
   }
 
-  if(DEBUG)
+  if (DEBUG)
     fprintf(stderr, "TOPIC CALLBACK : get_3d_lidar\n");
 
-  if(current_state_ == None)
+  if (current_state_ == None)
   {
     // turn off direct control and move head joint in order to make pointcloud
     is_direct_control_ = false;
@@ -144,6 +147,7 @@ void HeadControlModule::get3DLidarRangeCallback(const std_msgs::Float64::ConstPt
   if (enable_ == false || is_moving_ == true)
   {
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Fail to move Lidar");
+    publishDoneMsg("scan_failed");
     return;
   }
 
@@ -169,17 +173,19 @@ void HeadControlModule::get3DLidarRangeCallback(const std_msgs::Float64::ConstPt
 
 void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::ConstPtr &msg)
 {
-  if(enable_ == false)
+  if (enable_ == false)
   {
     ROS_INFO("Head module is not enable.");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Not Enable");
+    publishDoneMsg("head_control_failed");
     return;
   }
 
-  if(is_moving_ == true && is_direct_control_ == false)
+  if (is_moving_ == true && is_direct_control_ == false)
   {
     ROS_INFO("Head is moving now.");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Head is busy.");
+    publishDoneMsg("head_control_failed");
     return;
   }
 
@@ -189,12 +195,12 @@ void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::Cons
   // set target joint angle
   target_position_ = goal_position_;    // default
 
-  for(int ix = 0; ix < msg->name.size(); ix++)
+  for (int ix = 0; ix < msg->name.size(); ix++)
   {
     std::string joint_name = msg->name[ix];
     std::map<std::string, int>::iterator iter = using_joint_name_.find(joint_name);
 
-    if(iter != using_joint_name_.end())
+    if (iter != using_joint_name_.end())
     {
       // set target position
       target_position_.coeffRef(0, iter->second) = msg->position[ix];
@@ -205,7 +211,7 @@ void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::Cons
       if (calc_moving_time > moving_time_)
         moving_time_ = calc_moving_time;
 
-      if(DEBUG)
+      if (DEBUG)
       {
         std::cout << "joint : " << joint_name << ", Index : " << iter->second << ", Angle : " << msg->position[ix]
                   << ", Time : " << moving_time_ << std::endl;
@@ -214,10 +220,10 @@ void HeadControlModule::setHeadJointCallback(const sensor_msgs::JointState::Cons
   }
 
   // set init joint vel, accel
-  goal_velocity_      = Eigen::MatrixXd::Zero(1, result_.size());
-  goal_acceleration_  = Eigen::MatrixXd::Zero(1, result_.size());
+  goal_velocity_ = Eigen::MatrixXd::Zero(1, result_.size());
+  goal_acceleration_ = Eigen::MatrixXd::Zero(1, result_.size());
 
-  if(is_moving_ == true && is_direct_control_ == true)
+  if (is_moving_ == true && is_direct_control_ == true)
   {
     goal_velocity_ = calc_joint_vel_tra_.block(tra_count_, 0, 1, result_.size());
     goal_acceleration_ = calc_joint_accel_tra_.block(tra_count_, 0, 1, result_.size());
@@ -237,6 +243,7 @@ void HeadControlModule::setHeadJointTimeCallback(const thormang3_head_control_mo
   {
     ROS_INFO("Head module is not enable.");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Not Enable");
+    publishDoneMsg("head_control_failed");
     return;
   }
 
@@ -244,6 +251,7 @@ void HeadControlModule::setHeadJointTimeCallback(const thormang3_head_control_mo
   {
     ROS_INFO("Head is moving now.");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "Head is busy.");
+    publishDoneMsg("head_control_failed");
     return;
   }
 
@@ -298,7 +306,7 @@ void HeadControlModule::setHeadJointTimeCallback(const thormang3_head_control_mo
 void HeadControlModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
                                 std::map<std::string, double> sensors)
 {
-  if(enable_ == false)
+  if (enable_ == false)
     return;
 
   tra_lock_.lock();
@@ -312,33 +320,33 @@ void HeadControlModule::process(std::map<std::string, robotis_framework::Dynamix
 
     robotis_framework::Dynamixel *dxl = NULL;
     std::map<std::string, robotis_framework::Dynamixel*>::iterator dxl_it = dxls.find(joint_name);
-    if(dxl_it != dxls.end())
+    if (dxl_it != dxls.end())
       dxl = dxl_it->second;
     else
       continue;
 
-    current_position_.coeffRef(0, index)  = dxl->dxl_state_->present_position_;
-    goal_position_.coeffRef(0, index)  = dxl->dxl_state_->goal_position_;
+    current_position_.coeffRef(0, index) = dxl->dxl_state_->present_position_;
+    goal_position_.coeffRef(0, index) = dxl->dxl_state_->goal_position_;
   }
 
   // check to stop
-  if(stop_process_ == true)
+  if (stop_process_ == true)
   {
     stopMoving();
   }
   else
   {
     // process
-    if(tra_size_ != 0)
+    if (tra_size_ != 0)
     {
       // start of steps
-      if(tra_count_ == 0)
+      if (tra_count_ == 0)
       {
         startMoving();
       }
 
       // end of steps
-      if(tra_count_ >= tra_size_)
+      if (tra_count_ >= tra_size_)
       {
         finishMoving();
       }
@@ -366,7 +374,7 @@ void HeadControlModule::stop()
 {
   tra_lock_.lock();
 
-  if(is_moving_ == true)
+  if (is_moving_ == true)
     stop_process_ = true;
 
   tra_lock_.unlock();
@@ -384,12 +392,12 @@ void HeadControlModule::startMoving()
   is_moving_ = true;
 
   // set current lidar mode
-  if(is_direct_control_ == false)
+  if (is_direct_control_ == false)
   {
     current_state_ = (current_state_ + 1) % ModeCount;
     ROS_INFO_STREAM("state is changed : " << current_state_);
 
-    if(current_state_ == StartMove)
+    if (current_state_ == StartMove)
       publishLidarMoveMsg("start");
   }
 }
@@ -402,7 +410,7 @@ void HeadControlModule::finishMoving()
   tra_count_ = 0;
 
   // handle lidar state
-  switch(current_state_)
+  switch (current_state_)
   {
     case BeforeStart:
     {
@@ -417,9 +425,9 @@ void HeadControlModule::finishMoving()
       publishLidarMoveMsg("end");
       current_state_ = EndMove;
 
-    // generate next trajectory
-    afterMoveLidar();
-    break;
+      // generate next trajectory
+      afterMoveLidar();
+      break;
 
     case AfterMove:
       current_state_ = None;
@@ -430,14 +438,16 @@ void HeadControlModule::finishMoving()
                        "Finish head joint in order to make pointcloud");
       break;
 
-  default:
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Head movement is finished.");
-    is_moving_ = false;
-    break;
+    default:
+      publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Head movement is finished.");
+      is_moving_ = false;
+      publishDoneMsg("head_control");
+
+      break;
   }
 
   // is_direct_control_ = false;
-  if(DEBUG)
+  if (DEBUG)
     std::cout << "Trajectory End" << std::endl;
 }
 
@@ -450,16 +460,16 @@ void HeadControlModule::stopMoving()
   is_moving_ = false;
 
   // handle lidar state
-  switch(current_state_)
+  switch (current_state_)
   {
-  case StartMove:
-    publishLidarMoveMsg("end");
+    case StartMove:
+      publishLidarMoveMsg("end");
 
-  default:
-    // stop moving
-    current_state_ = None;
-    is_direct_control_ = true;
-    break;
+    default:
+      // stop moving
+      current_state_ = None;
+      is_direct_control_ = true;
+      break;
   }
 
   publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_WARN, "Stop Module.");
@@ -544,29 +554,39 @@ void HeadControlModule::publishLidarMoveMsg(std::string msg_data)
   msg.data = msg_data;
 
   moving_head_pub_.publish(msg);
+
+  if (msg_data == "end")
+    publishDoneMsg("scan");
+}
+
+void HeadControlModule::publishDoneMsg(const std::string done_msg)
+{
+  std_msgs::String movement_msg;
+  movement_msg.data = done_msg;
+  movement_done_pub_.publish(movement_msg);
 }
 
 /*
-   simple minimum jerk trajectory
+ simple minimum jerk trajectory
 
-   pos_start : position at initial state
-   vel_start : velocity at initial state
-   accel_start : acceleration at initial state
+ pos_start : position at initial state
+ vel_start : velocity at initial state
+ accel_start : acceleration at initial state
 
-   pos_end : position at final state
-   vel_end : velocity at final state
-   accel_end : acceleration at final state
+ pos_end : position at final state
+ vel_end : velocity at final state
+ accel_end : acceleration at final state
 
-   smp_time : sampling time
+ smp_time : sampling time
 
-   mov_time : movement time
+ mov_time : movement time
  */
-Eigen::MatrixXd HeadControlModule::calcMinimumJerkTraPVA( double pos_start , double vel_start , double accel_start,
-    double pos_end ,   double vel_end ,   double accel_end,
-    double smp_time ,  double mov_time )
+Eigen::MatrixXd HeadControlModule::calcMinimumJerkTraPVA(double pos_start, double vel_start, double accel_start,
+                                                         double pos_end, double vel_end, double accel_end,
+                                                         double smp_time, double mov_time)
 {
-  Eigen::MatrixXd poly_matrix( 3 , 3 );
-  Eigen::MatrixXd poly_vector( 3 , 1 );
+  Eigen::MatrixXd poly_matrix(3, 3);
+  Eigen::MatrixXd poly_vector(3, 1);
 
   poly_matrix << robotis_framework::powDI(mov_time, 3), robotis_framework::powDI(mov_time, 4), robotis_framework::powDI(
       mov_time, 5), 3 * robotis_framework::powDI(mov_time, 2), 4 * robotis_framework::powDI(mov_time, 3), 5
@@ -578,15 +598,15 @@ Eigen::MatrixXd HeadControlModule::calcMinimumJerkTraPVA( double pos_start , dou
 
   Eigen::MatrixXd poly_coeff = poly_matrix.inverse() * poly_vector;
 
-  int all_time_steps = round( mov_time / smp_time + 1 );
+  int all_time_steps = round(mov_time / smp_time + 1);
 
-  Eigen::MatrixXd time = Eigen::MatrixXd::Zero( all_time_steps , 1 );
-  Eigen::MatrixXd minimum_jer_tra = Eigen::MatrixXd::Zero( all_time_steps , 3 );
+  Eigen::MatrixXd time = Eigen::MatrixXd::Zero(all_time_steps, 1);
+  Eigen::MatrixXd minimum_jer_tra = Eigen::MatrixXd::Zero(all_time_steps, 3);
 
-  for ( int step = 0; step < all_time_steps; step++ )
-    time.coeffRef( step , 0 ) = step * smp_time;
+  for (int step = 0; step < all_time_steps; step++)
+    time.coeffRef(step, 0) = step * smp_time;
 
-  for ( int step = 0; step < all_time_steps; step++ )
+  for (int step = 0; step < all_time_steps; step++)
   {
     // position
     minimum_jer_tra.coeffRef(step, 0) = pos_start + vel_start * time.coeff(step, 0)
@@ -608,7 +628,8 @@ Eigen::MatrixXd HeadControlModule::calcMinimumJerkTraPVA( double pos_start , dou
   return minimum_jer_tra;
 }
 
-Eigen::MatrixXd HeadControlModule::calcLinearInterpolationTra(double pos_start, double pos_end, double smp_time, double mov_time)
+Eigen::MatrixXd HeadControlModule::calcLinearInterpolationTra(double pos_start, double pos_end, double smp_time,
+                                                              double mov_time)
 {
   double time_steps = mov_time / smp_time;
   int all_time_steps = round(time_steps + 1);
@@ -627,11 +648,11 @@ void HeadControlModule::jointTraGeneThread()
   tra_lock_.lock();
 
   double smp_time = control_cycle_msec_ * 0.001;  // ms -> s
-  int all_time_steps = int( moving_time_ / smp_time ) + 1;
+  int all_time_steps = int(moving_time_ / smp_time) + 1;
 
-  calc_joint_tra_.resize( all_time_steps , result_.size() );
-  calc_joint_vel_tra_.resize( all_time_steps , result_.size() );
-  calc_joint_accel_tra_.resize( all_time_steps , result_.size() );
+  calc_joint_tra_.resize(all_time_steps, result_.size());
+  calc_joint_vel_tra_.resize(all_time_steps, result_.size());
+  calc_joint_accel_tra_.resize(all_time_steps, result_.size());
 
   for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
       state_iter != result_.end(); state_iter++)
@@ -639,11 +660,11 @@ void HeadControlModule::jointTraGeneThread()
     std::string joint_name = state_iter->first;
     int index = using_joint_name_[joint_name];
 
-    double ini_value  = goal_position_.coeff(0, index);
-    double ini_vel    = goal_velocity_.coeff(0, index);
-    double ini_accel  = goal_acceleration_.coeff(0, index);
+    double ini_value = goal_position_.coeff(0, index);
+    double ini_vel = goal_velocity_.coeff(0, index);
+    double ini_accel = goal_acceleration_.coeff(0, index);
 
-    double tar_value  = target_position_.coeff(0, index);
+    double tar_value = target_position_.coeff(0, index);
 
     Eigen::MatrixXd tra = calcMinimumJerkTraPVA(ini_value, ini_vel, ini_accel, tar_value, 0.0, 0.0, smp_time,
                                                 moving_time_);
@@ -691,7 +712,7 @@ void HeadControlModule::lidarJointTraGeneThread()
   tra_size_ = calc_joint_tra_.rows();
   tra_count_ = 0;
 
-  if(DEBUG)
+  if (DEBUG)
     ROS_INFO("[ready] make trajectory : %d, %d", tra_size_, tra_count_);
 
   // init value
@@ -704,9 +725,9 @@ void HeadControlModule::publishStatusMsg(unsigned int type, std::string msg)
 {
   robotis_controller_msgs::StatusMsg status_msg;
   status_msg.header.stamp = ros::Time::now();
-  status_msg.type         = type;
-  status_msg.module_name  = "Head Control";
-  status_msg.status_msg   = msg;
+  status_msg.type = type;
+  status_msg.module_name = "Head Control";
+  status_msg.status_msg = msg;
 
   status_msg_pub_.publish(status_msg);
 }
