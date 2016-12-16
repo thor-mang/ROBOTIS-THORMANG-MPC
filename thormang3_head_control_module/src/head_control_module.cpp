@@ -559,13 +559,6 @@ void HeadControlModule::publishLidarMoveMsg(std::string msg_data)
     publishDoneMsg("scan");
 }
 
-void HeadControlModule::publishDoneMsg(const std::string done_msg)
-{
-  std_msgs::String movement_msg;
-  movement_msg.data = done_msg;
-  movement_done_pub_.publish(movement_msg);
-}
-
 /*
  simple minimum jerk trajectory
 
@@ -730,4 +723,11 @@ void HeadControlModule::publishStatusMsg(unsigned int type, std::string msg)
   status_msg.status_msg = msg;
 
   status_msg_pub_.publish(status_msg);
+}
+
+void HeadControlModule::publishDoneMsg(const std::string done_msg)
+{
+  std_msgs::String movement_msg;
+  movement_msg.data = done_msg;
+  movement_done_pub_.publish(movement_msg);
 }
