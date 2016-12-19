@@ -512,6 +512,9 @@ bool ActionModule::isRunning(int* playing_page_num, int* playing_step_num)
 
 bool ActionModule::loadPage(int page_number, action_file_define::Page* page)
 {
+  if(page_number < 0 || page_number >= action_file_define::MAXNUM_PAGE)
+    return false;
+
   long position = (long)(sizeof(action_file_define::Page)*page_number);
 
   if( fseek( action_file_, position, SEEK_SET ) != 0 )
