@@ -575,6 +575,16 @@ void ActionModule::resetPage(action_file_define::Page* page)
   setChecksum( page );
 }
 
+void ActionModule::enableAllJoints()
+{
+  for (std::map<std::string, bool>::iterator it = action_joints_enable_.begin();
+       it != action_joints_enable_.end();
+       it++)
+  {
+    it->second = true;
+  }
+}
+
 void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dynamixel *> dxls)
 {
   //////////////////// local Variable

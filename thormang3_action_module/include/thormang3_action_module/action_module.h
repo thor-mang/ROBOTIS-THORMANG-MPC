@@ -88,6 +88,7 @@ public:
   bool savePage(int page_number, action_file_define::Page* page);
   void resetPage(action_file_define::Page* page);
 
+  void enableAllJoints();
   void actionPlayProcess(std::map<std::string, robotis_framework::Dynamixel *> dxls);
 
 private:
