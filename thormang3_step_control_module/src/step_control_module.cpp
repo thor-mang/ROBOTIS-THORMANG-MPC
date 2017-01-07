@@ -22,6 +22,11 @@ StepControlModule::~StepControlModule()
   queue_thread_.join();
 }
 
+void StepControlModule::onModuleEnable()
+{
+  setBalanceParams(balance_params_);
+}
+
 void StepControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* robot)
 {
   boost::mutex::scoped_lock lock(step_control_mutex_);
@@ -76,50 +81,76 @@ void StepControlModule::queueThread()
     callback_queue.callAvailable(duration);
 }
 
-void StepControlModule::dynamicReconfigureCallback(thormang3_step_control_module::BalanceParametersConfig& config, uint32_t level)
+void StepControlModule::dynamicReconfigureCallback(thormang3_step_control_module::BalanceParametersConfig& config, uint32_t /*level*/)
 {
   boost::mutex::scoped_lock lock(step_control_mutex_);
 
-  thormang3_walking_module_msgs::SetBalanceParam balance_param_update;
+  balance_params_ = thormang3_walking_module_msgs::SetBalanceParam::Request();
 
-  balance_param_update.request.updating_duration = 2.0;
+  balance_params_.updating_duration = 2.0;
 
   // ####### COB Offset #######
-  balance_param_update.request.balance_param.cob_x_offset_m = config.cob_x_offset_m;
-  balance_param_update.request.balance_param.cob_y_offset_m = config.cob_y_offset_m;
+  balance_params_.balance_param.cob_x_offset_m = config.cob_x_offset_m;
+  balance_params_.balance_param.cob_y_offset_m = config.cob_y_offset_m;
 
   // ####### FeedForward #####
-  balance_param_update.request.balance_param.hip_roll_swap_angle_rad = config.hip_roll_swap_angle_rad;
+  balance_params_.balance_param.hip_roll_swap_angle_rad = config.hip_roll_swap_angle_rad;
 
   // in Gazebo mode these are kept zero (force disabling balancing)
   if (config.balance && !gazebo_mode_)
   {
     // ########## Gains ########
     // gyro
-    balance_param_update.request.balance_param.gyro_gain = config.gyro_gain;
+    balance_params_.balance_param.gyro_gain = config.gyro_gain;
 
     // imu
-    balance_param_update.request.balance_param.foot_roll_angle_gain = config.foot_roll_angle_gain;
-    balance_param_update.request.balance_param.foot_pitch_angle_gain = config.foot_pitch_angle_gain;
+    balance_params_.balance_param.foot_roll_angle_gain = config.foot_roll_angle_gain;
+    balance_params_.balance_param.foot_pitch_angle_gain = config.foot_pitch_angle_gain;
     // ft sensor
-    balance_param_update.request.balance_param.foot_x_force_gain = config.foot_x_force_gain;
-    balance_param_update.request.balance_param.foot_y_force_gain = config.foot_z_force_gain;
-    balance_param_update.request.balance_param.foot_z_force_gain = config.foot_z_force_gain;
-    balance_param_update.request.balance_param.foot_roll_torque_gain = config.foot_roll_torque_gain;
-    balance_param_update.request.balance_param.foot_pitch_torque_gain = config.foot_pitch_torque_gain;
+    balance_params_.balance_param.foot_x_force_gain = config.foot_x_force_gain;
+    balance_params_.balance_param.foot_y_force_gain = config.foot_z_force_gain;
+    balance_params_.balance_param.foot_z_force_gain = config.foot_z_force_gain;
+    balance_params_.balance_param.foot_roll_torque_gain = config.foot_roll_torque_gain;
+    balance_params_.balance_param.foot_pitch_torque_gain = config.foot_pitch_torque_gain;
   }
 
   // ########## Time Constants ##########
   // imu
-  balance_param_update.request.balance_param.foot_roll_angle_time_constant = config.foot_roll_angle_time_constant;
-  balance_param_update.request.balance_param.foot_pitch_angle_time_constant = config.foot_pitch_angle_time_constant;
+  balance_params_.balance_param.foot_roll_angle_time_constant = config.foot_roll_angle_time_constant;
+  balance_params_.balance_param.foot_pitch_angle_time_constant = config.foot_pitch_angle_time_constant;
   // ft
-  balance_param_update.request.balance_param.foot_x_force_time_constant = config.foot_x_force_time_constant;
-  balance_param_update.request.balance_param.foot_y_force_time_constant = config.foot_y_force_time_constant;
-  balance_param_update.request.balance_param.foot_z_force_time_constant = config.foot_z_force_time_constant;
-  balance_param_update.request.balance_param.foot_roll_torque_time_constant = config.foot_roll_torque_time_constant;
-  balance_param_update.request.balance_param.foot_pitch_torque_time_constant = config.foot_pitch_torque_time_constant;
+  balance_params_.balance_param.foot_x_force_time_constant = config.foot_x_force_time_constant;
+  balance_params_.balance_param.foot_y_force_time_constant = config.foot_y_force_time_constant;
+  balance_params_.balance_param.foot_z_force_time_constant = config.foot_z_force_time_constant;
+  balance_params_.balance_param.foot_roll_torque_time_constant = config.foot_roll_torque_time_constant;
+  balance_params_.balance_param.foot_pitch_torque_time_constant = config.foot_pitch_torque_time_constant;
 
-  WalkingMotionModule::setBalanceParamServiceCallback(balance_param_update.request, balance_param_update.response);
+  setBalanceParams(balance_params_);
+}
+
+void StepControlModule::setBalanceParams(thormang3_walking_module_msgs::SetBalanceParam::Request& req)
+{
+  thormang3_walking_module_msgs::SetBalanceParam::Response resp;
+
+  if (WalkingMotionModule::setBalanceParamServiceCallback(req, resp))
+  {
+    switch (resp.result)
+    {
+      case thormang3_walking_module_msgs::SetBalanceParam::Response::NOT_ENABLED_WALKING_MODULE:
+        ROS_WARN("[StepControlModule] Walking module disabled, balance parameter are not set.");
+        break;
+      case thormang3_walking_module_msgs::SetBalanceParam::Response::PREV_REQUEST_IS_NOT_FINISHED:
+        ROS_ERROR("[StepControlModule] Previous request is still pending. Can't set new parameters!");
+        break;
+      case thormang3_walking_module_msgs::SetBalanceParam::Response::TIME_CONST_IS_ZERO_OR_NEGATIVE:
+        ROS_ERROR("[StepControlModule] Invalid params used! Time constant smaller than zero.");
+        break;
+      default:
+        ROS_INFO("[StepControlModule] Set new balance parameters.");
+        break;
+    }
+  }
+  else
+    ROS_ERROR("[StepControlModule] Couldn't call balance parameter service!");
 }
 }
