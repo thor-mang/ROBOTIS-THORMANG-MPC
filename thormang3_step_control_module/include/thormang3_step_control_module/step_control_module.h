@@ -64,6 +64,8 @@ public:
      Singleton<StepControlModule>::getInstance();
   }
 
+  void onModuleEnable() override;
+
   void initialize(const int control_cycle_msec, robotis_framework::Robot* robot) override;
 
   void process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, double> sensors) override;
@@ -74,11 +76,15 @@ private:
   void queueThread();
   void dynamicReconfigureCallback(thormang3_step_control_module::BalanceParametersConfig& config, uint32_t level);
 
+  void setBalanceParams(thormang3_walking_module_msgs::SetBalanceParam::Request& req);
+
   int control_cycle_msec_;
   boost::thread queue_thread_;
   boost::mutex step_control_mutex_;
 
-  vigir_step_control::StepController::Ptr step_controller_;
+  vigir_step_control::StepController::Ptr step_controller_;  
+
+  thormang3_walking_module_msgs::SetBalanceParam::Request balance_params_;
 };
 }
 
