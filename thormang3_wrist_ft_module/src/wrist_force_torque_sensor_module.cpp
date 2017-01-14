@@ -52,10 +52,10 @@ WristForceTorqueSensor::WristForceTorqueSensor()
   result_["l_wrist_ty_scaled_Nm"] = l_wrist_ty_scaled_Nm_;
   result_["l_wrist_tz_scaled_Nm"] = l_wrist_tz_scaled_Nm_;
 
-  exist_r_wrist_an_r_ = false;
-  exist_r_wrist_an_p_ = false;
-  exist_l_wrist_an_r_ = false;
-  exist_l_wrist_an_p_ = false;
+  exist_r_arm_wr_p = false;
+  exist_r_arm_wr_y = false;
+  exist_l_arm_wr_p = false;
+  exist_l_arm_wr_y = false;
 
   ft_period_		 = 2 * 1000/ control_cycle_msec_;
 
@@ -247,10 +247,10 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
-  exist_r_wrist_an_r_ = false;
-  exist_r_wrist_an_p_ = false;
-  exist_l_wrist_an_r_ = false;
-  exist_l_wrist_an_p_ = false;
+  exist_r_arm_wr_p = false;
+  exist_r_arm_wr_y = false;
+  exist_l_arm_wr_p = false;
+  exist_l_arm_wr_y = false;
 
   if (!gazebo_mode_)
   {
@@ -261,19 +261,25 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
       r_wrist_ft_current_voltage_[1] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
       r_wrist_ft_current_voltage_[2] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
       r_wrist_ft_current_voltage_[3] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
-      exist_r_wrist_an_r_ = true;
+      exist_r_arm_wr_p = true;
     }
     else
+    {
+      ROS_WARN_ONCE("Couldn't find joint r_arm_wr_p. Not publishing ft sensor data.");
       return;
+    }
 
-    dxl_it = dxls.find("r_arm_wr_r");
+    dxl_it = dxls.find("r_arm_wr_y");
     if(dxl_it != dxls.end()) {
       r_wrist_ft_current_voltage_[4] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
       r_wrist_ft_current_voltage_[5] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
-      exist_r_wrist_an_p_ = true;
+      exist_r_arm_wr_y = true;
     }
     else
+    {
+      ROS_WARN_ONCE("Couldn't find joint r_arm_wr_y. Not publishing ft sensor data.");
       return;
+    }
 
     dxl_it = dxls.find("l_arm_wr_p");
     if(dxl_it != dxls.end()) {
@@ -281,22 +287,28 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
       l_wrist_ft_current_voltage_[1] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
       l_wrist_ft_current_voltage_[2] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_3])*3.3/4095.0;
       l_wrist_ft_current_voltage_[3] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_4])*3.3/4095.0;
-      exist_l_wrist_an_r_ = true;
+      exist_l_arm_wr_p = true;
     }
     else
+    {
+      ROS_WARN_ONCE("Couldn't find joint l_arm_wr_p. Not publishing ft sensor data.");
       return;
+    }
 
-    dxl_it = dxls.find("l_arm_wr_r");
+    dxl_it = dxls.find("l_arm_wr_y");
     if(dxl_it != dxls.end())	{
       l_wrist_ft_current_voltage_[4] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_1])*3.3/4095.0;
       l_wrist_ft_current_voltage_[5] = (dxl_it->second->dxl_state_->bulk_read_table_[EXT_PORT_DATA_2])*3.3/4095.0;
-      exist_l_wrist_an_p_ = true;
+      exist_l_arm_wr_y = true;
     }
     else
+    {
+      ROS_WARN_ONCE("Couldn't find joint l_arm_wr_y. Not publishing ft sensor data.");
       return;
+    }
   }
 
-  if (gazebo_mode_ || (exist_r_wrist_an_r_ && exist_r_wrist_an_p_))
+  if (gazebo_mode_ || (exist_r_arm_wr_p && exist_r_arm_wr_y))
   {
     if (!gazebo_mode_)
     {
@@ -331,9 +343,11 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     result_["r_wrist_ty_scaled_Nm"] = r_wrist_ty_scaled_Nm_;
     result_["r_wrist_tz_scaled_Nm"] = r_wrist_tz_scaled_Nm_;
 
+  } else {
+    ROS_WARN_ONCE("Couldn't find all needed joints for right wrist ft sensor.");
   }
 
-  if (gazebo_mode_ || (exist_l_wrist_an_r_ && exist_l_wrist_an_p_))
+  if (gazebo_mode_ || (exist_l_arm_wr_p && exist_l_arm_wr_y))
   {
     if (!gazebo_mode_)
     {
@@ -367,6 +381,8 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     result_["l_wrist_tx_scaled_Nm"] = l_wrist_tx_scaled_Nm_;
     result_["l_wrist_ty_scaled_Nm"] = l_wrist_ty_scaled_Nm_;
     result_["l_wrist_tz_scaled_Nm"] = l_wrist_tz_scaled_Nm_;
+  } else {
+    ROS_WARN_ONCE("Couldn't find all needed joints for left wrist ft sensor.");
   }
 
 
