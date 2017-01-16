@@ -109,10 +109,10 @@ private:
 
   bool	has_ft_air_;
 
-  bool exist_r_wrist_an_r_;
-  bool exist_r_wrist_an_p_;
-  bool exist_l_wrist_an_r_;
-  bool exist_l_wrist_an_p_;
+  bool exist_r_arm_wr_p;
+  bool exist_r_arm_wr_y;
+  bool exist_l_arm_wr_p;
+  bool exist_l_arm_wr_y;
 
   double r_wrist_ft_current_voltage_[6];
   double l_wrist_ft_current_voltage_[6];
