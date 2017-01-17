@@ -84,6 +84,7 @@ class HeadControlModule : public robotis_framework::MotionModule, public robotis
   void startMoveLidar(double target_angle);
   void afterMoveLidar();
   void publishLidarMoveMsg(std::string msg_data);
+  void publishDoneMsg(const std::string done_msg);
 
   void startMoving();
   void finishMoving();
@@ -102,6 +103,7 @@ class HeadControlModule : public robotis_framework::MotionModule, public robotis
   boost::mutex tra_lock_;
   ros::Publisher moving_head_pub_;
   ros::Publisher status_msg_pub_;
+  ros::Publisher movement_done_pub_;
   const bool DEBUG;
   bool stop_process_;
   bool is_moving_;

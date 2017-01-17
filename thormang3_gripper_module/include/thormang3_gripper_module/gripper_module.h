@@ -47,6 +47,7 @@ private:
   ros::Publisher status_msg_pub_;
   ros::Publisher set_ctrl_module_pub_;
   ros::Publisher goal_torque_limit_pub_;
+  ros::Publisher movement_done_pub_;
 
   std::map<std::string, int> joint_name_to_id_;
 
@@ -58,6 +59,8 @@ private:
   Eigen::VectorXd goal_joint_position_;
 
   sensor_msgs::JointState goal_joint_pose_msg_;
+
+  std_msgs::String movement_done_msg_;
 
   /* movement */
   double mov_time_;

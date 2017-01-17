@@ -116,6 +116,7 @@ private:
   void setCtrlModule(std::string module);
   void parseIniPoseData(const std::string &path);
   void publishStatusMsg(unsigned int type, std::string msg);
+  void publishDoneMsg(const std::string done_msg);
 
   int           control_cycle_msec_;
 
@@ -125,6 +126,7 @@ private:
   // ros::Publisher      send_tra_pub_;
   ros::Publisher status_msg_pub_;
   ros::Publisher set_ctrl_module_pub_;
+  ros::Publisher movement_done_pub_;
 
   std::map<std::string, int> joint_name_to_id_;
 

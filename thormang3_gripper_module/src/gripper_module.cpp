@@ -84,6 +84,7 @@ void GripperModule::queueThread()
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
   set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
   goal_torque_limit_pub_ = ros_node.advertise<robotis_controller_msgs::SyncWriteItem>("/robotis/sync_write_item", 1);
+  movement_done_pub_  = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
 
   /* subscribe topics */
   ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/gripper/set_mode_msg", 5,
@@ -92,19 +93,10 @@ void GripperModule::queueThread()
                                                           &GripperModule::setJointPoseMsgCallback, this);
 
   /* service */
-//  ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/wholebody/get_joint_pose",
-//                                                                       &GripperModule::getJointPoseCallback, this);
 
   ros::WallDuration duration(control_cycle_sec_);
   while(ros_node.ok())
     callback_queue.callAvailable(duration);
-
-//  while (ros_node.ok())
-//  {
-//    callback_queue.callAvailable();
-//    usleep(1000);
-//  }
-
 }
 
 void GripperModule::setModeMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -126,6 +118,8 @@ void GripperModule::setJointPoseMsgCallback(const sensor_msgs::JointState::Const
   if (is_moving_ == false)
   {
     setTorqueLimit();
+
+    movement_done_msg_.data = "gripper";
 
     tra_gene_tread_ = new boost::thread(boost::bind(&GripperModule::traGeneProcJointSpace, this));
     delete tra_gene_tread_;
@@ -186,8 +180,8 @@ void GripperModule::setTorqueLimit()
   robotis_controller_msgs::SyncWriteItem sync_write_msg;
   sync_write_msg.item_name = "goal_torque";
 
-  for (int dim=0; dim<NUM_GRIPPER_JOINTS; dim++)
-  {
+  for (int dim=0; dim<goal_joint_pose_msg_.name.size(); dim++)
+  {    
     std::string joint_name = goal_joint_pose_msg_.name[dim];
     int torque_limit = (int) goal_joint_pose_msg_.effort[dim];
 
@@ -205,8 +199,10 @@ void GripperModule::setEndTrajectory()
     if (cnt_ >= all_time_steps_)
     {
       ROS_INFO("[end] send trajectory");
-
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "End Trajectory");
+
+      movement_done_pub_.publish(movement_done_msg_);
+      movement_done_msg_.data = "";
 
       is_moving_ = false;
       cnt_ = 0;
