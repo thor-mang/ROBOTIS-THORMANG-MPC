@@ -61,7 +61,7 @@ public:
 
   static StepControlModule* getInstance()
   {
-     Singleton<StepControlModule>::getInstance();
+     return Singleton<StepControlModule>::getInstance();
   }
 
   void onModuleEnable() override;
