@@ -465,7 +465,7 @@ r_arm_grip  :   # GRIPPER
    torque_limit          :  250
    max_position_limit    :  750
    min_position_limit    :    0
-   goal_torque           :  310
+   goal_torque           :  250
    goal_velocity         :    0
    goal_acceleration     :    0
    position_p_gain       :   64
@@ -480,7 +480,7 @@ l_arm_grip  :   # GRIPPER
    torque_limit          :  250
    max_position_limit    :  750
    min_position_limit    :    0
-   goal_torque           :  310
+   goal_torque           :  250
    goal_velocity         :    0
    goal_acceleration     :    0
    position_p_gain       :   64
