@@ -42,19 +42,21 @@
 #include <vector>
 #include <boost/thread.hpp>
 
+#include "thormang3_balance_control/thormang3_balance_control.h"
 #include "robotis_framework_common/singleton.h"
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
-#include "thormang3_balance_control/thormang3_balance_control.h"
 #include "robotis_math/robotis_math.h"
+
+#define _USE_PD_BALANCE_
 
 namespace thormang3
 {
 
-class RobotisOnlineWalking : public robotis_framework::Singleton<RobotisOnlineWalking>
+class THORMANG3OnlineWalking : public robotis_framework::Singleton<THORMANG3OnlineWalking>
 {
 public:
-  RobotisOnlineWalking();
-  virtual ~RobotisOnlineWalking();
+  THORMANG3OnlineWalking();
+  virtual ~THORMANG3OnlineWalking();
 
   void initialize();
   void reInitialize();
@@ -82,6 +84,8 @@ public:
   void setInitialRightElbowAngle(double elbow_angle_rad);
   void setInitialLeftElbowAngle(double elbow_angle_rad);
 
+  void setCurrentIMUSensorOutput(double gyro_x, double gyro_y, double quat_x, double quat_y, double quat_z, double quat_w);
+
   Eigen::MatrixXd mat_cob_to_g_,  mat_g_to_cob_;
   Eigen::MatrixXd mat_robot_to_cob_, mat_cob_to_robot_;
   Eigen::MatrixXd mat_robot_to_g_, mat_g_to_robot_;
@@ -100,9 +104,13 @@ public:
 
   double hip_roll_feedforward_angle_rad_;
 
+  double curr_angle_rad_[12];
+  thormang3::BalancePDController leg_angle_feed_back_[12];
+
   // balance control
   int balance_error_;
-  RobotisBalanceControl balance_ctrl_;
+  thormang3::BalanceControlUsingPDController balance_ctrl_;
+
 
   // sensor value
   double current_right_fx_N_,  current_right_fy_N_,  current_right_fz_N_;
@@ -140,7 +148,6 @@ private:
   Eigen::MatrixXd mat_robot_to_rfoot_;
   Eigen::MatrixXd mat_robot_to_lfoot_;
 
-
   std::vector<robotis_framework::StepData> added_step_data_;
 
   double goal_waist_yaw_angle_rad_;
@@ -170,7 +177,8 @@ private:
   Eigen::MatrixXd rot_x_pi_3d_, rot_z_pi_3d_;
 
   Eigen::VectorXi step_idx_data_;
-  boost::mutex mutex_lock_;
+  boost::mutex step_data_mutex_lock_;
+  boost::mutex imu_data_mutex_lock_;
 
   //Time for Preview Control and Dynamics Regulator
   double preview_time_;

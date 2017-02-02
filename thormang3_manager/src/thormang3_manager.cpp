@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     controller->addMotionModule((robotis_framework::MotionModule*)ActionModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)ManipulationModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)HeadControlModule::getInstance());
-    //controller->addMotionModule((robotis_framework::MotionModule*)WalkingMotionModule::getInstance()); // Encaspulated by WalkControlModule
+    //controller->addMotionModule((robotis_framework::MotionModule*)OnlineWalkingModule::getInstance()); // Encaspulated by WalkControlModule
     controller->addMotionModule((robotis_framework::MotionModule*)StepControlModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)RosControlModule::getInstance());
 

@@ -10,16 +10,16 @@ namespace thormang3
 {
 using namespace vigir_footstep_planning;
 
-RobotisOnlineWalkingPlugin::RobotisOnlineWalkingPlugin()
+THORMANG3OnlineWalkingPlugin::THORMANG3OnlineWalkingPlugin()
   : StepControllerPlugin()
 {
 }
 
-RobotisOnlineWalkingPlugin::~RobotisOnlineWalkingPlugin()
+THORMANG3OnlineWalkingPlugin::~THORMANG3OnlineWalkingPlugin()
 {
 }
 
-void RobotisOnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
+void THORMANG3OnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
 {
   StepControllerPlugin::setStepPlanMsgPlugin(plugin);
 
@@ -28,10 +28,10 @@ void RobotisOnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plu
   thor_mang_step_plan_msg_plugin_ = boost::dynamic_pointer_cast<ThorMangStepPlanMsgPlugin>(plugin);
 
   if (!thor_mang_step_plan_msg_plugin_)
-    ROS_ERROR("[RobotisOnlineWalkingPlugin] StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
+    ROS_ERROR("[THORMANG3OnlineWalkingPlugin] StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
 }
 
-void RobotisOnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
+void THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 {
   if (step_plan.steps.empty())
     return;
@@ -44,7 +44,7 @@ void RobotisOnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
     robotis_framework::StepData ref_step;
     initStepData(ref_step);
     /// TODO: use robotis reference step here?
-    //robotis_framework::RobotisOnlineWalking::GetInstance()->GetReferenceStepDatafotAddition(&ref_step);
+    //robotis_framework::THORMANG3OnlineWalking::GetInstance()->GetReferenceStepDatafotAddition(&ref_step);
 
     geometry_msgs::Pose ref_pose;
     if (step.foot.foot_index == msgs::Foot::LEFT)
@@ -53,7 +53,7 @@ void RobotisOnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
       thor_mang_footstep_planning::toRos(ref_step.position_data.right_foot_pose, ref_pose);
     else
     {
-      ROS_ERROR("[RobotisOnlineWalkingPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
+      ROS_ERROR("[THORMANG3OnlineWalkingPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
       return;
     }
 
@@ -73,13 +73,13 @@ void RobotisOnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
   }
 }
 
-void RobotisOnlineWalkingPlugin::initWalk()
+void THORMANG3OnlineWalkingPlugin::initWalk()
 {
-  thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
+  thormang3::THORMANG3OnlineWalking* online_walking = thormang3::THORMANG3OnlineWalking::getInstance();
 
   if (online_walking->isRunning())
   {
-    ROS_INFO("[RobotisOnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
+    ROS_INFO("[THORMANG3OnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
@@ -105,22 +105,22 @@ void RobotisOnlineWalkingPlugin::initWalk()
 
   online_walking->start();
 
-  ROS_INFO("[RobotisOnlineWalkingPlugin] Starting walking.");
+  ROS_INFO("[THORMANG3OnlineWalkingPlugin] Starting walking.");
 }
 
-void RobotisOnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
+void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
 {
   StepControllerPlugin::preProcess(event);
 
   if (getState() != ACTIVE)
     return;
 
-  thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
+  thormang3::THORMANG3OnlineWalking* online_walking = thormang3::THORMANG3OnlineWalking::getInstance();
 
   // first check if walking engine is still running
   if (!online_walking->isRunning())
   {
-    ROS_INFO("[RobotisOnlineWalkingPlugin] Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
+    ROS_INFO("[THORMANG3OnlineWalkingPlugin] Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
@@ -158,7 +158,7 @@ void RobotisOnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
       // check for successful execution of queue
       if (step_queue_->lastStepIndex() == feedback.last_performed_step_index)
       {
-        ROS_INFO("[RobotisOnlineWalkingPlugin] Walking finished.");
+        ROS_INFO("[THORMANG3OnlineWalkingPlugin] Walking finished.");
 
         feedback.currently_executing_step_index = -1;
         feedback.first_changeable_step_index = -1;
@@ -173,10 +173,10 @@ void RobotisOnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
   }
 }
 
-bool RobotisOnlineWalkingPlugin::executeStep(const msgs::Step& step)
+bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
 {
   /// TODO: flush step
-  thormang3::RobotisOnlineWalking* online_walking = thormang3::RobotisOnlineWalking::getInstance();
+  thormang3::THORMANG3OnlineWalking* online_walking = thormang3::THORMANG3OnlineWalking::getInstance();
 
   // add initial step
   if (step.step_index == 0)
@@ -187,7 +187,7 @@ bool RobotisOnlineWalkingPlugin::executeStep(const msgs::Step& step)
     //online_walking->getReferenceStepDatafotAddition(&_refStepData);
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding initial step.");
+      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding initial step.");
       return false;
     }
     last_step_data_ = step_data;
@@ -200,7 +200,7 @@ bool RobotisOnlineWalkingPlugin::executeStep(const msgs::Step& step)
     step_data.time_data.abs_step_time += 1.0;
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
+      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
       return false;
     }
   }
@@ -215,7 +215,7 @@ bool RobotisOnlineWalkingPlugin::executeStep(const msgs::Step& step)
     step_data << step;
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding step %i.", step.step_index);
+      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding step %i.", step.step_index);
       return false;
     }
     last_step_data_ = step_data;
@@ -228,7 +228,7 @@ bool RobotisOnlineWalkingPlugin::executeStep(const msgs::Step& step)
     step_data.time_data.abs_step_time += 2.0;
     if (!online_walking->addStepData(step_data))
     {
-      ROS_INFO("[RobotisOnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
+      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
       return false;
     }
   }
@@ -239,20 +239,20 @@ bool RobotisOnlineWalkingPlugin::executeStep(const msgs::Step& step)
   feedback.first_changeable_step_index++;
   setFeedbackState(feedback);
 
-  ROS_INFO("[RobotisOnlineWalkingPlugin] Send step %i to walking engine.", step.step_index);
+  ROS_INFO("[THORMANG3OnlineWalkingPlugin] Send step %i to walking engine.", step.step_index);
   return true;
 }
 
-void RobotisOnlineWalkingPlugin::stop()
+void THORMANG3OnlineWalkingPlugin::stop()
 {
   StepControllerPlugin::stop();
 
   /// TODO: Stop when both feet on ground
 
-  thormang3::RobotisOnlineWalking::getInstance()->stop();
+  thormang3::THORMANG3OnlineWalking::getInstance()->stop();
 }
 } // namespace
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(thormang3::RobotisOnlineWalkingPlugin, vigir_step_control::StepControllerPlugin)
+PLUGINLIB_EXPORT_CLASS(thormang3::THORMANG3OnlineWalkingPlugin, vigir_step_control::StepControllerPlugin)
 

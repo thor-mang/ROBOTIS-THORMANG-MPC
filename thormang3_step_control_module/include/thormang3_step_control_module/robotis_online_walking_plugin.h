@@ -44,16 +44,16 @@ using namespace vigir_footstep_planning_msgs;
 using namespace vigir_step_control;
 using namespace thor_mang_footstep_planning;
 
-class RobotisOnlineWalkingPlugin
+class THORMANG3OnlineWalkingPlugin
   : public StepControllerPlugin
 {
 public:
   // typedefs
-  typedef boost::shared_ptr<RobotisOnlineWalkingPlugin> Ptr;
-  typedef boost::shared_ptr<const RobotisOnlineWalkingPlugin> ConstPtr;
+  typedef boost::shared_ptr<THORMANG3OnlineWalkingPlugin> Ptr;
+  typedef boost::shared_ptr<const THORMANG3OnlineWalkingPlugin> ConstPtr;
 
-  RobotisOnlineWalkingPlugin();
-  virtual ~RobotisOnlineWalkingPlugin();
+  THORMANG3OnlineWalkingPlugin();
+  virtual ~THORMANG3OnlineWalkingPlugin();
 
   /**
    * @brief Sets the StepPlanMsgPlugin to be used.

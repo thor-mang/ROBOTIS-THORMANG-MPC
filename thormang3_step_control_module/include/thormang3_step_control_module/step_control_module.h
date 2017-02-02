@@ -51,7 +51,7 @@
 namespace thormang3
 {
 class StepControlModule
-  : public WalkingMotionModule
+  : public OnlineWalkingModule
   , private robotis_framework::Singleton<StepControlModule>
 {
 public:

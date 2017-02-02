@@ -132,6 +132,7 @@ void ActionModule::queueThread()
 
   /* publisher */
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 0);
+  done_msg_pub_   = ros_node.advertise<std_msgs::String>("robotis/movement_done", 1);
 
   /* subscriber */
   ros::Subscriber action_page_sub = ros_node.subscribe("robotis/action/page_num", 0, &ActionModule::pageNumberCallback, this);
@@ -186,6 +187,7 @@ void ActionModule::pageNumberCallback(const std_msgs::Int32::ConstPtr& msg)
       std::string status_msg = "Failed to start page " + convertIntToString(msg->data);
       ROS_ERROR_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+      publishDoneMsg("action_failed");
     }
   }
 }
@@ -224,6 +226,7 @@ void ActionModule::startActionCallback(const thormang3_action_module_msgs::Start
         std::string status_msg = "Invalid Joint Name : " + msg->joint_name_array[joint_idx];
         ROS_INFO_STREAM(status_msg);
         publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+        publishDoneMsg("action_failed");
         return;
       }
       else
@@ -243,6 +246,7 @@ void ActionModule::startActionCallback(const thormang3_action_module_msgs::Start
       std::string status_msg = "Failed to start page " + convertIntToString(msg->page_num);
       ROS_ERROR_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
+      publishDoneMsg("action_failed");
     }
   }
 }
@@ -264,7 +268,7 @@ void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
       else
       {
         result_it->second->goal_position_ = dxls_it->second->dxl_state_->goal_position_;
-		action_result_[joint_name]->goal_position_ = dxls_it->second->dxl_state_->goal_position_;
+		    action_result_[joint_name]->goal_position_ = dxls_it->second->dxl_state_->goal_position_;
       }
     }
     action_module_enabled_ = false;
@@ -297,6 +301,7 @@ void ActionModule::process(std::map<std::string, robotis_framework::Dynamixel *>
       std::string status_msg = "Action_Finish";
       ROS_INFO_STREAM(status_msg);
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+      publishDoneMsg("action");
     }
   }
 }
@@ -422,9 +427,6 @@ bool ActionModule::start(int page_number)
 {
   if( page_number < 1 || page_number >= action_file_define::MAXNUM_PAGE )
   {
-    std::string _status_msg = "Can not play page.(" + convertIntToString(page_number) + " is invalid index)";
-    ROS_ERROR_STREAM(_status_msg);
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
     return false;
   }
 
@@ -449,11 +451,8 @@ bool ActionModule::start(std::string page_name)
       break;
   }
 
-  if(index == action_file_define::MAXNUM_PAGE) {
-    std::string _str_name_page = page_name;
-    std::string _status_msg = "Can not play page.(" + _str_name_page + " is invalid name)\n";
-    ROS_ERROR_STREAM(_status_msg);
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, _status_msg);
+  if(index == action_file_define::MAXNUM_PAGE)
+  {
     return false;
   }
   else
@@ -462,7 +461,8 @@ bool ActionModule::start(std::string page_name)
 
 bool ActionModule::start(int page_number, action_file_define::Page* page)
 {
-  if(enable_ == false)	{
+  if(enable_ == false)
+  {
     std::string status_msg = "Action Module is disabled";
     ROS_ERROR_STREAM(status_msg);
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, status_msg);
@@ -512,6 +512,9 @@ bool ActionModule::isRunning(int* playing_page_num, int* playing_step_num)
 
 bool ActionModule::loadPage(int page_number, action_file_define::Page* page)
 {
+  if(page_number < 0 || page_number >= action_file_define::MAXNUM_PAGE)
+    return false;
+
   long position = (long)(sizeof(action_file_define::Page)*page_number);
 
   if( fseek( action_file_, position, SEEK_SET ) != 0 )
@@ -557,12 +560,12 @@ void ActionModule::resetPage(action_file_define::Page* page)
   page->header.speed = 32;
   page->header.accel = 32;
 
-  for(int i=0; i < 38; i++)
+  for(int i=0; i < action_file_define::MAXNUM_JOINTS; i++)
     page->header.pgain[i] = 0x55;
 
   for(int i=0; i < action_file_define::MAXNUM_STEP; i++)
   {
-    for(int j=0; j < 38; j++)
+    for(int j=0; j < action_file_define::MAXNUM_JOINTS; j++)
       page->step[i].position[j] = action_file_define::INVALID_BIT_MASK;
 
     page->step[i].pause = 0;
@@ -570,6 +573,16 @@ void ActionModule::resetPage(action_file_define::Page* page)
   }
 
   setChecksum( page );
+}
+
+void ActionModule::enableAllJoints()
+{
+  for (std::map<std::string, bool>::iterator it = action_joints_enable_.begin();
+       it != action_joints_enable_.end();
+       it++)
+  {
+    it->second = true;
+  }
 }
 
 void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dynamixel *> dxls)
@@ -583,26 +596,25 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
   int32_t  moving_angle_speed1024_scale_256t_2t;
   int32_t  divider1,divider2;
 
-  int16_t  max_angle1024;
-  int16_t  max_speed256;
+  int16_t  max_angle;
+  int16_t  max_speed;
   int16_t  tmp;
   int16_t  prev_target_angle; // Start position
   int16_t  curr_target_angle; // Target position
   int16_t  next_target_angle; // Next target position
   uint8_t  direction_changed;
+  int16_t  speed_n;
 
   ///////////////// Static Variable
-  static uint16_t start_angle1024[action_file_define::MAXNUM_JOINTS];   // Start point of interpolation
-  static uint16_t target_angle1024[action_file_define::MAXNUM_JOINTS];  // Target point of interpolation
-  static int16_t  moving_angle1024[action_file_define::MAXNUM_JOINTS];  // Total Moving Angle
-  static int16_t  main_angle1024[action_file_define::MAXNUM_JOINTS];    // Moving angle at Constant Velocity Section
-  static int16_t  accel_angle1024[action_file_define::MAXNUM_JOINTS];   // Moving angle at Acceleration Section
-  static int16_t  main_speed1024[action_file_define::MAXNUM_JOINTS];    // Target constant velocity
-  static int16_t  last_out_speed1024[action_file_define::MAXNUM_JOINTS]; // Velocity of Previous State
-  static int16_t  goal_speed1024[action_file_define::MAXNUM_JOINTS];    // Target velocity
-  static uint8_t  finish_type[action_file_define::MAXNUM_JOINTS];       // Desired State at Target angle
-
-  int16_t speed_n;
+  static uint16_t start_angle[action_file_define::MAXNUM_JOINTS];    // Start point of interpolation
+  static uint16_t target_angle[action_file_define::MAXNUM_JOINTS];   // Target point of interpolation
+  static int16_t  moving_angle[action_file_define::MAXNUM_JOINTS];   // Total Moving Angle
+  static int16_t  main_angle[action_file_define::MAXNUM_JOINTS];     // Moving angle at Constant Velocity Section
+  static int16_t  accel_angle[action_file_define::MAXNUM_JOINTS];    // Moving angle at Acceleration Section
+  static int16_t  main_speed[action_file_define::MAXNUM_JOINTS];     // Target constant velocity
+  static int16_t  last_out_speed[action_file_define::MAXNUM_JOINTS]; // Velocity of Previous State
+  static int16_t  goal_speed[action_file_define::MAXNUM_JOINTS];     // Target velocity
+  static uint8_t  finish_type[action_file_define::MAXNUM_JOINTS];    // Desired State at Target angle
 
   static uint16_t unit_time_count;
   static uint16_t unit_time_num;
@@ -640,7 +652,6 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
     play_repeat_count = play_page_.header.repeat;
     next_play_page = 0;
 
-
     for(unsigned int joint_index = 0; joint_index < action_file_define::MAXNUM_JOINTS; joint_index++)
     {
       id = joint_index;
@@ -659,10 +670,10 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
       else
       {
         double goal_joint_angle_rad = dxls_it->second->dxl_state_->goal_position_;
-        target_angle1024[id] = convertRadTow4095(goal_joint_angle_rad);
-        last_out_speed1024[id] = 0;
-        moving_angle1024[id] = 0;
-        goal_speed1024[id] = 0;
+        target_angle[id] = convertRadTow4095(goal_joint_angle_rad);
+        last_out_speed[id] = 0;
+        moving_angle[id] = 0;
+        goal_speed[id] = 0;
       }
     }
   }
@@ -695,42 +706,42 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
         }
         else
         {
-          if( moving_angle1024[id] == 0 )
+          if( moving_angle[id] == 0 )
           {
-            action_result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle1024[id]);
+            action_result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle[id]);
           }
           else
           {
             if( section == PRE_SECTION )
             {
-              speed_n = (short)( ( (long)(main_speed1024[id] - last_out_speed1024[id]) * unit_time_count ) / unit_time_num );
-              goal_speed1024[id] = last_out_speed1024[id] + speed_n;
-              accel_angle1024[id] =  (short)( ( ( (long)( last_out_speed1024[id] + (speed_n >> 1) ) * unit_time_count * 144 ) / 15 ) >> 9);
+              speed_n = (short)( ( (long)(main_speed[id] - last_out_speed[id]) * unit_time_count ) / unit_time_num );
+              goal_speed[id] = last_out_speed[id] + speed_n;
+              accel_angle[id] =  (short)( ( ( (long)( last_out_speed[id] + (speed_n >> 1) ) * unit_time_count * 144 ) / 15 ) >> 9);
 
-              action_result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle1024[id] + accel_angle1024[id]);
+              action_result_[joint_name]->goal_position_ = convertw4095ToRad(start_angle[id] + accel_angle[id]);
             }
             else if( section == MAIN_SECTION )
             {
-              action_result_[joint_name]->goal_position_	= convertw4095ToRad(start_angle1024[id] + (short int)(((long)(main_angle1024[id])*unit_time_count) / unit_time_num));
+              action_result_[joint_name]->goal_position_	= convertw4095ToRad(start_angle[id] + (short int)(((long)(main_angle[id])*unit_time_count) / unit_time_num));
 
-              goal_speed1024[id] = main_speed1024[id];
+              goal_speed[id] = main_speed[id];
             }
             else // POST_SECTION
             {
               if( unit_time_count == (unit_time_num-1) )
               {
                 // use target angle in order to reduce the last step error
-                action_result_[joint_name]->goal_position_	= convertw4095ToRad(target_angle1024[id]);
+                action_result_[joint_name]->goal_position_	= convertw4095ToRad(target_angle[id]);
               }
               else
               {
                 if( finish_type[id] == ZERO_FINISH )
                 {
-                  speed_n = (short int)(((long)(0 - last_out_speed1024[id]) * unit_time_count) / unit_time_num);
-                  goal_speed1024[id] = last_out_speed1024[id] + speed_n;
+                  speed_n = (short int)(((long)(0 - last_out_speed[id]) * unit_time_count) / unit_time_num);
+                  goal_speed[id] = last_out_speed[id] + speed_n;
 
                   action_result_[joint_name]->goal_position_
-                  = convertw4095ToRad(start_angle1024[id] + (short)((((long)(last_out_speed1024[id] + (speed_n>>1)) * unit_time_count * 144) / 15) >> 9));
+                  = convertw4095ToRad(start_angle[id] + (short)((((long)(last_out_speed[id] + (speed_n>>1)) * unit_time_count * 144) / 15) >> 9));
 
                 }
                 else // NONE_ZERO_FINISH
@@ -738,9 +749,9 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
                   // Same as MAIN Section
                   // because some servos need to be rotate, others do not.
                   action_result_[joint_name]->goal_position_
-                  = convertw4095ToRad(start_angle1024[id] + (short int)(((long)(main_angle1024[id]) * unit_time_count) / unit_time_num));
+                  = convertw4095ToRad(start_angle[id] + (short int)(((long)(main_angle[id]) * unit_time_count) / unit_time_num));
 
-                  goal_speed1024[id] = main_speed1024[id];
+                  goal_speed[id] = main_speed[id];
                 }
               }
             }
@@ -771,8 +782,8 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
       else
       {
         double _goal_joint_angle_rad = dxls_it->second->dxl_state_->goal_position_;
-        start_angle1024[id] = convertRadTow4095(_goal_joint_angle_rad);
-        last_out_speed1024[id] = goal_speed1024[id];
+        start_angle[id] = convertRadTow4095(_goal_joint_angle_rad);
+        last_out_speed[id] = goal_speed[id];
       }
     }
 
@@ -789,13 +800,13 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
 
         if( finish_type[id] == NONE_ZERO_FINISH )
         {
-          if( (unit_time_total_num - accel_step) == 0 ) // �뜝�럥�맶�뜝�럥吏쀥뜝�럩援꿨뜝�럥�맶占쎈쐻�뜝占� �뜝�럥�맶�뜝�럥吏쀥뜝�럩援꿨뜝�럥�맶�뜝�럥吏쀥뜝�럩援꿨뜝�럥�맶�뜝�럥吏쀥뜝�럩援� �뜝�럥�맶�뜝�럥吏쀥뜝�럩援꿨뜝�럥�맶�뜝�럥吏쀥뜝�럩援� �뜝�럥�맶�뜝�럥吏쀥뜝�럩援꿨뜝�럥�맶�뜝�럥�냿嶺뚮ㅏ�뒩占쎄뎡
-            main_angle1024[id] = 0;
+          if( (unit_time_total_num - accel_step) == 0 ) // if there is not any constant velocity section
+            main_angle[id] = 0;
           else
-            main_angle1024[id] = (short)((((long)(moving_angle1024[id] - accel_angle1024[id])) * unit_time_num) / (unit_time_total_num - accel_step));
+            main_angle[id] = (short)((((long)(moving_angle[id] - accel_angle[id])) * unit_time_num) / (unit_time_total_num - accel_step));
         }
         else // ZERO_FINISH
-          main_angle1024[id] = moving_angle1024[id] - accel_angle1024[id] - (short int)((((long)main_speed1024[id] * accel_step * 12) / 5) >> 8);
+          main_angle[id] = moving_angle[id] - accel_angle[id] - (short int)((((long)main_speed[id] * accel_step * 12) / 5) >> 8);
       }
     }
     else if( section == MAIN_SECTION )
@@ -807,7 +818,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
       for(unsigned int joint_index = 0; joint_index < action_file_define::MAXNUM_JOINTS; joint_index++)
       {
         id = joint_index;
-        main_angle1024[id] = moving_angle1024[id] - main_angle1024[id] - accel_angle1024[id];
+        main_angle[id] = moving_angle[id] - main_angle[id] - accel_angle[id];
       }
     }
     else if( section == POST_SECTION )
@@ -831,7 +842,7 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
       for(unsigned int joint_index = 0; joint_index < action_file_define::MAXNUM_JOINTS; joint_index++)
       {
         id = joint_index;
-        last_out_speed1024[id] = 0;
+        last_out_speed[id] = 0;
       }
     }
 
@@ -890,31 +901,31 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
 
       //////// Calc Step Parameter
       pause_time = (((unsigned short)play_page_.step[page_step_count_-1].pause) << 5) / play_page_.header.speed;
-      max_speed256 = ((unsigned short)play_page_.step[page_step_count_-1].time * (unsigned short)play_page_.header.speed) >> 5;
-      if( max_speed256 == 0 )
-        max_speed256 = 1;
-      max_angle1024 = 0;
+      max_speed = ((unsigned short)play_page_.step[page_step_count_-1].time * (unsigned short)play_page_.header.speed) >> 5;
+      if( max_speed == 0 )
+        max_speed = 1;
+      max_angle = 0;
 
       ////////// Calc parameter for each joint
       for(unsigned int joint_index = 0; joint_index < action_file_define::MAXNUM_JOINTS; joint_index++)
       {
         id = joint_index;
         //Calculate the trajectory using previous, present and future
-        accel_angle1024[id] = 0;
+        accel_angle[id] = 0;
 
         // Find current target angle
         if( play_page_.step[page_step_count_ - 1].position[id] & action_file_define::INVALID_BIT_MASK )
-          curr_target_angle = target_angle1024[id];
+          curr_target_angle = target_angle[id];
         else
           curr_target_angle = play_page_.step[page_step_count_ - 1].position[id];
 
         // Update start, prev_target, curr_target
-        start_angle1024[id] = target_angle1024[id];
-        prev_target_angle = target_angle1024[id];
-        target_angle1024[id] = curr_target_angle;
+        start_angle[id] = target_angle[id];
+        prev_target_angle = target_angle[id];
+        target_angle[id] = curr_target_angle;
 
         // Find Moving offset
-        moving_angle1024[id] = (int)(target_angle1024[id] - start_angle1024[id]);
+        moving_angle[id] = (int)(target_angle[id] - start_angle[id]);
 
         // Find Next target angle
         if( page_step_count_ == play_page_.header.stepnum ) // If current step is last step
@@ -958,13 +969,13 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
         if( play_page_.header.schedule == action_file_define::SPEED_BASE_SCHEDULE )
         {
           //MaxAngle1024 update
-          if( moving_angle1024[id] < 0 )
-            tmp = -moving_angle1024[id];
+          if( moving_angle[id] < 0 )
+            tmp = -moving_angle[id];
           else
-            tmp = moving_angle1024[id];
+            tmp = moving_angle[id];
 
-          if( tmp > max_angle1024 )
-            max_angle1024 = tmp;
+          if( tmp > max_angle )
+            max_angle = tmp;
         }
 
       }
@@ -976,9 +987,9 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
       //              = ((128*wMaxAngle1024*300/1024) /(wMaxSpeed256 * 720/256)) ;    (/7.8msec == *128)
       //              = (wMaxAngle1024*40) /(wMaxSpeed256 *3);
       if( play_page_.header.schedule == action_file_define::TIME_BASE_SCHEDULE )
-        unit_time_total_num  = max_speed256; //TIME BASE 051025
+        unit_time_total_num  = max_speed; //TIME BASE 051025
       else
-        unit_time_total_num  = (max_angle1024 * 40) / (max_speed256 * 3);
+        unit_time_total_num  = (max_angle * 40) / (max_speed * 3);
 
       accel_step = play_page_.header.accel;
       if( unit_time_total_num <= (accel_step << 1) )
@@ -1010,19 +1021,19 @@ void ActionModule::actionPlayProcess(std::map<std::string, robotis_framework::Dy
       for(unsigned int joint_index = 0; joint_index < action_file_define::MAXNUM_JOINTS; joint_index++)
       {
         id = joint_index;
-        start_speed1024_pre_time_256t = (long)last_out_speed1024[id] * pre_section_time_256t; //  *300/1024 * 1024/720 * 256 * 2
-        moving_angle_speed1024_scale_256t_2t = (((long)moving_angle1024[id]) * 2560L) / 12;
+        start_speed1024_pre_time_256t = (long)last_out_speed[id] * pre_section_time_256t; //  *300/1024 * 1024/720 * 256 * 2
+        moving_angle_speed1024_scale_256t_2t = (((long)moving_angle[id]) * 2560L) / 12;
 
         if( finish_type[id] == ZERO_FINISH )
-          main_speed1024[id] = (short int)((moving_angle_speed1024_scale_256t_2t - start_speed1024_pre_time_256t) / divider2);
+          main_speed[id] = (short int)((moving_angle_speed1024_scale_256t_2t - start_speed1024_pre_time_256t) / divider2);
         else
-          main_speed1024[id] = (short int)((moving_angle_speed1024_scale_256t_2t - start_speed1024_pre_time_256t) / divider1);
+          main_speed[id] = (short int)((moving_angle_speed1024_scale_256t_2t - start_speed1024_pre_time_256t) / divider1);
 
-        if( main_speed1024[id] > 1023 )
-          main_speed1024[id] = 1023;
+        if( main_speed[id] > 1023 )
+          main_speed[id] = 1023;
 
-        if( main_speed1024[id] < -1023 )
-          main_speed1024[id] = -1023;
+        if( main_speed[id] < -1023 )
+          main_speed[id] = -1023;
       }
       unit_time_num = accel_step; //PreSection
     }
@@ -1039,5 +1050,13 @@ void ActionModule::publishStatusMsg(unsigned int type, std::string msg)
   status.status_msg = msg;
 
   status_msg_pub_.publish(status);
+}
+
+void ActionModule::publishDoneMsg(std::string msg)
+{
+  std_msgs::String done_msg;
+  done_msg.data = msg;
+
+  done_msg_pub_.publish(done_msg);
 }
 
