@@ -1275,7 +1275,7 @@ void THORMANG3OnlineWalking::process()
 
       walking_time_ += TIME_UNIT;
 
-      if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5)
+      if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5*0.001)
       {
         real_running = false;
         calcStepIdxData();
