@@ -29,7 +29,7 @@ offset:
   r_leg_hip_r: 0
   r_leg_hip_y: 0
   r_leg_kn_p: 0
-  torso_y: -0
+  torso_y: 0
 init_pose_for_offset_tuner:
   head_p: 0
   head_y: 0
@@ -62,3 +62,4 @@ init_pose_for_offset_tuner:
   r_leg_hip_y: 0
   r_leg_kn_p: 0
   torso_y: 0
+  
