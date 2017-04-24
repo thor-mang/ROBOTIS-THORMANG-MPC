@@ -49,13 +49,13 @@
 #include <boost/thread.hpp>
 #include <yaml-cpp/yaml.h>
 
-#include "manipulation_module_state.h"
-
 #include "robotis_math/robotis_math.h"
 #include "robotis_framework_common/motion_module.h"
-#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
+#include "robotis_controller_msgs/JointCtrlModule.h"
 #include "robotis_controller_msgs/StatusMsg.h"
+
+#include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 
 #include "thormang3_manipulation_module_msgs/JointPose.h"
 #include "thormang3_manipulation_module_msgs/KinematicsPose.h"
@@ -65,26 +65,6 @@
 
 namespace thormang3
 {
-
-class ManipulationJointData
-{
-public:
-  double  position_;
-  double  velocity_;
-  double  effort_;
-
-  int     p_gain_;
-  int     i_gain_;
-  int     d_gain_;
-};
-
-class ManipulationJointState
-{
-public:
-  ManipulationJointData curr_joint_state[MAX_JOINT_ID + 1];
-  ManipulationJointData goal_joint_state[MAX_JOINT_ID + 1];
-  ManipulationJointData fake_joint_state[MAX_JOINT_ID + 1];
-};
 
 class ManipulationModule: public robotis_framework::MotionModule,
                           public robotis_framework::Singleton<ManipulationModule>
@@ -117,9 +97,7 @@ public:
   void publishStatusMsg(unsigned int type, std::string msg);
 
   /* Parameter */
-  KinematicsDynamics       *humanoid_;
-  ManipulationJointState   *joint_state_;
-  ManipulationModuleState  *manipulation_module_state_;
+  KinematicsDynamics *robotis_;
 
 private:
   void queueThread();
@@ -127,13 +105,48 @@ private:
   void parseData(const std::string &path);
   void parseIniPoseData(const std::string &path);
 
-  int             control_cycle_msec_;
+  bool arm_angle_display_;
+
+  double          control_cycle_sec_;
   boost::thread   queue_thread_;
   boost::thread  *traj_generate_tread_;
 
-  ros::Publisher  status_msg_pub_;
+  std_msgs::String movement_done_msg_;
 
-  std::map<std::string, int> joint_name_to_id;
+  ros::Publisher  status_msg_pub_;
+  ros::Publisher  movement_done_pub_;
+
+  /* joint state */
+  Eigen::VectorXd present_joint_position_;
+  Eigen::VectorXd goal_joint_position_;
+  Eigen::VectorXd init_joint_position_;
+
+  /* trajectory */
+  bool    is_moving_;
+  double  mov_time_;
+  int     cnt_;
+  int     all_time_steps_;
+
+  Eigen::MatrixXd goal_joint_tra_;
+  Eigen::MatrixXd goal_task_tra_;
+
+    /* msgs */
+  thormang3_manipulation_module_msgs::JointPose       goal_joint_pose_msg_;
+  thormang3_manipulation_module_msgs::KinematicsPose  goal_kinematics_pose_msg_;
+
+  /* inverse kinematics */
+  bool  ik_solving_;
+  int   ik_id_start_;
+  int   ik_id_end_;
+
+  Eigen::MatrixXd ik_target_position_;
+  Eigen::MatrixXd ik_start_rotation_;
+  Eigen::MatrixXd ik_target_rotation_;
+  Eigen::MatrixXd ik_weight_;
+
+  void setInverseKinematics(int cnt, Eigen::MatrixXd start_rotation);
+
+  std::map<std::string, int> joint_name_to_id_;
 };
 
 }
