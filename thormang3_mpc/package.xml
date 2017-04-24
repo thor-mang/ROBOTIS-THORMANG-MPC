@@ -20,6 +20,7 @@
   <run_depend>thormang3_balance_control</run_depend>
   <run_depend>thormang3_base_module</run_depend>
   <run_depend>thormang3_feet_ft_module</run_depend>
+  <run_depend>thormang3_gripper_module</run_depend>
   <run_depend>thormang3_head_control_module</run_depend>
   <run_depend>thormang3_imu_3dm_gx4</run_depend>
   <run_depend>thormang3_kinematics_dynamics</run_depend>
