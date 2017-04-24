@@ -2,6 +2,12 @@
 Changelog for package thormang3_balance_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2017-04-24)
+-----------
+* upgraded walking balance control
+* - fixed package dependencies
+* Contributors: Jay Song, Zerom
+
 0.1.1 (2016-08-19)
 -----------
 * none

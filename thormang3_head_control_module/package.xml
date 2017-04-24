@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_head_control_module</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <description>
     A module to control the head.
     This module is included in the Thormang3 Manager as a library.
   </description>
   <license>BSD</license>
+  <author email="zerom@robotis.com">Zerom</author>
+  <author email="sch@robotis.com">SCH</author>
   <author email="kmjung@robotis.com">Kayman</author>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>

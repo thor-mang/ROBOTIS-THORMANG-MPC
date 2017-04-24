@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_manager</name>
-  <version>0.1.0</version>
+  <version>0.1.2</version>
   <description>
     This package describes robot manager to execute THORMANG3's motion modules.
   </description>
   <license>BSD</license>
   <author email="zerom@robotis.com">Zerom</author>
+  <author email="sch@robotis.com">SCH</author>
+  <author email="kmjung@robotis.com">Kayman</author>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
   <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>

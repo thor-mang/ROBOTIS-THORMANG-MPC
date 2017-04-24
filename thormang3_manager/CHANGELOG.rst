@@ -2,6 +2,31 @@
 Changelog for package thormang3_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2017-04-24)
+-----------
+* edited action file and dxl_init
+* reupload ft yaml
+* added function for action_editor to action_module
+* findpackage build_depend module msgs added
+* added control_cycle value.
+* upgrade walking balance control
+* manager parameter modified
+* manipulation & gripper module clean up
+* merged develop with feature_walking_upgrade
+* minor bug fixed
+* deleted old config
+* updated ft_data.yaml
+* initialize ftdata and offset data
+* wholebody inipose added
+* updated thormang3_head_control_module : scan lidar using range
+* wholebody balance gain update
+* gripper debug
+* manager modified
+* gripper module added
+* merge with wholebody
+* wholebody added
+* Contributors: Jay Song, Zerom, Kayman, SCH
+
 0.1.1 (2016-08-19)
 -----------
 * package name changed
