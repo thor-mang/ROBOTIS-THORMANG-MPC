@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_action_module</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <description>
     This package is a motion module that can play the saved action.
     This module is based on position control.
@@ -15,10 +15,10 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>dynamixel_sdk</build_depend>
-  <build_depend>robotis_device</build_depend>
+  <build_depend>robotis_framework_common</build_depend>
   <build_depend>robotis_controller_msgs</build_depend>
   <build_depend>thormang3_action_module_msgs</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>robotis_framework_common</run_depend>
 </package>

@@ -156,6 +156,8 @@ void BaseModule::initialize(const int control_cycle_msec, robotis_framework::Rob
   /* publish topics */
   status_msg_pub_       = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
   set_ctrl_module_pub_  = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
+
+  movement_done_pub_ = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
 }
 
 void BaseModule::parseIniPoseData(const std::string &path)
@@ -242,11 +244,9 @@ void BaseModule::queueThread()
   // for gui
   ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/base/ini_pose", 5, &BaseModule::initPoseMsgCallback, this);
 
-  while (ros_node.ok())
-  {
-    callback_queue.callAvailable();
-    usleep(100);
-  }
+  ros::WallDuration duration(control_cycle_msec_ / 1000.0);
+  while(ros_node.ok())
+    callback_queue.callAvailable(duration);
 }
 
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -451,6 +451,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     ROS_INFO("[end] send trajectory");
 
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Finish Init Pose");
+    publishDoneMsg("base_init");
 
     base_module_state_->is_moving_ = false;
     base_module_state_->cnt_ = 0;
@@ -486,4 +487,11 @@ void BaseModule::publishStatusMsg(unsigned int type, std::string msg)
   status.status_msg   = msg;
 
   status_msg_pub_.publish(status);
+}
+
+void BaseModule::publishDoneMsg(const std::string done_msg)
+{
+  std_msgs::String movement_msg;
+  movement_msg.data = done_msg;
+  movement_done_pub_.publish(movement_msg);
 }

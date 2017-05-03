@@ -2,6 +2,18 @@
 Changelog for package thormang3_feet_ft_module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2017-04-24)
+-----------
+* merged develop with feature_walking_upgrade
+* - fixed package dependencies
+* - optimized cpu usage by spin loop (by astumpf)
+* bug fix : calculate ft_scale
+* wholebody modified
+* - reduce CPU consumption
+* wholebody inipose added
+* update thormang3_head_control_module : scan lidar using range
+* Contributors: Jay Song, Zerom, Kayman
+
 0.1.1 (2016-08-19)
 -----------
 * none

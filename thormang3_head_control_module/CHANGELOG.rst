@@ -2,6 +2,23 @@
 Changelog for package thormang3_head_control_module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2017-04-24)
+-----------
+* added done msg to base_module
+* added done msg to head_control_module
+* head control module msgs added
+* merged develop with feature_walking_upgrade
+* merged branch 'walking_upgrade' into develop
+* - fixed package dependencies
+* - optimized cpu usage by spin loop (by astumpf)
+* applied head_control_module_msgs
+* changed lidar moving method
+* edited range scan
+* - reduce CPU consumption
+* wholebody inipose added
+* update thormang3_head_control_module : scan lidar using range
+* Contributors: Jay Song, Zerom, Kayman, SCH
+
 0.1.1 (2016-08-19)
 -----------
 * none

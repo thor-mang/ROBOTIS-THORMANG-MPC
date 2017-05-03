@@ -11,17 +11,14 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   sensor_msgs
-  geometry_msgs
   cmake_modules
   eigen_conversions
-  dynamixel_sdk
-  robotis_device
-  robotis_controller_msgs
-  robotis_framework_common
   robotis_math
+  robotis_framework_common
+  robotis_controller_msgs
   thormang3_kinematics_dynamics
-  thormang3_walking_module_msgs
   thormang3_balance_control
+  thormang3_walking_module_msgs
 )
 
 find_package(Eigen REQUIRED)
@@ -40,6 +37,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_walking_module
+  CATKIN_DEPENDS roscpp robotis_math robotis_framework_common thormang3_balance_control thormang3_kinematics_dynamics
 )
 
 ################################################################################

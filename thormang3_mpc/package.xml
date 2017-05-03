@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_mpc</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <description>ROS packages for the thormang3_mpc (meta package)</description>
   <license>BSD</license>
   <author email="zerom@robotis.com">Zerom</author>
@@ -20,6 +20,7 @@
   <run_depend>thormang3_balance_control</run_depend>
   <run_depend>thormang3_base_module</run_depend>
   <run_depend>thormang3_feet_ft_module</run_depend>
+  <run_depend>thormang3_gripper_module</run_depend>
   <run_depend>thormang3_head_control_module</run_depend>
   <run_depend>thormang3_imu_3dm_gx4</run_depend>
   <run_depend>thormang3_kinematics_dynamics</run_depend>
