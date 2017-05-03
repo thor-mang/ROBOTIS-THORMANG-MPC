@@ -1,12 +1,15 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_feet_ft_module</name>
-  <version>0.1.0</version>
+  <version>0.1.2</version>
   <description>
     This package is a sensor module for force torque sensors on feet.
   </description>
   <license>BSD</license>
+  <author email="zerom@robotis.com">Zerom</author>
   <author email="hjsong@robotis.com">Jay Song</author>
+  <author email="sch@robotis.com">SCH</author>
+  <author email="kmjung@robotis.com">Kayman</author>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
   <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>
