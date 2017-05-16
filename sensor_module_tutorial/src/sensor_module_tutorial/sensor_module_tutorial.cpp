@@ -28,13 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * sensor_module_tutorial.cpp
- *
- *  Created on: 2016. 4. 20.
- *      Author: zerom
- */
-
 #include <stdio.h>
 #include "sensor_module_tutorial/sensor_module_tutorial.h"
 
