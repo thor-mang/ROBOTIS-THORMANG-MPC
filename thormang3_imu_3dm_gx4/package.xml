@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>thormang3_imu_3dm_gx4</name>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <description>
     Driver for Microstrain 3DM-GX4-25 IMU
     This package is modified by robotis.
@@ -9,7 +9,6 @@
   </description>
   <license>Apache 2</license>
   <author>Gareth Cross</author>
-  <maintainer email="hjsong@robotis.com">Jay Song</maintainer>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC/issues</url>
   <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-THORMANG-MPC</url>
