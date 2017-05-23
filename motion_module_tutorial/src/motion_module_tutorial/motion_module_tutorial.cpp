@@ -28,13 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * motion_module_tutorial.cpp
- *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
- */
-
 #include <stdio.h>
 #include "motion_module_tutorial/motion_module_tutorial.h"
 
