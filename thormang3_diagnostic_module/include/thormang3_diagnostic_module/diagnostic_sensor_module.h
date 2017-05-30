@@ -40,6 +40,9 @@
 
 #include <robotis_framework_common/sensor_module.h>
 
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+
 
 
 namespace thormang3
@@ -48,6 +51,52 @@ class DiagnosticSensor
   : public robotis_framework::SensorModule
   , public robotis_framework::Singleton<DiagnosticSensor>
 {
+//  class DynamixelFunctionDiagnosticTask
+//   : public diagnostic_updater::FunctionDiagnosticTask
+//  {
+
+//    DynamixelFunctionDiagnosticTask(const std::string &name, boost::function<void(T&)> fn) :
+
+//  };
+protected:
+  class DynamixelDiagnosticTask
+    : public diagnostic_updater::DiagnosticTask
+  {
+    public:
+      DynamixelDiagnosticTask(const std::string name, robotis_framework::Dynamixel* dxl)
+        : DiagnosticTask(name)
+        , name_(name)
+        , dxl_(dxl)
+    {}
+
+      void run(diagnostic_updater::DiagnosticStatusWrapper &stat) override
+      {
+        stat.name = name_;
+
+        // do awesome stuff here
+
+        stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "node is ok");
+        stat.add("id", dxl_->id_);
+        stat.add("port", dxl_->port_name_);
+        stat.add("dxl_state_ ", dxl_->dxl_state_);
+        stat.add("current_position", dxl_->present_position_item_ );
+        stat.add("velocity",dxl_->present_velocity_item_);
+        stat.add("current", dxl_->present_current_item_);
+        stat.add("torque_enable_item_",dxl_->torque_enable_item_);
+        stat.add("position_p_gain_item_",dxl_->position_p_gain_item_);
+        stat.add("position_i_gain_item_",dxl_->position_i_gain_item_);
+        stat.add("position_d_gain_item_",dxl_->position_d_gain_item_);
+        stat.add("velocity_p_gain_item_",dxl_->velocity_p_gain_item_);
+        stat.add("velocity_i_gain_item_",dxl_->velocity_i_gain_item_);
+        stat.add("velocity_d_gain_item_",dxl_->velocity_d_gain_item_);
+
+      }
+
+    private:
+      const std::string name_;
+      robotis_framework::Dynamixel* dxl_;
+  };
+
 public:
   DiagnosticSensor();
   ~DiagnosticSensor();
@@ -60,12 +109,15 @@ public:
 
   bool gazebo_mode_;
   std::string gazebo_robot_name_;
+  boost::shared_ptr<diagnostic_updater::Updater> diagnostic_updater_;
 
 private:
   void msgQueueThread();
 
   int control_cycle_msec_;
   boost::thread queue_thread_;
+
+  diagnostic_updater::Updater updater_;
 };
 }
 

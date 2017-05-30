@@ -2,6 +2,7 @@
 
 
 
+
 using namespace thormang3;
 
 DiagnosticSensor::DiagnosticSensor()
@@ -40,7 +41,25 @@ void DiagnosticSensor::msgQueueThread()
     callback_queue.callAvailable(duration);
 }
 
-void DiagnosticSensor::process(std::map<std::string, robotis_framework::Dynamixel*> /*dxls*/, std::map<std::string, robotis_framework::Sensor*> /*sensors*/)
+void DiagnosticSensor::process(std::map<std::string, robotis_framework::Dynamixel*> dxls, std::map<std::string, robotis_framework::Sensor*> /*sensors*/)
 {
   // TODO
+
+  updater_.setHardwareID("none");
+
+  for (auto dxl : dxls)
+  {
+    robotis_framework::Dynamixel* dynamixel = dxl.second;
+
+    DynamixelDiagnosticTask task("dynamixel", dynamixel);
+    updater_.add(task);
+
+    //updater_.add("dynamixel", this , boost::bind(&thormang3::DiagnosticSensor::dynamixelCallback, _1));
+    //updater_.add("dynamixel", &thormang3::DiagnosticSensor::dynamixelCallback);
+
+    //dynamixel->DiagnosticSensor::dynamixelCallback();
+
+  }
+
+  updater_.update();
 }
