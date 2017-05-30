@@ -47,9 +47,9 @@ using namespace thormang3;
 static const double MMtoM = 0.001;
 static const double MStoS = 0.001;
 
-#define NO_STEP_IDX    (-1)
-#define G              (9810.0*MMtoM) // mm/s^2(= 9.81m/s^2 *1000mm/1m)
-#define TIME_UNIT      (8*MStoS)
+static const int NO_STEP_IDX = -1;
+
+static const double TIME_UNIT = 0.008;
 
 static const int IN_WALKING_STARTING = 0;
 static const int IN_WALKING = 1;
@@ -59,29 +59,24 @@ static const int LEFT_FOOT_SWING  = 1;
 static const int RIGHT_FOOT_SWING = 2;
 static const int STANDING = 3;
 
-enum
-{
-  BalancingPhase0 = 0, // DSP : START
-  BalancingPhase1 = 1, // DSP : R--O->L
-  BalancingPhase2 = 2, // SSP : L_BALANCING1
-  BalancingPhase3 = 3, // SSP : L_BALANCING2
-  BalancingPhase4 = 4, // DSP : R--O<-L
-  BalancingPhase5 = 5, // DSP : R<-O--L
-  BalancingPhase6 = 6, // SSP : R_BALANCING1
-  BalancingPhase7 = 7, // SSP : R_BALANCING2
-  BalancingPhase8 = 8, // DSP : R->O--L
-  BalancingPhase9 = 9  // DSP : END
-};
+static const int BalancingPhase0 = 0; // DSP : START
+static const int BalancingPhase1 = 1; // DSP : R--O->L
+static const int BalancingPhase2 = 2; // SSP : L_BALANCING1
+static const int BalancingPhase3 = 3; // SSP : L_BALANCING2
+static const int BalancingPhase4 = 4; // DSP : R--O<-L
+static const int BalancingPhase5 = 5; // DSP : R<-O--L
+static const int BalancingPhase6 = 6; // SSP : R_BALANCING1
+static const int BalancingPhase7 = 7; // SSP : R_BALANCING2
+static const int BalancingPhase8 = 8; // DSP : R->O--L
+static const int BalancingPhase9 = 9; // DSP : END
 
-enum StepDataStatus
-{
-  StepDataStatus1 = 1, //
-  StepDataStatus2 = 2, //
-  StepDataStatus3 = 3, //
-  StepDataStatus4 = 4, //
-};
+static const int StepDataStatus1 = 1; //
+static const int StepDataStatus2 = 2; //
+static const int StepDataStatus3 = 3; //
+static const int StepDataStatus4 = 4; //
 
-RobotisOnlineWalking::RobotisOnlineWalking()
+
+THORMANG3OnlineWalking::THORMANG3OnlineWalking()
 {
   thormang3_kd_ = new KinematicsDynamics(WholeBody);
 
@@ -226,20 +221,20 @@ RobotisOnlineWalking::RobotisOnlineWalking()
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
 
 
-  balance_error_ = BalanceControlError::NoError;
+  balance_error_ = thormang3::BalanceControlError::NoError;
   quat_current_imu_.w() = cos(0.5*M_PI);
   quat_current_imu_.x() = sin(0.5*M_PI);
   quat_current_imu_.y() = 0;
   quat_current_imu_.z() = 0;
 }
 
-RobotisOnlineWalking::~RobotisOnlineWalking()
+THORMANG3OnlineWalking::~THORMANG3OnlineWalking()
 {  }
 
-bool RobotisOnlineWalking::setInitialPose(double r_foot_x, double r_foot_y, double r_foot_z, double r_foot_roll, double r_foot_pitch, double r_foot_yaw,
-    double l_foot_x, double l_foot_y, double l_foot_z, double l_foot_roll, double l_foot_pitch, double l_foot_yaw,
-    double center_of_body_x, double center_of_body_y, double center_of_body_z,
-    double center_of_body_roll, double center_of_body_pitch, double center_of_body_yaw)
+bool THORMANG3OnlineWalking::setInitialPose(double r_foot_x, double r_foot_y, double r_foot_z, double r_foot_roll, double r_foot_pitch, double r_foot_yaw,
+                                            double l_foot_x, double l_foot_y, double l_foot_z, double l_foot_roll, double l_foot_pitch, double l_foot_yaw,
+                                            double center_of_body_x, double center_of_body_y, double center_of_body_z,
+                                            double center_of_body_roll, double center_of_body_pitch, double center_of_body_yaw)
 {
 
   if(real_running || ctrl_running)
@@ -273,38 +268,54 @@ bool RobotisOnlineWalking::setInitialPose(double r_foot_x, double r_foot_y, doub
   return true;
 }
 
-void RobotisOnlineWalking::setInitalWaistYawAngle(double waist_yaw_angle_rad)
+void THORMANG3OnlineWalking::setInitalWaistYawAngle(double waist_yaw_angle_rad)
 {
   goal_waist_yaw_angle_rad_ = waist_yaw_angle_rad;
 }
 
-void RobotisOnlineWalking::setInitialRightShoulderAngle(double shoulder_angle_rad)
+void THORMANG3OnlineWalking::setInitialRightShoulderAngle(double shoulder_angle_rad)
 {
   r_init_shoulder_angle_rad_ = shoulder_angle_rad;
 }
 
-void RobotisOnlineWalking::setInitialLeftShoulderAngle(double shoulder_angle_rad)
+void THORMANG3OnlineWalking::setInitialLeftShoulderAngle(double shoulder_angle_rad)
 {
   l_init_shoulder_angle_rad_ = shoulder_angle_rad;
 }
 
-void RobotisOnlineWalking::setInitialRightElbowAngle(double elbow_angle_rad)
+void THORMANG3OnlineWalking::setInitialRightElbowAngle(double elbow_angle_rad)
 {
   r_init_elbow_angle_rad_ = elbow_angle_rad;
 }
 
-void RobotisOnlineWalking::setInitialLeftElbowAngle(double elbow_angle_rad)
+void THORMANG3OnlineWalking::setInitialLeftElbowAngle(double elbow_angle_rad)
 {
   l_init_elbow_angle_rad_ = elbow_angle_rad;
 }
 
-void RobotisOnlineWalking::initialize()
+void THORMANG3OnlineWalking::setCurrentIMUSensorOutput(double gyro_x, double gyro_y, double quat_x, double quat_y, double quat_z, double quat_w)
+{
+  imu_data_mutex_lock_.lock();
+
+  current_gyro_roll_rad_per_sec_  = gyro_x;
+  current_gyro_pitch_rad_per_sec_ = gyro_y;
+
+  quat_current_imu_ = Eigen::Quaterniond(quat_w, quat_x, quat_y, quat_z);
+
+  mat_current_imu_ = (rot_x_pi_3d_ * quat_current_imu_.toRotationMatrix()) * rot_z_pi_3d_;
+
+  current_imu_roll_rad_  = atan2( mat_current_imu_.coeff(2,1), mat_current_imu_.coeff(2,2));
+  current_imu_pitch_rad_ = atan2(-mat_current_imu_.coeff(2,0), sqrt(robotis_framework::powDI(mat_current_imu_.coeff(2,1), 2) + robotis_framework::powDI(mat_current_imu_.coeff(2,2), 2)));
+
+  imu_data_mutex_lock_.unlock();
+}
+
+void THORMANG3OnlineWalking::initialize()
 {
   if(real_running)
     return;
 
-  boost::lock_guard<boost::mutex> lock(mutex_lock_);
-
+  step_data_mutex_lock_.lock();
   added_step_data_.clear();
 
   // initialize balance
@@ -361,6 +372,14 @@ void RobotisOnlineWalking::initialize()
   {
     out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
     out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
+    curr_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
+    curr_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
+  }
+
+  for(int feed_forward_idx = 0; feed_forward_idx < 12; feed_forward_idx++)
+  {
+    leg_angle_feed_back_[feed_forward_idx].p_gain_ = 0;
+    leg_angle_feed_back_[feed_forward_idx].d_gain_ = 0;
   }
 
   reference_step_data_for_addition_.position_data.moving_foot = STANDING;
@@ -401,17 +420,6 @@ void RobotisOnlineWalking::initialize()
   else
     t=TIME_UNIT/1000.0;
 
-  A_.resize(3,3); b_.resize(3,1); c_.resize(1,3);
-  A_ << 1,  t, t*t/2.0,
-      0,  1,   t,
-      0,  0,   1;
-  b_(0,0) = t*t*t/6.0;
-  b_(1,0) =   t*t/2.0;
-  b_(2,0) =     t;
-
-  c_(0,0) = 1; c_(0,1) = 0; c_(0,2) = -500.0*MMtoM/G;
-
-  double Q_e = 1.0, R = 0.000001;//1.0e-6;
   preview_size_ = round(preview_time_/TIME_UNIT);
 
   step_idx_data_.resize(preview_size_);
@@ -422,10 +430,22 @@ void RobotisOnlineWalking::initialize()
   reference_zmp_y_.resize(preview_size_, 1);
   reference_zmp_y_.fill(0.5*(present_right_foot_pose_.y + present_left_foot_pose_.y));
 
+  A_.resize(3,3); b_.resize(3,1); c_.resize(1,3);
+  A_ << 1,  t, t*t/2.0,
+      0,  1,   t,
+      0,  0,   1;
+  b_(0,0) = t*t*t/6.0;
+  b_(1,0) =   t*t/2.0;
+  b_(2,0) =     t;
+
+  c_(0,0) = 1; c_(0,1) = 0; c_(0,2) = -500.0*0.001/GRAVITY_ACCELERATION;
+
   k_s_ = 608.900142915471; //500.0
+  //k_s_ = 583.938789769793; //600.0
 
   k_x_.resize(1,3);
   k_x_ << 35904.1790662895, 8609.63092261379, 112.710622775482; // 500
+  //k_x_ << 37452.749706802, 9756.07453643388, 121.001738374095; // 600
 
   f_.resize(1, preview_size_);
   //500
@@ -450,11 +470,35 @@ void RobotisOnlineWalking::initialize()
       2.153028678,  2.076444411,  2.002567552,  1.931302952,   1.862558786,   1.796246438,  1.732280393,  1.670578121,  1.611059983,  1.553649123,
       1.498271374,  1.444855165,  1.393331431,  1.343633522,   1.295697125,   1.249460178,  1.204862791,  1.161847176,  1.120357568,  1.080340156;
 
+  //600
+//  f_ << 583.9387898,  750.9225137,  918.1585887,  1025.28224,  1068.572334,  1066.00235,   1038.071691,  1000.083662,   960.8853819,  924.332612,
+//        891.3091699,  861.3465762,  833.615981,   807.3964237,  782.2132154,  757.8151538,  734.0999123,  711.0427972,  688.6479404,  666.9221777,
+//        645.8649499,  625.4670304,  605.7128357,  586.5833441,  568.0583614,  550.1178678,  532.7426248,  515.914327,   499.6155377,  483.8295609,
+//        468.5403224,  453.7322864,  439.3904039,  425.5000849,  412.0471825,  399.0179825,  386.3991934,  374.1779373,  362.3417377,  350.8785086,
+//        339.7765423,  329.0244973,  318.6113874,  308.5265697,  298.7597346,  289.3008946,  280.140375,   271.2688034,  262.6771012,  254.3564733,
+//        246.2984005,  238.4946298,  230.9371668,  223.6182676,  216.5304305,  209.6663889,  203.019104,   196.5817571,  190.3477436,  184.3106657,
+//        178.464326,   172.8027215,  167.3200373,  162.010641,   156.8690766,  151.8900593,  147.0684701,  142.3993506,  137.8778978,  133.4994595,
+//        129.2595297,  125.1537435,  121.1778731,  117.3278237,  113.5996286,  109.9894461,  106.4935549,  103.1083507,   99.83034228,  96.6561483,
+//         93.58249356,  90.6062058,   87.72421248,  84.93353763, 82.23129884,   79.61470434,  77.08105014,  74.62771731,  72.25216927,  69.95194925,
+//         67.72467778,  65.56805026,  63.47983461,  61.45786901, 59.50005969,   57.6043788,   55.76886233,  53.99160812,  52.27077392,  50.60457551,
+//         48.99128487,  47.42922844,  45.91678537,  44.4523859,  43.03450975,   41.66168457,  40.33248441,  39.04552829,  37.79947877,  36.5930406,
+//         35.42495939,  34.29402031,  33.19904685,  32.13889964, 31.11247526,   30.11870513,  29.15655437,  28.22502079,  27.32313386,  26.44995365,
+//         25.60456997,  24.78610134,  23.99369414,  23.22652172, 22.48378355,   21.76470439,  21.06853351,  20.39454392,  19.74203158,  19.11031475,
+//         18.49873322,  17.90664768,  17.33343901,  16.77850772, 16.24127324,   15.7211734,   15.21766381,  14.73021731,  14.25832344,  13.80148787,
+//         13.35923194,  12.93109216,  12.51661969,  12.11537993, 11.72695202,   11.35092848,  10.98691468,  10.63452855,  10.29340009,   9.963171053,
+//          9.643494539,  9.334034646,  9.034466125,  8.74447404,  8.463753446,   8.19200907,   7.928955006,  7.674314421,  7.427819265,  7.189209996,
+//          6.958235311,  6.734651883,  6.518224112,  6.308723877, 6.105930303,   5.909629529,  5.719614489,  5.535684693,  5.357646024,  5.18531053,
+//          5.018496236,  4.857026947,  4.700732073,  4.549446444, 4.403010145,   4.261268345,  4.124071137,  3.991273383,  3.862734561,  3.738318623,
+//          3.617893846,  3.501332704,  3.388511725,  3.27931137,  3.173615908,   3.071313287,  2.97229503,   2.87645611,   2.783694848,  2.693912803,
+//          2.607014671,  2.522908184,  2.441504017,  2.362715689, 2.286459477,   2.212654328,  2.141221772,  2.072085843,  2.005172996,  1.940412033;
+
   u_x.resize(1,1);
   u_y.resize(1,1);
 
   x_lipm_.resize(3, 1);    y_lipm_.resize(3, 1);
   x_lipm_.fill(0.0);       y_lipm_.fill(0.0);
+
+  step_data_mutex_lock_.unlock();
 
   r_shoulder_out_angle_rad_ = r_shoulder_dir_*(mat_robot_to_rfoot_.coeff(0, 3) - mat_robot_to_lfoot_.coeff(0, 3))*shouler_swing_gain_ + r_init_shoulder_angle_rad_;
   l_shoulder_out_angle_rad_ = l_shoulder_dir_*(mat_robot_to_lfoot_.coeff(0, 3) - mat_robot_to_rfoot_.coeff(0, 3))*shouler_swing_gain_ + l_init_shoulder_angle_rad_;
@@ -468,13 +512,12 @@ void RobotisOnlineWalking::initialize()
 
 }
 
-void RobotisOnlineWalking::reInitialize()
+void THORMANG3OnlineWalking::reInitialize()
 {
   if(real_running)
     return;
 
-  boost::lock_guard<boost::mutex> lock(mutex_lock_);
-
+  step_data_mutex_lock_.lock();
   added_step_data_.clear();
 
   //Initialize Time
@@ -569,40 +612,42 @@ void RobotisOnlineWalking::reInitialize()
   sum_of_cy_ = 0.0;
   x_lipm_.fill(0.0);        y_lipm_.fill(0.0);
 
+  step_data_mutex_lock_.unlock();
+
   left_fz_trajectory_start_time_ = 0;
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
 }
 
-void RobotisOnlineWalking::start()
+void THORMANG3OnlineWalking::start()
 {
   ctrl_running = true;
   real_running = true;
 }
 
-void RobotisOnlineWalking::stop()
+void THORMANG3OnlineWalking::stop()
 {
   ctrl_running = false;
 }
 
-bool RobotisOnlineWalking::isRunning()
+bool THORMANG3OnlineWalking::isRunning()
 {
   return real_running;
 }
 
-bool RobotisOnlineWalking::addStepData(robotis_framework::StepData step_data)
+bool THORMANG3OnlineWalking::addStepData(robotis_framework::StepData step_data)
 {
-  mutex_lock_.lock();
+  step_data_mutex_lock_.lock();
   added_step_data_.push_back(step_data);
 
   calcStepIdxData();
-  mutex_lock_.unlock();
+  step_data_mutex_lock_.unlock();
 
   return true;
 }
 
-int RobotisOnlineWalking::getNumofRemainingUnreservedStepData()
+int THORMANG3OnlineWalking::getNumofRemainingUnreservedStepData()
 {
   int step_idx = step_idx_data_(preview_size_ - 1);
   int remain_step_num = 0;
@@ -617,17 +662,17 @@ int RobotisOnlineWalking::getNumofRemainingUnreservedStepData()
   return remain_step_num;
 }
 
-void RobotisOnlineWalking::eraseLastStepData()
+void THORMANG3OnlineWalking::eraseLastStepData()
 {
-  mutex_lock_.lock();
+  step_data_mutex_lock_.lock();
   if(getNumofRemainingUnreservedStepData() != 0)
   {
     added_step_data_.pop_back();
   }
-  mutex_lock_.unlock();
+  step_data_mutex_lock_.unlock();
 }
 
-void RobotisOnlineWalking::getReferenceStepDatafotAddition(robotis_framework::StepData *ref_step_data_for_addition)
+void THORMANG3OnlineWalking::getReferenceStepDatafotAddition(robotis_framework::StepData *ref_step_data_for_addition)
 {
   reference_step_data_for_addition_.time_data.start_time_delay_ratio_x = 0.0;
   reference_step_data_for_addition_.time_data.start_time_delay_ratio_y = 0.0;
@@ -644,7 +689,7 @@ void RobotisOnlineWalking::getReferenceStepDatafotAddition(robotis_framework::St
   (*ref_step_data_for_addition) = reference_step_data_for_addition_;
 }
 
-void RobotisOnlineWalking::calcStepIdxData()
+void THORMANG3OnlineWalking::calcStepIdxData()
 {
   unsigned int step_idx = 0, previous_step_idx = 0;
   unsigned int step_data_size = added_step_data_.size();
@@ -745,7 +790,7 @@ void RobotisOnlineWalking::calcStepIdxData()
   }
 }
 
-void RobotisOnlineWalking::calcRefZMP()
+void THORMANG3OnlineWalking::calcRefZMP()
 {
   int ref_zmp_idx = 0;
   int step_idx = 0;
@@ -868,7 +913,7 @@ void RobotisOnlineWalking::calcRefZMP()
   }
 }
 
-void RobotisOnlineWalking::calcDesiredPose()
+void THORMANG3OnlineWalking::calcDesiredPose()
 {
   ////Original LIPM
   //u_x = -K*x_LIPM + x_feed_forward_term;
@@ -924,7 +969,7 @@ void RobotisOnlineWalking::calcDesiredPose()
     current_start_idx_for_ref_zmp_ = 0;
 }
 
-void RobotisOnlineWalking::process()
+void THORMANG3OnlineWalking::process()
 {
   if(!ctrl_running)
   {
@@ -932,7 +977,7 @@ void RobotisOnlineWalking::process()
   }
   else
   {
-    boost::mutex::scoped_lock lock(mutex_lock_);
+    step_data_mutex_lock_.lock();
 
     calcStepIdxData();
     calcRefZMP();
@@ -1231,13 +1276,13 @@ void RobotisOnlineWalking::process()
 
       walking_time_ += TIME_UNIT;
 
-      if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5)
+      if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5*0.001)
       {
         real_running = false;
         calcStepIdxData();
-        lock.unlock();
+        step_data_mutex_lock_.unlock();
         reInitialize();
-        lock.lock();
+        step_data_mutex_lock_.lock();
       }
 
       if(balancing_index_ == BalancingPhase0 || balancing_index_ == BalancingPhase9)
@@ -1319,7 +1364,7 @@ void RobotisOnlineWalking::process()
       }
     }
 
-    lock.unlock();
+    step_data_mutex_lock_.unlock();
 
     mat_g_to_cob_ = robotis_framework::getTransformationXYZRPY(present_body_pose_.x, present_body_pose_.y, present_body_pose_.z,
         present_body_pose_.roll, present_body_pose_.pitch, present_body_pose_.yaw);
@@ -1344,8 +1389,6 @@ void RobotisOnlineWalking::process()
     //Stabilizer Start
     //Balancing Algorithm
     double target_fz_N  = 0;
-    double right_roll_dir = 1.0;
-    double left_roll_dir  = 1.0;
 
     double right_leg_fx_N  = current_right_fx_N_;
     double right_leg_fy_N  = current_right_fy_N_;
@@ -1387,16 +1430,21 @@ void RobotisOnlineWalking::process()
     mat_left_force  = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_force;
     mat_left_torque = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_torque;
 
+    imu_data_mutex_lock_.lock();
     double gyro_roll_rad_per_sec  = current_gyro_roll_rad_per_sec_;
-    double gyro_pitch_rad_per_sec =  current_gyro_pitch_rad_per_sec_;
-
-    Eigen::MatrixXd imu_mat = (rot_x_pi_3d_ * quat_current_imu_.toRotationMatrix()) * rot_z_pi_3d_;
-
-    current_imu_roll_rad_  = atan2( imu_mat.coeff(2,1), imu_mat.coeff(2,2));
-    current_imu_pitch_rad_ = atan2(-imu_mat.coeff(2,0), sqrt(robotis_framework::powDI(imu_mat.coeff(2,1), 2) + robotis_framework::powDI(imu_mat.coeff(2,2), 2)));
+    double gyro_pitch_rad_per_sec = current_gyro_pitch_rad_per_sec_;
 
     double iu_roll_rad  = current_imu_roll_rad_;
     double iu_pitch_rad = current_imu_pitch_rad_;
+    imu_data_mutex_lock_.unlock();
+
+    balance_ctrl_.setCurrentGyroSensorOutput(gyro_roll_rad_per_sec, gyro_pitch_rad_per_sec);
+    balance_ctrl_.setCurrentOrientationSensorOutput(iu_roll_rad, iu_pitch_rad);
+    balance_ctrl_.setCurrentFootForceTorqueSensorOutput(mat_right_force.coeff(0,0),  mat_right_force.coeff(1,0),  mat_right_force.coeff(2,0),
+                                                        mat_right_torque.coeff(0,0), mat_right_torque.coeff(1,0), mat_right_torque.coeff(2,0),
+                                                        mat_left_force.coeff(0,0),   mat_left_force.coeff(1,0),   mat_left_force.coeff(2,0),
+                                                        mat_left_torque.coeff(0,0),  mat_left_torque.coeff(1,0),  mat_left_torque.coeff(2,0));
+
 
     double r_target_fx_N = 0;
     double l_target_fx_N = 0;
@@ -1422,7 +1470,6 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
-      right_roll_dir = left_roll_dir = 1.0;
       break;
     case BalancingPhase1:
       //fprintf(stderr, "DSP : R--O->L\n");
@@ -1431,7 +1478,6 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
-      right_roll_dir = left_roll_dir = 1.0;
       break;
     case BalancingPhase2:
       //fprintf(stderr, "SSP : L_BALANCING1\n");
@@ -1440,11 +1486,9 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = 0;
 
       l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
-      right_roll_dir = -1.0;
-      left_roll_dir = 1.0;
       break;
     case BalancingPhase3:
       //fprintf(stderr, "SSP : L_BALANCING2\n");
@@ -1453,11 +1497,9 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = 0;
 
       l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
-      right_roll_dir = -1.0;
-      left_roll_dir = 1.0;
       break;
     case BalancingPhase4:
       //fprintf(stderr, "DSP : R--O<-L\n");
@@ -1466,8 +1508,6 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
-      right_roll_dir = 1.0;
-      left_roll_dir = 1.0;
       break;
     case BalancingPhase5:
       //fprintf(stderr, "DSP : R<-O--L\n");
@@ -1476,8 +1516,6 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
-      right_roll_dir = 1.0;
-      left_roll_dir = 1.0;
       break;
     case BalancingPhase6:
       //fprintf(stderr, "SSP : R_BALANCING1\n");
@@ -1486,11 +1524,9 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
-      l_target_fx_N = 0;
+      l_target_fy_N = 0;
       l_target_fz_N = 0;
       target_fz_N = -right_ssp_fz_N_;
-      right_roll_dir = 1.0;
-      left_roll_dir = -1.0;
       break;
     case BalancingPhase7:
       //fprintf(stderr, "SSP : R_BALANCING2\n");
@@ -1499,11 +1535,9 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
-      l_target_fx_N = 0;
+      l_target_fy_N = 0;
       l_target_fz_N = 0;
       target_fz_N =  -right_ssp_fz_N_;
-      right_roll_dir = 1.0;
-      left_roll_dir = -1.0;
       break;
     case BalancingPhase8:
       //fprintf(stderr, "DSP : R->O--L");
@@ -1512,8 +1546,6 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
-      right_roll_dir = 1.0;
-      left_roll_dir =  1.0;
       break;
     case BalancingPhase9:
       //fprintf(stderr, "DSP : END");
@@ -1522,8 +1554,6 @@ void RobotisOnlineWalking::process()
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
-      right_roll_dir = 1.0;
-      left_roll_dir =  1.0;
       break;
     default:
       break;
@@ -1575,12 +1605,6 @@ void RobotisOnlineWalking::process()
     balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*1.0, r_target_fy_N*1.0, r_target_fz_N, 0, 0, 0,
                                             l_target_fx_N*1.0, l_target_fy_N*1.0, l_target_fz_N, 0, 0, 0);
     balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
-    balance_ctrl_.setCurrentGyroSensorOutput(current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_);
-    balance_ctrl_.setCurrentOrientationSensorOutput(current_imu_roll_rad_, current_imu_pitch_rad_);
-    balance_ctrl_.setCurrentFootForceTorqueSensorOutput(mat_right_force.coeff(0,0),  mat_right_force.coeff(1,0),  mat_right_force.coeff(2,0),
-                                                        mat_right_torque.coeff(0,0), mat_right_torque.coeff(1,0), mat_right_torque.coeff(2,0),
-                                                        mat_left_force.coeff(0,0),   mat_left_force.coeff(1,0),   mat_left_force.coeff(2,0),
-                                                        mat_left_torque.coeff(0,0),  mat_left_torque.coeff(1,0),  mat_left_torque.coeff(2,0));
 
     balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
@@ -1636,19 +1660,23 @@ void RobotisOnlineWalking::process()
 
     for(int angle_idx = 0; angle_idx < 6; angle_idx++)
     {
-      out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
-      out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
+      leg_angle_feed_back_[angle_idx+0].desired_ = r_leg_out_angle_rad_[angle_idx];
+      leg_angle_feed_back_[angle_idx+6].desired_ = l_leg_out_angle_rad_[angle_idx];
+      out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx] + leg_angle_feed_back_[angle_idx+0].getFeedBack(curr_angle_rad_[angle_idx]);
+      out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx] + leg_angle_feed_back_[angle_idx+6].getFeedBack(curr_angle_rad_[angle_idx+6]);
+//      out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
+//      out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
     }
   }
 }
 
 
-double RobotisOnlineWalking::wsin(double time, double period, double period_shift, double mag, double mag_shift)
+double THORMANG3OnlineWalking::wsin(double time, double period, double period_shift, double mag, double mag_shift)
 {
   return mag * sin(2 * M_PI / period * time - period_shift) + mag_shift;
 }
 
-double RobotisOnlineWalking::wsigmoid(double time, double period, double time_shift, double mag, double mag_shift, double sigmoid_ratio, double distortion_ratio)
+double THORMANG3OnlineWalking::wsigmoid(double time, double period, double time_shift, double mag, double mag_shift, double sigmoid_ratio, double distortion_ratio)
 {
   double value = mag_shift, Amplitude = 0.0, sigmoid_distor_gain = 1.0, t = 0.0;
   if ((sigmoid_ratio >= 1.0) && (sigmoid_ratio < 2.0))

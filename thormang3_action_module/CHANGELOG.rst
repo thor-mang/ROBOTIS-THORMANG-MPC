@@ -2,6 +2,27 @@
 Changelog for package thormang3_action_module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2017-04-24)
+-----------
+* edited action file and dxl_init
+* added function for action_editor to action_module
+* bug fix : action file load
+* edited comment and some hard coded parameter
+* modified done msg in walking module and action module
+* add done msg : action module
+* code revision : action module
+* - fixed package dependencies
+* - optimized cpu usage by spin loop (by astumpf)
+* wholebody modified
+* - reduce CPU consumption
+* wholebody inipose added
+* update thormang3_head_control_module : scan lidar using range
+* Contributors: Jay Song, Zerom, Kayman
+
+0.1.1 (2016-08-19)
+-----------
+* none
+
 0.1.0 (2016-08-18)
 -----------
 * first public release for Kinetic

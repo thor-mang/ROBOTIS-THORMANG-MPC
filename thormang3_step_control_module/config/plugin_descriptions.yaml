@@ -1,6 +1,6 @@
 # StepControllerPlugin
-robotis_online_walking_plugin:
-  type_class: thormang3::RobotisOnlineWalkingPlugin
+thormang3_online_walking_plugin:
+  type_class: thormang3::THORMANG3OnlineWalkingPlugin
   type_class_package: thormang3_step_control_module
   base_class: vigir_step_control::StepControllerPlugin
   base_class_package: vigir_step_control

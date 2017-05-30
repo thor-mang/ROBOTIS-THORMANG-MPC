@@ -38,13 +38,13 @@
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
            	 
   <!-- imu sensor package -->
-  <include file="$(find microstrain_3dm_gx3_45)/launch/thor3_imu.launch" if="$(arg use_imu)" />
+  <include file="$(find microstrain_3dm_gx3_45)/launch/thormang3_imu.launch" if="$(arg use_imu)" />
 
   <!-- lidar -->
-  <include file="$(find thormang3_description)/launch/thor_laserscan.launch" if="$(arg use_lidar)" /> 
+  <include file="$(find thormang3_description)/launch/thormang3_laserscan.launch" if="$(arg use_lidar)" /> 
 
   <!-- THORMANG3 Manager -->
-  <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen"/>
+  <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen" />
 
   <!-- Executing this here to be separated from first parameter load -->
   <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />

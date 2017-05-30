@@ -51,7 +51,7 @@
 namespace thormang3
 {
 class StepControlModule
-  : public WalkingMotionModule
+  : public OnlineWalkingModule
   , private robotis_framework::Singleton<StepControlModule>
 {
 public:
@@ -61,8 +61,10 @@ public:
 
   static StepControlModule* getInstance()
   {
-     Singleton<StepControlModule>::getInstance();
+     return Singleton<StepControlModule>::getInstance();
   }
+
+  void onModuleEnable() override;
 
   void initialize(const int control_cycle_msec, robotis_framework::Robot* robot) override;
 
@@ -74,11 +76,15 @@ private:
   void queueThread();
   void dynamicReconfigureCallback(thormang3_step_control_module::BalanceParametersConfig& config, uint32_t level);
 
+  void setBalanceParams(thormang3_walking_module_msgs::SetBalanceParam::Request& req);
+
   int control_cycle_msec_;
   boost::thread queue_thread_;
   boost::mutex step_control_mutex_;
 
-  vigir_step_control::StepController::Ptr step_controller_;
+  vigir_step_control::StepController::Ptr step_controller_;  
+
+  thormang3_walking_module_msgs::SetBalanceParam::Request balance_params_;
 };
 }
 

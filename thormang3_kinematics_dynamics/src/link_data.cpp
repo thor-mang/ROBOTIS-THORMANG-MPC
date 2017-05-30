@@ -53,6 +53,7 @@ LinkData::LinkData()
   relative_position_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
   joint_axis_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
   center_of_mass_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
+  joint_center_of_mass_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
   inertia_ =robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
   joint_limit_max_ = 100.0;
