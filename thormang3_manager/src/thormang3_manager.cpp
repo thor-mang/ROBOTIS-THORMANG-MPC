@@ -110,6 +110,7 @@ int main(int argc, char **argv)
     controller->addSensorModule((robotis_framework::SensorModule*)ImuSensor::getInstance());
     controller->addSensorModule((robotis_framework::SensorModule*)FeetForceTorqueSensor::getInstance());
     controller->addSensorModule((robotis_framework::SensorModule*)WristForceTorqueSensor::getInstance());
+    controller->addSensorModule((robotis_framework::SensorModule*)DiagnosticSensor::getInstance());
 
     /* Add Motion Module */
     controller->addMotionModule((robotis_framework::MotionModule*)BaseModule::getInstance());
