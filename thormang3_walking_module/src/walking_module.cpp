@@ -1083,16 +1083,8 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
 {
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
 
-  Eigen::Quaterniond imu_quat;
-  tf::quaternionMsgToEigen(msg->orientation, imu_quat);
-
-  // rotate imu sensor values back to raw sensor frame
-  Eigen::AngleAxisd rotX(-M_PI, Eigen::Vector3d::UnitX());
-  Eigen::AngleAxisd rotZ(-M_PI, Eigen::Vector3d::UnitZ());
-  imu_quat = rotX * rotZ * imu_quat;
-
   online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
-                                            imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
+                                            msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
 }
 
 
