@@ -51,13 +51,6 @@ class DiagnosticSensor
   : public robotis_framework::SensorModule
   , public robotis_framework::Singleton<DiagnosticSensor>
 {
-//  class DynamixelFunctionDiagnosticTask
-//   : public diagnostic_updater::FunctionDiagnosticTask
-//  {
-
-//    DynamixelFunctionDiagnosticTask(const std::string &name, boost::function<void(T&)> fn) :
-
-//  };
 protected:
   class DynamixelDiagnosticTask
     : public diagnostic_updater::DiagnosticTask

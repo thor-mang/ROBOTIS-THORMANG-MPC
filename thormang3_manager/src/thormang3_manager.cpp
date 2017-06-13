@@ -107,6 +107,7 @@ int main(int argc, char **argv)
     sleep(1);
 
     /* Add Sensor Module */
+    std::cout<<"starting sensor modules"<<std::endl;
     controller->addSensorModule((robotis_framework::SensorModule*)ImuSensor::getInstance());
     controller->addSensorModule((robotis_framework::SensorModule*)FeetForceTorqueSensor::getInstance());
     controller->addSensorModule((robotis_framework::SensorModule*)WristForceTorqueSensor::getInstance());
