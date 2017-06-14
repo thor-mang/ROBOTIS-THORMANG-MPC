@@ -49,6 +49,9 @@ void DiagnosticSensor::process(std::map<std::string, robotis_framework::Dynamixe
 
   for (auto dxl : dxls)
   {
+    std::cout<<(dxl.first)<<std::endl;
+    std::cout<< " <-dxl.first and second ->";
+    std::cout<<(dxl.second->id_)<<std::endl;
     //robotis_framework::Dynamixel* dynamixel = dxl.second;
 
     //DynamixelDiagnosticTask task("dynamixel", dynamixel);
