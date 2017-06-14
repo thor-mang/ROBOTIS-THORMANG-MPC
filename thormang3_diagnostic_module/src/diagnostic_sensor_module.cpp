@@ -49,10 +49,10 @@ void DiagnosticSensor::process(std::map<std::string, robotis_framework::Dynamixe
 
   for (auto dxl : dxls)
   {
-    robotis_framework::Dynamixel* dynamixel = dxl.second;
+    //robotis_framework::Dynamixel* dynamixel = dxl.second;
 
-    DynamixelDiagnosticTask task("dynamixel", dynamixel);
-    updater_.add(task);
+    //DynamixelDiagnosticTask task("dynamixel", dynamixel);
+    //updater_.add(task);
 
     //updater_.add("dynamixel", this , boost::bind(&thormang3::DiagnosticSensor::dynamixelCallback, _1));
     //updater_.add("dynamixel", &thormang3::DiagnosticSensor::dynamixelCallback);
