@@ -47,22 +47,21 @@ void DiagnosticSensor::process(std::map<std::string, robotis_framework::Dynamixe
 
   updater_.setHardwareID("none");
 
-  for (auto dxl : dxls)
-  {
-    std::cout<<(dxl.first)<<std::endl;
-    std::cout<< " <-dxl.first and second ->";
-    std::cout<<(dxl.second->id_)<<std::endl;
-    //robotis_framework::Dynamixel* dynamixel = dxl.second;
+  //for (auto dxl : dxls)
+  //{
 
-    //DynamixelDiagnosticTask task("dynamixel", dynamixel);
-    //updater_.add(task);
+  auto dxl = dxls.begin();
+  robotis_framework::Dynamixel* dynamixel = dxl->second;
+
+    DynamixelDiagnosticTask task("dynamixel", dynamixel);
+    updater_.add(task);
 
     //updater_.add("dynamixel", this , boost::bind(&thormang3::DiagnosticSensor::dynamixelCallback, _1));
     //updater_.add("dynamixel", &thormang3::DiagnosticSensor::dynamixelCallback);
 
     //dynamixel->DiagnosticSensor::dynamixelCallback();
 
-  }
+  //}
 
   updater_.update();
 }
