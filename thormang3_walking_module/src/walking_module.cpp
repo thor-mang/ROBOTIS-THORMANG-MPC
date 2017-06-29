@@ -1085,12 +1085,6 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
 
   // revert ENU
   Eigen::Quaterniond orientation(msg->orientation.w, msg->orientation.y, msg->orientation.x, -1.0 * msg->orientation.z);
-
-  // rotate imu sensor values back to raw sensor frame
-  Eigen::AngleAxisd rotX(-M_PI, Eigen::Vector3d::UnitX());
-  Eigen::AngleAxisd rotZ(-M_PI, Eigen::Vector3d::UnitZ());
-  orientation = rotX * rotZ * orientation;
-
   // invert because of API change
   orientation = orientation.inverse();
   online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
