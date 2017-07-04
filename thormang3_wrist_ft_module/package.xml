@@ -54,6 +54,7 @@
   <run_depend>roscpp</run_depend>
   <run_depend>cmake_modules</run_depend>
   <run_depend>robotis_math</run_depend>
+  <run_depend>robotis_controller_msgs</run_depend>
   <run_depend>robotis_framework_common</run_depend>
   <run_depend>thormang3_kinematics_dynamics</run_depend>
   <run_depend>thormang3_feet_ft_module_msgs</run_depend>
