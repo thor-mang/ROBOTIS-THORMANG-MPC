@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_math
   robotis_framework_common
   thormang3_kinematics_dynamics
+  thormang3_feet_ft_module_msgs
   ati_ft_sensor
 )
 
@@ -32,7 +33,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_wrist_ft_module
-  CATKIN_DEPENDS roscpp robotis_framework_common
+  CATKIN_DEPENDS roscpp robotis_math robotis_framework_common thormang3_kinematics_dynamics thormang3_feet_ft_module_msgs
 #  DEPENDS system_lib
 )
 
