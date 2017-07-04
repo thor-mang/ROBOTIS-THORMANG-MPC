@@ -37,7 +37,7 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_walking_module
-  CATKIN_DEPENDS roscpp robotis_math robotis_framework_common thormang3_balance_control thormang3_kinematics_dynamics
+  CATKIN_DEPENDS roscpp robotis_math robotis_framework_common robotis_controller_msgs thormang3_kinematics_dynamics thormang3_balance_control thormang3_walking_module_msgs
 )
 
 ################################################################################
