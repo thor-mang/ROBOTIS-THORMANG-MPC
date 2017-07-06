@@ -79,7 +79,7 @@ void THORMANG3OnlineWalkingPlugin::initWalk()
 
   if (online_walking->isRunning())
   {
-    ROS_INFO("[THORMANG3OnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
+    ROS_ERROR("[THORMANG3OnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
@@ -221,11 +221,11 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
     last_step_data_ = step_data;
 
     // readd updated final step
-    step_data.position_data.foot_z_swap = 0.0;
+    //step_data.position_data.foot_z_swap = 0.0;
     step_data.position_data.body_z_swap = 0.0;
     step_data.position_data.moving_foot = thormang3_walking_module_msgs::StepPositionData::STANDING;
     step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
-    step_data.time_data.abs_step_time += 2.0;
+    step_data.time_data.abs_step_time += 1.6;
     if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
