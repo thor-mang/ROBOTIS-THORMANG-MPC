@@ -86,7 +86,7 @@ void THORMANG3OnlineWalkingPlugin::initWalk()
     return;
   }
 
-  online_walking->initialize();
+  //online_walking->initialize();
   //online_walking->setInitialPose();
   //online_walking->setInitalWaistYawAngle();
 
