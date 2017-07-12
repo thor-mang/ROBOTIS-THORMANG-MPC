@@ -69,8 +69,9 @@ public:
    * steps have been popped from step queue and therefore are not exisiting anymore.
    * The default implementation resets the plugin previously when in FINISHED or FAILED state.
    * @param step_plan Step plan to be merged into step queue.
+   * @return false if an error has occured
    */
-  virtual void updateStepPlan(const msgs::StepPlan& step_plan) override;
+  bool updateStepPlan(const msgs::StepPlan& step_plan) override;
 
   /**
    * @brief This method is called when new step plan has been enqueued and previously the walk controller state was IDLE.

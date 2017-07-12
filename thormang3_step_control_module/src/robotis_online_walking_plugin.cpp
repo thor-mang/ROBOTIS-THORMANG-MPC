@@ -31,10 +31,10 @@ void THORMANG3OnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr p
     ROS_ERROR("[THORMANG3OnlineWalkingPlugin] StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
 }
 
-void THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
+bool THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 {
   if (step_plan.steps.empty())
-    return;
+    return true;
 
   // transform initial step plan (afterwards stitching will do that automatically for us)
   if (step_queue_->empty())
@@ -54,7 +54,7 @@ void THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_pla
     else
     {
       ROS_ERROR("[THORMANG3OnlineWalkingPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
-      return;
+      return false;
     }
 
     // determine transformation to robotis frame
@@ -63,14 +63,16 @@ void THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_pla
     msgs::StepPlan step_plan_transformed = step_plan;
     vigir_footstep_planning::StepPlan::transformStepPlan(step_plan_transformed, transform);
 
-    StepControllerPlugin::updateStepPlan(step_plan_transformed);
+    return StepControllerPlugin::updateStepPlan(step_plan_transformed);
   }
   else
   {
     /// TODO: Handle reverse spooling correctly
 
-    StepControllerPlugin::updateStepPlan(step_plan);
+    return StepControllerPlugin::updateStepPlan(step_plan);
   }
+
+  return false;
 }
 
 void THORMANG3OnlineWalkingPlugin::initWalk()
