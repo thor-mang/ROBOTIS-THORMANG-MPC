@@ -1083,12 +1083,8 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
 {
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
 
-  // revert ENU
-  Eigen::Quaterniond orientation(msg->orientation.w, msg->orientation.y, msg->orientation.x, -1.0 * msg->orientation.z);
-  // invert because of API change
-  orientation = orientation.inverse();
   online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
-                                            orientation.x(), orientation.y(), orientation.z(), orientation.w());
+                                            msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
 }
 
 
