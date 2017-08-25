@@ -1092,7 +1092,7 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   imu_quat = rotZ * rotX * imu_quat;
 
   online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
-                                            msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
+                                            imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
 }
 
 
