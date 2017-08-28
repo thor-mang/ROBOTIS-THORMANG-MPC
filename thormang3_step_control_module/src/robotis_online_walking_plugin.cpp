@@ -31,10 +31,10 @@ void THORMANG3OnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr p
     ROS_ERROR("[THORMANG3OnlineWalkingPlugin] StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
 }
 
-void THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
+bool THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 {
   if (step_plan.steps.empty())
-    return;
+    return true;
 
   // transform initial step plan (afterwards stitching will do that automatically for us)
   if (step_queue_->empty())
@@ -54,7 +54,7 @@ void THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_pla
     else
     {
       ROS_ERROR("[THORMANG3OnlineWalkingPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
-      return;
+      return false;
     }
 
     // determine transformation to robotis frame
@@ -63,14 +63,16 @@ void THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_pla
     msgs::StepPlan step_plan_transformed = step_plan;
     vigir_footstep_planning::StepPlan::transformStepPlan(step_plan_transformed, transform);
 
-    StepControllerPlugin::updateStepPlan(step_plan_transformed);
+    return StepControllerPlugin::updateStepPlan(step_plan_transformed);
   }
   else
   {
     /// TODO: Handle reverse spooling correctly
 
-    StepControllerPlugin::updateStepPlan(step_plan);
+    return StepControllerPlugin::updateStepPlan(step_plan);
   }
+
+  return false;
 }
 
 void THORMANG3OnlineWalkingPlugin::initWalk()
@@ -79,12 +81,12 @@ void THORMANG3OnlineWalkingPlugin::initWalk()
 
   if (online_walking->isRunning())
   {
-    ROS_INFO("[THORMANG3OnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
+    ROS_ERROR("[THORMANG3OnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
     return;
   }
 
-  online_walking->initialize();
+  //online_walking->initialize();
   //online_walking->setInitialPose();
   //online_walking->setInitalWaistYawAngle();
 
@@ -221,11 +223,11 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
     last_step_data_ = step_data;
 
     // readd updated final step
-    step_data.position_data.foot_z_swap = 0.0;
+    //step_data.position_data.foot_z_swap = 0.0;
     step_data.position_data.body_z_swap = 0.0;
     step_data.position_data.moving_foot = thormang3_walking_module_msgs::StepPositionData::STANDING;
     step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
-    step_data.time_data.abs_step_time += 2.0;
+    step_data.time_data.abs_step_time += 1.6;
     if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");

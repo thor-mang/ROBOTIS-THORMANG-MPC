@@ -29,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_action_module
-  CATKIN_DEPENDS roscpp robotis_framework_common
+  CATKIN_DEPENDS roscpp robotis_framework_common thormang3_action_module_msgs
 )
 
 ################################################################################
