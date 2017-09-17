@@ -2,6 +2,11 @@
 Changelog for package thormang3_feet_ft_module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.3 (2017-05-23)
+-----------
+* updated cmake file for ros install
+* Contributors: SCH
+
 0.1.2 (2017-04-24)
 -----------
 * merged develop with feature_walking_upgrade

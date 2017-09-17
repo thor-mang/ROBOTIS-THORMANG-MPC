@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_base_module</name>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <description>The thormang3_base_module package</description>
   <license>BSD</license>
   <author email="sch@robotis.com">SCH</author>
@@ -18,6 +18,7 @@
   <build_depend>robotis_framework_common</build_depend>
   <build_depend>robotis_controller_msgs</build_depend>
   <build_depend>thormang3_kinematics_dynamics</build_depend>
+  <build_depend>yaml-cpp</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
@@ -26,4 +27,5 @@
   <run_depend>robotis_framework_common</run_depend>
   <run_depend>robotis_controller_msgs</run_depend>
   <run_depend>thormang3_kinematics_dynamics</run_depend>
+  <run_depend>yaml-cpp</run_depend>
 </package>

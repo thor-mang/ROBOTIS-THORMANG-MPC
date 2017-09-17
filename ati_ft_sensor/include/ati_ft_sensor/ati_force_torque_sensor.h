@@ -28,13 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * ati_force_torque_sensor_twe.h
- *
- *  Created on: 2016. 3. 22.
- *      Author: Jay Song
- */
-
 #ifndef ATI_FT_SENSOR_ATI_FORCE_TORQUE_SENSOR_H_
 #define ATI_FT_SENSOR_ATI_FORCE_TORQUE_SENSOR_H_
 

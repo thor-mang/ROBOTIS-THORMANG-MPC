@@ -28,13 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * sensor_module_tutorial.h
- *
- *  Created on: 2016. 4. 20.
- *      Author: zerom
- */
-
 #ifndef SENSOR_MODULE_TUTORIAL_SENSOR_MODULE_TUTORIAL_H_
 #define SENSOR_MODULE_TUTORIAL_SENSOR_MODULE_TUTORIAL_H_
 
