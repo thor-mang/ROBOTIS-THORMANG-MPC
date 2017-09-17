@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>thormang3_manager</name>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <description>
     This package describes robot manager to execute THORMANG3's motion modules.
   </description>

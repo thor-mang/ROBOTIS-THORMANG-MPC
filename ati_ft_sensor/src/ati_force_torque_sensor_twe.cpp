@@ -28,16 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * ForceTorqueSensor.cpp
- *
- *  Created on: 2016. 3. 23.
- *      Author: Jay Song
- */
-
-
-
-
 #include "ati_ft_sensor/ati_force_torque_sensor_twe.h"
 
 using namespace thormang3;

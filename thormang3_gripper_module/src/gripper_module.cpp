@@ -28,13 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * wholebody_module.cpp
- *
- *  Created on: Aug 10, 2016
- *      Author: sch
- */
-
 #include <stdio.h>
 #include "thormang3_gripper_module/gripper_module.h"
 

@@ -28,13 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*
- * motion_module_tutorial.h
- *
- *  Created on: 2016. 2. 23.
- *      Author: zerom
- */
-
 #ifndef MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
 #define MOTION_MODULE_TUTORIAL_MOTION_MODULE_TUTORIAL_H_
 

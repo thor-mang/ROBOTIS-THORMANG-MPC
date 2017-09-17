@@ -2,6 +2,11 @@
 Changelog for package thormang3_head_control_module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.3 (2017-05-23)
+-----------
+* updated cmake file for ros install
+* Contributors: SCH
+
 0.1.2 (2017-04-24)
 -----------
 * added done msg to base_module
