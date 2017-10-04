@@ -51,7 +51,7 @@
     <rosparam param="source_list" unless="$(arg use_present)">["robotis/joints/goal_joint_states"]</rosparam>
   </node>
 
-  <!-- Combine joint values to TF-->
+  <!-- combine joint values to TF-->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
   <!-- walk control module -->
@@ -69,6 +69,6 @@
   <!-- THORMANG3 Manager -->
   <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen" />
 
-  <!-- Executing this here to be separated from first parameter load -->
+  <!-- executing this here to be separated from first parameter load -->
   <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
 </launch>
