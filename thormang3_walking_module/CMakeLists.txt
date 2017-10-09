@@ -4,6 +4,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(thormang3_walking_module)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 ################################################################################
 # Packages
 ################################################################################

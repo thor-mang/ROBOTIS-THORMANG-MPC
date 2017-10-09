@@ -647,6 +647,16 @@ bool THORMANG3OnlineWalking::addStepData(robotis_framework::StepData step_data)
   return true;
 }
 
+size_t THORMANG3OnlineWalking::getStepDataSize()
+{
+  return added_step_data_.size();
+}
+
+int THORMANG3OnlineWalking::getCurrentStepIdx()
+{
+  return step_idx_data_(preview_size_ - 1);
+}
+
 int THORMANG3OnlineWalking::getNumofRemainingUnreservedStepData()
 {
   int step_idx = step_idx_data_(preview_size_ - 1);
