@@ -173,7 +173,7 @@ void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
         setState(FINISHED);
       }
     }
-  }  
+  }
 
   setFeedbackState(feedback);
 }
