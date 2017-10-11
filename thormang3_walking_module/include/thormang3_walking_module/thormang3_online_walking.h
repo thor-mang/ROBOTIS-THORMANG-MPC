@@ -67,8 +67,6 @@ public:
 
   bool addStepData(robotis_framework::StepData step_data);
   void eraseLastStepData();
-  size_t getStepDataSize();
-  int getCurrentStepIdx();
   int  getNumofRemainingUnreservedStepData();
   void getReferenceStepDatafotAddition(robotis_framework::StepData *ref_step_data_for_addition);
 

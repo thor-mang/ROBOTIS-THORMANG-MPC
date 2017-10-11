@@ -12,7 +12,8 @@ using namespace vigir_footstep_planning;
 
 THORMANG3OnlineWalkingPlugin::THORMANG3OnlineWalkingPlugin()
   : StepControllerPlugin()
-  , min_step_data_size(2)
+  , last_remaining_unreserved_steps_(0)
+  , min_unreserved_steps_(2)
 {
 }
 
@@ -91,11 +92,13 @@ void THORMANG3OnlineWalkingPlugin::initWalk()
   //online_walking->setInitialPose();
   //online_walking->setInitalWaistYawAngle();
 
+  last_remaining_unreserved_steps_ = 0;
+
   // init feedback states
   msgs::ExecuteStepPlanFeedback feedback;
   feedback.header.stamp = ros::Time::now();
-  feedback.last_performed_step_index = -min_step_data_size;
-  feedback.currently_executing_step_index =-min_step_data_size+1;
+  feedback.last_performed_step_index = -1;
+  feedback.currently_executing_step_index = 0;
   feedback.first_changeable_step_index = 0;
   setFeedbackState(feedback);
 
@@ -123,27 +126,23 @@ void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
     return;
   }
 
-  //int remaining_unreserved_steps = online_walking->getNumofRemainingUnreservedStepData();
-  int step_data_size = online_walking->getStepDataSize();
-  int current_step_id = online_walking->getCurrentStepIdx();
+  // checking current state of walking engine
+  int remaining_unreserved_steps = online_walking->getNumofRemainingUnreservedStepData();
+  int executed_steps = std::max(last_remaining_unreserved_steps_ - remaining_unreserved_steps, 0);
+  last_remaining_unreserved_steps_ = remaining_unreserved_steps;
 
-  // remove closing step from count which is automatically added
-  if (step_data_size > 0)
-    step_data_size--;
+  int needed_steps = min_unreserved_steps_ - remaining_unreserved_steps;
 
-  int diff = min_step_data_size - std::max(current_step_id, 0);
+  msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
 
-  ROS_WARN("Steps: %i Diff: %i Current Step: %i", step_data_size, diff, current_step_id);
+  // step(s) has been performed recently
+  feedback.header.stamp = ros::Time::now();
+  feedback.last_performed_step_index += executed_steps;
+  feedback.currently_executing_step_index += executed_steps;
 
-  if (diff > 0)
+  if (needed_steps > 0)
   {
-    msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
-    feedback.header.stamp = ros::Time::now();
-
-    // step(s) has been performed recently
-    feedback.last_performed_step_index += diff;
-    feedback.currently_executing_step_index += diff;
-    setFeedbackState(feedback);
+    step_queue_->clearDirtyFlag();
 
     // check if further steps in queue are available
     int steps_remaining = std::max(0, (step_queue_->lastStepIndex() - feedback.first_changeable_step_index) + 1);
@@ -151,8 +150,10 @@ void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
     // steps are available
     if (steps_remaining > 0)
     {
-      int steps = std::min(diff, steps_remaining);
-      setNextStepIndexNeeded(getNextStepIndexNeeded()+steps);
+      needed_steps = std::min(needed_steps, steps_remaining);
+
+      setNextStepIndexNeeded(getNextStepIndexNeeded()+needed_steps);
+      feedback.first_changeable_step_index = getNextStepIndexNeeded()+1;
     }
     // queue has been completely flushed out and executed
     else
@@ -172,7 +173,9 @@ void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
         setState(FINISHED);
       }
     }
-  }
+  }  
+
+  setFeedbackState(feedback);
 }
 
 bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
@@ -208,6 +211,10 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
   }
   else
   {
+    // get ref data
+    robotis_framework::StepData ref_step_data;
+    online_walking->getReferenceStepDatafotAddition(&ref_step_data);
+
     // remove final step to be updated
     online_walking->eraseLastStepData();
 
@@ -215,6 +222,13 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
     /// TODO: use robotis reference step here?
     robotis_framework::StepData step_data = last_step_data_;
     step_data << step;
+    /// TODO: compensate drift in z
+    step_data.position_data.body_pose.z = ref_step_data.position_data.body_pose.z;
+    if (step.foot.foot_index == msgs::Foot::LEFT)
+      step_data.position_data.left_foot_pose.z = ref_step_data.position_data.right_foot_pose.z;
+    else
+      step_data.position_data.right_foot_pose.z = ref_step_data.position_data.left_foot_pose.z;
+
     if (!online_walking->addStepData(step_data))
     {
       ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding step %i.", step.step_index);
@@ -235,11 +249,7 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
     }
   }
 
-  msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
-  feedback.first_changeable_step_index++;
-  setFeedbackState(feedback);
-
-  ROS_INFO("[THORMANG3OnlineWalkingPlugin] Send step %i to walking engine.", step.step_index);
+  last_remaining_unreserved_steps_ = online_walking->getNumofRemainingUnreservedStepData();
   return true;
 }
 

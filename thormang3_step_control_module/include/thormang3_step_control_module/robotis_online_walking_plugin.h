@@ -104,7 +104,8 @@ protected:
   ThorMangStepPlanMsgPlugin::ConstPtr thor_mang_step_plan_msg_plugin_;
   robotis_framework::StepData last_step_data_;
 
-  int min_step_data_size;
+  int last_remaining_unreserved_steps_;
+  int min_unreserved_steps_;
 };
 }
 
