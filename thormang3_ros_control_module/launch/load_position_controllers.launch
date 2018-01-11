@@ -9,8 +9,7 @@
     <node name="position_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
       args="--stopped
             head_p_position_controller
-            head_y_position_controller
-            --shutdown-timeout 3" />
+            head_y_position_controller" />
   </group>
 </launch>
 

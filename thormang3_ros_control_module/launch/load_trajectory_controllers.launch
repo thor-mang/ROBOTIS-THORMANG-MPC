@@ -13,8 +13,7 @@
             left_arm_traj_controller
             right_arm_traj_controller
             left_leg_traj_controller
-            right_leg_traj_controller
-            --shutdown-timeout 3" />
+            right_leg_traj_controller" />
   </group>
 </launch>
 
