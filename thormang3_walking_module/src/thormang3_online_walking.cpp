@@ -528,7 +528,8 @@ void THORMANG3OnlineWalking::reInitialize()
   added_step_data_.clear();
 
   //Initialize Time
-  walking_time_ = 0; reference_time_ = 0;
+  walking_time_ = 0;
+  reference_time_ = 0;
 
   previous_step_right_foot_pose_ = robotis_framework::getPose3DfromTransformMatrix(mat_robot_to_rfoot_);
   previous_step_left_foot_pose_  = robotis_framework::getPose3DfromTransformMatrix(mat_robot_to_lfoot_);

@@ -170,7 +170,12 @@ void OnlineWalkingModule::initialize(const int control_cycle_msec, robotis_frame
                                  0,  0.093, -0.63, 0, 0, 0,
                                  0,      0,     0, 0, 0, 0);
 
-  zmp_container_ = online_walking->zmp_container_;
+
+  online_walking->initZMPContainer();
+  reference_zmp_x_ = online_walking->zmp_container_.ref_x;
+  reference_zmp_y_ = online_walking->zmp_container_.ref_y;
+  init_walking_ = false;
+
   online_walking->hip_roll_feedforward_angle_rad_ = 0.0*M_PI/180.0;
   online_walking->balance_ctrl_.setCOBManualAdjustment(-10.0*0.001, 0, 0);
 
@@ -247,7 +252,6 @@ void OnlineWalkingModule::queueThread()
   cob_pub_ = ros_node.advertise<geometry_msgs::PointStamped>("visualization/cob", 1);
   footsteps_pub_ = ros_node.advertise<geometry_msgs::PointStamped>("visualization/footsteps", 1);
 
-
   /* ROS Service Callback Functions */
   ros::ServiceServer get_ref_step_data_server  = ros_node.advertiseService("robotis/walking/get_reference_step_data",   &OnlineWalkingModule::getReferenceStepDataServiceCallback,   this);
   ros::ServiceServer add_step_data_array_sever = ros_node.advertiseService("robotis/walking/add_step_data",             &OnlineWalkingModule::addStepDataServiceCallback,            this);
@@ -321,8 +325,8 @@ void OnlineWalkingModule::publishRobotPose(void)
 void OnlineWalkingModule::publishVisualizationMsg(THORMANG3OnlineWalking *online_walking)
 {
   geometry_msgs::Point ref_zmp;
-  ref_zmp.x = online_walking->zmp_container_.ref_x;
-  ref_zmp.y = online_walking->zmp_container_.ref_y;
+  ref_zmp.x = reference_zmp_x_ + online_walking->zmp_container_.ref_x;
+  ref_zmp.y = reference_zmp_y_ + online_walking->zmp_container_.ref_y;
   ref_zmp.z = 0;
 
   geometry_msgs::PointStamped ref_zmp_msg;
@@ -1309,10 +1313,11 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;
   process_mutex_.unlock();
 
-  zmp_container_ = online_walking->zmp_container_;
-
   publishRobotPose();
-  //publishVisualizationMsg(online_walking);
+  if(present_running == true)
+  {
+    publishVisualizationMsg(online_walking);
+  }
 
   result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
   result_["r_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[1];
@@ -1371,6 +1376,8 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
       std::string status_msg = WalkingStatusMSG::WALKING_FINISH_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
       publishDoneMsg("walking_completed");
+      reference_zmp_x_ += online_walking->zmp_container_.ref_x;
+      reference_zmp_y_ += online_walking->zmp_container_.ref_y;
     }
   }
   previous_running_ = present_running;

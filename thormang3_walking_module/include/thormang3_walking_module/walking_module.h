@@ -192,7 +192,9 @@ protected:
   thormang3_walking_module_msgs::BalanceParam current_balance_param_;
   thormang3_walking_module_msgs::BalanceParam desired_balance_param_;
 
-  zmp_struct zmp_container_;
+  double reference_zmp_x_;
+  double reference_zmp_y_;
+  bool init_walking_;
 };
 
 }
