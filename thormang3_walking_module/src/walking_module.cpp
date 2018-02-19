@@ -1314,9 +1314,10 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   process_mutex_.unlock();
 
   publishRobotPose();
-  if(present_running == true)
+  if(present_running == true || init_walking_ == false)
   {
     publishVisualizationMsg(online_walking);
+    //init_walking_ = true;
   }
 
   result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
@@ -1373,6 +1374,7 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
     }
     else
     {
+      init_walking_ = true;
       std::string status_msg = WalkingStatusMSG::WALKING_FINISH_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
       publishDoneMsg("walking_completed");
