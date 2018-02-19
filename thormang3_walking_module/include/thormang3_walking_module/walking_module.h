@@ -40,9 +40,12 @@
 
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
+#include <ros/console.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/Point.h>
 #include <boost/thread.hpp>
 
 #include "thormang3_walking_module/thormang3_online_walking.h"
@@ -94,6 +97,7 @@ public:
 protected:
   void publishRobotPose(void);
   void publishStatusMsg(unsigned int type, std::string msg);
+  void publishVisualizationMsg(THORMANG3OnlineWalking *online_walking);
   void publishDoneMsg(std::string msg);
 #ifdef WALKING_TUNE
   void publishWalkingTuningData();
@@ -155,6 +159,12 @@ protected:
   ros::Publisher status_msg_pub_;
   ros::Publisher pelvis_base_msg_pub_;
   ros::Publisher done_msg_pub_;
+
+  ros::Publisher zmp_reference_pub_;
+  ros::Publisher zmp_pub_;
+  ros::Publisher cob_pub_;
+  ros::Publisher footsteps_pub_;
+
 #ifdef WALKING_TUNE
   ros::Publisher walking_joint_states_pub_;
   ros::Publisher imu_orientation_states_pub_;
@@ -182,6 +192,7 @@ protected:
   thormang3_walking_module_msgs::BalanceParam current_balance_param_;
   thormang3_walking_module_msgs::BalanceParam desired_balance_param_;
 
+  zmp_struct zmp_container_;
 };
 
 }

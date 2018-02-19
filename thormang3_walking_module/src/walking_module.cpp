@@ -170,7 +170,7 @@ void OnlineWalkingModule::initialize(const int control_cycle_msec, robotis_frame
                                  0,  0.093, -0.63, 0, 0, 0,
                                  0,      0,     0, 0, 0, 0);
 
-
+  zmp_container_ = online_walking->zmp_container_;
   online_walking->hip_roll_feedforward_angle_rad_ = 0.0*M_PI/180.0;
   online_walking->balance_ctrl_.setCOBManualAdjustment(-10.0*0.001, 0, 0);
 
@@ -241,6 +241,13 @@ void OnlineWalkingModule::queueThread()
   walking_joint_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::WalkingJointStatesStamped>("robotis/walking/walking_joint_states", 1);
 #endif
 
+  /* publish topics for visualization*/
+  zmp_reference_pub_ = ros_node.advertise<geometry_msgs::PointStamped>("visualization/reference_zmp", 1);
+  zmp_pub_ = ros_node.advertise<geometry_msgs::PointStamped>("visualization/zmp", 1);
+  cob_pub_ = ros_node.advertise<geometry_msgs::PointStamped>("visualization/cob", 1);
+  footsteps_pub_ = ros_node.advertise<geometry_msgs::PointStamped>("visualization/footsteps", 1);
+
+
   /* ROS Service Callback Functions */
   ros::ServiceServer get_ref_step_data_server  = ros_node.advertiseService("robotis/walking/get_reference_step_data",   &OnlineWalkingModule::getReferenceStepDataServiceCallback,   this);
   ros::ServiceServer add_step_data_array_sever = ros_node.advertiseService("robotis/walking/add_step_data",             &OnlineWalkingModule::addStepDataServiceCallback,            this);
@@ -251,7 +258,7 @@ void OnlineWalkingModule::queueThread()
   ros::ServiceServer remove_existing_step_data = ros_node.advertiseService("robotis/walking/remove_existing_step_data", &OnlineWalkingModule::removeExistingStepDataServiceCallback, this);
 
   /* sensor topic subscribe */
-  ros::Subscriber imu_data_sub      = ros_node.subscribe("sensor/imu/raw",              3, &OnlineWalkingModule::imuDataOutputCallback,        this);
+  ros::Subscriber imu_data_sub      = ros_node.subscribe("sensor/imu/raw", 3, &OnlineWalkingModule::imuDataOutputCallback, this);
 
   ros::WallDuration duration(control_cycle_msec_ / 1000.0);
   if(ros::param::get("gazebo", gazebo_) == false)
@@ -309,6 +316,21 @@ void OnlineWalkingModule::publishRobotPose(void)
 //  process_mutex_.unlock();
 //
 //  pelvis_base_msg_pub_.publish(pose_msg);
+}
+
+void OnlineWalkingModule::publishVisualizationMsg(THORMANG3OnlineWalking *online_walking)
+{
+  geometry_msgs::Point ref_zmp;
+  ref_zmp.x = online_walking->zmp_container_.ref_x;
+  ref_zmp.y = online_walking->zmp_container_.ref_y;
+  ref_zmp.z = 0;
+
+  geometry_msgs::PointStamped ref_zmp_msg;
+  ref_zmp_msg.header.stamp = ros::Time::now();
+  ref_zmp_msg.header.frame_id = "world";
+  ref_zmp_msg.point = ref_zmp;
+
+  zmp_reference_pub_.publish(ref_zmp_msg);
 }
 
 void OnlineWalkingModule::publishStatusMsg(unsigned int type, std::string msg)
@@ -626,7 +648,7 @@ bool OnlineWalkingModule::setJointFeedBackGainServiceCallback(thormang3_walking_
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
 
   res.result = thormang3_walking_module_msgs::SetJointFeedBackGain::Response::NO_ERROR;
-
+using namespace thormang3;
   if( enable_ == false)
     res.result |= thormang3_walking_module_msgs::SetJointFeedBackGain::Response::NOT_ENABLED_WALKING_MODULE;
 
@@ -1287,7 +1309,10 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;
   process_mutex_.unlock();
 
+  zmp_container_ = online_walking->zmp_container_;
+
   publishRobotPose();
+  //publishVisualizationMsg(online_walking);
 
   result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
   result_["r_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[1];

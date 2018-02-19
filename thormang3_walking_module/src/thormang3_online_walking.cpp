@@ -268,6 +268,13 @@ bool THORMANG3OnlineWalking::setInitialPose(double r_foot_x, double r_foot_y, do
   return true;
 }
 
+bool THORMANG3OnlineWalking::initZMPContainer()
+{
+  zmp_container_.ref_x = 0;
+  zmp_container_.ref_y = 0;
+  return true;
+}
+
 void THORMANG3OnlineWalking::setInitalWaistYawAngle(double waist_yaw_angle_rad)
 {
   goal_waist_yaw_angle_rad_ = waist_yaw_angle_rad;
@@ -911,6 +918,8 @@ void THORMANG3OnlineWalking::calcRefZMP()
       }
     }
   }
+  zmp_container_.ref_x = reference_zmp_x_(ref_zmp_idx, 0);
+  zmp_container_.ref_y = reference_zmp_y_(ref_zmp_idx, 0);
 }
 
 void THORMANG3OnlineWalking::calcDesiredPose()

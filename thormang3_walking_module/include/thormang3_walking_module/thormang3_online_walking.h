@@ -41,6 +41,7 @@
 
 #include <vector>
 #include <boost/thread.hpp>
+#include <ros/console.h>
 
 #include "thormang3_balance_control/thormang3_balance_control.h"
 #include "robotis_framework_common/singleton.h"
@@ -48,6 +49,12 @@
 #include "robotis_math/robotis_math.h"
 
 #define _USE_PD_BALANCE_
+
+struct zmp_struct
+{
+  double ref_x;
+  double ref_y;
+};
 
 namespace thormang3
 {
@@ -76,6 +83,8 @@ public:
       double l_foot_x, double l_foot_y, double l_foot_z, double l_foot_roll, double l_foot_pitch, double l_foot_yaw,
       double center_of_body_x, double center_of_body_y, double center_of_body_z,
       double center_of_body_roll, double center_of_body_pitch, double center_of_body_yaw);
+
+  bool initZMPContainer();
 
   void setInitalWaistYawAngle(double waist_yaw_angle_rad);
 
@@ -122,6 +131,8 @@ public:
   Eigen::MatrixXd mat_current_imu_;
   double current_imu_roll_rad_, current_imu_pitch_rad_;
   double current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_;
+
+  zmp_struct zmp_container_;
 
 private:
   void calcStepIdxData();
