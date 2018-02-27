@@ -1,16 +1,8 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <!-- Executing this here to be separated from second parameter load -->
-  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
-
-  <arg name="use_imu" default="true" />
-  <arg name="use_lidar" default="true" />
-  <arg name="gazebo" default="false" />
   <arg name="robot_name" default="thormang3" />
-  <arg name="use_hands" default="false" />
-  <arg name="pinned" default="false" />
-  <arg name="use_present" default="true" />
+  <arg name="gazebo" default="false" />
 
   <param name="gazebo"                   value="$(arg gazebo)"    type="bool" />
   <param name="gazebo_robot_name"        value="$(arg robot_name)" />
@@ -25,50 +17,6 @@
 
   <param name="action_file_path"         value="$(find thormang3_action_module)/data/motion_4096.bin" />
 
-  <!-- Robot Model -->
-  <include file="$(find thormang3_description)/launch/load_robot_description.launch">
-    <arg name="robot_name" value="$(arg robot_name)" />
-    <arg name="use_hands" value="$(arg use_hands)" />
-    <arg name="pinned" value="$(arg pinned)" />
-  </include>
-
-  <!-- HACK: Load the URDF into the ROS Parameter Server at gazebo controller namespace due to a bug in controller spawner -->
-  <group ns="/gazebo/$(arg robot_name)/joints">
-    <include file="$(find thormang3_description)/launch/load_robot_description.launch">
-      <arg name="robot_name" value="$(arg robot_name)" />
-      <arg name="use_hands" value="$(arg use_hands)" />
-      <arg name="pinned" value="$(arg pinned)" />
-    </include>
-  </group>
-  
-  <!-- send joint values -->
-  <remap from="joint_states" to="joints/joint_states" />
-
-  <node name="robotis_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <param name="use_gui" value="false"/>
-    <param name="rate" value="125"/>
-    <rosparam param="source_list" if="$(arg use_present)">["robotis/joints/present_joint_states"]</rosparam>
-    <rosparam param="source_list" unless="$(arg use_present)">["robotis/joints/goal_joint_states"]</rosparam>
-  </node>
-
-  <!-- combine joint values to TF-->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
-
-  <!-- walk control module -->
-  <include file="$(find thormang3_step_control_module)/launch/load_step_controller.launch" />
-
-  <!-- ros control module -->
-  <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
-           	 
-  <!-- imu sensor package -->
-  <include file="$(find thor_mang_onboard_launch)/launch/microstrain_3dm_gx5_25.launch" if="$(arg use_imu)" />
-
-  <!-- lidar -->
-  <include file="$(find thormang3_description)/launch/thormang3_laserscan.launch" if="$(arg use_lidar)" /> 
-
   <!-- THORMANG3 Manager -->
   <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen" />
-
-  <!-- executing this here to be separated from first parameter load -->
-  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_sim_trajectory_controllers.launch" if="$(arg use_hands)" />
 </launch>
