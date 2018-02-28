@@ -2,6 +2,7 @@
 
 <launch>
   <arg name="robot_name" default="thormang3" />
+  <arg name="use_hands" default="$(optenv USE_HANDS false)" />
   <arg name="gazebo" default="false" />
 
   <!-- executing this here to be separated from second parameter load -->
