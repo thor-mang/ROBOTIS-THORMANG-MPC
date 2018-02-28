@@ -4,6 +4,9 @@
   <arg name="robot_name" default="thormang3" />
   <arg name="gazebo" default="false" />
 
+  <!-- executing this here to be separated from second parameter load -->
+  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_trajectory_controllers.launch" ns="joints" if="$(arg use_hands)" />
+
   <param name="gazebo"                   value="$(arg gazebo)"    type="bool" />
   <param name="gazebo_robot_name"        value="$(arg robot_name)" />
 
@@ -19,4 +22,13 @@
 
   <!-- THORMANG3 Manager -->
   <node name="thormang3_manager" pkg="thormang3_manager" type="thormang3_manager" output="screen" />
+
+  <!-- walk control module -->
+  <include file="$(find thormang3_step_control_module)/launch/load_step_controller.launch" />
+
+  <!-- ros control module -->
+  <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
+
+  <!-- executing this here to be separated from first parameter load -->
+  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_trajectory_controllers.launch" ns="joints" if="$(arg use_hands)" />
 </launch>
