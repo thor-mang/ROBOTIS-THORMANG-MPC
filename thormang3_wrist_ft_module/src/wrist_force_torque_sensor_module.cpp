@@ -74,12 +74,12 @@ void WristForceTorqueSensor::initialize(const int control_cycle_msec, robotis_fr
   ft_period_		 = 2 * 1000/ control_cycle_msec_;
   ft_get_count_ = ft_period_;
 
-  queue_thread_       = boost::thread(boost::bind(&WristForceTorqueSensor::msgQueueThread, this));
+  queue_thread_       = boost::thread(boost::bind(&WristForceTorqueSensor::queueThread, this));
 
-  wristForceTorqueSensorInitialize();
+  initializeWristForceTorqueSensor();
 }
 
-void WristForceTorqueSensor::wristForceTorqueSensorInitialize()
+void WristForceTorqueSensor::initializeWristForceTorqueSensor()
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
@@ -137,7 +137,7 @@ void WristForceTorqueSensor::saveFTCalibrationData(const std::string &path)
 }
 
 
-void WristForceTorqueSensor::FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg)
+void WristForceTorqueSensor::ftSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg)
 {
   boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
@@ -223,7 +223,7 @@ void WristForceTorqueSensor::gazeboFTSensorCallback(const geometry_msgs::WrenchS
   }
 }
 
-void WristForceTorqueSensor::msgQueueThread()
+void WristForceTorqueSensor::queueThread()
 {
   ros::NodeHandle     _ros_node;
   ros::CallbackQueue  _callback_queue;
@@ -231,7 +231,7 @@ void WristForceTorqueSensor::msgQueueThread()
   _ros_node.setCallbackQueue(&_callback_queue);
 
   /* subscriber */
-  ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrists_ft/ft_calib_command",	1, &WristForceTorqueSensor::FTSensorCalibrationCommandCallback, this);
+  ros::Subscriber ft_calib_command_sub	= _ros_node.subscribe("robotis/wrists_ft/ft_calib_command",	1, &WristForceTorqueSensor::ftSensorCalibrationCommandCallback, this);
   ros::Subscriber ft_left_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/left_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
   ros::Subscriber ft_right_wrist_sub	= _ros_node.subscribe("/gazebo/" + gazebo_robot_name_ + "/sensor/ft/right_wrist",	1, &WristForceTorqueSensor::gazeboFTSensorCallback, this);
 

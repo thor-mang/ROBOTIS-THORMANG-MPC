@@ -67,12 +67,6 @@ public:
   WristForceTorqueSensor();
   ~WristForceTorqueSensor();
 
-  /* ROS Topic Callback Functions */
-  void  gazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg);
-
-  void  initialize(const int control_cycle_msec, robotis_framework::Robot *robot) override;
-  void  process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors) override;
-
   bool gazebo_mode_;
   std::string gazebo_robot_name_;
 
@@ -86,13 +80,18 @@ public:
   double l_wrist_fx_scaled_N_,  l_wrist_fy_scaled_N_,  l_wrist_fz_scaled_N_;
   double l_wrist_tx_scaled_Nm_, l_wrist_ty_scaled_Nm_, l_wrist_tz_scaled_Nm_;
 
+  void  initialize(const int control_cycle_msec, robotis_framework::Robot *robot) override;
+  void  process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, robotis_framework::Sensor *> sensors) override;
+
 private:
-  void wristForceTorqueSensorInitialize();
+  void queueThread();
 
-  void msgQueueThread();
-
+  void initializeWristForceTorqueSensor();
   void saveFTCalibrationData(const std::string &path);
-  void FTSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
+
+  void ftSensorCalibrationCommandCallback(const std_msgs::String::ConstPtr& msg);
+  void gazeboFTSensorCallback(const geometry_msgs::WrenchStamped::ConstPtr msg);
+
   void publishStatusMsg(unsigned int type, std::string msg);
 
   int             control_cycle_msec_;
@@ -122,9 +121,7 @@ private:
   int 	ft_command_;
   int		ft_period_;
   int		ft_get_count_;
-
 };
 }
-
 
 #endif /* THORMANG3_FEET_FORCE_TORQUE_SENSOR_MODULE_H_ */
