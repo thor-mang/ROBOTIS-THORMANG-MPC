@@ -11,9 +11,6 @@ L3Module::L3Module()
   enable_ = false;
   module_name_ = "l3_module"; // set unique module name
   control_mode_ = robotis_framework::PositionControl;
-
-  joint_names_ = {"r_leg_hip_y", "r_leg_hip_r", "r_leg_hip_p", "r_leg_kn_p", "r_leg_an_p", "r_leg_an_r",
-                  "l_leg_hip_y", "l_leg_hip_r", "l_leg_hip_p", "l_leg_kn_p", "l_leg_an_p", "l_leg_an_r"};
 }
 
 L3Module::~L3Module()
@@ -35,6 +32,9 @@ void L3Module::onModuleEnable()
   // fetch sensor modules
   l3::InterfaceManager::getPlugins(sensor_modules_);
 
+  // get thormang joint cmd plugin
+  l3::InterfaceManager::getPlugin(joint_cmd_interface_);
+
   is_running_ = true;
 }
 
@@ -44,9 +44,18 @@ void L3Module::initialize(const int control_cycle_msec, robotis_framework::Robot
 
   control_cycle_msec_ = control_cycle_msec;
 
+  ros::NodeHandle nh("l3");
+
+  // read joints from ros param server
   result_.clear();
-  for(const std::string& name : joint_names_)
-    result_[name] = new robotis_framework::DynamixelState();
+  XmlRpc::XmlRpcValue joints = nh.param("joints", XmlRpc::XmlRpcValue());
+  if (joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
+  {
+    for (size_t i = 0; i < joints.size(); i++)
+      result_[static_cast<std::string>(joints[i])] = new robotis_framework::DynamixelState();
+  }
+  else
+    ROS_ERROR("[L3Module] Joints must be given as an array of strings.");
 
   /** start ros thread */
   queue_thread_ = boost::thread(boost::bind(&L3Module::queueThread, this));
@@ -78,6 +87,9 @@ void L3Module::process(std::map<std::string, robotis_framework::Dynamixel*> dxls
 
   // run controller
   walk_controller_->update(elapsed_time.toNSec()*10e-7);
+
+  // call joint cmd interface for thormang
+  joint_cmd_interface_->process(result_);
 }
 
 bool L3Module::isRunning()

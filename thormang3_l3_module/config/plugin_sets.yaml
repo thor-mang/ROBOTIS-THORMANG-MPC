@@ -30,7 +30,9 @@ plugin_sets:
         frame_id: "r_foot_ft_link"
         use_scaled: True
 
-    leg_joint_cmd:
+    leg_joint_cmd: thor_mang_joint_cmd_interface
+
+    leg_joint_cmd_topic:
       import: joint_cmd_interface_topic
       params:
         ns: "/johnny5/joints/"

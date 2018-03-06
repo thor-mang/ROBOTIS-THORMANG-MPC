@@ -42,6 +42,7 @@
 #include <l3_walk_controller/walk_controller.h>
 
 #include <thor_mang_l3_plugins/robotis_sensor_module.h>
+#include <thor_mang_l3_plugins/thor_mang_joint_cmd_interface.h>
 
 
 
@@ -80,11 +81,11 @@ private:
   ros::NodeHandle queue_nh_;
 
   bool is_running_;
-  std::vector<std::string> joint_names_;
 
   /** L3 */
   l3::WalkController::Ptr walk_controller_;
   std::vector<thormang3::RobotisSensorModule::Ptr> sensor_modules_;
+  ThorMangJointCmdInterface::Ptr joint_cmd_interface_;
 };
 }
 
