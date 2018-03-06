@@ -6,7 +6,7 @@ namespace thormang3
 {
 RosControlModule::RosControlModule()
   : control_cycle_msec_(8)
-  , last_time_stamp_(ros::Time::now())
+  , last_time_stamp_(ros::Time())
   , reset_controllers_(false)
 {
   enable_ = false;
@@ -23,18 +23,13 @@ RosControlModule::~RosControlModule()
   queue_thread_.join();
 }
 
-void RosControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* robot)
+void RosControlModule::initialize(const int control_cycle_msec, robotis_framework::Robot* /*robot*/)
 {
   boost::mutex::scoped_lock lock(ros_control_mutex_);
 
   control_cycle_msec_ = control_cycle_msec;
 
   ros::NodeHandle nh("joints/ros_control_module");
-
-  // clear already exisiting outputs
-  for (auto& kv : result_)
-    delete kv.second;
-  result_.clear();
 
   /** initialize IMU */
 
@@ -180,6 +175,12 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
   /** call controllers */
 
   // time measurements
+  if (last_time_stamp_.isZero())
+  {
+    last_time_stamp_ = ros::Time::now();
+    return;
+  }
+
   ros::Time current_time = ros::Time::now();
   ros::Duration elapsed_time = current_time - last_time_stamp_;
   last_time_stamp_ = current_time;
@@ -224,6 +225,12 @@ void RosControlModule::controllerManagerThread()
       continue;
 
     // time measurements
+    if (last_time_stamp_.isZero())
+    {
+      last_time_stamp_ = ros::Time::now();
+      continue;
+    }
+
     ros::Time current_time = ros::Time::now();
     ros::Duration elapsed_time = current_time - last_time_stamp_;
     last_time_stamp_ = current_time;
@@ -246,13 +253,12 @@ void RosControlModule::queueThread()
   nh.setCallbackQueue(&callback_queue);
   
   // Initialize ros control
-  last_time_stamp_ = ros::Time::now();
   controller_manager_.reset(new controller_manager::ControllerManager(this, nh));
 
   ros_control_mutex_.unlock();
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
-  while(nh.ok())
+  while (nh.ok())
     callback_queue.callAvailable(duration);
 }
 }
