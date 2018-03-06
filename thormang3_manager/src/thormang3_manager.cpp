@@ -50,6 +50,7 @@
 #include "thormang3_walking_module/walking_module.h"
 #include "thormang3_ros_control_module/ros_control_module.h"
 #include "thormang3_step_control_module/step_control_module.h"
+#include "thormang3_l3_module/l3_module.h"
 
 
 using namespace thormang3;
@@ -82,6 +83,7 @@ int main(int argc, char **argv)
         FeetForceTorqueSensor::getInstance()->gazebo_mode_ = true;
         WristForceTorqueSensor::getInstance()->gazebo_mode_ = true;
         StepControlModule::getInstance()->gazebo_mode_ = true;
+        L3Module::getInstance()->gazebo_mode_ = true;
         ROS_WARN("SET TO GAZEBO MODE!");
     }
 
@@ -118,6 +120,7 @@ int main(int argc, char **argv)
     //controller->addMotionModule((robotis_framework::MotionModule*)OnlineWalkingModule::getInstance()); // Encaspulated by StepControlModule
     controller->addMotionModule((robotis_framework::MotionModule*)StepControlModule::getInstance());
     controller->addMotionModule((robotis_framework::MotionModule*)RosControlModule::getInstance());
+    controller->addMotionModule((robotis_framework::MotionModule*)L3Module::getInstance());
 
     controller->startTimer();
 

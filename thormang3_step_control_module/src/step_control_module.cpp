@@ -23,6 +23,17 @@ StepControlModule::~StepControlModule()
 
 void StepControlModule::onModuleEnable()
 {
+  step_control_mutex_.lock();
+
+  // (re)initialize parameter and plugin manager
+  vigir_generic_params::ParameterManager::initialize(queue_nh_);
+  vigir_pluginlib::PluginManager::initialize(queue_nh_);
+
+  // start walk controller
+  step_controller_.reset(new vigir_step_control::StepController(queue_nh_, false));
+
+  step_control_mutex_.unlock();
+
   setBalanceParams(balance_params_);
 }
 
@@ -54,21 +65,13 @@ void StepControlModule::queueThread()
 {
   step_control_mutex_.lock();
 
-  ros::NodeHandle nh("step_control_module");
+  queue_nh_ = ros::NodeHandle("step_control_module");
   ros::CallbackQueue callback_queue;
-
-  nh.setCallbackQueue(&callback_queue);
-
-  // initialize parameter and plugin manager
-  vigir_generic_params::ParameterManager::initialize(nh);
-  vigir_pluginlib::PluginManager::initialize(nh);
+  queue_nh_.setCallbackQueue(&callback_queue);
 
   // dynamic reconfigure
-  dynamic_reconfigure::Server<thormang3_step_control_module::BalanceParametersConfig> server(nh);
+  dynamic_reconfigure::Server<thormang3_step_control_module::BalanceParametersConfig> server(queue_nh_);
   dynamic_reconfigure::Server<thormang3_step_control_module::BalanceParametersConfig>::CallbackType callback_f;
-
-  // start walk controller
-  step_controller_.reset(new vigir_step_control::StepController(nh, false));
 
   step_control_mutex_.unlock();
 
@@ -76,7 +79,7 @@ void StepControlModule::queueThread()
   server.setCallback(callback_f);
 
   ros::WallDuration duration(control_cycle_msec_/1000.0);
-  while(nh.ok())
+  while(queue_nh_.ok())
     callback_queue.callAvailable(duration);
 }
 

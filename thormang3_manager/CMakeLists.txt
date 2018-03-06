@@ -4,6 +4,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(thormang3_manager)
 
+#set(CMAKE_BUILD_TYPE Debug)
+
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 ################################################################################
@@ -30,6 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
   thormang3_base_module
   thormang3_ros_control_module
   thormang3_step_control_module
+  thormang3_l3_module
 )
 
 find_package(Eigen REQUIRED)

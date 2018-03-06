@@ -27,6 +27,9 @@
   <!-- walk control module -->
   <include file="$(find thormang3_step_control_module)/launch/load_step_controller.launch" />
 
+  <!-- l3_walk control module -->
+  <include file="$(find thormang3_l3_module)/launch/load_plugins.launch" ns="l3" />
+
   <!-- ros control module -->
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
 
