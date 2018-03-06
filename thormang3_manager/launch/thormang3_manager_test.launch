@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <arg name="use_imu" default="false" />
-  <arg name="use_lidar" default="false" />
   <arg name="gazebo" default="true" />
   <arg name="robot_name" default="thormang3" />
   <arg name="use_hands" default="false" />
@@ -12,10 +10,6 @@
       <arg name="robot_name" value="$(arg robot_name)" />
       <arg name="use_hands" value="$(arg use_hands)" />
       <arg name="gazebo" value="$(arg gazebo)" />
-      <arg name="use_imu"     if="$(arg gazebo)"      value="false" />
-      <arg name="use_imu"     unless="$(arg gazebo)"  value="$(arg use_imu)" />
-      <arg name="use_lidar"   if="$(arg gazebo)"      value="false" />
-      <arg name="use_lidar"   unless="$(arg gazebo)"  value="$(arg use_lidar)" />
     </include>
   </group>
 </launch>
