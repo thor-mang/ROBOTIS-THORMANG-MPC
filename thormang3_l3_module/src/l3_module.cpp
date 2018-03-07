@@ -25,6 +25,10 @@ void L3Module::onModuleEnable()
 {
   boost::mutex::scoped_lock lock(l3_mutex_);
 
+  // (re)initialize parameter and plugin manager
+  vigir_generic_params::ParameterManager::initialize(queue_nh_);
+  vigir_pluginlib::PluginManager::initialize(queue_nh_);
+
   // (re)initialize walk controller
   walk_controller_.reset(new l3::WalkController(queue_nh_));
   walk_controller_->initialize(queue_nh_);
