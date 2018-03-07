@@ -12,9 +12,6 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  rospy
-  actionlib_msgs
-  actionlib
   std_msgs
   thormang3_walking_module
   vigir_step_control
@@ -101,7 +98,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_step_control_module
-  CATKIN_DEPENDS roscpp actionlib_msgs actionlib std_msgs thormang3_walking_module vigir_step_control thor_mang_footstep_planning_plugins
+  CATKIN_DEPENDS roscpp std_msgs thormang3_walking_module vigir_step_control thor_mang_footstep_planning_plugins
 #  DEPENDS system_lib
 )
 
