@@ -9,6 +9,9 @@ plugin_sets:
     # JointBalanceControllerPlugin
     robotis_joint_balance_controller: none
 
+    # KinematicsPlugin
+    kdl_kinematics: none
+
     # Interface Plugins
     imu_sensor_topic:
       params:
