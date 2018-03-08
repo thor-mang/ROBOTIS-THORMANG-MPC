@@ -86,7 +86,7 @@ void L3Module::process(std::map<std::string, robotis_framework::Dynamixel*> dxls
   last_time_stamp_ = current_time;
 
   // update (sensor) interfaces
-  for (thormang3::RobotisSensorModule::Ptr module : sensor_modules_)
+  for (RobotisSensorModule::Ptr module : sensor_modules_)
     module->process(dxls, sensors);
 
   // run controller

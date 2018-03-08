@@ -84,7 +84,7 @@ private:
 
   /** L3 */
   l3::WalkController::Ptr walk_controller_;
-  std::vector<thormang3::RobotisSensorModule::Ptr> sensor_modules_;
+  std::vector<RobotisSensorModule::Ptr> sensor_modules_;
   ThorMangJointCmdInterface::Ptr joint_cmd_interface_;
 };
 }
