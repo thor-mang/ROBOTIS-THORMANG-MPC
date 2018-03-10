@@ -68,7 +68,8 @@ void StepControlModule::queueThread()
   dynamic_reconfigure::Server<thormang3_step_control_module::BalanceParametersConfig>::CallbackType callback_f;
 
   // start walk controller
-  step_controller_.reset(new vigir_step_control::StepController(nh, false));
+  step_controller_.reset(new vigir_step_control::StepController(nh));
+  step_controller_->initialize(nh, false);
 
   step_control_mutex_.unlock();
 
