@@ -30,7 +30,8 @@ void StepControlModule::onModuleEnable()
   vigir_pluginlib::PluginManager::initialize(queue_nh_);
 
   // start walk controller
-  step_controller_.reset(new vigir_step_control::StepController(queue_nh_, false));
+  step_controller_.reset(new vigir_step_control::StepController(queue_nh_));
+  step_controller_->initialize(queue_nh_, false);
 
   step_control_mutex_.unlock();
 
