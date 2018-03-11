@@ -53,7 +53,7 @@ public:
   typedef boost::shared_ptr<const THORMANG3OnlineWalkingPlugin> ConstPtr;
 
   THORMANG3OnlineWalkingPlugin();
-  virtual ~THORMANG3OnlineWalkingPlugin();
+  ~THORMANG3OnlineWalkingPlugin();
 
   /**
    * @brief Sets the StepPlanMsgPlugin to be used.
