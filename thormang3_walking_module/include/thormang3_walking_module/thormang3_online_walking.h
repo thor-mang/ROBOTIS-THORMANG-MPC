@@ -39,8 +39,11 @@
 #ifndef THORMANG3_WALKING_MODULE_THORMANG3_ONLINEL_WALKING_H_
 #define THORMANG3_WALKING_MODULE_THORMANG3_ONLINEL_WALKING_H_
 
+#include <ros/ros.h>
+#include <ros/package.h>
 #include <vector>
 #include <boost/thread.hpp>
+#include <yaml-cpp/yaml.h>
 
 #include "thormang3_balance_control/thormang3_balance_control.h"
 #include "robotis_framework_common/singleton.h"
@@ -73,9 +76,9 @@ public:
   void setRefZMPDecisionParameter(double X_ZMP_CenterShift, double Y_ZMP_CenterShift, double Y_ZMP_Convergence);
 
   bool setInitialPose(double r_foot_x, double r_foot_y, double r_foot_z, double r_foot_roll, double r_foot_pitch, double r_foot_yaw,
-      double l_foot_x, double l_foot_y, double l_foot_z, double l_foot_roll, double l_foot_pitch, double l_foot_yaw,
-      double center_of_body_x, double center_of_body_y, double center_of_body_z,
-      double center_of_body_roll, double center_of_body_pitch, double center_of_body_yaw);
+                      double l_foot_x, double l_foot_y, double l_foot_z, double l_foot_roll, double l_foot_pitch, double l_foot_yaw,
+                      double center_of_body_x, double center_of_body_y, double center_of_body_z,
+                      double center_of_body_roll, double center_of_body_pitch, double center_of_body_yaw);
 
   void setInitalWaistYawAngle(double waist_yaw_angle_rad);
 
@@ -130,6 +133,18 @@ private:
 
   double wsin(double time, double period, double period_shift, double mag, double mag_shift);
   double wsigmoid(double time, double period, double time_shift, double mag, double mag_shift, double sigmoid_ratio, double distortion_ratio);
+
+  double r_leg_to_body_roll_gain_, l_leg_to_body_roll_gain_;
+  double r_leg_to_body_pitch_gain_, l_leg_to_body_pitch_gain_;
+  Eigen::MatrixXd des_balance_offset_;
+  robotis_framework::MinimumJerkViaPoint *feed_forward_tra_;
+  int     mov_size_, mov_step_;
+  double  mov_time_;
+  bool init_balance_offset_;
+
+  void parseBalanceOffsetData(const std::string &path);
+  void initBalanceOffset();
+  void setBalanceOffset();
 
   KinematicsDynamics* thormang3_kd_;
 

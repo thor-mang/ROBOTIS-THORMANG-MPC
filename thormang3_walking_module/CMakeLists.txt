@@ -24,6 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen REQUIRED)
+pkg_check_modules(yaml_cpp yaml-cpp REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions
@@ -49,6 +50,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
+  ${yaml_cpp_INCLUDE_DIRS}
 )
 
 add_library(thormang3_walking_module
@@ -60,6 +62,7 @@ add_dependencies(thormang3_walking_module ${${PROJECT_NAME}_EXPORTED_TARGETS} ${
 
 target_link_libraries(thormang3_walking_module
   ${catkin_LIBRARIES}
+  ${yaml_cpp_LIBRARIES}
 )
 
 ################################################################################

@@ -323,6 +323,11 @@ void THORMANG3OnlineWalking::initialize()
   balance_ctrl_.setOrientationBalanceEnable(true);
   balance_ctrl_.setForceTorqueBalanceEnable(true);
 
+  // load balance offset gain
+  init_balance_offset_ = false;
+  std::string balance_offset_path = ros::package::getPath("thormang3_walking_module") + "/config/balance_offset.yaml";
+  parseBalanceOffsetData(balance_offset_path);
+
   //Initialize Time
   walking_time_ = 0; reference_time_ = 0;
 
@@ -1598,8 +1603,13 @@ void THORMANG3OnlineWalking::process()
       }
     }
 
+    setBalanceOffset();
+
     balance_ctrl_.setDesiredCOBGyro(0,0);
-    balance_ctrl_.setDesiredCOBOrientation(present_body_pose_.roll, present_body_pose_.pitch);
+//    balance_ctrl_.setDesiredCOBOrientation(present_body_pose_.roll, present_body_pose_.pitch);
+    balance_ctrl_.setDesiredCOBOrientation(present_body_pose_.roll  + des_balance_offset_.coeff(0,0),
+                                           present_body_pose_.pitch + des_balance_offset_.coeff(1,0));
+
     balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*1.0, r_target_fy_N*1.0, r_target_fz_N, 0, 0, 0,
                                             l_target_fx_N*1.0, l_target_fy_N*1.0, l_target_fz_N, 0, 0, 0);
     balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
@@ -1721,3 +1731,137 @@ double THORMANG3OnlineWalking::wsigmoid(double time, double period, double time_
   return value;
 }
 
+void THORMANG3OnlineWalking::parseBalanceOffsetData(const std::string &path)
+{
+  YAML::Node doc;
+  try
+  {
+    // load yaml
+    doc = YAML::LoadFile(path.c_str());
+  }
+  catch (const std::exception& e)
+  {
+    ROS_ERROR("Fail to load yaml file.");
+    return;
+  }
+
+  r_leg_to_body_roll_gain_ = doc["r_leg_to_body_roll_gain"].as<double>();
+  l_leg_to_body_roll_gain_ = doc["l_leg_to_body_roll_gain"].as<double>();
+
+  r_leg_to_body_pitch_gain_ = doc["r_leg_to_body_pitch_gain"].as<double>();
+  l_leg_to_body_pitch_gain_ = doc["l_leg_to_body_pitch_gain"].as<double>();
+
+  ROS_INFO("r_leg_to_body_roll_gain_ : %f", r_leg_to_body_roll_gain_);
+  ROS_INFO("l_leg_to_body_roll_gain_ : %f", l_leg_to_body_roll_gain_);
+  ROS_INFO("r_leg_to_body_pitch_gain_ : %f", r_leg_to_body_pitch_gain_);
+  ROS_INFO("l_leg_to_body_pitch_gain_ : %f", l_leg_to_body_pitch_gain_);
+}
+
+void THORMANG3OnlineWalking::initBalanceOffset()
+{
+  if (init_balance_offset_ == false)
+  {
+    if((added_step_data_.size() != 0) && real_running)
+    {
+      double period_time = added_step_data_[0].time_data.abs_step_time - reference_time_;
+      double dsp_ratio = added_step_data_[0].time_data.dsp_ratio;
+
+//      ROS_INFO("period_time = %f", period_time);
+//      ROS_INFO("dsp_ratio = %f", dsp_ratio);
+
+      // feedforward trajectory
+      std::vector<double_t> zero_vector;
+      zero_vector.resize(1,0.0);
+
+      std::vector<double_t> via_pos;
+      via_pos.resize(3, 0.0);
+      via_pos[0] = 1.0 * DEGREE2RADIAN;
+
+      double init_time = 0.0;
+      double fin_time = period_time;
+      double via_time = 0.5 * (init_time + fin_time);
+
+      feed_forward_tra_ =
+          new robotis_framework::MinimumJerkViaPoint(init_time, fin_time, via_time, dsp_ratio,
+                                                     zero_vector, zero_vector, zero_vector,
+                                                     zero_vector, zero_vector, zero_vector,
+                                                     via_pos, zero_vector, zero_vector);
+
+      mov_time_ = fin_time;
+      mov_size_ = (int) (mov_time_ / TIME_UNIT) + 1;
+
+      init_balance_offset_ = true;
+    }
+  }
+}
+
+void THORMANG3OnlineWalking::setBalanceOffset()
+{
+  initBalanceOffset();
+
+  bool is_DSP = false;
+  bool is_l_balancing, is_r_balancing;
+  if( (balancing_index_ == BalancingPhase0) ||
+      (balancing_index_ == BalancingPhase1) ||
+      (balancing_index_ == BalancingPhase4) ||
+      (balancing_index_ == BalancingPhase5) ||
+      (balancing_index_ == BalancingPhase8) ||
+      (balancing_index_ == BalancingPhase9) )
+  {
+    is_DSP = true;
+    is_l_balancing = false;
+    is_r_balancing = false;
+  }
+  else
+    is_DSP = false;
+
+  if (balancing_index_ == 2 || balancing_index_ == 3)
+  {
+    is_l_balancing = true;
+    is_r_balancing = false;
+  }
+
+  if (balancing_index_ == 6 || balancing_index_ == 7)
+  {
+    is_l_balancing = false;
+    is_r_balancing = true;
+  }
+
+  des_balance_offset_ = Eigen::MatrixXd::Zero(2,1);
+
+  if (init_balance_offset_)
+  {
+    double cur_time = (double) mov_step_ * TIME_UNIT;
+//    ROS_INFO("cur_time : %f / %f", cur_time , mov_time_);
+
+    if (is_DSP == false)
+    {
+//      ROS_INFO("SSP");
+      std::vector<double_t> value = feed_forward_tra_->getPosition(cur_time);
+
+      if (is_l_balancing)
+      {
+        des_balance_offset_.coeffRef(0,0) = r_leg_to_body_roll_gain_ * value[0];
+        des_balance_offset_.coeffRef(1,0) = r_leg_to_body_pitch_gain_ * value[0];
+//        ROS_INFO("L_BALANCING");
+      }
+
+      if (is_r_balancing)
+      {
+        des_balance_offset_.coeffRef(0,0) = l_leg_to_body_roll_gain_ * value[0];
+        des_balance_offset_.coeffRef(1,0) = l_leg_to_body_pitch_gain_ * value[0];
+//        ROS_INFO("R_BALANCING");
+      }
+    }
+
+    if (mov_step_ == mov_size_-1)
+    {
+      mov_step_ = 0;
+      init_balance_offset_ = false;
+    }
+    else
+      mov_step_++;
+
+//    ROS_INFO("des_balance_offset_ roll: %f, pitch: %f", des_balance_offset_.coeff(0,0), des_balance_offset_.coeff(1,0));
+  }
+}

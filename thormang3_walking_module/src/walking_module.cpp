@@ -1348,4 +1348,3 @@ void OnlineWalkingModule::stop()
 {
   return;
 }
-
