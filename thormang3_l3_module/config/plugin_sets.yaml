@@ -4,7 +4,7 @@ plugin_sets:
     robotis_gait_pattern_generator: none
 
     # LIPMBalanceControllerPlugin
-    robotis_feet_balance_controller: none
+    robotis_lipm_balance_controller: none
 
     # JointBalanceControllerPlugin
     robotis_joint_balance_controller: none
