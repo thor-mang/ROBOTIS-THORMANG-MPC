@@ -631,8 +631,8 @@ BalanceControlUsingPDController::BalanceControlUsingPDController()
   mat_robot_to_right_foot_modified_ = Eigen::MatrixXd::Identity(4,4);
   mat_robot_to_left_foot_modified_  = Eigen::MatrixXd::Identity(4,4);
   pose_cob_adjustment_         = Eigen::VectorXd::Zero(6);
-  pose_right_foot_adjustment_  = Eigen::VectorXd::Zero(6);;
-  pose_left_foot_adjustment_   = Eigen::VectorXd::Zero(6);;
+  pose_right_foot_adjustment_  = Eigen::VectorXd::Zero(6);
+  pose_left_foot_adjustment_   = Eigen::VectorXd::Zero(6);
 }
 
 BalanceControlUsingPDController::~BalanceControlUsingPDController()

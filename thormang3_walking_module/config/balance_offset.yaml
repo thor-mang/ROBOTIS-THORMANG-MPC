@@ -1,0 +1,7 @@
+# 1.0 <-> 1.0 [deg]
+
+r_leg_to_body_roll_gain :  0.5 # support r_leg
+l_leg_to_body_roll_gain : -0.5 # support l_leg
+
+r_leg_to_body_pitch_gain : 0.0 # support r_leg
+l_leg_to_body_pitch_gain : 0.0 # support l_leg

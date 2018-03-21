@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 
 <launch>    
-    <arg name="use_imu" default="true"/>
-    <arg name="use_lidar" default="true" />
-    z
-    <param name="gazebo"                   value="false"    type="bool"/>
+    <arg name="use_imu" default="false"/>
+    <arg name="use_lidar" default="false" />
+    
+    <param name="gazebo"                   value="true"    type="bool"/>
     <param name="gazebo_robot_name"        value="thormang3"/>
     
     <param name="offset_file_path"         value="$(find thormang3_manager)/config/offset.yaml"/>
