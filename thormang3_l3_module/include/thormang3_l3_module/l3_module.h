@@ -39,10 +39,10 @@
 #include <robotis_framework_common/motion_module.h>
 
 // l3
-#include <l3_walk_controller/walk_controller.h>
+#include <l3_zmp_walk_controller/walk_controller.h>
 
-#include <thor_mang_l3_plugins/robotis_sensor_module.h>
-#include <thor_mang_l3_plugins/thor_mang_joint_cmd_interface.h>
+#include <thor_mang_l3_zmp_walk_plugins/robotis_sensor_module.h>
+#include <thor_mang_l3_zmp_walk_plugins/thor_mang_joint_cmd_interface.h>
 
 
 
