@@ -83,7 +83,7 @@ private:
   bool is_running_;
 
   /** L3 */
-  l3::WalkController::Ptr walk_controller_;
+  l3_zmp_walk::WalkController::Ptr walk_controller_;
   std::vector<RobotisSensorModule::Ptr> sensor_modules_;
   ThorMangJointCmdInterface::Ptr joint_cmd_interface_;
 };

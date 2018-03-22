@@ -30,14 +30,14 @@ void L3Module::onModuleEnable()
   vigir_pluginlib::PluginManager::initialize(queue_nh_);
 
   // (re)initialize walk controller
-  walk_controller_.reset(new l3::WalkController(queue_nh_));
+  walk_controller_.reset(new l3_zmp_walk::WalkController(queue_nh_));
   walk_controller_->initialize(queue_nh_);
 
   // fetch sensor modules
-  l3::InterfaceManager::getPlugins(sensor_modules_);
+  l3_zmp_walk::InterfaceManager::getPlugins(sensor_modules_);
 
   // get thormang joint cmd plugin
-  l3::InterfaceManager::getPlugin(joint_cmd_interface_);
+  l3_zmp_walk::InterfaceManager::getPlugin(joint_cmd_interface_);
 
   is_running_ = true;
 }
