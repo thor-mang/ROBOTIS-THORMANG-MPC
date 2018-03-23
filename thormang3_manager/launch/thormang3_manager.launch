@@ -2,11 +2,13 @@
 
 <launch>
   <arg name="robot_name" default="thormang3" />
-  <arg name="use_hands" default="$(optenv USE_HANDS false)" />
+  <arg name="l_hand_type" default="$(optenv L_HAND_TYPE none)" />
+  <arg name="r_hand_type" default="$(optenv R_HAND_TYPE none)" />
   <arg name="gazebo" default="false" />
 
   <!-- executing this here to be separated from second parameter load -->
-  <include file="$(find thor_vt_hand_ros_control)/launch/l_vt_hand_trajectory_controllers.launch" ns="joints" if="$(arg use_hands)" />
+  <include file="$(find thor_vt_hand_ros_control)/launch/left_hand_trajectory_controllers.launch" ns="joints" if="$(eval arg('l_hand_type') == 'vt_hand')" />
+  <include file="$(find rh_p12_rn_ros_control)/launch/left_hand_trajectory_controllers.launch" ns="joints" if="$(eval arg('l_hand_type') == 'rh_p12_rn')" />
 
   <param name="gazebo"                   value="$(arg gazebo)"    type="bool" />
   <param name="gazebo_robot_name"        value="$(arg robot_name)" />
@@ -34,5 +36,6 @@
   <include file="$(find thormang3_ros_control_module)/launch/load_trajectory_controllers.launch" />
 
   <!-- executing this here to be separated from first parameter load -->
-  <include file="$(find thor_vt_hand_ros_control)/launch/r_vt_hand_trajectory_controllers.launch" ns="joints" if="$(arg use_hands)" />
+  <include file="$(find thor_vt_hand_ros_control)/launch/right_hand_trajectory_controllers.launch" ns="joints" if="$(eval arg('r_hand_type') == 'vt_hand')" />
+  <include file="$(find rh_p12_rn_ros_control)/launch/right_hand_trajectory_controllers.launch" ns="joints" if="$(eval arg('r_hand_type') == 'rh_p12_rn')" />
 </launch>
