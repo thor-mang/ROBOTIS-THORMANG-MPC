@@ -3,13 +3,8 @@
 <launch>
   <arg name="gazebo" default="true" />
   <arg name="robot_name" default="thormang3" />
-  <arg name="use_hands" default="false" />
+  <arg name="l_hand_type" default="$(optenv L_HAND_TYPE none)" />
+  <arg name="r_hand_type" default="$(optenv R_HAND_TYPE none)" />
 
-  <group ns="$(arg robot_name)">
-    <include file="$(find thormang3_manager)/launch/thormang3_manager.launch">
-      <arg name="robot_name" value="$(arg robot_name)" />
-      <arg name="use_hands" value="$(arg use_hands)" />
-      <arg name="gazebo" value="$(arg gazebo)" />
-    </include>
-  </group>
+  <include file="$(find thormang3_manager)/launch/thormang3_manager.launch" ns="$(arg robot_name)" pass_all_args="true" />
 </launch>
