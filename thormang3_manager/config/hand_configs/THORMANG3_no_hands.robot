@@ -41,7 +41,3 @@ dynamixel | /dev/ttyCH0  | 27  | H54-100-S500-R | 2.0      | torso_y            
 dynamixel | /dev/ttyCH1  | 28  | H42-20-S300-R  | 2.0      | head_y                         | present_position, present_voltage
 dynamixel | /dev/ttyCH1  | 29  | H42-20-S300-R  | 2.0      | head_p                         | present_position, present_voltage
 dynamixel | /dev/ttyCH4  | 34  | MX-28          | 2.0      | head_lidar_spinning_joint      | present_position, present_voltage
-dynamixel | /dev/ttyCH1  | 30  | MX-106         | 2.0      | l_f0_j0                        | present_position, present_voltage
-dynamixel | /dev/ttyCH0  | 31  | MX-106         | 2.0      | r_f0_j0                        | present_position, present_voltage
-dynamixel | /dev/ttyCH1  | 32  | MX-106         | 2.0      | l_f1_j0                        | present_position, present_voltage
-dynamixel | /dev/ttyCH0  | 33  | MX-106         | 2.0      | r_f1_j0                        | present_position, present_voltage
