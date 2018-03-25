@@ -79,9 +79,10 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
 
   /** initialize joints */
 
+  result_.clear();
+
   // read joints from ros param server
   /// TODO: Check available joints with 'robot' parameter
-  result_.clear();
   XmlRpc::XmlRpcValue joints = nh.param("joints", XmlRpc::XmlRpcValue());
   if (joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
   {
@@ -90,18 +91,37 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
   }
   else
     ROS_ERROR("[RosControlModule] Joints must be given as an array of strings.");
-  
+
+  // read left hand joints from ros param server
+  if (nh.getParam("l_hand_joints", joints) && joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
+  {
+    for (size_t i = 0; i < joints.size(); i++)
+      result_[static_cast<std::string>(joints[i])] = new robotis_framework::DynamixelState();
+  }
+  else
+    ROS_ERROR("[RosControlModule] hand joints must be given as an array of strings.");
+
+  // read right hand joints from ros param server
+  if (nh.getParam("r_hand_joints", joints) && joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
+  {
+    for (size_t i = 0; i < joints.size(); i++)
+      result_[static_cast<std::string>(joints[i])] = new robotis_framework::DynamixelState();
+  }
+  else
+    ROS_ERROR("[RosControlModule] hand joints must be given as an array of strings.");
+
+  // create joint state and position interface
   jnt_state_interface_ = hardware_interface::JointStateInterface();
   jnt_pos_interface_ = hardware_interface::PositionJointInterface();
-  
+
   for (std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
-    
+
     // connect and register the joint state interface
     hardware_interface::JointStateHandle state_handle(joint_name, &pos_[joint_name], &vel_[joint_name], &eff_[joint_name]);
     jnt_state_interface_.registerHandle(state_handle);
-    
+
     // connect and register the joint position interface
     hardware_interface::JointHandle pos_handle(state_handle, &cmd_[joint_name]);
     jnt_pos_interface_.registerHandle(pos_handle);
@@ -159,7 +179,7 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
   for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
-    
+
     const robotis_framework::Dynamixel* dxl = dxls[joint_name];
     if (dxl)
     {
@@ -192,11 +212,11 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
   }
 
   /** write back commands */
-  
+
   for(std::map<std::string, robotis_framework::DynamixelState*>::iterator state_iter = result_.begin(); state_iter != result_.end(); state_iter++)
   {
     const std::string& joint_name = state_iter->first;
-    
+
     result_[joint_name]->goal_position_ = cmd_[joint_name];
   }
 }
@@ -251,7 +271,7 @@ void RosControlModule::queueThread()
   ros::CallbackQueue callback_queue;
 
   nh.setCallbackQueue(&callback_queue);
-  
+
   // Initialize ros control
   controller_manager_.reset(new controller_manager::ControllerManager(this, nh));
 

@@ -81,7 +81,7 @@ private:
   bool reset_controllers_;
 
   boost::mutex ros_control_mutex_;
-  
+
   /** ROS CONTROL PART */
   boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
@@ -99,7 +99,7 @@ private:
 
   std::map<std::string, double[3]> force_scaled_;
   std::map<std::string, double[3]> torque_scaled_;
-  
+
   // joint interfaces
   hardware_interface::JointStateInterface jnt_state_interface_;
   hardware_interface::PositionJointInterface jnt_pos_interface_;

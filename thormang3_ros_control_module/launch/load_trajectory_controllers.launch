@@ -1,8 +1,13 @@
 <?xml version="1.0"?>
 
 <launch>
+  <arg name="l_hand_type" default="$(optenv L_HAND_TYPE none)" />
+  <arg name="r_hand_type" default="$(optenv R_HAND_TYPE none)" />
+
   <group ns="joints">
     <rosparam file="$(find thormang3_ros_control_module)/config/ros_control_module_config.yaml" command="load" ns="ros_control_module" />
+    <rosparam file="$(find thormang3_ros_control_module)/config/hand_configs/l_$(arg l_hand_type).yaml" command="load" ns="ros_control_module" />
+    <rosparam file="$(find thormang3_ros_control_module)/config/hand_configs/r_$(arg r_hand_type).yaml" command="load" ns="ros_control_module" />
     <rosparam file="$(find thormang3_ros_control_module)/config/thor_mang_trajectory_controllers.yaml" command="load" />
 
     <!-- load trajectory controllers -->
