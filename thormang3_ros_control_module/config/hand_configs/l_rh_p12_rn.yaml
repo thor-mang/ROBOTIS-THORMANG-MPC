@@ -1,0 +1,2 @@
+# defines hand joints to be controlled by ros control module
+l_hand_joints: ["l_rh_p12_rn"]

@@ -1,0 +1,2 @@
+# empty as no hand joints should be used
+r_hand_joints: []
