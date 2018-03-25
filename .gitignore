@@ -11,4 +11,4 @@ qtcreator-build
 *.autosave
 *.orig
 *.rej
-THORMANG3_gen.robot
+THORMANG3_generated.robot
