@@ -133,10 +133,6 @@ BaseModule::BaseModule()
   joint_name_to_id_["head_y"]       = 28;
   joint_name_to_id_["head_p"]       = 29;
 
-  /* gripper */
-  joint_name_to_id_["r_arm_grip"]   = 31;
-  joint_name_to_id_["l_arm_grip"]   = 30;
-
   base_module_state_  = new BaseModuleState();
   joint_state_    = new BaseJointState();
 }
