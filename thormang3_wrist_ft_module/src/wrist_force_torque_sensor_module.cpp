@@ -266,7 +266,6 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     else
     {
       ROS_WARN_ONCE("Couldn't find joint r_arm_wr_p. Not publishing ft sensor data.");
-      return;
     }
 
     dxl_it = dxls.find("r_arm_wr_y");
@@ -278,7 +277,6 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     else
     {
       ROS_WARN_ONCE("Couldn't find joint r_arm_wr_y. Not publishing ft sensor data.");
-      return;
     }
 
     dxl_it = dxls.find("l_arm_wr_p");
@@ -292,7 +290,6 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     else
     {
       ROS_WARN_ONCE("Couldn't find joint l_arm_wr_p. Not publishing ft sensor data.");
-      return;
     }
 
     dxl_it = dxls.find("l_arm_wr_y");
@@ -304,7 +301,6 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
     else
     {
       ROS_WARN_ONCE("Couldn't find joint l_arm_wr_y. Not publishing ft sensor data.");
-      return;
     }
   }
 
