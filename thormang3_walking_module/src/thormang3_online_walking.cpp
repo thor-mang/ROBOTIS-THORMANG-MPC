@@ -958,6 +958,10 @@ void THORMANG3OnlineWalking::calcDesiredPose()
   sum_of_zmp_x_ += reference_zmp_x_.coeff(current_start_idx_for_ref_zmp_, 0);
   sum_of_zmp_y_ += reference_zmp_y_.coeff(current_start_idx_for_ref_zmp_, 0);
 
+  //for publisher in walking_module.cpp
+  current_ref_zmp_x_ = reference_zmp_x_(current_start_idx_for_ref_zmp_, 0);
+  current_ref_zmp_y_ = reference_zmp_y_(current_start_idx_for_ref_zmp_, 0);
+
   present_body_pose_.x = x_lipm_.coeff(0,0);
   present_body_pose_.y = y_lipm_.coeff(0,0);
 
@@ -982,6 +986,10 @@ void THORMANG3OnlineWalking::process()
     calcStepIdxData();
     calcRefZMP();
     calcDesiredPose();
+    mat_g_to_acc_.resize(4, 1);
+    mat_g_to_acc_.fill(0);
+    mat_g_to_acc_.coeffRef(0,0) = x_lipm_(2,0);
+    mat_g_to_acc_.coeffRef(1,0) = y_lipm_(2,0);
 
     double hip_roll_swap = 0;
 
@@ -1446,35 +1454,30 @@ void THORMANG3OnlineWalking::process()
                                                         mat_left_torque.coeff(0,0),  mat_left_torque.coeff(1,0),  mat_left_torque.coeff(2,0));
 
 
-    double r_target_fx_N = 0;
-    double l_target_fx_N = 0;
-    double r_target_fy_N = 0;
-    double l_target_fy_N = 0;
-    double r_target_fz_N = right_dsp_fz_N_;
-    double l_target_fz_N = left_dsp_fz_N_;
+    r_target_fx_N = 0;
+    l_target_fx_N = 0;
+    r_target_fy_N = 0;
+    l_target_fy_N = 0;
+    r_target_fz_N = right_dsp_fz_N_;
+    l_target_fz_N = left_dsp_fz_N_;
 
-    Eigen::MatrixXd mat_g_to_acc, mat_robot_to_acc;
-    mat_g_to_acc.resize(4, 1);
-    mat_g_to_acc.fill(0);
-    mat_g_to_acc.coeffRef(0,0) = x_lipm_.coeff(2,0);
-    mat_g_to_acc.coeffRef(1,0) = y_lipm_.coeff(2,0);
-    mat_robot_to_acc = mat_robot_to_g_ * mat_g_to_acc;
+    mat_robot_to_acc_ = mat_robot_to_g_ * mat_g_to_acc_;
 
 
     switch(balancing_index_)
     {
     case BalancingPhase0:
       //fprintf(stderr, "DSP : START\n");
-      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase1:
       //fprintf(stderr, "DSP : R--O->L\n");
-      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1485,8 +1488,8 @@ void THORMANG3OnlineWalking::process()
       r_target_fy_N = 0;
       r_target_fz_N = 0;
 
-      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
       break;
@@ -1496,31 +1499,31 @@ void THORMANG3OnlineWalking::process()
       r_target_fy_N = 0;
       r_target_fz_N = 0;
 
-      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       l_target_fz_N = left_ssp_fz_N_;
       target_fz_N = left_ssp_fz_N_;
       break;
     case BalancingPhase4:
       //fprintf(stderr, "DSP : R--O<-L\n");
-      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase5:
       //fprintf(stderr, "DSP : R<-O--L\n");
-      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase6:
       //fprintf(stderr, "SSP : R_BALANCING1\n");
-      r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
@@ -1530,8 +1533,8 @@ void THORMANG3OnlineWalking::process()
       break;
     case BalancingPhase7:
       //fprintf(stderr, "SSP : R_BALANCING2\n");
-      r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
@@ -1541,16 +1544,16 @@ void THORMANG3OnlineWalking::process()
       break;
     case BalancingPhase8:
       //fprintf(stderr, "DSP : R->O--L");
-      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase9:
       //fprintf(stderr, "DSP : END");
-      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
-      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
+      r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(0,0);
+      r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc_.coeff(1,0);
       r_target_fz_N = right_dsp_fz_N_;
       l_target_fz_N = left_dsp_fz_N_;
       target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
@@ -1600,6 +1603,9 @@ void THORMANG3OnlineWalking::process()
       }
     }
 
+    r_target_tx_Nm = r_target_ty_Nm = r_target_tz_Nm = 0;
+    l_target_tx_Nm = l_target_ty_Nm = l_target_tz_Nm = 0;
+
     balance_ctrl_.setDesiredCOBGyro(0,0);
     balance_ctrl_.setDesiredCOBOrientation(present_body_pose_.roll, present_body_pose_.pitch);
     balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*1.0, r_target_fy_N*1.0, r_target_fz_N, 0, 0, 0,
@@ -1609,6 +1615,10 @@ void THORMANG3OnlineWalking::process()
     balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
+
+    mdfd_mat_g_to_cob_ = mat_g_to_robot_*mat_robot_to_cob_modified_;
+    mdfd_mat_g_to_rfoot_ = mat_g_to_robot_*mat_robot_to_rf_modified_;
+    mdfd_mat_g_to_lfoot_ = mat_g_to_robot_*mat_robot_to_lf_modified_;
 
     rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
     lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
