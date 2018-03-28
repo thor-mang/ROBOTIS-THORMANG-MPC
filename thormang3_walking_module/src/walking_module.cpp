@@ -121,6 +121,14 @@ OnlineWalkingModule::OnlineWalkingModule()
   desired_matrix_g_to_rfoot_ = Eigen::MatrixXd::Identity(4,4);
   desired_matrix_g_to_lfoot_ = Eigen::MatrixXd::Identity(4,4);
 
+  desired_matrix_g_to_cob_acc_.resize(4, 1);
+  desired_matrix_g_to_cob_acc_.fill(0);
+  desired_matrix_robot_to_cob_acc_.resize(4, 1);
+  desired_matrix_robot_to_cob_acc_.fill(0);
+
+  mdfd_des_matrix_g_to_cob_   = Eigen::MatrixXd::Identity(4,4);
+  mdfd_des_matrix_g_to_rfoot_ = Eigen::MatrixXd::Identity(4,4);
+  mdfd_des_matrix_g_to_lfoot_ = Eigen::MatrixXd::Identity(4,4);
 
   balance_update_with_loop_ = false;
   balance_update_duration_ = 2.0;
@@ -180,6 +188,13 @@ void OnlineWalkingModule::initialize(const int control_cycle_msec, robotis_frame
   desired_matrix_g_to_cob_   = online_walking->mat_g_to_cob_;
   desired_matrix_g_to_rfoot_ = online_walking->mat_g_to_rfoot_;
   desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;
+
+  mdfd_des_matrix_g_to_cob_   = online_walking->mdfd_mat_g_to_cob_;
+  mdfd_des_matrix_g_to_rfoot_ = online_walking->mdfd_mat_g_to_rfoot_;
+  mdfd_des_matrix_g_to_lfoot_ = online_walking->mdfd_mat_g_to_lfoot_;
+
+  desired_matrix_g_to_cob_acc_ = online_walking->mat_g_to_acc_;
+  desired_matrix_robot_to_cob_acc_ = online_walking->mat_robot_to_acc_;
   process_mutex_.unlock();
 
   result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
@@ -239,6 +254,8 @@ void OnlineWalkingModule::queueThread()
   done_msg_pub_ = ros_node.advertise<std_msgs::String>("robotis/movement_done", 1);
 #ifdef WALKING_TUNE
   walking_joint_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::WalkingJointStatesStamped>("robotis/walking/walking_joint_states", 1);
+  joint_fb_gain_pub_ = ros_node.advertise<thormang3_walking_module_msgs::JointFeedBackGain>("robotis/walking/joint_fb_gain", 1);
+  force_torque_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::ForceTorqueStates>("robotis/walking/force_torque_states", 1);
 #endif
 
   /* ROS Service Callback Functions */
@@ -290,6 +307,34 @@ void OnlineWalkingModule::publishRobotPose(void)
   tf::quaternionEigenToMsg(quaterniond_g_to_cob, robot_pose_msg_.global_to_center_of_body.orientation);
   tf::quaternionEigenToMsg(quaterniond_g_to_rf,  robot_pose_msg_.global_to_right_foot.orientation);
   tf::quaternionEigenToMsg(quaterniond_g_to_lf,  robot_pose_msg_.global_to_left_foot.orientation);
+
+  //added matrices which were modified by the Balance Control
+  robot_pose_msg_.mdfd_global_to_center_of_body.position.x = mdfd_des_matrix_g_to_cob_.coeff(0, 3);
+  robot_pose_msg_.mdfd_global_to_center_of_body.position.y = mdfd_des_matrix_g_to_cob_.coeff(1, 3);
+  robot_pose_msg_.mdfd_global_to_center_of_body.position.z = mdfd_des_matrix_g_to_cob_.coeff(2, 3);
+  Eigen::Quaterniond quaterniond_mdfd_g_to_cob(mdfd_des_matrix_g_to_cob_.block<3, 3>(0, 0));
+
+  robot_pose_msg_.mdfd_global_to_right_foot.position.x = mdfd_des_matrix_g_to_rfoot_.coeff(0, 3);
+  robot_pose_msg_.mdfd_global_to_right_foot.position.y = mdfd_des_matrix_g_to_rfoot_.coeff(1, 3);
+  robot_pose_msg_.mdfd_global_to_right_foot.position.z = mdfd_des_matrix_g_to_rfoot_.coeff(2, 3);
+  Eigen::Quaterniond quaterniond_mdfd_g_to_rf(mdfd_des_matrix_g_to_rfoot_.block<3, 3>(0, 0));
+
+  robot_pose_msg_.mdfd_global_to_left_foot.position.x = mdfd_des_matrix_g_to_lfoot_.coeff(0, 3);
+  robot_pose_msg_.mdfd_global_to_left_foot.position.y = mdfd_des_matrix_g_to_lfoot_.coeff(1, 3);
+  robot_pose_msg_.mdfd_global_to_left_foot.position.z = mdfd_des_matrix_g_to_lfoot_.coeff(2, 3);
+  Eigen::Quaterniond quaterniond_mdfd_g_to_lf(mdfd_des_matrix_g_to_lfoot_.block<3, 3>(0, 0));
+
+  tf::quaternionEigenToMsg(quaterniond_mdfd_g_to_cob, robot_pose_msg_.mdfd_global_to_center_of_body.orientation);
+  tf::quaternionEigenToMsg(quaterniond_mdfd_g_to_rf,  robot_pose_msg_.mdfd_global_to_right_foot.orientation);
+  tf::quaternionEigenToMsg(quaterniond_mdfd_g_to_lf,  robot_pose_msg_.mdfd_global_to_left_foot.orientation);
+
+  robot_pose_msg_.global_to_cob_acc.x = desired_matrix_g_to_cob_acc_.coeff(0, 0);
+  robot_pose_msg_.global_to_cob_acc.y = desired_matrix_g_to_cob_acc_.coeff(1, 0);
+  robot_pose_msg_.global_to_cob_acc.z = -1;
+
+  robot_pose_msg_.robot_to_cob_acc.x = desired_matrix_robot_to_cob_acc_.coeff(0, 0);
+  robot_pose_msg_.robot_to_cob_acc.y = desired_matrix_robot_to_cob_acc_.coeff(1, 0);
+  robot_pose_msg_.robot_to_cob_acc.z = -1;
 
   robot_pose_pub_.publish(robot_pose_msg_);
 
@@ -970,6 +1015,8 @@ void OnlineWalkingModule::setJointFeedBackGain(thormang3_walking_module_msgs::Jo
   online_walking->leg_angle_feed_back_[10].d_gain_ = msg.l_leg_an_p_d_gain  ;
   online_walking->leg_angle_feed_back_[11].p_gain_ = msg.l_leg_an_r_p_gain  ;
   online_walking->leg_angle_feed_back_[11].d_gain_ = msg.l_leg_an_r_d_gain  ;
+
+  joint_fb_gain_pub_.publish(msg);
 }
 
 
@@ -1285,7 +1332,18 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   desired_matrix_g_to_cob_   = online_walking->mat_g_to_cob_;
   desired_matrix_g_to_rfoot_ = online_walking->mat_g_to_rfoot_;
   desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;
+
+  mdfd_des_matrix_g_to_cob_   = online_walking->mdfd_mat_g_to_cob_;
+  mdfd_des_matrix_g_to_rfoot_ = online_walking->mdfd_mat_g_to_rfoot_;
+  mdfd_des_matrix_g_to_lfoot_ = online_walking->mdfd_mat_g_to_lfoot_;
+
+  desired_matrix_g_to_cob_acc_ = online_walking->mat_g_to_acc_;
+  desired_matrix_robot_to_cob_acc_ = online_walking->mat_robot_to_acc_;
   process_mutex_.unlock();
+
+  robot_pose_msg_.ref_zmp.x = online_walking->current_ref_zmp_x_;
+  robot_pose_msg_.ref_zmp.y = online_walking->current_ref_zmp_y_;
+  robot_pose_msg_.ref_zmp.z = -0.630;
 
   publishRobotPose();
 
@@ -1304,7 +1362,8 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
 
 #ifdef WALKING_TUNE
-  walking_joint_states_msg_.header.stamp = ros::Time::now();
+  force_torque_states_msg_.header.stamp = walking_joint_states_msg_.header.stamp = ros::Time::now();
+
   walking_joint_states_msg_.r_goal_hip_y = online_walking->r_leg_out_angle_rad_[0];
   walking_joint_states_msg_.r_goal_hip_r = online_walking->r_leg_out_angle_rad_[1];
   walking_joint_states_msg_.r_goal_hip_p = online_walking->r_leg_out_angle_rad_[2];
@@ -1317,6 +1376,20 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   walking_joint_states_msg_.l_goal_kn_p  = online_walking->l_leg_out_angle_rad_[3];
   walking_joint_states_msg_.l_goal_an_p  = online_walking->l_leg_out_angle_rad_[4];
   walking_joint_states_msg_.l_goal_an_r  = online_walking->l_leg_out_angle_rad_[5];
+
+  //to use the following lines, please add the missing fields in the msg WalkingJointStatesStamped.msg in the package thormang3_walking_module_msgs
+  walking_joint_states_msg_.r_mdfd_goal_hip_y = online_walking->out_angle_rad_[0];
+  walking_joint_states_msg_.r_mdfd_goal_hip_r = online_walking->out_angle_rad_[1];
+  walking_joint_states_msg_.r_mdfd_goal_hip_p = online_walking->out_angle_rad_[2];
+  walking_joint_states_msg_.r_mdfd_goal_kn_p  = online_walking->out_angle_rad_[3];
+  walking_joint_states_msg_.r_mdfd_goal_an_p  = online_walking->out_angle_rad_[4];
+  walking_joint_states_msg_.r_mdfd_goal_an_r  = online_walking->out_angle_rad_[5];
+  walking_joint_states_msg_.l_mdfd_goal_hip_y = online_walking->out_angle_rad_[6];
+  walking_joint_states_msg_.l_mdfd_goal_hip_r = online_walking->out_angle_rad_[7];
+  walking_joint_states_msg_.l_mdfd_goal_hip_p = online_walking->out_angle_rad_[8];
+  walking_joint_states_msg_.l_mdfd_goal_kn_p  = online_walking->out_angle_rad_[9];
+  walking_joint_states_msg_.l_mdfd_goal_an_p  = online_walking->out_angle_rad_[10];
+  walking_joint_states_msg_.l_mdfd_goal_an_r  = online_walking->out_angle_rad_[11];
 
   walking_joint_states_msg_.r_present_hip_y = online_walking->curr_angle_rad_[0];
   walking_joint_states_msg_.r_present_hip_r = online_walking->curr_angle_rad_[1];
@@ -1331,6 +1404,33 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   walking_joint_states_msg_.l_present_an_p  = online_walking->curr_angle_rad_[10];
   walking_joint_states_msg_.l_present_an_r  = online_walking->curr_angle_rad_[11];
   walking_joint_states_pub_.publish(walking_joint_states_msg_);
+
+  force_torque_states_msg_.des_fx_l = online_walking->l_target_fx_N;
+  force_torque_states_msg_.des_fy_l = online_walking->l_target_fy_N;
+  force_torque_states_msg_.des_fz_l = online_walking->l_target_fz_N;
+  force_torque_states_msg_.des_tx_l = online_walking->l_target_tx_Nm;
+  force_torque_states_msg_.des_ty_l = online_walking->l_target_ty_Nm;
+  force_torque_states_msg_.des_tz_l = online_walking->l_target_tz_Nm;
+  force_torque_states_msg_.des_fx_r = online_walking->r_target_fx_N;
+  force_torque_states_msg_.des_fy_r = online_walking->r_target_fy_N;
+  force_torque_states_msg_.des_fz_r = online_walking->r_target_fz_N;
+  force_torque_states_msg_.des_tx_r = online_walking->r_target_tx_Nm;
+  force_torque_states_msg_.des_ty_r = online_walking->r_target_ty_Nm;
+  force_torque_states_msg_.des_tz_r = online_walking->r_target_tz_Nm;
+
+  force_torque_states_msg_.meas_fx_l = online_walking->current_left_fx_N_;
+  force_torque_states_msg_.meas_fy_l = online_walking->current_left_fy_N_;
+  force_torque_states_msg_.meas_fz_l = online_walking->current_left_fz_N_;
+  force_torque_states_msg_.meas_tx_l = online_walking->current_left_tx_Nm_;
+  force_torque_states_msg_.meas_ty_l = online_walking->current_left_ty_Nm_;
+  force_torque_states_msg_.meas_tz_l = online_walking->current_left_tz_Nm_;
+  force_torque_states_msg_.meas_fx_r = online_walking->current_right_fx_N_;
+  force_torque_states_msg_.meas_fy_r = online_walking->current_right_fy_N_;
+  force_torque_states_msg_.meas_fz_r = online_walking->current_right_fz_N_;
+  force_torque_states_msg_.meas_tx_r = online_walking->current_right_tx_Nm_;
+  force_torque_states_msg_.meas_ty_r = online_walking->current_right_ty_Nm_;
+  force_torque_states_msg_.meas_tz_r = online_walking->current_right_tz_Nm_;
+  force_torque_states_pub_.publish(force_torque_states_msg_);
 #endif
 
   present_running = isRunning();

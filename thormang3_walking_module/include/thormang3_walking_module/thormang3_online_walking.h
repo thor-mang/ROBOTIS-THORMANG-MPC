@@ -94,6 +94,14 @@ public:
 
   Eigen::MatrixXd mat_g_to_rfoot_, mat_g_to_lfoot_;
 
+  Eigen::MatrixXd mat_robot_to_acc_;
+  Eigen::MatrixXd mat_g_to_acc_;
+
+  Eigen::MatrixXd mdfd_mat_g_to_cob_, mdfd_mat_g_to_rfoot_, mdfd_mat_g_to_lfoot_;
+
+  Eigen::MatrixXd  mat_right_force, mat_right_torque;
+  Eigen::MatrixXd  mat_left_force, mat_left_torque;
+
   double r_shoulder_out_angle_rad_;
   double l_shoulder_out_angle_rad_;
   double r_elbow_out_angle_rad_;
@@ -118,10 +126,19 @@ public:
   double current_left_fx_N_,  current_left_fy_N_,  current_left_fz_N_;
   double current_left_tx_Nm_, current_left_ty_Nm_, current_left_tz_Nm_;
 
+  double r_target_fx_N, r_target_fy_N, r_target_fz_N;
+  double l_target_fx_N, l_target_fy_N, l_target_fz_N;
+  double r_target_tx_Nm, r_target_ty_Nm, r_target_tz_Nm;
+  double l_target_tx_Nm, l_target_ty_Nm, l_target_tz_Nm;
+
   Eigen::Quaterniond quat_current_imu_;
   Eigen::MatrixXd mat_current_imu_;
   double current_imu_roll_rad_, current_imu_pitch_rad_;
   double current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_;
+
+  //for publisher in walking_module.cpp
+  float current_ref_zmp_x_;
+  float current_ref_zmp_y_;
 
 private:
   void calcStepIdxData();

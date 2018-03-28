@@ -64,6 +64,7 @@
 #define WALKING_TUNE
 #ifdef WALKING_TUNE
 #include "thormang3_walking_module_msgs/WalkingJointStatesStamped.h"
+#include "thormang3_walking_module_msgs/ForceTorqueStates.h"
 #endif
 
 namespace thormang3
@@ -146,6 +147,13 @@ protected:
   Eigen::MatrixXd desired_matrix_g_to_rfoot_;
   Eigen::MatrixXd desired_matrix_g_to_lfoot_;
 
+  Eigen::MatrixXd desired_matrix_g_to_cob_acc_;
+  Eigen::MatrixXd desired_matrix_robot_to_cob_acc_;
+
+  Eigen::MatrixXd mdfd_des_matrix_g_to_cob_;
+  Eigen::MatrixXd mdfd_des_matrix_g_to_rfoot_;
+  Eigen::MatrixXd mdfd_des_matrix_g_to_lfoot_;
+
   bool previous_running_, present_running;
 
   /* ROS Topic Publish Functions */
@@ -157,9 +165,12 @@ protected:
   ros::Publisher done_msg_pub_;
 #ifdef WALKING_TUNE
   ros::Publisher walking_joint_states_pub_;
+  ros::Publisher force_torque_states_pub_;
+  ros::Publisher joint_fb_gain_pub_;
   ros::Publisher imu_orientation_states_pub_;
   ros::Publisher ft_states_pub_;
   thormang3_walking_module_msgs::WalkingJointStatesStamped walking_joint_states_msg_;
+  thormang3_walking_module_msgs::ForceTorqueStates force_torque_states_msg_;
 #endif
 
   thormang3_walking_module_msgs::RobotPose  robot_pose_msg_;
