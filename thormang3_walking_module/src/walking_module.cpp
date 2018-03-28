@@ -1362,7 +1362,8 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
 
 #ifdef WALKING_TUNE
-  walking_joint_states_msg_.header.stamp = ros::Time::now();
+  force_torque_states_msg_.header.stamp = walking_joint_states_msg_.header.stamp = ros::Time::now();
+
   walking_joint_states_msg_.r_goal_hip_y = online_walking->r_leg_out_angle_rad_[0];
   walking_joint_states_msg_.r_goal_hip_r = online_walking->r_leg_out_angle_rad_[1];
   walking_joint_states_msg_.r_goal_hip_p = online_walking->r_leg_out_angle_rad_[2];
