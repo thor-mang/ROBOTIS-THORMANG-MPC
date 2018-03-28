@@ -10,7 +10,9 @@ plugin_sets:
     robotis_joint_balance_controller: none
 
     # KinematicsPlugin
-    kdl_kinematics: none
+    kdl_kinematics:
+      params:
+        robot_description: "/johnny5/robot_description"
 
     # Interface Plugins
     imu_sensor_topic:
