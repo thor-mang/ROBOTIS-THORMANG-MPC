@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>my_visualization_for_walking</name>
+  <version>0.0.0</version>
+  <description>The my_visualization_for_walking package</description>
+
+  <maintainer email="anais@todo.todo">anais</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>thormang3_walking_module_msgs</depend>
+  <depend>robotis_controller_msgs</depend>
+  <depend>thormang3_foot_step_generator</depend>
+  <depend>robotis_math</depend>
+
+  <export>
+
+  </export>
+</package>
