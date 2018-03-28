@@ -1015,6 +1015,8 @@ void OnlineWalkingModule::setJointFeedBackGain(thormang3_walking_module_msgs::Jo
   online_walking->leg_angle_feed_back_[10].d_gain_ = msg.l_leg_an_p_d_gain  ;
   online_walking->leg_angle_feed_back_[11].p_gain_ = msg.l_leg_an_r_p_gain  ;
   online_walking->leg_angle_feed_back_[11].d_gain_ = msg.l_leg_an_r_d_gain  ;
+
+  joint_fb_gain_pub_.publish(msg);
 }
 
 
