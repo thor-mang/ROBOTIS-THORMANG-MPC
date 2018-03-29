@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 
 <launch>
-  <arg name="l_hand_type" default="$(optenv L_HAND_TYPE none)" />
-  <arg name="r_hand_type" default="$(optenv R_HAND_TYPE none)" />
+  <arg name="l_finger_joints" default="$(optenv L_HAND_JOINTS none)" />
+  <arg name="r_finger_joints" default="$(optenv R_HAND_JOINTS none)" />
 
   <group ns="joints">
     <rosparam file="$(find thormang3_ros_control_module)/config/ros_control_module_config.yaml" command="load" ns="ros_control_module" />
-    <rosparam file="$(find thormang3_ros_control_module)/config/hand_configs/l_$(arg l_hand_type).yaml" command="load" ns="ros_control_module" />
-    <rosparam file="$(find thormang3_ros_control_module)/config/hand_configs/r_$(arg r_hand_type).yaml" command="load" ns="ros_control_module" />
     <rosparam file="$(find thormang3_ros_control_module)/config/thor_mang_trajectory_controllers.yaml" command="load" />
+    <rosparam param="hand_joints" subst_value="True" ns="ros_control_module">[$(arg l_finger_joints), $(arg r_finger_joints)]</rosparam>
 
     <!-- load trajectory controllers -->
     <node name="trajectory_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
