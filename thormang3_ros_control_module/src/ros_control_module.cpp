@@ -96,7 +96,10 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
   if (nh.getParam("hand_joints", joints) && joints.getType() == XmlRpc::XmlRpcValue::TypeArray)
   {
     for (size_t i = 0; i < joints.size(); i++)
-      result_[static_cast<std::string>(joints[i])] = new robotis_framework::DynamixelState();
+    {
+      if (static_cast<std::string>(joints[i]) != "none")
+        result_[static_cast<std::string>(joints[i])] = new robotis_framework::DynamixelState();
+    }
   }
   else
     ROS_ERROR("[RosControlModule] hand joints must be given as an array of strings.");
