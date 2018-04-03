@@ -9,6 +9,12 @@ plugin_sets:
     # JointBalanceControllerPlugin
     robotis_joint_balance_controller: none
 
+    # ZMPReferenceGenerator
+    zmp_reference_generator: none
+
+    # SwingFootTrajectoryGenerator
+    swing_foot_trajectory_generator: none
+
     # KinematicsPlugin
     kdl_kinematics:
       params:
