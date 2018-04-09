@@ -256,6 +256,7 @@ void OnlineWalkingModule::queueThread()
   walking_joint_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::WalkingJointStatesStamped>("robotis/walking/walking_joint_states", 1);
   joint_fb_gain_pub_ = ros_node.advertise<thormang3_walking_module_msgs::JointFeedBackGain>("robotis/walking/joint_fb_gain", 1);
   force_torque_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::ForceTorqueStates>("robotis/walking/force_torque_states", 1);
+  imu_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::IMURollPitch>("robotis/walking/imu_states", 1);
 #endif
 
   /* ROS Service Callback Functions */
@@ -1430,7 +1431,15 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   force_torque_states_msg_.meas_tx_r = online_walking->current_right_tx_Nm_;
   force_torque_states_msg_.meas_ty_r = online_walking->current_right_ty_Nm_;
   force_torque_states_msg_.meas_tz_r = online_walking->current_right_tz_Nm_;
+
   force_torque_states_pub_.publish(force_torque_states_msg_);
+
+  imu_states_msg_.meas_roll_angle = online_walking->current_imu_roll_rad_;
+  imu_states_msg_.meas_pitch_angle = online_walking->current_imu_pitch_rad_;
+  imu_states_msg_.meas_roll_velocity = online_walking->current_gyro_roll_rad_per_sec_;
+  imu_states_msg_.meas_pitch_velocity = online_walking->current_gyro_pitch_rad_per_sec_;
+
+  imu_states_pub_.publish(imu_states_msg_);
 #endif
 
   present_running = isRunning();

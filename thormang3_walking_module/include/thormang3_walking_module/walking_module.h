@@ -65,6 +65,7 @@
 #ifdef WALKING_TUNE
 #include "thormang3_walking_module_msgs/WalkingJointStatesStamped.h"
 #include "thormang3_walking_module_msgs/ForceTorqueStates.h"
+#include "thormang3_walking_module_msgs/IMURollPitch.h"
 #endif
 
 namespace thormang3
@@ -167,10 +168,10 @@ protected:
   ros::Publisher walking_joint_states_pub_;
   ros::Publisher force_torque_states_pub_;
   ros::Publisher joint_fb_gain_pub_;
-  ros::Publisher imu_orientation_states_pub_;
-  ros::Publisher ft_states_pub_;
+  ros::Publisher imu_states_pub_;
   thormang3_walking_module_msgs::WalkingJointStatesStamped walking_joint_states_msg_;
   thormang3_walking_module_msgs::ForceTorqueStates force_torque_states_msg_;
+  thormang3_walking_module_msgs::IMURollPitch imu_states_msg_;
 #endif
 
   thormang3_walking_module_msgs::RobotPose  robot_pose_msg_;
