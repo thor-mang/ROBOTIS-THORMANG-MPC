@@ -12,8 +12,17 @@ plugin_sets:
     # ZMPReferenceGenerator
     zmp_reference_generator: none
 
-    # SwingFootTrajectoryGenerator
-    swing_foot_trajectory_generator: none
+    # SwingFootTrajectoryGeneratorPlugin
+    swing_foot_trajectory_generator: 
+      params:
+       delay_ratio_z_approx_dflt: 0.2
+       delta_z_approx_dflt: 0.03
+       delay_ratio_z_depart_down_dflt: 0.3
+       delta_z_depart_down_dflt: 0.1
+       delta_z_up_min: 0.1
+       delta_z_up_max: 0.3
+       velocity_z_up_max: 1.8
+       delay_ratio_xyrpy_start_max: 0.2  
 
     # KinematicsPlugin
     kdl_kinematics:
