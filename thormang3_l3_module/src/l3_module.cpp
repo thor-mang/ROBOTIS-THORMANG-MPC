@@ -75,9 +75,25 @@ void L3Module::process(std::map<std::string, robotis_framework::Dynamixel*> dxls
     return;
   }
 
+  // hold position in first iteration
   if (last_time_stamp_.isZero())
   {
     last_time_stamp_ = ros::Time::now();
+
+    for (std::pair<std::string, robotis_framework::DynamixelState*> e : result_)
+    {
+      const std::string& joint_name = e.first;
+      robotis_framework::DynamixelState* dxl = e.second;
+
+      auto itr = dxls.find(joint_name);
+      if (itr != dxls.end())
+      {
+        dxl->goal_position_ = itr->second->dxl_state_->goal_position_;
+        dxl->goal_velocity_ = itr->second->dxl_state_->goal_velocity_;
+        dxl->goal_torque_ = itr->second->dxl_state_->goal_torque_;
+      }
+    }
+
     return;
   }
 
