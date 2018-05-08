@@ -9,7 +9,6 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
-  cmake_modules
   robotis_math
   robotis_framework_common
   robotis_controller_msgs
@@ -18,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   ati_ft_sensor
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 
 

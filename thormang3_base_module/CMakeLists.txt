@@ -11,14 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   geometry_msgs
-  cmake_modules
   robotis_math
   robotis_framework_common
   robotis_controller_msgs
   thormang3_kinematics_dynamics
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions
