@@ -10,11 +10,10 @@ project(ati_ft_sensor)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
-  cmake_modules
   robotis_math
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions

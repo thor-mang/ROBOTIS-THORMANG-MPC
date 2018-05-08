@@ -9,11 +9,10 @@ project(thormang3_balance_control)
 ################################################################################
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  cmake_modules
   robotis_math
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions

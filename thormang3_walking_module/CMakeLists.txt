@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   sensor_msgs
-  cmake_modules
   eigen_conversions
   robotis_math
   robotis_framework_common
@@ -21,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   thormang3_walking_module_msgs
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions

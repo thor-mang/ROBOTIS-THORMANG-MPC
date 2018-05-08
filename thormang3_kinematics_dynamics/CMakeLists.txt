@@ -10,10 +10,9 @@ project(thormang3_kinematics_dynamics)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   robotis_math
-  cmake_modules
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions

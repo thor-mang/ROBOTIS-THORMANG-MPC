@@ -17,7 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_controller_msgs
   robotis_framework_common
   robotis_math
-  cmake_modules
   ati_ft_sensor
   thormang3_kinematics_dynamics
   thormang3_imu_module
@@ -35,7 +34,7 @@ find_package(catkin REQUIRED COMPONENTS
   thormang3_l3_module
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions

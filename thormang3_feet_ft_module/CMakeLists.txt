@@ -10,7 +10,6 @@ project(thormang3_feet_ft_module)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-  cmake_modules
   robotis_math
   robotis_controller_msgs
   robotis_framework_common
@@ -19,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   ati_ft_sensor
 )
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ################################################################################
 # Declare ROS messages, services and actions
