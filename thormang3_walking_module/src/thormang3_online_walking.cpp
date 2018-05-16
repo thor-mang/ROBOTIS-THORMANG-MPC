@@ -76,6 +76,15 @@ static const int StepDataStatus3 = 3; //
 static const int StepDataStatus4 = 4; //
 
 
+void THORMANG3OnlineWalking::matrixPrinter(Eigen::MatrixXd& mat)
+{
+  ROS_ERROR("G_TO_COB:");
+  ROS_ERROR("%f %f %f %f", mat.coeff(0, 0), mat.coeff(0, 1), mat.coeff(0, 2), mat.coeff(0, 3));
+  ROS_ERROR("%f %f %f %f", mat.coeff(1, 0), mat.coeff(1, 1), mat.coeff(1, 2), mat.coeff(1, 3));
+  ROS_ERROR("%f %f %f %f", mat.coeff(2, 0), mat.coeff(2, 1), mat.coeff(2, 2), mat.coeff(2, 3));
+  ROS_ERROR("%f %f %f %f", mat.coeff(3, 0), mat.coeff(3, 1), mat.coeff(3, 2), mat.coeff(3, 3));
+}
+
 THORMANG3OnlineWalking::THORMANG3OnlineWalking()
 {
   thormang3_kd_ = new KinematicsDynamics(WholeBody);
@@ -109,11 +118,12 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
   rot_x_pi_3d_ = robotis_framework::getRotationX(M_PI);
   rot_z_pi_3d_ = robotis_framework::getRotationZ(M_PI);
 
-
   mat_g_to_cob_ = robotis_framework::getTransformationXYZRPY(present_body_pose_.x, present_body_pose_.y, present_body_pose_.z,
       present_body_pose_.roll, present_body_pose_.pitch, present_body_pose_.yaw);
 
   mat_cob_to_g_ = robotis_framework::getInverseTransformation(mat_g_to_cob_);
+
+  matrixPrinter(mat_rfoot_to_rft_);
 
   mat_robot_to_cob_ = robotis_framework::getRotation4d(present_body_pose_.roll, present_body_pose_.pitch, 0);
   mat_cob_to_robot_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_);
@@ -183,6 +193,7 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
 
   walking_time_ = 0; reference_time_ = 0;
   balancing_index_ = BalancingPhase0;
+  static const double MMtoM = 0.001;
 
   preview_time_ = 1.6;
   preview_size_ = round(preview_time_/TIME_UNIT);
