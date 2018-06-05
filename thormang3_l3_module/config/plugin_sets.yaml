@@ -1,13 +1,13 @@
 plugin_sets:
   robotis_walk:
-    # GaitPatternGeneratorPlugin
-    robotis_gait_pattern_generator: none
-
     # LIPMBalanceControllerPlugin
     robotis_lipm_balance_controller: none
 
     # JointBalanceControllerPlugin
     robotis_joint_balance_controller: none
+
+    # ZMPGaitGeneratorPlugin
+    robotis_zmp_gait_generator: none
 
     # ZMPReferenceGenerator
     zmp_reference_generator: none
@@ -28,6 +28,9 @@ plugin_sets:
     kdl_kinematics:
       params:
         robot_description: "/johnny5/robot_description"
+
+    # GaitGeneratorPlugin
+    bipedal_gait_generator: none
 
     # Interface Plugins
     imu_sensor_topic:
