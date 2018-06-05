@@ -78,11 +78,11 @@ static const int StepDataStatus4 = 4; //
 
 void THORMANG3OnlineWalking::matrixPrinter(Eigen::MatrixXd& mat)
 {
-  ROS_ERROR("G_TO_COB:");
+  /*ROS_ERROR("G_TO_COB:");
   ROS_ERROR("%f %f %f %f", mat.coeff(0, 0), mat.coeff(0, 1), mat.coeff(0, 2), mat.coeff(0, 3));
   ROS_ERROR("%f %f %f %f", mat.coeff(1, 0), mat.coeff(1, 1), mat.coeff(1, 2), mat.coeff(1, 3));
   ROS_ERROR("%f %f %f %f", mat.coeff(2, 0), mat.coeff(2, 1), mat.coeff(2, 2), mat.coeff(2, 3));
-  ROS_ERROR("%f %f %f %f", mat.coeff(3, 0), mat.coeff(3, 1), mat.coeff(3, 2), mat.coeff(3, 3));
+  ROS_ERROR("%f %f %f %f", mat.coeff(3, 0), mat.coeff(3, 1), mat.coeff(3, 2), mat.coeff(3, 3));*/
 }
 
 THORMANG3OnlineWalking::THORMANG3OnlineWalking()
@@ -123,8 +123,6 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
 
   mat_cob_to_g_ = robotis_framework::getInverseTransformation(mat_g_to_cob_);
 
-  matrixPrinter(mat_rfoot_to_rft_);
-
   mat_robot_to_cob_ = robotis_framework::getRotation4d(present_body_pose_.roll, present_body_pose_.pitch, 0);
   mat_cob_to_robot_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_);
   mat_g_to_robot_   = mat_g_to_cob_ * mat_cob_to_robot_;
@@ -149,7 +147,6 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
   r_elbow_dir_    = thormang3_kd_->thormang3_link_data_[ID_R_ARM_START+2*3]->joint_axis_.coeff(2, 0);
   l_shoulder_dir_ = thormang3_kd_->thormang3_link_data_[ID_L_ARM_START+2*0]->joint_axis_.coeff(1, 0);
   l_elbow_dir_    = thormang3_kd_->thormang3_link_data_[ID_L_ARM_START+2*3]->joint_axis_.coeff(2, 0);
-
 
   r_init_shoulder_angle_rad_ = r_init_elbow_angle_rad_ = r_shoulder_out_angle_rad_ = r_elbow_out_angle_rad_ = 0;
   l_init_shoulder_angle_rad_ = l_init_elbow_angle_rad_ = l_shoulder_out_angle_rad_ = l_elbow_out_angle_rad_ = 0;
@@ -366,6 +363,11 @@ void THORMANG3OnlineWalking::initialize()
 
   rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
   lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
+
+
+  ROS_ERROR("Funktion: Initialize");
+  Eigen::MatrixXd test = robotis_framework::getTransformationXYZRPY(rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw);
+  matrixPrinter(test);
 
   if(thormang3_kd_->calcInverseKinematicsForRightLeg(&r_leg_out_angle_rad_[0], rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw) == false)
   {
@@ -1634,6 +1636,7 @@ void THORMANG3OnlineWalking::process()
       return;
     }
 
+    ROS_ERROR("Funktion: Process");
     Eigen::MatrixXd test = robotis_framework::getTransformationXYZRPY(rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw);
     matrixPrinter(test);
 
