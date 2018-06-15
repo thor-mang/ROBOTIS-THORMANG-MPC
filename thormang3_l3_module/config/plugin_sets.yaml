@@ -25,7 +25,7 @@ plugin_sets:
        delay_ratio_xyrpy_start_max: 0.2  
 
     # KinematicsPlugin
-    kdl_kinematics:
+    robotis_kinematics:
       params:
         robot_description: "/johnny5/robot_description"
 
