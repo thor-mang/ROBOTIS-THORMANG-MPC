@@ -238,6 +238,9 @@ void OnlineWalkingModule::initialize(const int control_cycle_msec, robotis_frame
   online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.d_gain_ = 0;
   online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.p_gain_ = 0;
   online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.d_gain_ = 0;
+
+  setJointFeedBackGains();
+  ROS_WARN("UPDATED JOINT FEEDBACK GAINS");
 }
 
 void OnlineWalkingModule::queueThread()
@@ -1465,3 +1468,111 @@ void OnlineWalkingModule::stop()
   return;
 }
 
+bool OnlineWalkingModule::loadFeedbackGainFromYaml()
+{
+  std::string balance_yaml_path = ros::package::getPath("thormang3_walking_module") + "/config/joint_feedback_gain.yaml";
+
+  YAML::Node doc;
+  try
+  {
+    // load yaml
+    doc = YAML::LoadFile(balance_yaml_path.c_str());
+
+    joint_feedback_update_duration_ = 2.0;
+    desired_joint_feedback_gain_.r_leg_hip_y_p_gain  = doc["r_leg_hip_y_p_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_hip_y_d_gain  = doc["r_leg_hip_y_d_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_hip_r_p_gain  = doc["r_leg_hip_r_p_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_hip_r_d_gain  = doc["r_leg_hip_r_d_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_hip_p_p_gain  = doc["r_leg_hip_p_p_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_hip_p_d_gain  = doc["r_leg_hip_p_d_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_kn_p_p_gain   = doc["r_leg_kn_p_p_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_kn_p_d_gain   = doc["r_leg_kn_p_d_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_an_p_p_gain   = doc["r_leg_an_p_p_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_an_p_d_gain   = doc["r_leg_an_p_d_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_an_r_p_gain   = doc["r_leg_an_r_p_gain"].as<double>();
+    desired_joint_feedback_gain_.r_leg_an_r_d_gain   = doc["r_leg_an_r_d_gain"].as<double>();
+
+    desired_joint_feedback_gain_.l_leg_hip_y_p_gain  = doc["l_leg_hip_y_p_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_hip_y_d_gain  = doc["l_leg_hip_y_d_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_hip_r_p_gain  = doc["l_leg_hip_r_p_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_hip_r_d_gain  = doc["l_leg_hip_r_d_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_hip_p_p_gain  = doc["l_leg_hip_p_p_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_hip_p_d_gain  = doc["l_leg_hip_p_d_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_kn_p_p_gain   = doc["l_leg_kn_p_p_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_kn_p_d_gain   = doc["l_leg_kn_p_d_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_an_p_p_gain   = doc["l_leg_an_p_p_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_an_p_d_gain   = doc["l_leg_an_p_d_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_an_r_p_gain   = doc["l_leg_an_r_p_gain"].as<double>();
+    desired_joint_feedback_gain_.l_leg_an_r_d_gain   = doc["l_leg_an_r_d_gain"].as<double>();
+  }
+  catch (const std::exception& e)
+  {
+    ROS_ERROR("Failed to load joint feedback gain yaml file.");
+    return false;
+  }
+
+  return true;
+}
+
+bool OnlineWalkingModule::setJointFeedBackGains()
+{
+  loadFeedbackGainFromYaml();
+
+  THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
+
+  if( joint_feedback_update_duration_ <= 0.0 )
+  {
+    // under 8ms apply immediately
+    setJointFeedBackGain(desired_joint_feedback_gain_);
+    std::string status_msg = WalkingStatusMSG::JOINT_FEEDBACK_GAIN_UPDATE_FINISHED_MSG;
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
+    publishDoneMsg("walking_joint_feedback");
+    return true;
+  }
+
+  joint_feedback_update_sys_time_ = 0.0;
+  joint_feedback_update_polynomial_coeff_.resize(6, 1);
+
+  double tf = joint_feedback_update_duration_;
+  Eigen::MatrixXd A(6,6), B(6, 1);
+  A <<  0.0,     0.0,     0.0,    0.0,    0.0, 1.0,
+      0.0,   0.0,    0.0,    0.0,       1.0, 0.0,
+      0.0,   0.0,    0.0,    2.0,       0.0, 0.0,
+      tf*tf*tf*tf*tf,     tf*tf*tf*tf,      tf*tf*tf,        tf*tf,     tf, 1.0,
+      5.0*tf*tf*tf*tf,    4.0*tf*tf*tf,    3.0*tf*tf,    2.0*tf,        1.0, 0.0,
+      20.0*tf*tf*tf,      12.0*tf*tf,       6.0*tf,        2.0,        0.0, 0.0;
+
+  B << 0, 0, 0, 1.0, 0, 0;
+  joint_feedback_update_polynomial_coeff_ = A.inverse() * B;
+
+  previous_joint_feedback_gain_.r_leg_hip_y_p_gain = online_walking->leg_angle_feed_back_[0].p_gain_;
+  previous_joint_feedback_gain_.r_leg_hip_y_d_gain = online_walking->leg_angle_feed_back_[0].d_gain_;
+  previous_joint_feedback_gain_.r_leg_hip_r_p_gain = online_walking->leg_angle_feed_back_[1].p_gain_;
+  previous_joint_feedback_gain_.r_leg_hip_r_d_gain = online_walking->leg_angle_feed_back_[1].d_gain_;
+  previous_joint_feedback_gain_.r_leg_hip_p_p_gain = online_walking->leg_angle_feed_back_[2].p_gain_;
+  previous_joint_feedback_gain_.r_leg_hip_p_d_gain = online_walking->leg_angle_feed_back_[2].d_gain_;
+  previous_joint_feedback_gain_.r_leg_kn_p_p_gain  = online_walking->leg_angle_feed_back_[3].p_gain_;
+  previous_joint_feedback_gain_.r_leg_kn_p_d_gain  = online_walking->leg_angle_feed_back_[3].d_gain_;
+  previous_joint_feedback_gain_.r_leg_an_p_p_gain  = online_walking->leg_angle_feed_back_[4].p_gain_;
+  previous_joint_feedback_gain_.r_leg_an_p_d_gain  = online_walking->leg_angle_feed_back_[4].d_gain_;
+  previous_joint_feedback_gain_.r_leg_an_r_p_gain  = online_walking->leg_angle_feed_back_[5].p_gain_;
+  previous_joint_feedback_gain_.r_leg_an_r_d_gain  = online_walking->leg_angle_feed_back_[5].d_gain_;
+
+  previous_joint_feedback_gain_.l_leg_hip_y_p_gain = online_walking->leg_angle_feed_back_[6].p_gain_;
+  previous_joint_feedback_gain_.l_leg_hip_y_d_gain = online_walking->leg_angle_feed_back_[6].d_gain_;
+  previous_joint_feedback_gain_.l_leg_hip_r_p_gain = online_walking->leg_angle_feed_back_[7].p_gain_;
+  previous_joint_feedback_gain_.l_leg_hip_r_d_gain = online_walking->leg_angle_feed_back_[7].d_gain_;
+  previous_joint_feedback_gain_.l_leg_hip_p_p_gain = online_walking->leg_angle_feed_back_[8].p_gain_;
+  previous_joint_feedback_gain_.l_leg_hip_p_d_gain = online_walking->leg_angle_feed_back_[8].d_gain_;
+  previous_joint_feedback_gain_.l_leg_kn_p_p_gain  = online_walking->leg_angle_feed_back_[9].p_gain_;
+  previous_joint_feedback_gain_.l_leg_kn_p_d_gain  = online_walking->leg_angle_feed_back_[9].d_gain_;
+  previous_joint_feedback_gain_.l_leg_an_p_p_gain  = online_walking->leg_angle_feed_back_[10].p_gain_;
+  previous_joint_feedback_gain_.l_leg_an_p_d_gain  = online_walking->leg_angle_feed_back_[10].d_gain_;
+  previous_joint_feedback_gain_.l_leg_an_r_p_gain  = online_walking->leg_angle_feed_back_[11].p_gain_;
+  previous_joint_feedback_gain_.l_leg_an_r_d_gain  = online_walking->leg_angle_feed_back_[11].d_gain_;
+
+  joint_feedback_update_with_loop_ = true;
+  joint_feedback_update_sys_time_  = 0.0;
+
+  return true;
+}
