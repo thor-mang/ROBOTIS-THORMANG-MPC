@@ -40,10 +40,14 @@
 
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
+#include <ros/package.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <boost/thread.hpp>
+
+#include <yaml-cpp/yaml.h>
+
 
 #include "thormang3_walking_module/thormang3_online_walking.h"
 #include "robotis_framework_common/motion_module.h"
@@ -135,6 +139,10 @@ protected:
 
   void setJointFeedBackGain(thormang3_walking_module_msgs::JointFeedBackGain& msg);
   void updateJointFeedBackGain();
+
+  /// MY MODIFS
+  bool loadFeedbackGainFromYaml();
+  bool setJointFeedBackGains();
 
   std::map<std::string, int> joint_name_to_index_;
 
