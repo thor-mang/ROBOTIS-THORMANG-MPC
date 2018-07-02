@@ -1422,18 +1422,18 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   force_torque_states_msg_.des_ty_r = online_walking->r_target_ty_Nm;
   force_torque_states_msg_.des_tz_r = online_walking->r_target_tz_Nm;
 
-  force_torque_states_msg_.meas_fx_l = online_walking->current_left_fx_N_;
-  force_torque_states_msg_.meas_fy_l = online_walking->current_left_fy_N_;
-  force_torque_states_msg_.meas_fz_l = online_walking->current_left_fz_N_;
-  force_torque_states_msg_.meas_tx_l = online_walking->current_left_tx_Nm_;
-  force_torque_states_msg_.meas_ty_l = online_walking->current_left_ty_Nm_;
-  force_torque_states_msg_.meas_tz_l = online_walking->current_left_tz_Nm_;
-  force_torque_states_msg_.meas_fx_r = online_walking->current_right_fx_N_;
-  force_torque_states_msg_.meas_fy_r = online_walking->current_right_fy_N_;
-  force_torque_states_msg_.meas_fz_r = online_walking->current_right_fz_N_;
-  force_torque_states_msg_.meas_tx_r = online_walking->current_right_tx_Nm_;
-  force_torque_states_msg_.meas_ty_r = online_walking->current_right_ty_Nm_;
-  force_torque_states_msg_.meas_tz_r = online_walking->current_right_tz_Nm_;
+  force_torque_states_msg_.meas_fx_l = online_walking->mat_left_force(0,0);
+  force_torque_states_msg_.meas_fy_l = online_walking->mat_left_force(1,0);
+  force_torque_states_msg_.meas_fz_l = online_walking->mat_left_force(2,0);
+  force_torque_states_msg_.meas_tx_l = online_walking->mat_left_torque(0,0);
+  force_torque_states_msg_.meas_ty_l = online_walking->mat_left_torque(1,0);
+  force_torque_states_msg_.meas_tz_l = online_walking->mat_left_torque(2,0);
+  force_torque_states_msg_.meas_fx_r = online_walking->mat_right_force(0,0);
+  force_torque_states_msg_.meas_fy_r = online_walking->mat_right_force(1,0);
+  force_torque_states_msg_.meas_fz_r = online_walking->mat_right_force(2,0);
+  force_torque_states_msg_.meas_tx_r = online_walking->mat_right_torque(0,0);
+  force_torque_states_msg_.meas_ty_r = online_walking->mat_right_torque(1,0);
+  force_torque_states_msg_.meas_tz_r = online_walking->mat_right_torque(2,0);
 
   force_torque_states_pub_.publish(force_torque_states_msg_);
 

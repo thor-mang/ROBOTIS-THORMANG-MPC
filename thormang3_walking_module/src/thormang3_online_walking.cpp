@@ -1412,7 +1412,6 @@ void THORMANG3OnlineWalking::process()
     double left_leg_Ty_Nm = current_left_ty_Nm_;
     double left_leg_Tz_Nm = current_left_tz_Nm_;
 
-    Eigen::MatrixXd  mat_right_force, mat_right_torque;
     mat_right_force.resize(4,1);    mat_right_force.fill(0);
     mat_right_torque.resize(4,1);   mat_right_torque.fill(0);
     mat_right_force(0,0) = right_leg_fx_N;
@@ -1422,7 +1421,6 @@ void THORMANG3OnlineWalking::process()
     mat_right_torque(1,0) = right_leg_Ty_Nm;
     mat_right_torque(2,0) = right_leg_Tz_Nm;
 
-    Eigen::MatrixXd  mat_left_force, mat_left_torque;
     mat_left_force.resize(4,1);     mat_left_force.fill(0);
     mat_left_torque.resize(4,1);    mat_left_torque.fill(0);
     mat_left_force(0,0) = left_leg_fx_N;
