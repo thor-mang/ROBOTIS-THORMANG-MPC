@@ -984,6 +984,7 @@ void THORMANG3OnlineWalking::process()
 {
   if(!ctrl_running)
   {
+    ROS_ERROR("NOT WALKING");
     return;
   }
   else
@@ -1004,8 +1005,16 @@ void THORMANG3OnlineWalking::process()
       ssp_ratio = 1 - dsp_ratio;
       foot_move_period_time = ssp_ratio*period_time;
 
+      //ROS_ERROR("Period Time: %f", period_time);
+      //ROS_ERROR("Foot Move Period Time: %f", foot_move_period_time);
+
       ssp_time_start = dsp_ratio*period_time/2.0 + reference_time_;
       ssp_time_end = (1 + ssp_ratio)*period_time / 2.0 + reference_time_;
+
+      //ROS_ERROR("DSP_Ratio: %f", dsp_ratio);
+      //ROS_ERROR("SSP_Ratio: %f", ssp_ratio);
+      //ROS_ERROR("SSP_Time_Start: %f", ssp_time_start);
+      //ROS_ERROR("SSP_Time_End: %f", ssp_time_end);
 
       double start_time_delay_ratio_x        = added_step_data_[0].time_data.start_time_delay_ratio_x;
       double start_time_delay_ratio_y        = added_step_data_[0].time_data.start_time_delay_ratio_y;
