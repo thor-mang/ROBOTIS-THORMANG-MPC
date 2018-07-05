@@ -124,7 +124,7 @@ public:
   double current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_;
 
 private:
-  void matrixPrinter(Eigen::MatrixXd& mat);
+  std::string toString(Eigen::MatrixXd& mat);
 
   void calcStepIdxData();
   void calcRefZMP();
