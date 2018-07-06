@@ -202,6 +202,7 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
   sum_of_zmp_x_ = 0;
   sum_of_zmp_y_ = 0;
   sum_of_cx_ = 0;
+
   sum_of_cy_ = 0;
 
   // variables for balance
@@ -385,7 +386,7 @@ void THORMANG3OnlineWalking::initialize()
     out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
     curr_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
     curr_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
-  }
+  }reference_step_data_for_addition_.time_data.abs_step_time = 1.6;
 
   for(int feed_forward_idx = 0; feed_forward_idx < 12; feed_forward_idx++)
   {
@@ -486,7 +487,7 @@ void THORMANG3OnlineWalking::initialize()
 //        891.3091699,  861.3465762,  833.615981,   807.3964237,  782.2132154,  757.8151538,  734.0999123,  711.0427972,  688.6479404,  666.9221777,
 //        645.8649499,  625.4670304,  605.7128357,  586.5833441,  568.0583614,  550.1178678,  532.7426248,  515.914327,   499.6155377,  483.8295609,
 //        468.5403224,  453.7322864,  439.3904039,  425.5000849,  412.0471825,  399.0179825,  386.3991934,  374.1779373,  362.3417377,  350.8785086,
-//        339.7765423,  329.0244973,  318.6113874,  308.5265697,  298.7597346,  289.3008946,  280.140375,   271.2688034,  262.6771012,  254.3564733,
+//        339.7765423,  329.0244973,  318.6113874,  308.5265697,  298.75reference_step_data_for_addition_.time_data.abs_step_time = 1.6;97346,  289.3008946,  280.140375,   271.2688034,  262.6771012,  254.3564733,
 //        246.2984005,  238.4946298,  230.9371668,  223.6182676,  216.5304305,  209.6663889,  203.019104,   196.5817571,  190.3477436,  184.3106657,
 //        178.464326,   172.8027215,  167.3200373,  162.010641,   156.8690766,  151.8900593,  147.0684701,  142.3993506,  137.8778978,  133.4994595,
 //        129.2595297,  125.1537435,  121.1778731,  117.3278237,  113.5996286,  109.9894461,  106.4935549,  103.1083507,   99.83034228,  96.6561483,
@@ -576,7 +577,7 @@ void THORMANG3OnlineWalking::reInitialize()
   }
 
   for(int angle_idx = 0; angle_idx < 6; angle_idx++)
-  {
+  {reference_step_data_for_addition_.time_data.abs_step_time = 1.6;
     out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
     out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
   }
@@ -984,7 +985,6 @@ void THORMANG3OnlineWalking::process()
 {
   if(!ctrl_running)
   {
-    ROS_ERROR("NOT WALKING");
     return;
   }
   else
@@ -1005,16 +1005,8 @@ void THORMANG3OnlineWalking::process()
       ssp_ratio = 1 - dsp_ratio;
       foot_move_period_time = ssp_ratio*period_time;
 
-      //ROS_ERROR("Period Time: %f", period_time);
-      //ROS_ERROR("Foot Move Period Time: %f", foot_move_period_time);
-
       ssp_time_start = dsp_ratio*period_time/2.0 + reference_time_;
       ssp_time_end = (1 + ssp_ratio)*period_time / 2.0 + reference_time_;
-
-      //ROS_ERROR("DSP_Ratio: %f", dsp_ratio);
-      //ROS_ERROR("SSP_Ratio: %f", ssp_ratio);
-      //ROS_ERROR("SSP_Time_Start: %f", ssp_time_start);
-      //ROS_ERROR("SSP_Time_End: %f", ssp_time_end);
 
       double start_time_delay_ratio_x        = added_step_data_[0].time_data.start_time_delay_ratio_x;
       double start_time_delay_ratio_y        = added_step_data_[0].time_data.start_time_delay_ratio_y;
@@ -1031,16 +1023,29 @@ void THORMANG3OnlineWalking::process()
 
       double hip_roll_swap_dir = 1.0;
 
+      //Update Trajectories before every new step
       if( (walking_time_ - reference_time_) < TIME_UNIT)
       {
+        //ROS_ERROR("Walking Time: %f", walking_time_);
+        //ROS_ERROR("Reference Time: %f", reference_time_);
+        //ROS_ERROR("Subtraction: %f", walking_time_ - reference_time_);
+        if((walking_time_ - reference_time_) < TIME_UNIT)
+        {
+          //ROS_ERROR("WHAT?");
+        }
+
         waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.waist_yaw_angle, 0, 0);
+
         body_z_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.z, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.z, 0, 0);
+
         body_roll_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.roll, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.roll, 0, 0);
+
         body_pitch_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.pitch, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.pitch, 0, 0);
+
 
         double bc_move_amp = added_step_data_[0].position_data.body_pose.yaw - previous_step_body_pose_.yaw;
 
@@ -1059,6 +1064,8 @@ void THORMANG3OnlineWalking::process()
 
         if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
         {
+          //ROS_ERROR("Right Foot is swinging");
+
           foot_x_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_x*foot_move_period_time,
               previous_step_right_foot_pose_.x, 0, 0,
               ssp_time_end - finish_time_advance_ratio_x*foot_move_period_time,
@@ -1099,6 +1106,7 @@ void THORMANG3OnlineWalking::process()
         }
         else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
         {
+          //ROS_ERROR("Left Foot is swinging");
           foot_x_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_x*foot_move_period_time,
               previous_step_left_foot_pose_.x, 0, 0,
               ssp_time_end - finish_time_advance_ratio_x*foot_move_period_time,
@@ -1141,6 +1149,7 @@ void THORMANG3OnlineWalking::process()
         }
         else
         {
+          //ROS_ERROR("No Foot is Swinging");
           foot_z_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
               ssp_time_end, 0, 0, 0);
 
@@ -1151,6 +1160,8 @@ void THORMANG3OnlineWalking::process()
         }
       }
 
+
+      //Position of trajectories at current walking time
       double z_swap = body_z_swap_tra_.getPosition(walking_time_);
       double wp_move = waist_yaw_tra_.getPosition(walking_time_);
       double bz_move = body_z_tra_.getPosition(walking_time_);
@@ -1158,6 +1169,7 @@ void THORMANG3OnlineWalking::process()
       double bb_move = body_pitch_tra_.getPosition(walking_time_);
       double bc_move = body_yaw_tra_.getPosition(walking_time_);
 
+      //Current body pose
       present_waist_yaw_angle_rad_ = wp_move;
       present_body_pose_.z = bz_move + z_swap;
       present_body_pose_.roll = ba_move;
@@ -1166,6 +1178,8 @@ void THORMANG3OnlineWalking::process()
 
       //Feet
       double x_move, y_move, z_move, a_move, b_move, c_move, z_vibe;
+
+      //Preparation of taking the current step and choosing the right balancing phase
       if( walking_time_ <= ssp_time_start)
       {
         x_move = foot_x_tra_.getPosition(ssp_time_start);
@@ -1185,6 +1199,7 @@ void THORMANG3OnlineWalking::process()
         else
           balancing_index_ = BalancingPhase0;
       }
+      //Doing the current step and choosing the right balancing phase
       else if( walking_time_ <= ssp_time_end)
       {
         x_move = foot_x_tra_.getPosition(walking_time_);
@@ -1236,6 +1251,7 @@ void THORMANG3OnlineWalking::process()
       }
       else
       {
+        //Trajectory position after the step and choosing the right balancing phase
         x_move = foot_x_tra_.getPosition(ssp_time_end);
         y_move = foot_y_tra_.getPosition(ssp_time_end);
         z_move = foot_z_tra_.getPosition(ssp_time_end);
@@ -1254,7 +1270,7 @@ void THORMANG3OnlineWalking::process()
           balancing_index_ = BalancingPhase0;
       }
 
-
+      //Right foot is swinging, right foot has trajectory position of current time
       if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
       {
         present_right_foot_pose_.x = x_move;
@@ -1268,6 +1284,8 @@ void THORMANG3OnlineWalking::process()
 
         hip_roll_swap_dir = -1.0;
       }
+
+      //Left foot is swinging, left foot has trajectory position of current time
       else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
       {
         present_right_foot_pose_ = added_step_data_[0].position_data.right_foot_pose;
@@ -1281,6 +1299,7 @@ void THORMANG3OnlineWalking::process()
 
         hip_roll_swap_dir = 1.0;
       }
+      //Both feet on the ground, both feet hold their position
       else
       {
         present_right_foot_pose_ = added_step_data_[0].position_data.right_foot_pose;
@@ -1294,6 +1313,7 @@ void THORMANG3OnlineWalking::process()
       shouler_swing_gain_ = added_step_data_[0].position_data.shoulder_swing_gain;
       elbow_swing_gain_ = added_step_data_[0].position_data.elbow_swing_gain;
 
+      //Next time step
       walking_time_ += TIME_UNIT;
 
       if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5*0.001)
@@ -1305,6 +1325,7 @@ void THORMANG3OnlineWalking::process()
         step_data_mutex_lock_.lock();
       }
 
+      //Preparation for Balance Control
       if(balancing_index_ == BalancingPhase0 || balancing_index_ == BalancingPhase9)
       {
         left_fz_trajectory_start_time_ = walking_time_;
@@ -1386,6 +1407,7 @@ void THORMANG3OnlineWalking::process()
 
     step_data_mutex_lock_.unlock();
 
+    //Transformation Matrices for Balance Control
     mat_g_to_cob_ = robotis_framework::getTransformationXYZRPY(present_body_pose_.x, present_body_pose_.y, present_body_pose_.z,
         present_body_pose_.roll, present_body_pose_.pitch, present_body_pose_.yaw);
 
@@ -1481,6 +1503,7 @@ void THORMANG3OnlineWalking::process()
     mat_robot_to_acc = mat_robot_to_g_ * mat_g_to_acc;
 
 
+    //Balance Control dependent on the balancing Phase
     switch(balancing_index_)
     {
     case BalancingPhase0:
@@ -1558,7 +1581,7 @@ void THORMANG3OnlineWalking::process()
       l_target_fy_N = 0;
       l_target_fz_N = 0;
       target_fz_N =  -right_ssp_fz_N_;
-      break;
+      break;reference_step_data_for_addition_.time_data.abs_step_time = 1.6;
     case BalancingPhase8:
       //fprintf(stderr, "DSP : R->O--L");
       r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
@@ -1630,6 +1653,8 @@ void THORMANG3OnlineWalking::process()
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
 
+
+    //Kinematics and sending commands to joints
     rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
     lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
 
@@ -1656,6 +1681,7 @@ void THORMANG3OnlineWalking::process()
     }
 
 
+    //Arm Movement for Walking - Currently not Used
     r_shoulder_out_angle_rad_ = r_shoulder_dir_*(mat_robot_to_rfoot_.coeff(0, 3) - mat_robot_to_lfoot_.coeff(0, 3))*shouler_swing_gain_ + r_init_shoulder_angle_rad_;
     l_shoulder_out_angle_rad_ = l_shoulder_dir_*(mat_robot_to_lfoot_.coeff(0, 3) - mat_robot_to_rfoot_.coeff(0, 3))*shouler_swing_gain_ + l_init_shoulder_angle_rad_;
     r_elbow_out_angle_rad_ = r_elbow_dir_*(mat_robot_to_rfoot_.coeff(0, 3) - mat_robot_to_lfoot_.coeff(0, 3))*elbow_swing_gain_ + r_init_elbow_angle_rad_;
