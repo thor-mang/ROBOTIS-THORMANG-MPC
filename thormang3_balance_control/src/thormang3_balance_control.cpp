@@ -614,18 +614,18 @@ BalanceControlUsingPDController::BalanceControlUsingPDController()
   cob_z_manual_adjustment_m_ = 0;
 
   // maximum adjustment
-  cob_x_adjustment_abs_max_m_ = 0.05;
-  cob_y_adjustment_abs_max_m_ = 0.05;
-  cob_z_adjustment_abs_max_m_ = 0.05;
-  cob_roll_adjustment_abs_max_rad_  = 15.0*DEGREE2RADIAN;
-  cob_pitch_adjustment_abs_max_rad_ = 15.0*DEGREE2RADIAN;
-  cob_yaw_adjustment_abs_max_rad_   = 15.0*DEGREE2RADIAN;
-  foot_x_adjustment_abs_max_m_ = 0.05;
-  foot_y_adjustment_abs_max_m_ = 0.05;
-  foot_z_adjustment_abs_max_m_ = 0.05;
-  foot_roll_adjustment_abs_max_rad_  = 15.0*DEGREE2RADIAN;
-  foot_pitch_adjustment_abs_max_rad_ = 15.0*DEGREE2RADIAN;
-  foot_yaw_adjustment_abs_max_rad_   = 15.0*DEGREE2RADIAN;
+  cob_x_adjustment_abs_max_m_ = 0.03;
+  cob_y_adjustment_abs_max_m_ = 0.01;
+  cob_z_adjustment_abs_max_m_ = 0.01;
+  cob_roll_adjustment_abs_max_rad_  = 0.13;
+  cob_pitch_adjustment_abs_max_rad_ = 0.13;
+  cob_yaw_adjustment_abs_max_rad_   = 0.13;
+  foot_x_adjustment_abs_max_m_ = 0.01;
+  foot_y_adjustment_abs_max_m_ = 0.01;
+  foot_z_adjustment_abs_max_m_ = 0.01;
+  foot_roll_adjustment_abs_max_rad_  = 0.13;
+  foot_pitch_adjustment_abs_max_rad_ = 0.13;
+  foot_yaw_adjustment_abs_max_rad_   = 0.13;
 
   mat_robot_to_cob_modified_        = Eigen::MatrixXd::Identity(4,4);
   mat_robot_to_right_foot_modified_ = Eigen::MatrixXd::Identity(4,4);
@@ -774,22 +774,26 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_left_foot_adjustment_.coeffRef(4) = (foot_pitch_adjustment_by_gyro_pitch_ + foot_pitch_adjustment_by_orientation_pitch_ + l_foot_pitch_adjustment_by_torque_pitch_);
 
   // check limitation
-  if((fabs(pose_cob_adjustment_.coeff(0)) == cob_x_adjustment_abs_max_m_      ) ||
-     (fabs(pose_cob_adjustment_.coeff(1)) == cob_y_adjustment_abs_max_m_      ) ||
-     (fabs(pose_cob_adjustment_.coeff(2)) == cob_z_adjustment_abs_max_m_      ) ||
-     (fabs(pose_cob_adjustment_.coeff(3)) == cob_roll_adjustment_abs_max_rad_ ) ||
-     (fabs(pose_cob_adjustment_.coeff(4)) == cob_pitch_adjustment_abs_max_rad_) ||
-     (fabs(pose_right_foot_adjustment_.coeff(0)) == foot_x_adjustment_abs_max_m_      ) ||
-     (fabs(pose_right_foot_adjustment_.coeff(1)) == foot_y_adjustment_abs_max_m_      ) ||
-     (fabs(pose_right_foot_adjustment_.coeff(2)) == foot_z_adjustment_abs_max_m_      ) ||
-     (fabs(pose_right_foot_adjustment_.coeff(3)) == foot_roll_adjustment_abs_max_rad_ ) ||
-     (fabs(pose_right_foot_adjustment_.coeff(4)) == foot_pitch_adjustment_abs_max_rad_) ||
-     (fabs(pose_left_foot_adjustment_.coeff(0)) == foot_x_adjustment_abs_max_m_      ) ||
-     (fabs(pose_left_foot_adjustment_.coeff(1)) == foot_y_adjustment_abs_max_m_      ) ||
-     (fabs(pose_left_foot_adjustment_.coeff(2)) == foot_z_adjustment_abs_max_m_      ) ||
-     (fabs(pose_left_foot_adjustment_.coeff(3)) == foot_roll_adjustment_abs_max_rad_ ) ||
-     (fabs(pose_left_foot_adjustment_.coeff(4)) == foot_pitch_adjustment_abs_max_rad_))
+  if((fabs(pose_cob_adjustment_.coeff(0)) > cob_x_adjustment_abs_max_m_      ) ||
+     (fabs(pose_cob_adjustment_.coeff(1)) > cob_y_adjustment_abs_max_m_      ) ||
+     (fabs(pose_cob_adjustment_.coeff(2)) > cob_z_adjustment_abs_max_m_      ) ||
+     (fabs(pose_cob_adjustment_.coeff(3)) > cob_roll_adjustment_abs_max_rad_ ) ||
+     (fabs(pose_cob_adjustment_.coeff(4)) > cob_pitch_adjustment_abs_max_rad_) ||
+     (fabs(pose_right_foot_adjustment_.coeff(0)) > foot_x_adjustment_abs_max_m_      ) ||
+     (fabs(pose_right_foot_adjustment_.coeff(1)) > foot_y_adjustment_abs_max_m_      ) ||
+     (fabs(pose_right_foot_adjustment_.coeff(2)) > foot_z_adjustment_abs_max_m_      ) ||
+     (fabs(pose_right_foot_adjustment_.coeff(3)) > foot_roll_adjustment_abs_max_rad_ ) ||
+     (fabs(pose_right_foot_adjustment_.coeff(4)) > foot_pitch_adjustment_abs_max_rad_) ||
+     (fabs(pose_left_foot_adjustment_.coeff(0)) > foot_x_adjustment_abs_max_m_      ) ||
+     (fabs(pose_left_foot_adjustment_.coeff(1)) > foot_y_adjustment_abs_max_m_      ) ||
+     (fabs(pose_left_foot_adjustment_.coeff(2)) > foot_z_adjustment_abs_max_m_      ) ||
+     (fabs(pose_left_foot_adjustment_.coeff(3)) > foot_roll_adjustment_abs_max_rad_ ) ||
+     (fabs(pose_left_foot_adjustment_.coeff(4)) > foot_pitch_adjustment_abs_max_rad_))
+  {
     balance_control_error_ &= BalanceControlError::BalanceLimit;
+    ROS_WARN("[Balance Control] BC correction reached saturation!");
+  }
+
 
   pose_cob_adjustment_.coeffRef(0) = copysign(fmin(fabs(pose_cob_adjustment_.coeff(0)), cob_x_adjustment_abs_max_m_      ), pose_cob_adjustment_.coeff(0));
   pose_cob_adjustment_.coeffRef(1) = copysign(fmin(fabs(pose_cob_adjustment_.coeff(1)), cob_x_adjustment_abs_max_m_      ), pose_cob_adjustment_.coeff(1));
