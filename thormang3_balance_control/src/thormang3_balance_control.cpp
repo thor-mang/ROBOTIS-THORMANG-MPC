@@ -574,6 +574,8 @@ BalanceControlUsingPDController::BalanceControlUsingPDController()
   orientation_enable_ = 1.0;
   ft_enable_ = 1.0;
 
+  fall_detected_ = false;
+
   desired_robot_to_cob_         = Eigen::MatrixXd::Identity(4,4);
   desired_robot_to_right_foot_  = Eigen::MatrixXd::Identity(4,4);
   desired_robot_to_left_foot_   = Eigen::MatrixXd::Identity(4,4);
@@ -693,6 +695,11 @@ void BalanceControlUsingPDController::setForceTorqueBalanceEnable(bool enable)
 
 void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified)
 {
+  if(stopMotion())
+  {
+    return;
+  }
+
   balance_control_error_ = BalanceControlError::NoError;
 
   pose_cob_adjustment_.fill(0);
@@ -718,6 +725,15 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   double left_foot_torque_roll_filtered  = left_foot_torque_roll_lpf_.getFilteredOutput(current_left_tx_Nm_);
   double left_foot_torque_pitch_filtered = left_foot_torque_pitch_lpf_.getFilteredOutput(current_left_ty_Nm_);
 
+  //--fall detection--
+  if( (fabs(pitch_angle_filtered) > 0.3) || (fabs(roll_angle_filtered) > 0.3) )
+  {
+    if(fall_detected_ == false)
+    {
+      ROS_ERROR("[Balance Control] Robot falled over!");
+      fall_detected_ = true;
+    }
+  }
 
   // gyro
   foot_roll_adjustment_by_gyro_roll_   = -0.1*gyro_enable_*foot_roll_gyro_ctrl_.getFeedBack(roll_gyro_filtered);
@@ -954,4 +970,9 @@ double BalanceControlUsingPDController::getCOBManualAdjustmentY()
 double BalanceControlUsingPDController::getCOBManualAdjustmentZ()
 {
   return cob_z_manual_adjustment_m_;
+}
+
+bool BalanceControlUsingPDController::stopMotion()
+{
+  return fall_detected_;
 }

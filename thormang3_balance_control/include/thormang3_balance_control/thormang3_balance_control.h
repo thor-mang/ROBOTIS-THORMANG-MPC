@@ -310,6 +310,8 @@ public:
   double getCOBManualAdjustmentY();
   double getCOBManualAdjustmentZ();
 
+  bool stopMotion();
+
   // damping controllers
   BalancePDController foot_roll_gyro_ctrl_;
   BalancePDController foot_pitch_gyro_ctrl_;
@@ -356,6 +358,8 @@ private:
   double gyro_enable_;
   double orientation_enable_;
   double ft_enable_;
+
+  bool fall_detected_;
 
   // desired pose
   Eigen::MatrixXd desired_robot_to_cob_;

@@ -1667,15 +1667,17 @@ void THORMANG3OnlineWalking::process()
         l_leg_out_angle_rad_[1] = l_leg_out_angle_rad_[1] - 0.35*hip_roll_swap;
     }
 
-    for(int angle_idx = 0; angle_idx < 6; angle_idx++)
+    if(!balance_ctrl_.stopMotion())
     {
-      leg_angle_feed_back_[angle_idx+0].desired_ = r_leg_out_angle_rad_[angle_idx];
-      leg_angle_feed_back_[angle_idx+6].desired_ = l_leg_out_angle_rad_[angle_idx];
-      out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx] + leg_angle_feed_back_[angle_idx+0].getFeedBack(curr_angle_rad_[angle_idx]);
-      out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx] + leg_angle_feed_back_[angle_idx+6].getFeedBack(curr_angle_rad_[angle_idx+6]);
-//      out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx];
-//      out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx];
+      for(int angle_idx = 0; angle_idx < 6; angle_idx++)
+      {
+        leg_angle_feed_back_[angle_idx+0].desired_ = r_leg_out_angle_rad_[angle_idx];
+        leg_angle_feed_back_[angle_idx+6].desired_ = l_leg_out_angle_rad_[angle_idx];
+        out_angle_rad_[angle_idx+0] = r_leg_out_angle_rad_[angle_idx] + leg_angle_feed_back_[angle_idx+0].getFeedBack(curr_angle_rad_[angle_idx]);
+        out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx] + leg_angle_feed_back_[angle_idx+6].getFeedBack(curr_angle_rad_[angle_idx+6]);
+      }
     }
+
   }
 }
 
