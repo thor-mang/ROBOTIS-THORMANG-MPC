@@ -263,6 +263,26 @@ private:
 
 };
 
+
+
+class BreakDownDetector
+{
+  public:
+    BreakDownDetector();
+    ~BreakDownDetector();
+
+    void initialize(double precision, int counter_limit);
+    void reset();
+    bool getBreakDownDetection(double value);
+
+  private:
+    int break_down_counter_, counter_limit_;
+    double precision_;
+    double old_value_;
+};
+
+
+
 class BalanceControlUsingPDController
 {
 public:
@@ -359,7 +379,13 @@ private:
   double orientation_enable_;
   double ft_enable_;
 
+  // safety params
   bool fall_detected_;
+  bool communication_pb_detected_;
+
+  BreakDownDetector imu_roll_bd_detector_, imu_pitch_bd_detector_;
+  BreakDownDetector fz_l_bd_detector_, tx_l_bd_detector_, ty_l_bd_detector_;
+  BreakDownDetector fz_r_bd_detector_, tx_r_bd_detector_, ty_r_bd_detector_;
 
   // desired pose
   Eigen::MatrixXd desired_robot_to_cob_;

@@ -138,7 +138,6 @@ double BalanceLowPassFilter::getFilteredOutput(double present_raw_value)
   return prev_output_;
 }
 
-
 BalancePDController::BalancePDController()
 {
   desired_ = 0;
@@ -564,6 +563,52 @@ double BalanceControlUsingDampingConroller::getGyroBalanceGainRatio(void)
 }
 
 
+
+
+
+BreakDownDetector::BreakDownDetector()
+{
+  old_value_ = 0;
+  break_down_counter_ = counter_limit_ = 0;
+  precision_ = 0;
+}
+
+BreakDownDetector::~BreakDownDetector()
+{ }
+
+void BreakDownDetector::initialize(double precision, int counter_limit)
+{
+  precision_ = precision;
+  break_down_counter_ = 0;
+  counter_limit_ = counter_limit;
+  old_value_ = 0;
+}
+
+void BreakDownDetector::reset()
+{
+  break_down_counter_ = 0;
+}
+
+bool BreakDownDetector::getBreakDownDetection(double value)
+{
+  if(value > old_value_ - precision_ && value < old_value_ + precision_)
+  {
+    break_down_counter_ += 1;
+  }
+  else
+  {
+    break_down_counter_ = 0;
+  }
+
+  old_value_ = value;
+
+  return (break_down_counter_>=counter_limit_);
+}
+
+
+
+
+
 BalanceControlUsingPDController::BalanceControlUsingPDController()
 {
   balance_control_error_ = BalanceControlError::NoError;
@@ -575,6 +620,7 @@ BalanceControlUsingPDController::BalanceControlUsingPDController()
   ft_enable_ = 1.0;
 
   fall_detected_ = false;
+  communication_pb_detected_ = false;
 
   desired_robot_to_cob_         = Eigen::MatrixXd::Identity(4,4);
   desired_robot_to_right_foot_  = Eigen::MatrixXd::Identity(4,4);
@@ -667,6 +713,17 @@ void BalanceControlUsingPDController::initialize(const int control_cycle_msec)
   left_foot_force_z_lpf_.initialize(control_cycle_sec_, 1.0);
   left_foot_torque_roll_lpf_.initialize(control_cycle_sec_, 1.0);
   left_foot_torque_pitch_lpf_.initialize(control_cycle_sec_, 1.0);
+
+  fall_detected_ = false;
+  communication_pb_detected_ = false;
+  imu_roll_bd_detector_.initialize(1e-6,10);
+  imu_pitch_bd_detector_.initialize(1e-6,10);
+  fz_l_bd_detector_.initialize(1e-3,10);
+  tx_l_bd_detector_.initialize(1e-3,10);
+  ty_l_bd_detector_.initialize(1e-3,10);
+  fz_r_bd_detector_.initialize(1e-3,10);
+  tx_r_bd_detector_.initialize(1e-3,10);
+  ty_r_bd_detector_.initialize(1e-3,10);
 }
 
 void BalanceControlUsingPDController::setGyroBalanceEnable(bool enable)
@@ -907,6 +964,12 @@ void BalanceControlUsingPDController::setCurrentOrientationSensorOutput(double c
 {
   current_orientation_roll_rad_  = cob_orientation_roll;
   current_orientation_pitch_rad_ = cob_orientation_pitch;
+
+  if(!communication_pb_detected_ && imu_roll_bd_detector_.getBreakDownDetection(current_orientation_roll_rad_) && imu_pitch_bd_detector_.getBreakDownDetection(current_orientation_pitch_rad_))
+  {
+    ROS_ERROR("[My Balance Control] IMU communication break down!");
+    communication_pb_detected_ = true;
+  }
 }
 
 void BalanceControlUsingPDController::setCurrentFootForceTorqueSensorOutput(double r_force_x_N,      double r_force_y_N,       double r_force_z_N,
@@ -927,6 +990,19 @@ void BalanceControlUsingPDController::setCurrentFootForceTorqueSensorOutput(doub
   current_left_tx_Nm_ = l_torque_roll_Nm;
   current_left_ty_Nm_ = l_torque_pitch_Nm;
   current_left_tz_Nm_ = l_torque_yaw_Nm;
+
+
+  if(!communication_pb_detected_ && fz_r_bd_detector_.getBreakDownDetection(current_right_fz_N_) && tx_r_bd_detector_.getBreakDownDetection(current_right_tx_Nm_) && ty_r_bd_detector_.getBreakDownDetection(current_right_ty_Nm_))
+  {
+    ROS_ERROR("[Balance Control] right F/T sensor communication break down!");
+    communication_pb_detected_ = true;
+  }
+
+  if(!communication_pb_detected_ && fz_l_bd_detector_.getBreakDownDetection(current_left_fz_N_) && tx_l_bd_detector_.getBreakDownDetection(current_left_tx_Nm_) && ty_l_bd_detector_.getBreakDownDetection(current_left_ty_Nm_))
+  {
+    ROS_ERROR("[Balance Control] left F/T sensor communication break down!");
+    communication_pb_detected_ = true;
+  }
 }
 
 // set maximum adjustment
@@ -974,5 +1050,5 @@ double BalanceControlUsingPDController::getCOBManualAdjustmentZ()
 
 bool BalanceControlUsingPDController::stopMotion()
 {
-  return fall_detected_;
+  return (fall_detected_ || communication_pb_detected_);
 }
