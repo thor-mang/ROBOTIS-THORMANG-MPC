@@ -716,14 +716,14 @@ void BalanceControlUsingPDController::initialize(const int control_cycle_msec)
 
   fall_detected_ = false;
   communication_pb_detected_ = false;
-  imu_roll_bd_detector_.initialize(1e-6,10);
-  imu_pitch_bd_detector_.initialize(1e-6,10);
-  fz_l_bd_detector_.initialize(1e-3,10);
-  tx_l_bd_detector_.initialize(1e-3,10);
-  ty_l_bd_detector_.initialize(1e-3,10);
-  fz_r_bd_detector_.initialize(1e-3,10);
-  tx_r_bd_detector_.initialize(1e-3,10);
-  ty_r_bd_detector_.initialize(1e-3,10);
+  imu_roll_bd_detector_.initialize(1e-7,10);
+  imu_pitch_bd_detector_.initialize(1e-7,10);
+  fz_l_bd_detector_.initialize(1e-4,10);
+  tx_l_bd_detector_.initialize(1e-4,10);
+  ty_l_bd_detector_.initialize(1e-4,10);
+  fz_r_bd_detector_.initialize(1e-4,10);
+  tx_r_bd_detector_.initialize(1e-4,10);
+  ty_r_bd_detector_.initialize(1e-4,10);
 }
 
 void BalanceControlUsingPDController::setGyroBalanceEnable(bool enable)
@@ -787,7 +787,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   {
     if(fall_detected_ == false)
     {
-      ROS_ERROR("[Balance Control] Robot falled over!");
+      ROS_ERROR("[Balance Control] Robot fell over!");
       fall_detected_ = true;
     }
   }
@@ -967,7 +967,7 @@ void BalanceControlUsingPDController::setCurrentOrientationSensorOutput(double c
 
   if(!communication_pb_detected_ && imu_roll_bd_detector_.getBreakDownDetection(current_orientation_roll_rad_) && imu_pitch_bd_detector_.getBreakDownDetection(current_orientation_pitch_rad_))
   {
-    ROS_ERROR("[My Balance Control] IMU communication break down!");
+    ROS_ERROR("[Balance Control] IMU communication break down!");
     communication_pb_detected_ = true;
   }
 }
