@@ -1147,8 +1147,8 @@ void THORMANG3OnlineWalking::process()
       double bc_move = body_yaw_tra_.getPosition(walking_time_);
 
       present_waist_yaw_angle_rad_ = wp_move;
-//      present_body_pose_.z = bz_move + z_swap;
-      present_body_pose_.z = bz_move;
+      present_body_pose_.z = bz_move + z_swap;
+//      present_body_pose_.z = bz_move;
       present_body_pose_.roll = ba_move;
       present_body_pose_.pitch = bb_move;
       present_body_pose_.yaw = bc_move;
