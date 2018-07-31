@@ -783,7 +783,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   double left_foot_torque_pitch_filtered = left_foot_torque_pitch_lpf_.getFilteredOutput(current_left_ty_Nm_);
 
   //--fall detection--
-  if( (fabs(pitch_angle_filtered) > 0.3) || (fabs(roll_angle_filtered) > 0.3) )
+  if( (fabs(pitch_angle_filtered) > 0.23) || (fabs(roll_angle_filtered) > 0.23) )
   {
     if(fall_detected_ == false)
     {
