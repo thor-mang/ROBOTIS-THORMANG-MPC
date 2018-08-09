@@ -670,7 +670,7 @@ BalanceControlUsingPDController::BalanceControlUsingPDController()
   cob_yaw_adjustment_abs_max_rad_   = 0.13;
   foot_x_adjustment_abs_max_m_ = 0.01;
   foot_y_adjustment_abs_max_m_ = 0.01;
-  foot_z_adjustment_abs_max_m_ = 0.01;
+  foot_z_adjustment_abs_max_m_ = 0.03;
   foot_roll_adjustment_abs_max_rad_  = 0.13;
   foot_pitch_adjustment_abs_max_rad_ = 0.13;
   foot_yaw_adjustment_abs_max_rad_   = 0.13;
