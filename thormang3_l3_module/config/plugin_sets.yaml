@@ -7,7 +7,10 @@ plugin_sets:
     robotis_joint_balance_controller: none
 
     # ZMPGaitGeneratorPlugin
-    robotis_zmp_gait_generator: none
+    robotis_zmp_gait_generator: 
+      params:
+        time_unit: 0.008
+        preview_time: 1.6
 
     # ZMPReferenceGenerator
     zmp_reference_generator: none
