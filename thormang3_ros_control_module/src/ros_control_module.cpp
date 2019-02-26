@@ -35,13 +35,23 @@ void RosControlModule::initialize(const int control_cycle_msec, robotis_framewor
 
   imu_sensor_interface_ = hardware_interface::ImuSensorInterface();
 
+  // raw IMU data
   imu_data_.name = "waist_imu";
-  imu_data_.frame_id = "imu_link";
+  imu_data_.frame_id = gazebo_mode_ ? "pelvis_link" : "imu_link";
   imu_data_.orientation = imu_orientation_;
   imu_data_.angular_velocity = imu_angular_velocity_;
   imu_data_.linear_acceleration = imu_linear_acceleration_;
   hardware_interface::ImuSensorHandle imu_sensor_handle(imu_data_);
   imu_sensor_interface_.registerHandle(imu_sensor_handle);
+
+  // filtered IMU data
+  imu_data_filtered_.name = "waist_imu_filtered";
+  imu_data_filtered_.frame_id = gazebo_mode_ ? "pelvis_link" : "imu_link";
+  imu_data_filtered_.orientation = imu_orientation_filtered_;
+  imu_data_filtered_.angular_velocity = imu_angular_velocity_filtered_;
+  imu_data_filtered_.linear_acceleration = imu_linear_acceleration_filtered_;
+  hardware_interface::ImuSensorHandle imu_sensor_handle_filtered(imu_data_filtered_);
+  imu_sensor_interface_.registerHandle(imu_sensor_handle_filtered);
 
   registerInterface(&imu_sensor_interface_);
 
@@ -134,6 +144,38 @@ void RosControlModule::process(std::map<std::string, robotis_framework::Dynamixe
   boost::mutex::scoped_lock lock(ros_control_mutex_);
 
   /** update IMU */
+
+  // TODO if(isGazebo() -> rotate around z-axis)
+  imu_orientation_[0] = sensors["imu_orientation_q_x_raw"];
+  imu_orientation_[1] = sensors["imu_orientation_q_y_raw"];
+  imu_orientation_[2] = sensors["imu_orientation_q_z_raw"];
+  imu_orientation_[3] = sensors["imu_orientation_q_w_raw"];
+
+  imu_angular_velocity_[0] = sensors["imu_angular_velocity_x_raw"];
+  imu_angular_velocity_[1] = sensors["imu_angular_velocity_y_raw"];
+  imu_angular_velocity_[2] = sensors["imu_angular_velocity_z_raw"];
+
+  imu_linear_acceleration_[0] = sensors["imu_linear_acceleration_x_raw"];
+  imu_linear_acceleration_[1] = sensors["imu_linear_acceleration_y_raw"];
+  imu_linear_acceleration_[2] = sensors["imu_linear_acceleration_z_raw"];
+
+
+
+  // TODO if(isGazebo() -> rotate around z-axis)
+  imu_orientation_filtered_[0] = sensors["imu_orientation_q_x_filtered"];
+  imu_orientation_filtered_[1] = sensors["imu_orientation_q_y_filtered"];
+  imu_orientation_filtered_[2] = sensors["imu_orientation_q_z_filtered"];
+  imu_orientation_filtered_[3] = sensors["imu_orientation_q_w_filtered"];
+
+  imu_angular_velocity_filtered_[0] = sensors["imu_angular_velocity_x_filtered"];
+  imu_angular_velocity_filtered_[1] = sensors["imu_angular_velocity_y_filtered"];
+  imu_angular_velocity_filtered_[2] = sensors["imu_angular_velocity_z_filtered"];
+
+  imu_linear_acceleration_filtered_[0] = sensors["imu_linear_acceleration_x_filtered"];
+  imu_linear_acceleration_filtered_[1] = sensors["imu_linear_acceleration_y_filtered"];
+  imu_linear_acceleration_filtered_[2] = sensors["imu_linear_acceleration_z_filtered"];
+
+
 
   /// TODO: Handle covariance matrices
 

@@ -69,6 +69,8 @@ public:
   void stop() override;
   bool isRunning() override;
 
+  bool gazebo_mode_ = false;
+
 private:
   void controllerManagerThread();
   void queueThread();
@@ -91,6 +93,11 @@ private:
   double imu_orientation_[4];
   double imu_angular_velocity_[3];
   double imu_linear_acceleration_[3];
+
+  hardware_interface::ImuSensorHandle::Data imu_data_filtered_;
+  double imu_orientation_filtered_[4];
+  double imu_angular_velocity_filtered_[3];
+  double imu_linear_acceleration_filtered_[3];
 
   // FT-Sensors
   hardware_interface::ForceTorqueSensorInterface force_torque_sensor_interface_;
