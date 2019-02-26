@@ -64,7 +64,9 @@ FeetForceTorqueSensor::FeetForceTorqueSensor()
   l_foot_ft_gnd_.resize(6, 1); l_foot_ft_gnd_.fill(0.0);
 
   r_foot_ft_scale_factor_ = l_foot_ft_scale_factor_ = 1.0;
-  total_mass_ = thormang3_kd_->calcTotalMass(0);
+//  total_mass_ = thormang3_kd_->calcTotalMass(0);
+  total_mass_ = 48.5; //measured value on real robot
+  
 
   for(int _idx = 0; _idx < 6; _idx++) {
     r_foot_ft_current_voltage_[_idx] = 3.3*0.5;
