@@ -441,17 +441,16 @@ void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dyn
   {
     if (!gazebo_mode_)
     {
-      r_foot_ft_sensor_.setCurrentVoltageOutputPublish( r_foot_ft_current_voltage_[0],
+      r_foot_ft_sensor_.setCurrentVoltageOutput( r_foot_ft_current_voltage_[0],
         r_foot_ft_current_voltage_[1],
         r_foot_ft_current_voltage_[2],
         r_foot_ft_current_voltage_[3],
         r_foot_ft_current_voltage_[4],
         r_foot_ft_current_voltage_[5]);
     }
-    else
-    {
-      r_foot_ft_sensor_.publishForceTorque();
-    }
+
+    r_foot_ft_sensor_.publishForceTorque();
+
 
     r_foot_ft_sensor_.getCurrentForceTorqueRaw(&r_foot_fx_raw_N_,  &r_foot_fy_raw_N_,  &r_foot_fz_raw_N_,
         &r_foot_tx_raw_Nm_, &r_foot_ty_raw_Nm_, &r_foot_tz_raw_Nm_);
@@ -479,17 +478,16 @@ void FeetForceTorqueSensor::process(std::map<std::string, robotis_framework::Dyn
   {
     if (!gazebo_mode_)
     {
-      l_foot_ft_sensor_.setCurrentVoltageOutputPublish(l_foot_ft_current_voltage_[0],
+      l_foot_ft_sensor_.setCurrentVoltageOutput(l_foot_ft_current_voltage_[0],
         l_foot_ft_current_voltage_[1],
         l_foot_ft_current_voltage_[2],
         l_foot_ft_current_voltage_[3],
         l_foot_ft_current_voltage_[4],
         l_foot_ft_current_voltage_[5]);
     }
-    else
-    {
-      l_foot_ft_sensor_.publishForceTorque();
-    }
+
+    l_foot_ft_sensor_.publishForceTorque();
+
 
     l_foot_ft_sensor_.getCurrentForceTorqueRaw(&l_foot_fx_raw_N_,  &l_foot_fy_raw_N_,  &l_foot_fz_raw_N_,
         &l_foot_tx_raw_Nm_, &l_foot_ty_raw_Nm_, &l_foot_tz_raw_Nm_);

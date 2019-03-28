@@ -308,17 +308,16 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
   {
     if (!gazebo_mode_)
     {
-      r_wrist_ft_sensor_.setCurrentVoltageOutputPublish(r_wrist_ft_current_voltage_[0],
+      r_wrist_ft_sensor_.setCurrentVoltageOutput(r_wrist_ft_current_voltage_[0],
           r_wrist_ft_current_voltage_[1],
           r_wrist_ft_current_voltage_[2],
           r_wrist_ft_current_voltage_[3],
           r_wrist_ft_current_voltage_[4],
           r_wrist_ft_current_voltage_[5]);
     }
-    else
-    {
-      r_wrist_ft_sensor_.publishForceTorque();
-    }
+
+    r_wrist_ft_sensor_.publishForceTorque();
+
 
     r_wrist_ft_sensor_.getCurrentForceTorqueRaw(&r_wrist_fx_raw_N,  &r_wrist_fy_raw_N,  &r_wrist_fz_raw_N,
                                                &r_wrist_tx_raw_Nm, &r_wrist_ty_raw_Nm, &r_wrist_tz_raw_Nm);
@@ -347,17 +346,16 @@ void WristForceTorqueSensor::process(std::map<std::string, robotis_framework::Dy
   {
     if (!gazebo_mode_)
     {
-      l_wrist_ft_sensor_.setCurrentVoltageOutputPublish(l_wrist_ft_current_voltage_[0],
+      l_wrist_ft_sensor_.setCurrentVoltageOutput(l_wrist_ft_current_voltage_[0],
           l_wrist_ft_current_voltage_[1],
           l_wrist_ft_current_voltage_[2],
           l_wrist_ft_current_voltage_[3],
           l_wrist_ft_current_voltage_[4],
           l_wrist_ft_current_voltage_[5]);
     }
-    else
-    {
-      l_wrist_ft_sensor_.publishForceTorque();
-    }
+
+    l_wrist_ft_sensor_.publishForceTorque();
+
 
     l_wrist_ft_sensor_.getCurrentForceTorqueRaw(&l_wrist_fx_raw_N,  &l_wrist_fy_raw_N,  &l_wrist_fz_raw_N,
                                                &l_wrist_tx_raw_Nm, &l_wrist_ty_raw_Nm, &l_wrist_tz_raw_Nm);
