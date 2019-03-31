@@ -1,5 +1,0 @@
-robot_model:
-  configuration:
-    feet:
-      - [0, "LEFT_FOOT"]
-      - [1, "RIGHT_FOOT"]
