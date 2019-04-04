@@ -83,8 +83,8 @@ private:
   bool parseFTData(const std::string& ft_data_path, const std::string& ft_data_key);
 
   Eigen::MatrixXd ft_coeff_mat_;
-  Eigen::MatrixXd ft_unload_volatge_;
-  Eigen::MatrixXd ft_current_volatge_;
+  Eigen::MatrixXd ft_unload_voltage_;
+  Eigen::MatrixXd ft_current_voltage_;
   Eigen::MatrixXd ft_null_;
   Eigen::MatrixXd ft_raw_;
   Eigen::MatrixXd ft_scaled_;

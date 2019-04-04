@@ -36,11 +36,11 @@ using namespace thormang3;
 ATIForceTorqueSensorTWE::ATIForceTorqueSensorTWE()
 {
 	ft_coeff_mat_ = Eigen::MatrixXd::Zero(6,6);
-	ft_unload_volatge_.resize(6, 1);
-	ft_unload_volatge_.fill(3.3*0.5);
+  ft_unload_voltage_.resize(6, 1);
+  ft_unload_voltage_.fill(3.3*0.5);
 
-	ft_current_volatge_.resize(6, 1);
-	ft_current_volatge_.fill(3.3*0.5);
+  ft_current_voltage_.resize(6, 1);
+  ft_current_voltage_.fill(3.3*0.5);
 
 	ft_null_.resize(6, 1);
 	ft_null_.fill(0);
@@ -138,9 +138,9 @@ bool ATIForceTorqueSensorTWE::parseFTData(const std::string& ft_data_path, const
 
 	_ft.clear();
 	_ft = doc[_ft_unload_key].as< std::vector<double> >();
-	ft_unload_volatge_ = Eigen::Map<Eigen::MatrixXd>(_ft.data(), 6, 1);
+  ft_unload_voltage_ = Eigen::Map<Eigen::MatrixXd>(_ft.data(), 6, 1);
 	std::cout << "[" <<_ft_unload_key << "]"	<< std::endl;
-	std::cout << ft_unload_volatge_.transpose() << std::endl;
+  std::cout << ft_unload_voltage_.transpose() << std::endl;
 
 	return true;
 }
@@ -151,15 +151,15 @@ void ATIForceTorqueSensorTWE::setCurrentVoltageOutput(double voltage0, double vo
 {
     boost::mutex::scoped_lock lock(ft_sensor_mutex_);
 
-	ft_current_volatge_.coeffRef(0, 0) = voltage0;
-	ft_current_volatge_.coeffRef(1, 0) = voltage1;
-	ft_current_volatge_.coeffRef(2, 0) = voltage2;
-	ft_current_volatge_.coeffRef(3, 0) = voltage3;
-	ft_current_volatge_.coeffRef(4, 0) = voltage4;
-	ft_current_volatge_.coeffRef(5, 0) = voltage5;
+  ft_current_voltage_.coeffRef(0, 0) = voltage0;
+  ft_current_voltage_.coeffRef(1, 0) = voltage1;
+  ft_current_voltage_.coeffRef(2, 0) = voltage2;
+  ft_current_voltage_.coeffRef(3, 0) = voltage3;
+  ft_current_voltage_.coeffRef(4, 0) = voltage4;
+  ft_current_voltage_.coeffRef(5, 0) = voltage5;
 
 
-	ft_raw_		= 					  ft_coeff_mat_ * (ft_current_volatge_ - ft_unload_volatge_);
+  ft_raw_		= 					  ft_coeff_mat_ * (ft_current_voltage_ - ft_unload_voltage_);
 
 	ft_scale_param_mutex_.lock();
 	ft_scaled_	= ft_scale_factor_ * (ft_raw_ - ft_null_ );
@@ -205,13 +205,12 @@ void ATIForceTorqueSensorTWE::setCurrentForceTorqueRaw(const geometry_msgs::Wren
     ft_raw_.coeffRef(5, 0) = ft_msg.torque.z;
 
     ft_raw_msg_.header.stamp = ros::Time::now();
-    ft_raw_msg_.wrench.force.x = ft_msg.force.x;
-    ft_raw_msg_.wrench.force.y = ft_msg.force.y;
-    ft_raw_msg_.wrench.force.z = -ft_msg.force.z;
-
-    ft_raw_msg_.wrench.torque.x = ft_msg.torque.x;
-    ft_raw_msg_.wrench.torque.y = ft_msg.torque.y;
-    ft_raw_msg_.wrench.torque.z = -ft_msg.torque.z;
+    ft_raw_msg_.wrench.force.x  = ft_raw_.coeff(0,0);
+    ft_raw_msg_.wrench.force.y  = ft_raw_.coeff(1,0);
+    ft_raw_msg_.wrench.force.z  = -ft_raw_.coeff(2,0);
+    ft_raw_msg_.wrench.torque.x = ft_raw_.coeff(3,0);
+    ft_raw_msg_.wrench.torque.y = ft_raw_.coeff(4,0);
+    ft_raw_msg_.wrench.torque.z = -ft_raw_.coeff(5,0);
 
     ft_scaled_	= ft_scale_factor_ * (ft_raw_ - ft_null_ );
     ft_scaled_msg_.header.stamp = ros::Time::now();
