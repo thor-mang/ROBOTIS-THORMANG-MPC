@@ -12,8 +12,11 @@ plugin_sets:
         time_unit: 0.008
         preview_time: 1.6
 
-    # ZMPReferenceGenerator
-    zmp_reference_generator: none
+    # ZMPReferenceGeneratorPlugin
+    robotis_zmp_reference_generator: 
+       params:
+        time_unit: 0.008
+        preview_time: 1.6
 
     # SwingFootTrajectoryGeneratorPlugin
     swing_foot_trajectory_generator: 
