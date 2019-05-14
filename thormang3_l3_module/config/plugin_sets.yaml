@@ -18,8 +18,8 @@ plugin_sets:
         time_unit: 0.008
         preview_time: 1.6
 
-    # SwingFootTrajectoryGeneratorPlugin
-    swing_foot_trajectory_generator: 
+    # FootTrajectoryGeneratorPlugin
+    foot_trajectory_generator: 
       params:
        delay_ratio_z_approx_dflt: 0.2
        delta_z_approx_dflt: 0.03
@@ -28,7 +28,10 @@ plugin_sets:
        delta_z_up_min: 0.1
        delta_z_up_max: 0.3
        velocity_z_up_max: 1.8
-       delay_ratio_xyrpy_start_max: 0.2  
+       delay_ratio_xyrpy_start_max: 0.2 
+
+    # BodyTrajectoryGeneratorPlugin
+    body_trajectory_generator: none       
 
     # KinematicsPlugin
     kdl_kinematics:
