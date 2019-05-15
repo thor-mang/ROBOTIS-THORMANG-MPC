@@ -31,7 +31,9 @@ plugin_sets:
        delay_ratio_xyrpy_start_max: 0.2 
 
     # BodyTrajectoryGeneratorPlugin
-    body_trajectory_generator: none       
+    body_trajectory_generator:
+      params:
+       z_swap_value: 0.01       
 
     # KinematicsPlugin
     kdl_kinematics:
