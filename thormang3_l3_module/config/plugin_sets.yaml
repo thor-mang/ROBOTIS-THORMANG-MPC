@@ -7,7 +7,7 @@ plugin_sets:
     robotis_joint_balance_controller: none
 
     # ZMPGaitGeneratorPlugin
-    robotis_zmp_gait_generator: 
+    robotis_zmp_schedule_planner: 
       params:
         time_unit: 0.008
         preview_time: 1.6
@@ -21,14 +21,7 @@ plugin_sets:
     # FootTrajectoryGeneratorPlugin
     foot_trajectory_generator: 
       params:
-       delay_ratio_z_approx_dflt: 0.2
-       delta_z_approx_dflt: 0.03
-       delay_ratio_z_depart_down_dflt: 0.3
-       delta_z_depart_down_dflt: 0.1
-       delta_z_up_min: 0.1
-       delta_z_up_max: 0.3
-       velocity_z_up_max: 1.8
-       delay_ratio_xyrpy_start_max: 0.2 
+       z_swap_value: 0.01 
 
     # BodyTrajectoryGeneratorPlugin
     body_trajectory_generator:
