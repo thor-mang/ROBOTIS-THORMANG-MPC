@@ -10,10 +10,7 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  robotis_framework_common
-  thor_mang_l3
+find_package(catkin REQUIRED COMPONENTS roscpp robotis_framework_common l3_zmp_walk_controller thor_mang_l3_config thor_mang_l3_plugins
 )
 
 ## System dependencies are found with CMake's conventions
@@ -87,7 +84,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_l3_module
-  CATKIN_DEPENDS roscpp robotis_framework_common thor_mang_l3
+  CATKIN_DEPENDS roscpp robotis_framework_common l3_zmp_walk_controller thor_mang_l3_config thor_mang_l3_plugins
 #  DEPENDS system_lib
 )
 

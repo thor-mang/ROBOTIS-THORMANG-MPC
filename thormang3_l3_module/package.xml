@@ -44,7 +44,9 @@
 
   <depend>roscpp</depend>
   <depend>robotis_framework_common</depend>
-  <depend>thor_mang_l3</depend>
+  <depend>l3_zmp_walk_controller</depend>
+  <depend>thor_mang_l3_config</depend>
+  <depend>thor_mang_l3_plugins</depend>
 
   <export>
   </export>
