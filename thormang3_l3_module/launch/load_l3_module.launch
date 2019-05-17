@@ -4,7 +4,7 @@
   <!-- start robot description server -->
   <node name="robot_description_server" pkg="l3_libs" type="robot_description_server" respawn="true" output="screen" />
 
-  <rosparam file="$(find thormang3_l3_module)/config/robot_description.yaml" command="load" />
+  <rosparam file="$(find thor_mang_l3)/config/robot_description.yaml" command="load" />
   <rosparam file="$(find thormang3_l3_module)/config/l3_module_config.yaml" command="load" />
   <rosparam file="$(find thormang3_l3_module)/config/plugin_sets.yaml" command="load" />
 
