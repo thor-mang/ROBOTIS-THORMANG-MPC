@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
-  <!-- start robot description server -->
-  <node name="robot_description_server" pkg="l3_libs" type="robot_description_server" respawn="true" output="screen" />
+  <!-- start robot model server -->
+  <include file="$(find thor_mang_l3_config)/launch/robot_model_server.launch" />
 
-  <rosparam file="$(find thor_mang_l3)/config/robot_description.yaml" command="load" />
   <rosparam file="$(find thormang3_l3_module)/config/l3_module_config.yaml" command="load" />
   <rosparam file="$(find thormang3_l3_module)/config/plugin_sets.yaml" command="load" />
 
