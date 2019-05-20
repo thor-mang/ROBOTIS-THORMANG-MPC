@@ -69,7 +69,7 @@ void L3Module::process(std::map<std::string, robotis_framework::Dynamixel*> dxls
 {
   boost::mutex::scoped_lock lock(l3_mutex_);
 
-  if (!walk_controller_->getState() == l3::READY)
+  if (!walk_controller_->getState() == l3_zmp_walk::READY)
   {
     ROS_ERROR_THROTTLE(10.0, "[L3Module] Walk Controller not ready. Probably initialization has failed.");
     return;
