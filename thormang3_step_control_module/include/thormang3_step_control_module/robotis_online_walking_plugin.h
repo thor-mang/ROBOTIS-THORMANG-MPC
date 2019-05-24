@@ -31,7 +31,7 @@
 
 #include <ros/ros.h>
 
-#include <vigir_step_control/step_controller_plugin.h>
+#include <l3_step_controller_plugins/base/step_controller_plugin.h>
 
 #include <thor_mang_footstep_planning_plugins/thor_mang_step_plan_msg_plugin.h>
 
@@ -39,9 +39,7 @@
 
 namespace thormang3
 {
-using namespace vigir_footstep_planning;
-using namespace vigir_footstep_planning_msgs;
-using namespace vigir_step_control;
+using namespace l3_step_controller;
 using namespace thor_mang_footstep_planning;
 
 class THORMANG3OnlineWalkingPlugin
@@ -59,7 +57,7 @@ public:
    * @brief Sets the StepPlanMsgPlugin to be used.
    * @param plugin Plugin of type StepPlanMsgPlugin
    */
-  void setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin) override;
+  msgs::ErrorStatus setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin) override;
 
   /**
    * @brief Merges given step plan to the current step queue of steps. Hereby, two cases have to considered:
@@ -71,12 +69,12 @@ public:
    * @param step_plan Step plan to be merged into step queue.
    * @return false if an error has occured
    */
-  bool updateStepPlan(const msgs::StepPlan& step_plan) override;
+  msgs::ErrorStatus updateStepPlan(const msgs::StepPlan& step_plan) override;
 
   /**
    * @brief This method is called when new step plan has been enqueued and previously the walk controller state was IDLE.
    */
-  void initWalk() override;
+  msgs::ErrorStatus initWalk() override;
 
   /**
    * @brief PreProcess Method is called before processing walk controller, e.g. for precompute/update data or check walking engine status.
@@ -86,19 +84,19 @@ public:
    * - setState(FINISEHD) when execution of all steps were successfully completed
    * - setState(FAILED) when an error has occured
    */
-  void preProcess(const ros::TimerEvent& event) override;
+  msgs::ErrorStatus preProcess(const ros::TimerEvent& event) override;
 
   /**
    * @brief This method will be called when the next step should be added to execution pipeline. The call of this function should
    * be triggered by the process(...) method when nextStepIndexNeeded has been changed.
    * @param step Step to be executed now
    */
-  bool executeStep(const msgs::Step& step) override;
+  msgs::ErrorStatus executeStep(Step::ConstPtr step) override;
 
   /**
    * @brief Will be called when (soft) stop is requested and resets plugin.
    */
-  void stop() override;
+  msgs::ErrorStatus stop() override;
 
 protected:
   ThorMangStepPlanMsgPlugin::ConstPtr thor_mang_step_plan_msg_plugin_;

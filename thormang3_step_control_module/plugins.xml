@@ -1,7 +1,7 @@
 <library path="lib/libthormang3_step_control_module">
-  <class name="thormang3_online_walking_plugin" type="thormang3::THORMANG3OnlineWalkingPlugin" base_class_type="vigir_step_control::StepControllerPlugin">
+  <class name="thormang3_online_walking_plugin" type="thormang3::THORMANG3OnlineWalkingPlugin" base_class_type="l3_step_controller::StepControllerPlugin">
     <description>
-      THORMANG3OnlineWalkingPlugin: vigir_step_controller plugin interfacing for Robotis Online Walking with THORMANG3
+      THORMANG3OnlineWalkingPlugin: l3_step_controller plugin interfacing for Robotis Online Walking with THORMANG3
     </description>
   </class>
 </library>

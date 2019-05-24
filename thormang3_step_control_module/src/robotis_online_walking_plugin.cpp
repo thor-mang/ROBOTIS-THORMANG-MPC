@@ -8,8 +8,6 @@
 
 namespace thormang3
 {
-using namespace vigir_footstep_planning;
-
 THORMANG3OnlineWalkingPlugin::THORMANG3OnlineWalkingPlugin()
   : StepControllerPlugin()
   , last_remaining_unreserved_steps_(0)
@@ -21,49 +19,53 @@ THORMANG3OnlineWalkingPlugin::~THORMANG3OnlineWalkingPlugin()
 {
 }
 
-void THORMANG3OnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
+msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
 {
-  StepControllerPlugin::setStepPlanMsgPlugin(plugin);
+  msgs::ErrorStatus status = StepControllerPlugin::setStepPlanMsgPlugin(plugin);
 
-  boost::unique_lock<boost::shared_mutex> lock(plugin_mutex_);
+  if (hasError(status))
+    return status;
 
-  thor_mang_step_plan_msg_plugin_ = boost::dynamic_pointer_cast<ThorMangStepPlanMsgPlugin>(plugin);
+  UniqueLock lock(plugin_mutex_);
 
+  thor_mang_step_plan_msg_plugin_ = vigir_pluginlib::cast<ThorMangStepPlanMsgPlugin>(plugin);
   if (!thor_mang_step_plan_msg_plugin_)
-    ROS_ERROR("[THORMANG3OnlineWalkingPlugin] StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
+    status += ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Given StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
+
+  return status;
 }
 
-bool THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
+msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 {
-  if (step_plan.steps.empty())
-    return true;
+  if (step_plan.plan.steps.empty())
+    return msgs::ErrorStatus();
 
   // transform initial step plan (afterwards stitching will do that automatically for us)
   if (step_queue_->empty())
   {
-    const msgs::Step& step = step_plan.steps.front();
+    const msgs::Step& step = step_plan.plan.steps.front();
+
+    if (step.support.size() != 2)
+      return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "updateStepPlan: First step of an initial step plan must contain 2 support legs.");
+    else if (step.support[0].foot_idx != Foot::LEFT)
+      return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Initial step foothold with idx = 0 is not left foot!");
+    else if (step.support[1].foot_idx != Foot::RIGHT)
+      return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Initial step foothold with idx = 1 is not right foot!");
 
     robotis_framework::StepData ref_step;
     initStepData(ref_step);
     /// TODO: use robotis reference step here?
     //robotis_framework::THORMANG3OnlineWalking::GetInstance()->GetReferenceStepDatafotAddition(&ref_step);
 
-    geometry_msgs::Pose ref_pose;
-    if (step.foot.foot_index == msgs::Foot::LEFT)
-      thor_mang_footstep_planning::toRos(ref_step.position_data.left_foot_pose, ref_pose);
-    else if (step.foot.foot_index == msgs::Foot::RIGHT)
-      thor_mang_footstep_planning::toRos(ref_step.position_data.right_foot_pose, ref_pose);
-    else
-    {
-      ROS_ERROR("[THORMANG3OnlineWalkingPlugin] updateStepPlan: First step of input step plan has unknown foot index.");
-      return false;
-    }
+    l3::Pose ref_pose;
+    toRos(ref_step.position_data.left_foot_pose, ref_pose);
+
+    l3::Pose cur_pose;
+    l3::poseMsgToL3(step.support[0].pose, cur_pose);
 
     // determine transformation to robotis frame
-    tf::Transform transform = vigir_footstep_planning::StepPlan::getTransform(step.foot.pose, ref_pose);
-
-    msgs::StepPlan step_plan_transformed = step_plan;
-    vigir_footstep_planning::StepPlan::transformStepPlan(step_plan_transformed, transform);
+    Transform transform = ref_pose * cur_pose.inverse();
+    msgs::StepPlan step_plan_transformed = l3_footstep_planning::StepPlan::transformStepPlan(step_plan, transform);
 
     return StepControllerPlugin::updateStepPlan(step_plan_transformed);
   }
@@ -73,19 +75,16 @@ bool THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_pla
 
     return StepControllerPlugin::updateStepPlan(step_plan);
   }
-
-  return false;
 }
 
-void THORMANG3OnlineWalkingPlugin::initWalk()
+msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::initWalk()
 {
   thormang3::THORMANG3OnlineWalking* online_walking = thormang3::THORMANG3OnlineWalking::getInstance();
 
   if (online_walking->isRunning())
   {
-    ROS_ERROR("[THORMANG3OnlineWalkingPlugin] Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
-    return;
+    return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Can't start walking as walking engine is still running. This is likely a bug and should be fixed immediately!");
   }
 
   //online_walking->initialize();
@@ -97,33 +96,34 @@ void THORMANG3OnlineWalkingPlugin::initWalk()
   // init feedback states
   msgs::ExecuteStepPlanFeedback feedback;
   feedback.header.stamp = ros::Time::now();
-  feedback.last_performed_step_index = -1;
-  feedback.currently_executing_step_index = 0;
-  feedback.first_changeable_step_index = 0;
+  feedback.last_queued_step_idx = -1;
+  feedback.currently_executing_step_idx = 0;
+  feedback.first_changeable_step_idx = 0;
   setFeedbackState(feedback);
 
   setState(ACTIVE);
 
   online_walking->start();
 
-  ROS_INFO("[THORMANG3OnlineWalkingPlugin] Starting walking.");
+  ROS_INFO("[%s] Starting walking.", getName().c_str());
+
+  return msgs::ErrorStatus();
 }
 
-void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
+msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
 {
-  StepControllerPlugin::preProcess(event);
+  msgs::ErrorStatus status = StepControllerPlugin::preProcess(event);
 
   if (getState() != ACTIVE)
-    return;
+    return status;
 
   thormang3::THORMANG3OnlineWalking* online_walking = thormang3::THORMANG3OnlineWalking::getInstance();
 
   // first check if walking engine is still running
   if (!online_walking->isRunning())
   {
-    ROS_INFO("[THORMANG3OnlineWalkingPlugin] Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
     setState(FAILED);
-    return;
+    return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
   }
 
   // checking current state of walking engine
@@ -137,15 +137,13 @@ void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
 
   // step(s) has been performed recently
   feedback.header.stamp = ros::Time::now();
-  feedback.last_performed_step_index += executed_steps;
-  feedback.currently_executing_step_index += executed_steps;
+  feedback.last_performed_step_idx += executed_steps;
+  feedback.currently_executing_step_idx += executed_steps;
 
   if (needed_steps > 0)
   {
-    step_queue_->clearDirtyFlag();
-
     // check if further steps in queue are available
-    int steps_remaining = std::max(0, (step_queue_->lastStepIndex() - feedback.first_changeable_step_index) + 1);
+    int steps_remaining = std::max(0, (step_queue_->lastStepIndex() - feedback.first_changeable_step_idx) + 1);
 
     // steps are available
     if (steps_remaining > 0)
@@ -153,21 +151,21 @@ void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
       needed_steps = std::min(needed_steps, steps_remaining);
 
       setNextStepIndexNeeded(getNextStepIndexNeeded()+needed_steps);
-      feedback.first_changeable_step_index = getNextStepIndexNeeded()+1;
+      feedback.first_changeable_step_idx = getNextStepIndexNeeded()+1;
     }
     // queue has been completely flushed out and executed
     else
     {
       // check for successful execution of queue
-      if (step_queue_->lastStepIndex() == feedback.last_performed_step_index)
+      if (step_queue_->lastStepIndex() == feedback.last_performed_step_idx)
       {
-        ROS_INFO("[THORMANG3OnlineWalkingPlugin] Walking finished.");
+        ROS_INFO("[%s] Walking finished.", getName().c_str());
 
-        feedback.currently_executing_step_index = -1;
-        feedback.first_changeable_step_index = -1;
+        feedback.currently_executing_step_idx = -1;
+        feedback.first_changeable_step_idx = -1;
         setFeedbackState(feedback);
 
-        step_queue_->reset();
+        step_queue_->clear();
         updateQueueFeedback();
 
         setState(FINISHED);
@@ -176,25 +174,26 @@ void THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent& event)
   }
 
   setFeedbackState(feedback);
+
+  return status;
 }
 
-bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
+msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::executeStep(Step::ConstPtr step)
 {
   /// TODO: flush step
   thormang3::THORMANG3OnlineWalking* online_walking = thormang3::THORMANG3OnlineWalking::getInstance();
 
   // add initial step
-  if (step.step_index == 0)
+  if (step->getStepIndex() == 0)
   {
     robotis_framework::StepData step_data;
     initStepData(step_data);
+
     /// TODO: use robotis reference step here?
     //online_walking->getReferenceStepDatafotAddition(&_refStepData);
     if (!online_walking->addStepData(step_data))
-    {
-      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding initial step.");
-      return false;
-    }
+      return ErrorStatusError(msgs::ErrorStatus::ERR_INVALID_STEP, getName(), "executeStep: Error while adding initial step " + boost::lexical_cast<std::string>(step->getStepIndex()) + ".");
+
     last_step_data_ = step_data;
 
     // add final step
@@ -204,13 +203,13 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
     step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
     step_data.time_data.abs_step_time += 1.0;
     if (!online_walking->addStepData(step_data))
-    {
-      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
-      return false;
-    }
+      return ErrorStatusError(msgs::ErrorStatus::ERR_INVALID_STEP, getName(), "executeStep: Error while adding (temp) final step.");
   }
   else
   {
+    if (step->getStepDataMap().size() != 1)
+      return ErrorStatusError(msgs::ErrorStatus::ERR_INVALID_STEP, getName(), "executeStep: Step " + boost::lexical_cast<std::string>(step->getStepIndex()) + " does not contain exactly 1 step data.");
+
     // get ref data
     robotis_framework::StepData ref_step_data;
     online_walking->getReferenceStepDatafotAddition(&ref_step_data);
@@ -221,19 +220,17 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
     // add step
     /// TODO: use robotis reference step here?
     robotis_framework::StepData step_data = last_step_data_;
-    step_data << step;
+    step_data << *step;
     /// TODO: compensate drift in z
     step_data.position_data.body_pose.z = ref_step_data.position_data.body_pose.z;
-    if (step.foot.foot_index == msgs::Foot::LEFT)
+    if (step->getStepDataMap().begin()->second->target->foot_idx == Foot::LEFT)
       step_data.position_data.left_foot_pose.z = ref_step_data.position_data.right_foot_pose.z;
     else
       step_data.position_data.right_foot_pose.z = ref_step_data.position_data.left_foot_pose.z;
 
     if (!online_walking->addStepData(step_data))
-    {
-      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding step %i.", step.step_index);
-      return false;
-    }
+      return ErrorStatusError(msgs::ErrorStatus::ERR_INVALID_STEP, getName(), "executeStep: Error while adding step " + boost::lexical_cast<std::string>(step->getStepIndex()) + ".");
+
     last_step_data_ = step_data;
 
     // readd updated final step
@@ -242,27 +239,25 @@ bool THORMANG3OnlineWalkingPlugin::executeStep(const msgs::Step& step)
     step_data.position_data.moving_foot = thormang3_walking_module_msgs::StepPositionData::STANDING;
     step_data.time_data.walking_state = thormang3_walking_module_msgs::StepTimeData::IN_WALKING_ENDING;
     step_data.time_data.abs_step_time += 1.6;
+
     if (!online_walking->addStepData(step_data))
-    {
-      ROS_INFO("[THORMANG3OnlineWalkingPlugin] executeStep: Error while adding (temp) final step.");
-      return false;
-    }
+      return ErrorStatusError(msgs::ErrorStatus::ERR_INVALID_STEP, getName(), "executeStep: Error while adding (temp) final step.");
   }
 
   last_remaining_unreserved_steps_ = online_walking->getNumofRemainingUnreservedStepData();
-  return true;
+  return msgs::ErrorStatus();
 }
 
-void THORMANG3OnlineWalkingPlugin::stop()
+msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::stop()
 {
-  StepControllerPlugin::stop();
-
-  /// TODO: Stop when both feet on ground
+  /// TODO: Stop during DSP
 
   thormang3::THORMANG3OnlineWalking::getInstance()->stop();
+
+  return StepControllerPlugin::stop();
 }
 } // namespace
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(thormang3::THORMANG3OnlineWalkingPlugin, vigir_step_control::StepControllerPlugin)
+PLUGINLIB_EXPORT_CLASS(thormang3::THORMANG3OnlineWalkingPlugin, l3_step_controller::StepControllerPlugin)
 

@@ -14,7 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   thormang3_walking_module
-  vigir_step_control
+  l3_step_controller_plugins
+  l3_step_controller
   thor_mang_footstep_planning_plugins
   dynamic_reconfigure
 )
@@ -98,7 +99,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES thormang3_step_control_module
-  CATKIN_DEPENDS roscpp std_msgs thormang3_walking_module vigir_step_control thor_mang_footstep_planning_plugins
+  CATKIN_DEPENDS roscpp std_msgs thormang3_walking_module l3_step_controller_plugins l3_step_controller thor_mang_footstep_planning_plugins
 #  DEPENDS system_lib
 )
 

@@ -39,8 +39,8 @@
 // robotis
 #include <thormang3_walking_module/walking_module.h>
 
-// vigir walk control
-#include <vigir_step_control/step_controller.h>
+// l3 step controller
+#include <l3_step_controller/step_controller.h>
 
 // dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
@@ -84,7 +84,7 @@ private:
 
   ros::NodeHandle queue_nh_;
 
-  vigir_step_control::StepController::Ptr step_controller_;  
+  l3_step_controller::StepController::Ptr step_controller_;
 
   thormang3_walking_module_msgs::SetBalanceParam::Request balance_params_;
 };
