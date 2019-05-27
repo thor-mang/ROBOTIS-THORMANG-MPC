@@ -8,7 +8,6 @@
   <rosparam file="$(find thormang3_l3_module)/config/plugin_sets.yaml" command="load" />
 
   <param name="step_controller_plugin" value="zmp_walk_step_controller_plugin" />
-  <param name="step_plan_msg_plugin" value="l3_step_plan_msg_plugin" />
   <param name="plugin_set" value="robotis_walk" />
 </launch>
 
