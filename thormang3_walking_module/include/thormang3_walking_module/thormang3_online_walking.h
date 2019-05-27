@@ -65,6 +65,8 @@ public:
   void process();
   bool isRunning();
 
+  void printStepIdxData(Eigen::VectorXi idx_data);
+
   bool addStepData(robotis_framework::StepData step_data);
   void eraseLastStepData();
   int  getNumofRemainingUnreservedStepData();

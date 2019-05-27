@@ -713,6 +713,7 @@ void THORMANG3OnlineWalking::calcStepIdxData()
   }
   else
   {
+    //reference_time_: Endzeitpunkt vom letzten Schritt / Startzeitpunkt des nächsten Schrittes
     if(walking_time_ >= added_step_data_[0].time_data.abs_step_time - 0.5*MStoS)
     {
       previous_step_waist_yaw_angle_rad_ = added_step_data_[0].position_data.waist_yaw_angle;
@@ -981,8 +982,34 @@ void THORMANG3OnlineWalking::calcDesiredPose()
     current_start_idx_for_ref_zmp_ = 0;
 }
 
+void THORMANG3OnlineWalking::printStepIdxData(Eigen::VectorXi idx_data)
+{
+  int p = 0;
+  int pi = idx_data(p);
+  std::map<int, int> idx_pairs;
+  int counter = 0;
+  while(idx_data(p) < preview_size_)
+  {
+    p = p + 1;
+    counter = counter + 1;
+    if(pi != idx_data(p))
+    {
+      idx_pairs[pi] = counter;
+      counter = 0;
+      pi = idx_data(p);
+    }
+  }
+
+  for(std::pair<int, int> pair : idx_pairs)
+  {
+    ROS_ERROR("Index %d -> %d times", pair.first, pair.second);
+  }
+}
+
 void THORMANG3OnlineWalking::process()
 {
+  //printStepIdxData(step_idx_data_);
+  //ROS_ERROR("------------");
   if(!ctrl_running)
   {
     return;
@@ -999,15 +1026,23 @@ void THORMANG3OnlineWalking::process()
 
     if((added_step_data_.size() != 0) && real_running)
     {
+      //ROS_ERROR("Target: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
+      //period_time: Dauer von Ende des letzten zu Ende das aktuellen Schrittes
+      //dsp_ratio: Anteil der Zeit im Double Support
+      //ssp_ratio: Anteil der Zeit im Single Support
+      //foot_move_period_time: Zeit in der sich der Fuß bewegt (Schwingt) (Not used)
       double period_time, dsp_ratio, ssp_ratio, foot_move_period_time, ssp_time_start, ssp_time_end;
       period_time = added_step_data_[0].time_data.abs_step_time - reference_time_;
       dsp_ratio = added_step_data_[0].time_data.dsp_ratio;
       ssp_ratio = 1 - dsp_ratio;
       foot_move_period_time = ssp_ratio*period_time;
 
+      //ssp_time_start: Start der Single Support Phase im Schritt
+      //ssp_time_end: Ende der Single Support Phase im Schritt
       ssp_time_start = dsp_ratio*period_time/2.0 + reference_time_;
       ssp_time_end = (1 + ssp_ratio)*period_time / 2.0 + reference_time_;
 
+      //Werte werden nicht benutzt und sind alle 0
       double start_time_delay_ratio_x        = added_step_data_[0].time_data.start_time_delay_ratio_x;
       double start_time_delay_ratio_y        = added_step_data_[0].time_data.start_time_delay_ratio_y;
       double start_time_delay_ratio_z        = added_step_data_[0].time_data.start_time_delay_ratio_z;
@@ -1021,22 +1056,17 @@ void THORMANG3OnlineWalking::process()
       double finish_time_advance_ratio_pitch = added_step_data_[0].time_data.finish_time_advance_ratio_pitch;
       double finish_time_advance_ratio_yaw   = added_step_data_[0].time_data.finish_time_advance_ratio_yaw;
 
+      //Currently not used
       double hip_roll_swap_dir = 1.0;
 
       //Update Trajectories before every new step
       if( (walking_time_ - reference_time_) < TIME_UNIT)
       {
-        //ROS_ERROR("Walking Time: %f", walking_time_);
-        //ROS_ERROR("Reference Time: %f", reference_time_);
-        //ROS_ERROR("Subtraction: %f", walking_time_ - reference_time_);
-        if((walking_time_ - reference_time_) < TIME_UNIT)
-        {
-          //ROS_ERROR("WHAT?");
-        }
-
+        //Currently not used
         waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.waist_yaw_angle, 0, 0);
 
+        //Trajektorien für den Oberkörper
         body_z_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.z, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.z, 0, 0);
 
@@ -1045,7 +1075,6 @@ void THORMANG3OnlineWalking::process()
 
         body_pitch_tra_.changeTrajectory(reference_time_, previous_step_body_pose_.pitch, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.body_pose.pitch, 0, 0);
-
 
         double bc_move_amp = added_step_data_[0].position_data.body_pose.yaw - previous_step_body_pose_.yaw;
 
@@ -1064,8 +1093,6 @@ void THORMANG3OnlineWalking::process()
 
         if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
         {
-          //ROS_ERROR("Right Foot is swinging");
-
           foot_x_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_x*foot_move_period_time,
               previous_step_right_foot_pose_.x, 0, 0,
               ssp_time_end - finish_time_advance_ratio_x*foot_move_period_time,
@@ -1101,12 +1128,12 @@ void THORMANG3OnlineWalking::process()
           foot_z_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
               0.5*(ssp_time_start + ssp_time_end), added_step_data_[0].position_data.foot_z_swap, 0, 0);
 
+          //Currently not Used
           hip_roll_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
               0.5*(ssp_time_start + ssp_time_end), hip_roll_feedforward_angle_rad_, 0, 0);
         }
         else if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
         {
-          //ROS_ERROR("Left Foot is swinging");
           foot_x_tra_.changeTrajectory(ssp_time_start + start_time_delay_ratio_x*foot_move_period_time,
               previous_step_left_foot_pose_.x, 0, 0,
               ssp_time_end - finish_time_advance_ratio_x*foot_move_period_time,
@@ -1168,6 +1195,14 @@ void THORMANG3OnlineWalking::process()
       double ba_move = body_roll_tra_.getPosition(walking_time_);
       double bb_move = body_pitch_tra_.getPosition(walking_time_);
       double bc_move = body_yaw_tra_.getPosition(walking_time_);
+
+      /*ROS_ERROR("Position Body Z: %f", body_z_tra_.getPosition(walking_time_));
+      ROS_ERROR("Z-Swap Body: %f", body_z_swap_tra_.getPosition(walking_time_));
+      ROS_ERROR("Velocity Body Z: %f", body_z_tra_.getVelocity(walking_time_));
+      ROS_ERROR("Acceleration Body Z: %f", body_z_tra_.getAcceleration(walking_time_));
+      ROS_ERROR("Velocity Body Yaw: %f", body_yaw_tra_.getVelocity(walking_time_));
+      ROS_ERROR("Position Body Yaw: %f", body_yaw_tra_.getPosition(walking_time_));
+      ROS_ERROR("------------------------");*/
 
       //Current body pose
       present_waist_yaw_angle_rad_ = wp_move;
