@@ -15,6 +15,7 @@ plugin_sets:
         time_unit: 0.008
         preview_time: 1.6
         min_reserved_steps: 2
+        waiting_period: 3.2
 
     # ZMPReferenceGeneratorPlugin
     robotis_zmp_reference_generator: 
