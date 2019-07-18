@@ -119,11 +119,32 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
 
   thormang3::THORMANG3OnlineWalking* online_walking = thormang3::THORMANG3OnlineWalking::getInstance();
 
-  // first check if walking engine is still running
+  msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
+
   if (!online_walking->isRunning())
   {
-    setState(FAILED);
-    return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
+    // queue has been completely flushed out and executed
+    if (step_queue_->empty())
+    {
+      ROS_INFO("[%s] Walking finished.", getName().c_str());
+
+      feedback.currently_executing_step_idx = -1;
+      feedback.first_changeable_step_idx = -1;
+      setFeedbackState(feedback);
+
+      step_queue_->clear();
+      updateQueueFeedback();
+
+      setState(FINISHED);
+      return status;
+    }
+    // walking engine has been stopped unexpectedly
+    else
+    {
+      setState(FAILED);
+      status += ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Walking engine has stopped unexpectedly. This is likely a bug and should be fixed immediately!");
+      return status;
+    }
   }
 
   // checking current state of walking engine
@@ -133,9 +154,11 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
 
   int needed_steps = min_unreserved_steps_ - remaining_unreserved_steps;
 
-  msgs::ExecuteStepPlanFeedback feedback = getFeedbackState();
+  // skip when final pseudo step is in execution in order terminating the walking controller
+  if (step_queue_->empty() && remaining_unreserved_steps == 0)
+    return status;
 
-  // step(s) has been performed recently
+  // update step(s) which has been performed recently
   feedback.header.stamp = ros::Time::now();
   feedback.last_performed_step_idx += executed_steps;
   feedback.currently_executing_step_idx += executed_steps;
@@ -143,7 +166,7 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
   if (needed_steps > 0)
   {
     // check if further steps in queue are available
-    int steps_remaining = std::max(0, (step_queue_->lastStepIndex() - feedback.first_changeable_step_idx) + 1);
+    int steps_remaining = std::max(0, step_queue_->lastStepIndex() - getLastStepIndexSent());
 
     // steps are available
     if (steps_remaining > 0)
@@ -152,24 +175,6 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
 
       setNextStepIndexNeeded(getNextStepIndexNeeded()+needed_steps);
       feedback.first_changeable_step_idx = getNextStepIndexNeeded()+1;
-    }
-    // queue has been completely flushed out and executed
-    else
-    {
-      // check for successful execution of queue
-      if (step_queue_->lastStepIndex() == feedback.last_performed_step_idx)
-      {
-        ROS_INFO("[%s] Walking finished.", getName().c_str());
-
-        feedback.currently_executing_step_idx = -1;
-        feedback.first_changeable_step_idx = -1;
-        setFeedbackState(feedback);
-
-        step_queue_->clear();
-        updateQueueFeedback();
-
-        setState(FINISHED);
-      }
     }
   }
 
