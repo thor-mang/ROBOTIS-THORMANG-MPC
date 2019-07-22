@@ -16,6 +16,7 @@ plugin_sets:
         preview_time: 1.6
         min_reserved_steps: 2
         waiting_period: 3.2
+        fsp_ratio: 0.2
 
     # ZMPReferenceGeneratorPlugin
     robotis_zmp_reference_generator: 
@@ -26,7 +27,7 @@ plugin_sets:
     # FootTrajectoryGeneratorPlugin
     foot_trajectory_generator: 
       params:
-       z_swap_value: 0.01 
+       z_swap_value: 0.1 
 
     # BodyTrajectoryGeneratorPlugin
     body_trajectory_generator:
