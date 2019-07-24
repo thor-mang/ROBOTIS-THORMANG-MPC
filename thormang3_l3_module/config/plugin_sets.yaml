@@ -4,7 +4,11 @@ plugin_sets:
     l3_step_walk_controller: none
 
     # LIPMBalanceControllerPlugin
-    robotis_lipm_balance_controller: none
+    robotis_lipm_balance_controller:
+      params:
+        preview_time: 1.6
+        time_unit: 0.008
+        gravity: 9.81
 
     # JointBalanceControllerPlugin
     robotis_joint_balance_controller: none
