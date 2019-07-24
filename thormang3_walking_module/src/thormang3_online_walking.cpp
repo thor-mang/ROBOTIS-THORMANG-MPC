@@ -85,7 +85,7 @@ std::string THORMANG3OnlineWalking::toString(Eigen::MatrixXd& mat)
 }
 
 THORMANG3OnlineWalking::THORMANG3OnlineWalking()
-{
+{    
   thormang3_kd_ = new KinematicsDynamics(WholeBody);
 
   present_right_foot_pose_.x = 0.0;    present_right_foot_pose_.y = -0.5*thormang3_kd_->leg_side_offset_m_;
@@ -246,6 +246,8 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
     single_time += 0.008;
     timer += 0.008;
   }
+
+  step_counter = 0;
 }
 
 THORMANG3OnlineWalking::~THORMANG3OnlineWalking()
@@ -642,6 +644,8 @@ void THORMANG3OnlineWalking::reInitialize()
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
+
+  step_counter = 0;
 }
 
 void THORMANG3OnlineWalking::start()
@@ -821,79 +825,35 @@ void THORMANG3OnlineWalking::calcRefZMP()
   int step_idx = 0;
   if(walking_time_ == 0)
   {
-    if((step_idx_data_(ref_zmp_idx) == NO_STEP_IDX)/* && (m_StepData.size() == 0)*/)
+    // Default Füllung mit Neural Stance
+    if((step_idx_data_(ref_zmp_idx) == NO_STEP_IDX))
     {
       reference_zmp_x_.fill((present_left_foot_pose_.x + present_right_foot_pose_.x)*0.5);
       reference_zmp_y_.fill((present_left_foot_pose_.y + present_right_foot_pose_.y)*0.5);
       return;
     }
-
-    for(ref_zmp_idx = 0; ref_zmp_idx < preview_size_;  ref_zmp_idx++)
-    {
-      step_idx = step_idx_data_(ref_zmp_idx);
-      if(step_idx == NO_STEP_IDX)
-      {
-        reference_zmp_x_(ref_zmp_idx, 0) = reference_zmp_x_(ref_zmp_idx - 1, 0);
-        reference_zmp_y_(ref_zmp_idx, 0) = reference_zmp_y_(ref_zmp_idx - 1, 0);
-      }
-      else
-      {
-        if(added_step_data_[step_idx].time_data.walking_state == IN_WALKING)
-        {
-          if( added_step_data_[step_idx].position_data.moving_foot == RIGHT_FOOT_SWING )
-          {
-            reference_zmp_x_(ref_zmp_idx, 0) = added_step_data_[step_idx].position_data.left_foot_pose.x;
-            reference_zmp_y_(ref_zmp_idx, 0) = added_step_data_[step_idx].position_data.left_foot_pose.y;
-          }
-          else if( added_step_data_[step_idx].position_data.moving_foot == LEFT_FOOT_SWING )
-          {
-            reference_zmp_x_(ref_zmp_idx, 0) = added_step_data_[step_idx].position_data.right_foot_pose.x;
-            reference_zmp_y_(ref_zmp_idx, 0) = added_step_data_[step_idx].position_data.right_foot_pose.y;
-          }
-          else if( added_step_data_[step_idx].position_data.moving_foot == STANDING )
-          {
-            reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-            reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-          }
-          else
-          {
-            reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-            reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-          }
-        }
-        else if(added_step_data_[step_idx].time_data.walking_state == IN_WALKING_STARTING)
-        {
-          reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-          reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-        }
-        else if(added_step_data_[step_idx].time_data.walking_state == IN_WALKING_ENDING)
-        {
-          reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-          reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-        }
-        else
-        {
-          reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-          reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-        }
-      }
-    }
+    // Such Index nach Init auf 0
     current_start_idx_for_ref_zmp_ = 0;
   }
   else
   {
+      // Schedule Index wird nach hinten verschoben
     step_idx = step_idx_data_(preview_size_ - 1);
 
+    // Ist Suchindex vorne => Input Index wird auf Ende gesetzt
     if(current_start_idx_for_ref_zmp_ == 0)
       ref_zmp_idx = preview_size_ - 1;
     else
+      // Ansonsten wird Input Index eine Stelle nach vorne geschoben
       ref_zmp_idx = current_start_idx_for_ref_zmp_ - 1;
 
+    // Ist ganz hinten kein Step => ZMP wird in die Mitte zwischen die Füße gelegt
     if(step_idx == NO_STEP_IDX)
     {
       reference_zmp_x_(ref_zmp_idx, 0) = 0.5*(reference_step_data_for_addition_.position_data.right_foot_pose.x + reference_step_data_for_addition_.position_data.left_foot_pose.x);
       reference_zmp_y_(ref_zmp_idx, 0) = 0.5*(reference_step_data_for_addition_.position_data.right_foot_pose.y + reference_step_data_for_addition_.position_data.left_foot_pose.y);
     }
+    // Ansonsten => ZMP wird für aktuellen Step berechnet
     else
     {
       if(added_step_data_[step_idx].time_data.walking_state == IN_WALKING)
@@ -908,28 +868,8 @@ void THORMANG3OnlineWalking::calcRefZMP()
           reference_zmp_x_(ref_zmp_idx, 0) = added_step_data_[step_idx].position_data.right_foot_pose.x;
           reference_zmp_y_(ref_zmp_idx, 0) = added_step_data_[step_idx].position_data.right_foot_pose.y;
         }
-        else if( added_step_data_[step_idx].position_data.moving_foot == STANDING )
-        {
-          reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-          reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-        }
-        else
-        {
-          reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-          reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-        }
-      }
-      else if(added_step_data_[step_idx].time_data.walking_state == IN_WALKING_STARTING)
-      {
-        reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-        reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
       }
       else if(added_step_data_[step_idx].time_data.walking_state == IN_WALKING_ENDING)
-      {
-        reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
-        reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
-      }
-      else
       {
         reference_zmp_x_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.x + added_step_data_[step_idx].position_data.right_foot_pose.x)*0.5;
         reference_zmp_y_(ref_zmp_idx, 0) = (added_step_data_[step_idx].position_data.left_foot_pose.y + added_step_data_[step_idx].position_data.right_foot_pose.y)*0.5;
@@ -1014,7 +954,7 @@ void THORMANG3OnlineWalking::printStepIdxData(Eigen::VectorXi idx_data)
 
   for(std::pair<int, int> pair : idx_pairs)
   {
-    ROS_ERROR("Index %d -> %d times", pair.first, pair.second);
+    //ROS_ERROR("Index %d -> %d times", pair.first, pair.second);
   }
 }
 
@@ -1074,7 +1014,14 @@ void THORMANG3OnlineWalking::process()
       //Update Trajectories before every new step
       if( (walking_time_ - reference_time_) < TIME_UNIT)
       {
-        ROS_ERROR("------------------");
+        //if(added_step_data_[0].position_data.moving_foot != IN_WALKING_ENDING)
+        ROS_ERROR("Step: %d", step_counter);
+        if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
+            ROS_ERROR("Foot 0: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
+        else if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
+            ROS_ERROR("Foot 1: %f, %f, %f", added_step_data_[0].position_data.right_foot_pose.x, added_step_data_[0].position_data.right_foot_pose.y, added_step_data_[0].position_data.right_foot_pose.z);
+        ROS_ERROR("--------------");
+        step_counter++;
         //Currently not used
         waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.waist_yaw_angle, 0, 0);
@@ -1350,8 +1297,6 @@ void THORMANG3OnlineWalking::process()
       }
 
       hip_roll_swap = hip_roll_swap_dir * hip_roll_swap;
-
-      ROS_ERROR("Time: %f - Value: %f", walking_time_, hip_roll_swap);
 
       shouler_swing_gain_ = added_step_data_[0].position_data.shoulder_swing_gain;
       elbow_swing_gain_ = added_step_data_[0].position_data.elbow_swing_gain;

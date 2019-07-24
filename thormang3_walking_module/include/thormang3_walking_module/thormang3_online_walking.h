@@ -211,6 +211,8 @@ private:
   double reference_time_;  //Absolute Time
   int balancing_index_;
   int current_step_data_status_;
+
+  int step_counter;
 };
 
 }
