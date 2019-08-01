@@ -47,6 +47,9 @@
 #include "thormang3_kinematics_dynamics/kinematics_dynamics.h"
 #include "robotis_math/robotis_math.h"
 
+#include <iostream>
+#include <fstream>
+
 #define _USE_PD_BALANCE_
 
 namespace thormang3
@@ -213,6 +216,10 @@ private:
   int current_step_data_status_;
 
   int step_counter;
+
+  std::FILE* file;
+  bool isClosed;
+  bool firstTime;
 };
 
 }

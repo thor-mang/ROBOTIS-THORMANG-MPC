@@ -235,19 +235,9 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
   quat_current_imu_.y() = 0;
   quat_current_imu_.z() = 0;
 
-  float timer = 5.2;
-  float single_time = 0;
-  robotis_framework::FifthOrderPolynomialTrajectory test_traj;
-  test_traj.changeTrajectory(5.2, 0, 0, 0, 5.7, 0.01, 0, 0);
-  while (timer <= 6.2)
-  {
-    float pose = test_traj.getPosition(timer);
-    ROS_ERROR("T: %f - V: %f", single_time, pose);
-    single_time += 0.008;
-    timer += 0.008;
-  }
+  isClosed = false;
+  firstTime = true;
 
-  step_counter = 0;
 }
 
 THORMANG3OnlineWalking::~THORMANG3OnlineWalking()
@@ -876,6 +866,8 @@ void THORMANG3OnlineWalking::calcRefZMP()
       }
     }
   }
+
+  //ROS_ERROR("ZMP-Index: %d at %f", ref_zmp_idx, walking_time_);
 }
 
 void THORMANG3OnlineWalking::calcDesiredPose()
@@ -972,12 +964,26 @@ void THORMANG3OnlineWalking::process()
 
     calcStepIdxData();
     calcRefZMP();
+
+    //ROS_ERROR("Time Step: %f", walking_time_);
+    //ROS_ERROR("ZMP Index: %d", current_start_idx_for_ref_zmp_);
+    //ROS_ERROR("ZMP:");
+    //for(int i = 0; i < preview_size_; i++)
+        //ROS_ERROR("ZMP: %f, %f", reference_zmp_x_[i], reference_zmp_y_[i]);
+    //ROS_ERROR("First time index: %d", step_idx_data_[0]);
+    //ROS_ERROR("----------------");
+
     calcDesiredPose();
 
     double hip_roll_swap = 0;
 
     if((added_step_data_.size() != 0) && real_running)
     {
+      if(firstTime)
+      {
+        file = std::fopen("/home/thor/Documents/Step_Trajectories_Robotis.txt", "wb");
+        firstTime = false;
+      }
       //ROS_ERROR("Target: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
       //period_time: Dauer von Ende des letzten zu Ende das aktuellen Schrittes
       //dsp_ratio: Anteil der Zeit im Double Support
@@ -1014,13 +1020,15 @@ void THORMANG3OnlineWalking::process()
       //Update Trajectories before every new step
       if( (walking_time_ - reference_time_) < TIME_UNIT)
       {
+        //ROS_ERROR("Present Body Pose:[%f, %f, %f]", present_body_pose_.x, present_body_pose_.y, present_body_pose_.z);
+        //ROS_ERROR("Previous Body Pose:[%f, %f, %f]", previous_step_body_pose_.x, previous_step_body_pose_.y, previous_step_body_pose_.z);
         //if(added_step_data_[0].position_data.moving_foot != IN_WALKING_ENDING)
-        ROS_ERROR("Step: %d", step_counter);
+        /*ROS_ERROR("Step: %d", step_counter);
         if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
             ROS_ERROR("Foot 0: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
         else if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
-            ROS_ERROR("Foot 1: %f, %f, %f", added_step_data_[0].position_data.right_foot_pose.x, added_step_data_[0].position_data.right_foot_pose.y, added_step_data_[0].position_data.right_foot_pose.z);
-        ROS_ERROR("--------------");
+            ROS_ERROR("Foot 1: %f, %f, %f", added_step_data_[0].position_data.right_foot_pose.x, added_step_data_[0].position_data.right_foot_pose.y, added_step_data_[0].position_data.right_foot_pose.z);*/
+        //ROS_ERROR("--------------");
         step_counter++;
         //Currently not used
         waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
@@ -1163,6 +1171,31 @@ void THORMANG3OnlineWalking::process()
       present_body_pose_.roll = ba_move;
       present_body_pose_.pitch = bb_move;
       present_body_pose_.yaw = bc_move;
+
+      //if(walking_time_ >= 3.2-1e-8 && walking_time_+1e-8 < 5.2)
+      //{
+          std::string pose_string;
+          pose_string.append(std::to_string(present_body_pose_.x));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(present_body_pose_.y));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(present_body_pose_.z));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(reference_zmp_x_.coeff(current_start_idx_for_ref_zmp_, 0)));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(reference_zmp_y_.coeff(current_start_idx_for_ref_zmp_, 0)));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(walking_time_));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(current_start_idx_for_ref_zmp_));
+          std::fprintf(file, "%s", pose_string.c_str());
+          std::fprintf(file, "\n");
+      //}else if(walking_time_+1e-8 > 5.192 && !isClosed)
+      //{
+          //ROS_ERROR("File Closed");
+          //c
+          //isClosed = true;
+      //}
 
       //Feet
       double x_move, y_move, z_move, a_move, b_move, c_move, z_vibe;
@@ -1311,6 +1344,7 @@ void THORMANG3OnlineWalking::process()
         calcStepIdxData();
         step_data_mutex_lock_.unlock();
         reInitialize();
+        std::fclose(file);
         step_data_mutex_lock_.lock();
       }
 
