@@ -979,11 +979,11 @@ void THORMANG3OnlineWalking::process()
 
     if((added_step_data_.size() != 0) && real_running)
     {
-      //if(firstTime)
-      //{
-        //file = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/scripts/Step_Trajectories_Robotis.txt", "wb");
-        //firstTime = false;
-      //}
+      /*if(firstTime)
+      {
+        file = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Step_Trajectories_Robotis.txt", "wb");
+        firstTime = false;
+      }*/
       //ROS_ERROR("Target: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
       //period_time: Dauer von Ende des letzten zu Ende das aktuellen Schrittes
       //dsp_ratio: Anteil der Zeit im Double Support
@@ -1174,7 +1174,7 @@ void THORMANG3OnlineWalking::process()
 
       //if(walking_time_ >= 3.2-1e-8 && walking_time_+1e-8 < 5.2)
       //{
-          /*std::string pose_string;
+          std::string pose_string;
           pose_string.append(std::to_string(present_body_pose_.x));
           pose_string.append(" ");
           pose_string.append(std::to_string(present_body_pose_.y));
@@ -1187,9 +1187,17 @@ void THORMANG3OnlineWalking::process()
           pose_string.append(" ");
           pose_string.append(std::to_string(walking_time_));
           pose_string.append(" ");
+          pose_string.append(std::to_string(present_left_foot_pose_.x));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(present_left_foot_pose_.y));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(present_right_foot_pose_.x));
+          pose_string.append(" ");
+          pose_string.append(std::to_string(present_right_foot_pose_.y));
+          pose_string.append(" ");
           pose_string.append(std::to_string(current_start_idx_for_ref_zmp_));
-          std::fprintf(file, "%s", pose_string.c_str());
-          std::fprintf(file, "\n");*/
+          //std::fprintf(file, "%s", pose_string.c_str());
+          //std::fprintf(file, "\n");
       //}else if(walking_time_+1e-8 > 5.192 && !isClosed)
       //{
           //ROS_ERROR("File Closed");
