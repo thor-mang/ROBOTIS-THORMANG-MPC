@@ -42,6 +42,8 @@ plugin_sets:
     kdl_kinematics:
       params:
         robot_description: "/johnny5/robot_description"
+        take_com_from_config: True
+        com_from_base_frame: {x: 0.0, y: 0.0, z: 0.0}
 
     # GaitGeneratorPlugin
     bipedal_gait_generator: none
