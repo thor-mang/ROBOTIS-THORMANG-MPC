@@ -11,7 +11,10 @@ plugin_sets:
         gravity: 9.81
 
     # JointBalanceControllerPlugin
-    robotis_joint_balance_controller: none
+    robotis_joint_balance_controller: 
+      params:
+        gravity: 9.81
+        fsp_ratio: 0.2
 
     # ZMPGaitGeneratorPlugin
     robotis_zmp_schedule_planner: 
