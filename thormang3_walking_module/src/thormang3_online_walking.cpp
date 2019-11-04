@@ -1377,17 +1377,14 @@ void THORMANG3OnlineWalking::process()
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
+            ROS_ERROR("Standing in Phase 4");
             left_fz_trajectory_target_ = left_dsp_fz_N_;
             left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
           else if(added_step_data_[1].position_data.moving_foot == LEFT_FOOT_SWING)
           {
+            ROS_ERROR("Left Foot in Phase 4");
             left_fz_trajectory_target_ = 0.0;
-            left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
-          }
-          else
-          {
-            left_fz_trajectory_target_ = left_ssp_fz_N_;
             left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
         }
@@ -1409,17 +1406,14 @@ void THORMANG3OnlineWalking::process()
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
+            ROS_ERROR("Standing in Phase 8");
             left_fz_trajectory_target_ = left_dsp_fz_N_;
             left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
-          else if(added_step_data_[1].position_data.moving_foot == LEFT_FOOT_SWING)
+          else if(added_step_data_[1].position_data.moving_foot == RIGHT_FOOT_SWING)
           {
+            ROS_ERROR("Right Foot in Phase 8");
             left_fz_trajectory_target_ = 0.0;
-            left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
-          }
-          else
-          {
-            left_fz_trajectory_target_ = left_ssp_fz_N_;
             left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
         }
