@@ -979,11 +979,12 @@ void THORMANG3OnlineWalking::process()
 
     if((added_step_data_.size() != 0) && real_running)
     {
-      /*if(firstTime)
+      if(firstTime)
       {
         file = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Step_Trajectories_Robotis.txt", "wb");
+        file_f = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Force_Trajectories_Robotis.txt", "wb");
         firstTime = false;
-      }*/
+      }
       //ROS_ERROR("Target: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
       //period_time: Dauer von Ende des letzten zu Ende das aktuellen Schrittes
       //dsp_ratio: Anteil der Zeit im Double Support
@@ -1194,10 +1195,8 @@ void THORMANG3OnlineWalking::process()
           pose_string.append(std::to_string(present_right_foot_pose_.x));
           pose_string.append(" ");
           pose_string.append(std::to_string(present_right_foot_pose_.y));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(current_start_idx_for_ref_zmp_));
-          //std::fprintf(file, "%s", pose_string.c_str());
-          //std::fprintf(file, "\n");
+          std::fprintf(file, "%s", pose_string.c_str());
+          std::fprintf(file, "\n");
       //}else if(walking_time_+1e-8 > 5.192 && !isClosed)
       //{
           //ROS_ERROR("File Closed");
@@ -1352,7 +1351,8 @@ void THORMANG3OnlineWalking::process()
         calcStepIdxData();
         step_data_mutex_lock_.unlock();
         reInitialize();
-        //std::fclose(file);
+        std::fclose(file);
+        std::fclose(file_f);
         step_data_mutex_lock_.lock();
       }
 
@@ -1528,106 +1528,67 @@ void THORMANG3OnlineWalking::process()
     mat_robot_to_acc = mat_robot_to_g_ * mat_g_to_acc;
 
 
-    //Balance Control dependent on the balancing Phase
+    //Force Values in x and y direction
     switch(balancing_index_)
     {
     case BalancingPhase0:
-      //fprintf(stderr, "DSP : START\n");
       r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_dsp_fz_N_;
-      l_target_fz_N = left_dsp_fz_N_;
-      target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase1:
-      //fprintf(stderr, "DSP : R--O->L\n");
+
       r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_dsp_fz_N_;
-      l_target_fz_N = left_dsp_fz_N_;
-      target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase2:
-      //fprintf(stderr, "SSP : L_BALANCING1\n");
       r_target_fx_N = 0;
       r_target_fy_N = 0;
-      r_target_fz_N = 0;
 
       l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      l_target_fz_N = left_ssp_fz_N_;
-      target_fz_N = left_ssp_fz_N_;
       break;
     case BalancingPhase3:
-      //fprintf(stderr, "SSP : L_BALANCING2\n");
       r_target_fx_N = 0;
       r_target_fy_N = 0;
-      r_target_fz_N = 0;
 
       l_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       l_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      l_target_fz_N = left_ssp_fz_N_;
-      target_fz_N = left_ssp_fz_N_;
       break;
     case BalancingPhase4:
-      //fprintf(stderr, "DSP : R--O<-L\n");
       r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_dsp_fz_N_;
-      l_target_fz_N = left_dsp_fz_N_;
-      target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase5:
-      //fprintf(stderr, "DSP : R<-O--L\n");
       r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_dsp_fz_N_;
-      l_target_fz_N = left_dsp_fz_N_;
-      target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase6:
-      //fprintf(stderr, "SSP : R_BALANCING1\n");
       r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
       l_target_fy_N = 0;
-      l_target_fz_N = 0;
-      target_fz_N = -right_ssp_fz_N_;
       break;
     case BalancingPhase7:
-      //fprintf(stderr, "SSP : R_BALANCING2\n");
       r_target_fx_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = -1.0*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_ssp_fz_N_;
 
       l_target_fx_N = 0;
       l_target_fy_N = 0;
-      l_target_fz_N = 0;
-      target_fz_N =  -right_ssp_fz_N_;
-      break;reference_step_data_for_addition_.time_data.abs_step_time = 1.6;
+      break;
     case BalancingPhase8:
-      //fprintf(stderr, "DSP : R->O--L");
       r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_dsp_fz_N_;
-      l_target_fz_N = left_dsp_fz_N_;
-      target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     case BalancingPhase9:
-      //fprintf(stderr, "DSP : END");
       r_target_fx_N = l_target_fx_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(0,0);
       r_target_fy_N = l_target_fy_N = -0.5*total_mass_of_robot_*mat_robot_to_acc.coeff(1,0);
-      r_target_fz_N = right_dsp_fz_N_;
-      l_target_fz_N = left_dsp_fz_N_;
-      target_fz_N = left_dsp_fz_N_ - right_dsp_fz_N_;
       break;
     default:
       break;
     }
 
-
+    // Force Values in z direction
     bool IsDSP = false;
     if( (balancing_index_ == BalancingPhase0) ||
         (balancing_index_ == BalancingPhase1) ||
@@ -1668,6 +1629,29 @@ void THORMANG3OnlineWalking::process()
       }
     }
 
+    if((added_step_data_.size() != 0) && real_running)
+    {
+        std::string force_string;
+        force_string.append(std::to_string(r_target_fx_N));
+        force_string.append(" ");
+        force_string.append(std::to_string(r_target_fy_N));
+        force_string.append(" ");
+        force_string.append(std::to_string(r_target_fz_N));
+        force_string.append(" ");
+        force_string.append(std::to_string(x_lipm_.coeff(2,0)));
+        force_string.append(" ");
+        force_string.append(std::to_string(y_lipm_.coeff(2,0)));
+        force_string.append(" ");
+        force_string.append(std::to_string(l_target_fz_N));
+        force_string.append(" ");
+        force_string.append(std::to_string(balancing_index_));
+        force_string.append(" ");
+        force_string.append(std::to_string(walking_time_));
+        std::fprintf(file_f, "%s", force_string.c_str());
+        std::fprintf(file_f, "\n");
+    }
+
+    //Balancing Algorithm
     balance_ctrl_.setDesiredCOBGyro(0,0);
     balance_ctrl_.setDesiredCOBOrientation(present_body_pose_.roll, present_body_pose_.pitch);
     balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*1.0, r_target_fy_N*1.0, r_target_fz_N, 0, 0, 0,

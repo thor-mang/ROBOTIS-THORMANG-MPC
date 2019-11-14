@@ -218,6 +218,7 @@ private:
   int step_counter;
 
   std::FILE* file;
+  std::FILE* file_f;
   bool isClosed;
   bool firstTime;
 };
