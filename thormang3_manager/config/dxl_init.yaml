@@ -297,6 +297,7 @@ r_leg_hip_p :   # H54-200-B500-R
        
 l_leg_hip_p :   # H54-200-B500-R
    return_delay_time     :  10    
+   drive_mode            :  1
    operating_mode        :  3     
    shutdown              :  58    
    homing_offset         :  8365
