@@ -15,7 +15,8 @@ plugin_sets:
       params:
         gravity: 9.81
         fsp_ratio: 0.2
-        waiting_period: 3.2
+        start_step_duration: 3.2
+        end_step_duration: 1.6
         time_unit: 0.008
 
     # ZMPGaitGeneratorPlugin
@@ -24,7 +25,7 @@ plugin_sets:
         time_unit: 0.008
         preview_time: 1.6
         min_reserved_steps: 2
-        waiting_period: 3.2
+        start_step_duration: 3.2
         fsp_ratio: 0.2
 
     # ZMPReferenceGeneratorPlugin
