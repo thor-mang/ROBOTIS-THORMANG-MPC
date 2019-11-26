@@ -1356,6 +1356,12 @@ void THORMANG3OnlineWalking::process()
         step_data_mutex_lock_.lock();
       }
 
+      ROS_ERROR("Start Time: %f", ssp_time_start);
+      ROS_ERROR("End Time: %f", ssp_time_end);
+      ROS_ERROR("Duration of Step: %f", period_time);
+      ROS_ERROR("Reference Time: %f", reference_time_);
+      ROS_ERROR("---------------------");
+
       //Preparation for Balance Control
       if(balancing_index_ == BalancingPhase0 || balancing_index_ == BalancingPhase9)
       {
@@ -1632,11 +1638,11 @@ void THORMANG3OnlineWalking::process()
     if((added_step_data_.size() != 0) && real_running)
     {
         std::string force_string;
-        force_string.append(std::to_string(r_target_fx_N));
+        force_string.append(std::to_string(left_fz_trajectory_start_time_));
         force_string.append(" ");
-        force_string.append(std::to_string(r_target_fy_N));
+        force_string.append(std::to_string(left_fz_trajectory_end_time_));
         force_string.append(" ");
-        force_string.append(std::to_string(r_target_fz_N));
+        force_string.append(std::to_string(left_fz_trajectory_target_));
         force_string.append(" ");
         force_string.append(std::to_string(x_lipm_.coeff(2,0)));
         force_string.append(" ");
