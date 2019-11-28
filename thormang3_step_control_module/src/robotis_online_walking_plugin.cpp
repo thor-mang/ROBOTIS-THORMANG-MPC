@@ -19,22 +19,6 @@ THORMANG3OnlineWalkingPlugin::~THORMANG3OnlineWalkingPlugin()
 {
 }
 
-msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
-{
-  msgs::ErrorStatus status = StepControllerPlugin::setStepPlanMsgPlugin(plugin);
-
-  if (hasError(status))
-    return status;
-
-  UniqueLock lock(plugin_mutex_);
-
-  thor_mang_step_plan_msg_plugin_ = vigir_pluginlib::cast<ThorMangStepPlanMsgPlugin>(plugin);
-  if (!thor_mang_step_plan_msg_plugin_)
-    status += ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Given StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
-
-  return status;
-}
-
 msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 {
   if (step_plan.plan.steps.empty())
