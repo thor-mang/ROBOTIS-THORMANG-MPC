@@ -54,12 +54,6 @@ public:
   ~THORMANG3OnlineWalkingPlugin();
 
   /**
-   * @brief Sets the StepPlanMsgPlugin to be used.
-   * @param plugin Plugin of type StepPlanMsgPlugin
-   */
-  msgs::ErrorStatus setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin) override;
-
-  /**
    * @brief Merges given step plan to the current step queue of steps. Hereby, two cases have to considered:
    * 1. In case of an empty step queue (robot is standing) the step plan has to begin with step index 0.
    * 2. In case of an non-empty step queue (robot is walking) the first step of the step plan has to be
