@@ -867,7 +867,6 @@ void THORMANG3OnlineWalking::calcRefZMP()
     }
   }
 
-  //ROS_ERROR("ZMP-Index: %d at %f", ref_zmp_idx, walking_time_);
 }
 
 void THORMANG3OnlineWalking::calcDesiredPose()
@@ -943,17 +942,10 @@ void THORMANG3OnlineWalking::printStepIdxData(Eigen::VectorXi idx_data)
       pi = idx_data(p);
     }
   }
-
-  for(std::pair<int, int> pair : idx_pairs)
-  {
-    //ROS_ERROR("Index %d -> %d times", pair.first, pair.second);
-  }
 }
 
 void THORMANG3OnlineWalking::process()
 {
-  //printStepIdxData(step_idx_data_);
-  //ROS_ERROR("------------");
   if(!ctrl_running)
   {
     return;
@@ -964,15 +956,6 @@ void THORMANG3OnlineWalking::process()
 
     calcStepIdxData();
     calcRefZMP();
-
-    //ROS_ERROR("Time Step: %f", walking_time_);
-    //ROS_ERROR("ZMP Index: %d", current_start_idx_for_ref_zmp_);
-    //ROS_ERROR("ZMP:");
-    //for(int i = 0; i < preview_size_; i++)
-        //ROS_ERROR("ZMP: %f, %f", reference_zmp_x_[i], reference_zmp_y_[i]);
-    //ROS_ERROR("First time index: %d", step_idx_data_[0]);
-    //ROS_ERROR("----------------");
-
     calcDesiredPose();
 
     double hip_roll_swap = 0;
@@ -984,7 +967,6 @@ void THORMANG3OnlineWalking::process()
         file = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Step_Trajectories_Robotis.txt", "wb");
         firstTime = false;
       }*/
-      //ROS_ERROR("Target: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
       //period_time: Dauer von Ende des letzten zu Ende das aktuellen Schrittes
       //dsp_ratio: Anteil der Zeit im Double Support
       //ssp_ratio: Anteil der Zeit im Single Support
@@ -1020,15 +1002,6 @@ void THORMANG3OnlineWalking::process()
       //Update Trajectories before every new step
       if( (walking_time_ - reference_time_) < TIME_UNIT)
       {
-        //ROS_ERROR("Present Body Pose:[%f, %f, %f]", present_body_pose_.x, present_body_pose_.y, present_body_pose_.z);
-        //ROS_ERROR("Previous Body Pose:[%f, %f, %f]", previous_step_body_pose_.x, previous_step_body_pose_.y, previous_step_body_pose_.z);
-        //if(added_step_data_[0].position_data.moving_foot != IN_WALKING_ENDING)
-        /*ROS_ERROR("Step: %d", step_counter);
-        if(added_step_data_[0].position_data.moving_foot == LEFT_FOOT_SWING)
-            ROS_ERROR("Foot 0: %f, %f, %f", added_step_data_[0].position_data.left_foot_pose.x, added_step_data_[0].position_data.left_foot_pose.y, added_step_data_[0].position_data.left_foot_pose.z);
-        else if(added_step_data_[0].position_data.moving_foot == RIGHT_FOOT_SWING)
-            ROS_ERROR("Foot 1: %f, %f, %f", added_step_data_[0].position_data.right_foot_pose.x, added_step_data_[0].position_data.right_foot_pose.y, added_step_data_[0].position_data.right_foot_pose.z);*/
-        //ROS_ERROR("--------------");
         step_counter++;
         //Currently not used
         waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
@@ -1145,7 +1118,6 @@ void THORMANG3OnlineWalking::process()
         }
         else
         {
-          //ROS_ERROR("No Foot is Swinging");
           foot_z_swap_tra_.changeTrajectory(ssp_time_start, 0, 0, 0,
               ssp_time_end, 0, 0, 0);
 
@@ -1377,13 +1349,11 @@ void THORMANG3OnlineWalking::process()
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
-            ROS_ERROR("Standing in Phase 4");
             left_fz_trajectory_target_ = left_dsp_fz_N_;
             left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
           else if(added_step_data_[1].position_data.moving_foot == LEFT_FOOT_SWING)
           {
-            ROS_ERROR("Left Foot in Phase 4");
             left_fz_trajectory_target_ = 0.0;
             left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
@@ -1406,13 +1376,11 @@ void THORMANG3OnlineWalking::process()
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
-            ROS_ERROR("Standing in Phase 8");
             left_fz_trajectory_target_ = left_dsp_fz_N_;
             left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
           else if(added_step_data_[1].position_data.moving_foot == RIGHT_FOOT_SWING)
           {
-            ROS_ERROR("Right Foot in Phase 8");
             left_fz_trajectory_target_ = 0.0;
             left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
