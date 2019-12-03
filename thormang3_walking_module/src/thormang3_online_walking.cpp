@@ -1356,12 +1356,6 @@ void THORMANG3OnlineWalking::process()
         step_data_mutex_lock_.lock();
       }
 
-      ROS_ERROR("Start Time: %f", ssp_time_start);
-      ROS_ERROR("End Time: %f", ssp_time_end);
-      ROS_ERROR("Duration of Step: %f", period_time);
-      ROS_ERROR("Reference Time: %f", reference_time_);
-      ROS_ERROR("---------------------");
-
       //Preparation for Balance Control
       if(balancing_index_ == BalancingPhase0 || balancing_index_ == BalancingPhase9)
       {
@@ -1383,13 +1377,13 @@ void THORMANG3OnlineWalking::process()
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
-            ROS_ERROR("Standing in Phase 4");
+            //ROS_ERROR("Standing in Phase 4");
             left_fz_trajectory_target_ = left_dsp_fz_N_;
             left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
           else if(added_step_data_[1].position_data.moving_foot == LEFT_FOOT_SWING)
           {
-            ROS_ERROR("Left Foot in Phase 4");
+            //ROS_ERROR("Left Foot in Phase 4");
             left_fz_trajectory_target_ = 0.0;
             left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
@@ -1412,13 +1406,13 @@ void THORMANG3OnlineWalking::process()
         {
           if(added_step_data_[1].position_data.moving_foot == STANDING)
           {
-            ROS_ERROR("Standing in Phase 8");
+            //ROS_ERROR("Standing in Phase 8");
             left_fz_trajectory_target_ = left_dsp_fz_N_;
             left_fz_trajectory_end_time_ = added_step_data_[0].time_data.abs_step_time;
           }
           else if(added_step_data_[1].position_data.moving_foot == RIGHT_FOOT_SWING)
           {
-            ROS_ERROR("Right Foot in Phase 8");
+            //ROS_ERROR("Right Foot in Phase 8");
             left_fz_trajectory_target_ = 0.0;
             left_fz_trajectory_end_time_ = (added_step_data_[1].time_data.abs_step_time - added_step_data_[0].time_data.abs_step_time)*0.5*added_step_data_[1].time_data.dsp_ratio + added_step_data_[0].time_data.abs_step_time;
           }
@@ -1435,6 +1429,16 @@ void THORMANG3OnlineWalking::process()
         left_fz_trajectory_end_time_   = walking_time_;
       }
     }
+
+    /*if(added_step_data_.size() > 0)
+    {
+      ROS_ERROR("Balancing Phase: %d", balancing_index_);
+      ROS_ERROR("Start Time: %f", left_fz_trajectory_start_time_);
+      ROS_ERROR("End Time: %f", left_fz_trajectory_end_time_);
+      ROS_ERROR("Reference Time: %f", reference_time_);
+      ROS_ERROR("Walking Time: %f", walking_time_);
+      ROS_ERROR("---------------------");
+    }*/
 
    step_data_mutex_lock_.unlock();
 
@@ -1638,11 +1642,11 @@ void THORMANG3OnlineWalking::process()
     if((added_step_data_.size() != 0) && real_running)
     {
         std::string force_string;
-        force_string.append(std::to_string(left_fz_trajectory_start_time_));
+        force_string.append(std::to_string(r_target_fx_N));
         force_string.append(" ");
-        force_string.append(std::to_string(left_fz_trajectory_end_time_));
+        force_string.append(std::to_string(r_target_fy_N));
         force_string.append(" ");
-        force_string.append(std::to_string(left_fz_trajectory_target_));
+        force_string.append(std::to_string(r_target_fz_N));
         force_string.append(" ");
         force_string.append(std::to_string(x_lipm_.coeff(2,0)));
         force_string.append(" ");
