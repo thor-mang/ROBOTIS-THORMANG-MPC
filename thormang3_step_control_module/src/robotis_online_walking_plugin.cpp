@@ -19,29 +19,13 @@ THORMANG3OnlineWalkingPlugin::~THORMANG3OnlineWalkingPlugin()
 {
 }
 
-msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::setStepPlanMsgPlugin(StepPlanMsgPlugin::Ptr plugin)
-{
-  msgs::ErrorStatus status = StepControllerPlugin::setStepPlanMsgPlugin(plugin);
-
-  if (hasError(status))
-    return status;
-
-  UniqueLock lock(plugin_mutex_);
-
-  thor_mang_step_plan_msg_plugin_ = vigir_pluginlib::cast<ThorMangStepPlanMsgPlugin>(plugin);
-  if (!thor_mang_step_plan_msg_plugin_)
-    status += ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Given StepPlanMsgPlugin is not from type 'ThorMangStepPlanMsgPlugin'!");
-
-  return status;
-}
-
 msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepPlan& step_plan)
 {
   if (step_plan.plan.steps.empty())
     return msgs::ErrorStatus();
 
   // transform initial step plan (afterwards stitching will do that automatically for us)
-  if (step_queue_->empty())
+  if (step_plan_.empty())
   {
     const msgs::Step& step = step_plan.plan.steps.front();
 
@@ -124,7 +108,7 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
   if (!online_walking->isRunning())
   {
     // queue has been completely flushed out and executed
-    if (step_queue_->empty())
+    if (step_plan_.empty())
     {
       ROS_INFO("[%s] Walking finished.", getName().c_str());
 
@@ -132,7 +116,7 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
       feedback.first_changeable_step_idx = -1;
       setFeedbackState(feedback);
 
-      step_queue_->clear();
+      step_plan_.clear();
       updateQueueFeedback();
 
       setState(FINISHED);
@@ -155,7 +139,7 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
   int needed_steps = min_unreserved_steps_ - remaining_unreserved_steps;
 
   // skip when final pseudo step is in execution in order terminating the walking controller
-  if (step_queue_->empty() && remaining_unreserved_steps == 0)
+  if (step_plan_.empty() && remaining_unreserved_steps == 0)
     return status;
 
   // update step(s) which has been performed recently
@@ -166,7 +150,7 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::preProcess(const ros::TimerEvent
   if (needed_steps > 0)
   {
     // check if further steps in queue are available
-    int steps_remaining = std::max(0, step_queue_->lastStepIndex() - getLastStepIndexSent());
+    int steps_remaining = std::max(0, step_plan_.getSteps().lastStepIndex() - getLastStepIndexSent());
 
     // steps are available
     if (steps_remaining > 0)

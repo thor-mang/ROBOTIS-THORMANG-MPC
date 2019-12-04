@@ -3,7 +3,6 @@
 <launch>
   <group ns="step_control_module">
     <param name="step_controller_plugin" value="thormang3_online_walking_plugin" />
-    <param name="step_plan_msg_plugin" value="thor_mang_step_plan_msg_plugin" />
   </group>
 </launch>
 
