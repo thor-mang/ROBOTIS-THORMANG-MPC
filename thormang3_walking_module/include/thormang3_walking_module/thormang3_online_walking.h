@@ -91,6 +91,8 @@ public:
 
   void setCurrentIMUSensorOutput(double gyro_x, double gyro_y, double quat_x, double quat_y, double quat_z, double quat_w);
 
+  inline double getWalkingTime() { return walking_time_; }
+
   Eigen::MatrixXd mat_cob_to_g_,  mat_g_to_cob_;
   Eigen::MatrixXd mat_robot_to_cob_, mat_cob_to_robot_;
   Eigen::MatrixXd mat_robot_to_g_, mat_g_to_robot_;

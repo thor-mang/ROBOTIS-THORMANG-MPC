@@ -770,6 +770,7 @@ bool OnlineWalkingModule::setBalanceParamServiceCallback(thormang3_walking_modul
       5.0*tf*tf*tf*tf,    4.0*tf*tf*tf,    3.0*tf*tf,    2.0*tf,        1.0, 0.0,
       20.0*tf*tf*tf,      12.0*tf*tf,       6.0*tf,        2.0,        0.0, 0.0;
 
+
   B << 0, 0, 0, 1.0, 0, 0;
   balance_update_polynomial_coeff_ = A.inverse() * B;
 
@@ -897,7 +898,9 @@ void OnlineWalkingModule::setBalanceParam(thormang3_walking_module_msgs::Balance
 
 void OnlineWalkingModule::updateBalanceParam()
 {
-  double current_update_gain =  balance_update_polynomial_coeff_.coeff(0,0) * robotis_framework::powDI(balance_update_sys_time_ , 5)
+  THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
+
+  double current_update_gain =  balance_update_polynomial_coeff_.coeff(0,0) * robotis_framework::powDI(balance_update_sys_time_, 5)
   + balance_update_polynomial_coeff_.coeff(1,0) * robotis_framework::powDI(balance_update_sys_time_ , 4)
   + balance_update_polynomial_coeff_.coeff(2,0) * robotis_framework::powDI(balance_update_sys_time_ , 3)
   + balance_update_polynomial_coeff_.coeff(3,0) * robotis_framework::powDI(balance_update_sys_time_ , 2)
@@ -909,19 +912,60 @@ void OnlineWalkingModule::updateBalanceParam()
 
   current_balance_param_.hip_roll_swap_angle_rad         = current_update_gain*(desired_balance_param_.hip_roll_swap_angle_rad         - previous_balance_param_.hip_roll_swap_angle_rad        ) + previous_balance_param_.hip_roll_swap_angle_rad;
 
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_gyro_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_gyro_d_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_gyro_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_gyro_d_gain);
+
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_angle_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_angle_d_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_angle_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_angle_d_gain);
+
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_x_force_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_y_force_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_z_force_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_torque_p_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_torque_p_gain);
+
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_x_force_d_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_y_force_d_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_z_force_d_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_torque_d_gain);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_torque_d_gain);
+
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.roll_gyro_cut_off_frequency );
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.pitch_gyro_cut_off_frequency);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.roll_angle_cut_off_frequency);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.pitch_angle_cut_off_frequency);
+
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_x_force_cut_off_frequency);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_y_force_cut_off_frequency);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_z_force_cut_off_frequency);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_torque_cut_off_frequency);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_torque_cut_off_frequency);
+
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.cob_x_offset_m);
+  ROS_ERROR("Previous Gain: %f", previous_balance_param_.cob_y_offset_m);
+
+  ROS_ERROR("-------------------------");
+
   current_balance_param_.foot_roll_gyro_p_gain                = current_update_gain*(desired_balance_param_.foot_roll_gyro_p_gain                - previous_balance_param_.foot_roll_gyro_p_gain              ) + previous_balance_param_.foot_roll_gyro_p_gain;
   current_balance_param_.foot_roll_gyro_d_gain                = current_update_gain*(desired_balance_param_.foot_roll_gyro_d_gain                - previous_balance_param_.foot_roll_gyro_d_gain              ) + previous_balance_param_.foot_roll_gyro_d_gain;
   current_balance_param_.foot_pitch_gyro_p_gain               = current_update_gain*(desired_balance_param_.foot_pitch_gyro_p_gain               - previous_balance_param_.foot_pitch_gyro_p_gain             ) + previous_balance_param_.foot_pitch_gyro_p_gain;
   current_balance_param_.foot_pitch_gyro_d_gain               = current_update_gain*(desired_balance_param_.foot_pitch_gyro_d_gain               - previous_balance_param_.foot_pitch_gyro_d_gain             ) + previous_balance_param_.foot_pitch_gyro_d_gain;
+
   current_balance_param_.foot_roll_angle_p_gain               = current_update_gain*(desired_balance_param_.foot_roll_angle_p_gain               - previous_balance_param_.foot_roll_angle_p_gain             ) + previous_balance_param_.foot_roll_angle_p_gain;
   current_balance_param_.foot_roll_angle_d_gain               = current_update_gain*(desired_balance_param_.foot_roll_angle_d_gain               - previous_balance_param_.foot_roll_angle_d_gain             ) + previous_balance_param_.foot_roll_angle_d_gain;
   current_balance_param_.foot_pitch_angle_p_gain              = current_update_gain*(desired_balance_param_.foot_pitch_angle_p_gain              - previous_balance_param_.foot_pitch_angle_p_gain            ) + previous_balance_param_.foot_pitch_angle_p_gain;
   current_balance_param_.foot_pitch_angle_d_gain              = current_update_gain*(desired_balance_param_.foot_pitch_angle_d_gain              - previous_balance_param_.foot_pitch_angle_d_gain            ) + previous_balance_param_.foot_pitch_angle_d_gain;
+
   current_balance_param_.foot_x_force_p_gain                  = current_update_gain*(desired_balance_param_.foot_x_force_p_gain                  - previous_balance_param_.foot_x_force_p_gain                ) + previous_balance_param_.foot_x_force_p_gain;
   current_balance_param_.foot_y_force_p_gain                  = current_update_gain*(desired_balance_param_.foot_y_force_p_gain                  - previous_balance_param_.foot_y_force_p_gain                ) + previous_balance_param_.foot_y_force_p_gain;
   current_balance_param_.foot_z_force_p_gain                  = current_update_gain*(desired_balance_param_.foot_z_force_p_gain                  - previous_balance_param_.foot_z_force_p_gain                ) + previous_balance_param_.foot_z_force_p_gain;
   current_balance_param_.foot_roll_torque_p_gain              = current_update_gain*(desired_balance_param_.foot_roll_torque_p_gain              - previous_balance_param_.foot_roll_torque_p_gain            ) + previous_balance_param_.foot_roll_torque_p_gain;
   current_balance_param_.foot_pitch_torque_p_gain             = current_update_gain*(desired_balance_param_.foot_pitch_torque_p_gain             - previous_balance_param_.foot_pitch_torque_p_gain           ) + previous_balance_param_.foot_pitch_torque_p_gain;
+
   current_balance_param_.foot_x_force_d_gain                  = current_update_gain*(desired_balance_param_.foot_x_force_d_gain                  - previous_balance_param_.foot_x_force_d_gain                ) + previous_balance_param_.foot_x_force_d_gain;
   current_balance_param_.foot_y_force_d_gain                  = current_update_gain*(desired_balance_param_.foot_y_force_d_gain                  - previous_balance_param_.foot_y_force_d_gain                ) + previous_balance_param_.foot_y_force_d_gain;
   current_balance_param_.foot_z_force_d_gain                  = current_update_gain*(desired_balance_param_.foot_z_force_d_gain                  - previous_balance_param_.foot_z_force_d_gain                ) + previous_balance_param_.foot_z_force_d_gain;
@@ -932,11 +976,49 @@ void OnlineWalkingModule::updateBalanceParam()
   current_balance_param_.pitch_gyro_cut_off_frequency         = current_update_gain*(desired_balance_param_.pitch_gyro_cut_off_frequency         - previous_balance_param_.pitch_gyro_cut_off_frequency       ) + previous_balance_param_.pitch_gyro_cut_off_frequency;
   current_balance_param_.roll_angle_cut_off_frequency         = current_update_gain*(desired_balance_param_.roll_angle_cut_off_frequency         - previous_balance_param_.roll_angle_cut_off_frequency       ) + previous_balance_param_.roll_angle_cut_off_frequency;
   current_balance_param_.pitch_angle_cut_off_frequency        = current_update_gain*(desired_balance_param_.pitch_angle_cut_off_frequency        - previous_balance_param_.pitch_angle_cut_off_frequency      ) + previous_balance_param_.pitch_angle_cut_off_frequency;
+
   current_balance_param_.foot_x_force_cut_off_frequency       = current_update_gain*(desired_balance_param_.foot_x_force_cut_off_frequency       - previous_balance_param_.foot_x_force_cut_off_frequency     ) + previous_balance_param_.foot_x_force_cut_off_frequency;
   current_balance_param_.foot_y_force_cut_off_frequency       = current_update_gain*(desired_balance_param_.foot_y_force_cut_off_frequency       - previous_balance_param_.foot_y_force_cut_off_frequency     ) + previous_balance_param_.foot_y_force_cut_off_frequency;
   current_balance_param_.foot_z_force_cut_off_frequency       = current_update_gain*(desired_balance_param_.foot_z_force_cut_off_frequency       - previous_balance_param_.foot_z_force_cut_off_frequency     ) + previous_balance_param_.foot_z_force_cut_off_frequency;
   current_balance_param_.foot_roll_torque_cut_off_frequency   = current_update_gain*(desired_balance_param_.foot_roll_torque_cut_off_frequency   - previous_balance_param_.foot_roll_torque_cut_off_frequency ) + previous_balance_param_.foot_roll_torque_cut_off_frequency;
   current_balance_param_.foot_pitch_torque_cut_off_frequency  = current_update_gain*(desired_balance_param_.foot_pitch_torque_cut_off_frequency  - previous_balance_param_.foot_pitch_torque_cut_off_frequency) + previous_balance_param_.foot_pitch_torque_cut_off_frequency;
+
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.roll_gyro_cut_off_frequency );
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.pitch_gyro_cut_off_frequency);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.roll_angle_cut_off_frequency);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.pitch_angle_cut_off_frequency);
+
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_x_force_cut_off_frequency);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_y_force_cut_off_frequency);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_z_force_cut_off_frequency);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_roll_torque_cut_off_frequency);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_pitch_torque_cut_off_frequency);
+
+  ROS_ERROR("-------------------------");
+
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_gyro_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_gyro_d_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_gyro_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_gyro_d_gain);
+
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_angle_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_angle_d_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_angle_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_angle_d_gain);
+
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_x_force_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_y_force_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_z_force_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_torque_p_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_torque_p_gain);
+
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_x_force_d_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_y_force_d_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_z_force_d_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_torque_d_gain);
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_torque_d_gain);
+
+  ROS_ERROR("-------------------------");
 
   setBalanceParam(current_balance_param_);
 }
@@ -1195,17 +1277,16 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   r_foot_fx_N_ = robotis_framework::sign(r_foot_fx_N_) * fmin( fabs(r_foot_fx_N_), 2000.0);
   r_foot_fy_N_ = robotis_framework::sign(r_foot_fy_N_) * fmin( fabs(r_foot_fy_N_), 2000.0);
   r_foot_fz_N_ = robotis_framework::sign(r_foot_fz_N_) * fmin( fabs(r_foot_fz_N_), 2000.0);
-  r_foot_Tx_Nm_ = robotis_framework::sign(r_foot_Tx_Nm_) *fmin(fabs(r_foot_Tx_Nm_), 300.0);
-  r_foot_Ty_Nm_ = robotis_framework::sign(r_foot_Ty_Nm_) *fmin(fabs(r_foot_Ty_Nm_), 300.0);
-  r_foot_Tz_Nm_ = robotis_framework::sign(r_foot_Tz_Nm_) *fmin(fabs(r_foot_Tz_Nm_), 300.0);
+  r_foot_Tx_Nm_ = robotis_framework::sign(r_foot_Tx_Nm_) * fmin(fabs(r_foot_Tx_Nm_), 300.0);
+  r_foot_Ty_Nm_ = robotis_framework::sign(r_foot_Ty_Nm_) * fmin(fabs(r_foot_Ty_Nm_), 300.0);
+  r_foot_Tz_Nm_ = robotis_framework::sign(r_foot_Tz_Nm_) * fmin(fabs(r_foot_Tz_Nm_), 300.0);
 
   l_foot_fx_N_ = robotis_framework::sign(l_foot_fx_N_) * fmin( fabs(l_foot_fx_N_), 2000.0);
   l_foot_fy_N_ = robotis_framework::sign(l_foot_fy_N_) * fmin( fabs(l_foot_fy_N_), 2000.0);
   l_foot_fz_N_ = robotis_framework::sign(l_foot_fz_N_) * fmin( fabs(l_foot_fz_N_), 2000.0);
-  l_foot_Tx_Nm_ = robotis_framework::sign(l_foot_Tx_Nm_) *fmin(fabs(l_foot_Tx_Nm_), 300.0);
-  l_foot_Ty_Nm_ = robotis_framework::sign(l_foot_Ty_Nm_) *fmin(fabs(l_foot_Ty_Nm_), 300.0);
-  l_foot_Tz_Nm_ = robotis_framework::sign(l_foot_Tz_Nm_) *fmin(fabs(l_foot_Tz_Nm_), 300.0);
-
+  l_foot_Tx_Nm_ = robotis_framework::sign(l_foot_Tx_Nm_) * fmin(fabs(l_foot_Tx_Nm_), 300.0);
+  l_foot_Ty_Nm_ = robotis_framework::sign(l_foot_Ty_Nm_) * fmin(fabs(l_foot_Ty_Nm_), 300.0);
+  l_foot_Tz_Nm_ = robotis_framework::sign(l_foot_Tz_Nm_) * fmin(fabs(l_foot_Tz_Nm_), 300.0);
 
   if(balance_update_with_loop_ == true)
   {
