@@ -82,7 +82,7 @@ int main(int argc, char **argv)
         ImuSensor::getInstance()->gazebo_mode_ = true;
         FeetForceTorqueSensor::getInstance()->gazebo_mode_ = true;
         WristForceTorqueSensor::getInstance()->gazebo_mode_ = true;
-        StepControlModule::getInstance()->gazebo_mode_ = true;
+        StepControlModule::getInstance()->gazebo_mode_ = false;
         L3Module::getInstance()->gazebo_mode_ = true;
         ROS_WARN("SET TO GAZEBO MODE!");
     }
