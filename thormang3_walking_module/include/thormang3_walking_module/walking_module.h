@@ -181,7 +181,6 @@ protected:
   thormang3_walking_module_msgs::BalanceParam previous_balance_param_;
   thormang3_walking_module_msgs::BalanceParam current_balance_param_;
   thormang3_walking_module_msgs::BalanceParam desired_balance_param_;
-
 };
 
 }

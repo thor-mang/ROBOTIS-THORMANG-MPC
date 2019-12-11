@@ -18,17 +18,30 @@ plugin_sets:
         start_step_duration: 3.2
         end_step_duration: 1.6
         param_update_duration: 2.0
-        time_unit: 0.008
-        ft_p_gains: [0.05, 0.05, 0.02, 0.0015, 0.0015]
-        ft_d_gains: [0.001, 0.001, 0.001, 0.0002, 0.0002]
-        imu_p_gains: [1.0, 0.3, 1.0, 0.3]
-        imu_d_gains: [0.0, 0.0, 0.0, 0.0]
+        time_unit: 0.008 
+
+        ft_weights: [0.001, 0.001, 0.001, 1.0, 1.0, 0.0]
+        ft_p_gains: [0.05, 0.05, 0.02, 0.0015, 0.0015, 0.0]
+        ft_d_gains: [0.001, 0.001, 0.001, 0.0002, 0.0002, 0.0]
+
         joint_p_gains: [1.0, 1.5, 0.15, 0.15, 0.05, 0.05]
         joint_d_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        imu_cut_off_freq: 12
-        ft_cut_off_freq: 10
-        x_offset_cob: -0.015
+
+        imu_weights: [-1.0, -1.0, -0.1, -0.1]
+        imu_p_gains: [1.0, 1.0, 0.3, 0.3]
+        imu_d_gains: [0.0, 0.0, 0.0, 0.0]
+
+        leg_controller_names: ["x_force_controller", "y_force_controller", "z_force_controller", "roll_torque_controller", "pitch_torque_controller", "yaw_torque_controller"]
+        imu_controller_names: ["roll_orientation_controller", "pitch_orientation_controller", "roll_gyro_controller", "pitch_gyro_controller"]
+        leg_filter_names: ["x_force_filter", "y_force_filter", "z_force_filter", "roll_torque_filter", "pitch_torque_filter"]
+        imu_filter_names: ["x_orientation_filter", "y_orientation_filter", "x_velocity_filter", "y_velocity_filter"]
+
+        imu_cut_off_freq: 12.0
+        ft_cut_off_freq: 10.0
+        x_offset_cob: 0.0
         y_offset_cob: 0.0
+
+        feet_adjustment_limits: [0.05, 0.05, 0.05, 15.0, 15.0, 15.0]
 
     # ZMPGaitGeneratorPlugin
     robotis_zmp_schedule_planner: 

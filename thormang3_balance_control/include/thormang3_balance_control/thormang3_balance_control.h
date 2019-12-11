@@ -101,12 +101,14 @@ public:
   double getCutOffFrequency(void);
   double getFilteredOutput(double present_raw_value);
 
+  double alpha_;
+  double prev_output_;
+
 private:
   double cut_off_freq_;
   double control_cycle_sec_;
-  double alpha_;
 
-  double prev_output_;
+
 };
 
 class BalanceControlUsingDampingConroller
@@ -329,7 +331,6 @@ public:
   BalancePDController left_foot_torque_roll_ctrl_;
   BalancePDController left_foot_torque_pitch_ctrl_;
 
-
   BalanceLowPassFilter roll_gyro_lpf_;
   BalanceLowPassFilter pitch_gyro_lpf_;
 
@@ -420,6 +421,8 @@ private:
   double foot_roll_adjustment_abs_max_rad_;
   double foot_pitch_adjustment_abs_max_rad_;
   double foot_yaw_adjustment_abs_max_rad_;
+
+  double walking_time;
 };
 
 }

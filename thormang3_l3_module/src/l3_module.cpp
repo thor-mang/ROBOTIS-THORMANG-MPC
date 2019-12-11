@@ -32,6 +32,7 @@ void L3Module::onModuleEnable()
   // (re)initialize walk controller
   walk_controller_.reset(new l3_zmp_walk::WalkController(queue_nh_));
   walk_controller_->initialize(queue_nh_);
+  walk_controller_->setBalanceCtrlStatus(!gazebo_mode_);
 
   // fetch sensor modules
   l3_zmp_walk::InterfaceManager::getPlugins(sensor_modules_);

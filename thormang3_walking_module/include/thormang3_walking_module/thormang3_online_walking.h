@@ -68,8 +68,6 @@ public:
   void process();
   bool isRunning();
 
-  void printStepIdxData(Eigen::VectorXi idx_data);
-
   bool addStepData(robotis_framework::StepData step_data);
   void eraseLastStepData();
   int  getNumofRemainingUnreservedStepData();
@@ -90,6 +88,10 @@ public:
   void setInitialLeftElbowAngle(double elbow_angle_rad);
 
   void setCurrentIMUSensorOutput(double gyro_x, double gyro_y, double quat_x, double quat_y, double quat_z, double quat_w);
+
+  inline double getWalkingTime() { return walking_time_; }
+
+  void printDebugData();
 
   Eigen::MatrixXd mat_cob_to_g_,  mat_g_to_cob_;
   Eigen::MatrixXd mat_robot_to_cob_, mat_cob_to_robot_;
@@ -217,10 +219,9 @@ private:
 
   int step_counter;
 
-  std::FILE* file;
-  std::FILE* file_f;
-  bool isClosed;
-  bool firstTime;
+  bool first_time_;
+  int file_count_;
+  std::FILE* file_;
 };
 
 }
