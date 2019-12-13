@@ -28,10 +28,8 @@ plugin_sets:
         imu_p_gains: [1.0, 0.3, 1.0, 0.3]
         imu_d_gains: [0.0, 0.0, 0.0, 0.0]
 
-        joint_p_gains: [1.0, 1.5, 0.15, 0.15, 0.05, 0.05]
-        joint_d_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-
         leg_controller_names: ["x_force_controller", "y_force_controller", "z_force_controller", "pitch_torque_controller", "roll_torque_controller", "yaw_torque_controller"]
+        imu_controller_names: ["roll_orientation_controller", "roll_gyro_controller", "pitch_orientation_controller", "pitch_gyro_controller"]
 
         imu_cut_off_freq: 12.0
         ft_cut_off_freq: 10.0
