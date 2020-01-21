@@ -727,6 +727,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   foot_roll_adjustment_by_orientation_roll_   = -1.0*orientation_enable_ * foot_roll_angle_ctrl_.getFeedBack(roll_angle_filtered);
   foot_pitch_adjustment_by_orientation_pitch_ = -1.0*orientation_enable_ * foot_pitch_angle_ctrl_.getFeedBack(pitch_angle_filtered);
 
+  // Mysteriöses Umformen
   Eigen::MatrixXd mat_orientation_adjustment_by_imu = robotis_framework::getRotation4d(foot_roll_adjustment_by_gyro_roll_ + foot_roll_adjustment_by_orientation_roll_, foot_pitch_adjustment_by_gyro_pitch_ + foot_pitch_adjustment_by_orientation_pitch_, 0.0);
   Eigen::MatrixXd mat_r_xy, mat_l_xy;
   mat_r_xy.resize(4,1); mat_l_xy.resize(4,1);
@@ -756,10 +757,15 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   l_foot_roll_adjustment_by_torque_roll_   = ft_enable_*left_foot_torque_roll_ctrl_.getFeedBack(left_foot_torque_roll_filtered);
   l_foot_pitch_adjustment_by_torque_pitch_ = ft_enable_*left_foot_torque_pitch_ctrl_.getFeedBack(left_foot_torque_pitch_filtered);
 
-  // sum of sensory balance result
+  // sum of sensory balance result --> Noch mysteriöserer Kram
   pose_cob_adjustment_.coeffRef(0) = cob_x_manual_adjustment_m_;
   pose_cob_adjustment_.coeffRef(1) = cob_y_manual_adjustment_m_;
   pose_cob_adjustment_.coeffRef(2) = cob_z_manual_adjustment_m_;
+
+  ROS_ERROR("Offset X: %f", cob_x_manual_adjustment_m_);
+  ROS_ERROR("Offset Y: %f", cob_y_manual_adjustment_m_);
+  ROS_ERROR("Offset Z: %f", cob_z_manual_adjustment_m_);
+  ROS_ERROR("-------------");
 
   pose_right_foot_adjustment_.coeffRef(0) = r_foot_x_adjustment_by_force_x_;
   pose_right_foot_adjustment_.coeffRef(1) = r_foot_y_adjustment_by_force_y_;
