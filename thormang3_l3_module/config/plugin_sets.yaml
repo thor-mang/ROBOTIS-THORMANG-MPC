@@ -31,6 +31,9 @@ plugin_sets:
         leg_controller_names: ["x_force_controller", "y_force_controller", "z_force_controller", "pitch_torque_controller", "roll_torque_controller", "yaw_torque_controller"]
         imu_controller_names: ["roll_orientation_controller", "roll_gyro_controller", "pitch_orientation_controller", "pitch_gyro_controller"]
 
+		leg_filter_names: ["x_filter", "y_filter", "z_filter", "pitch_filter", "roll_filter", "yaw_filter"]
+		imu_filter_names: ["roll_orientation_filter", "roll_gyro_filter", "pitch_orientation_filter", "pitch_gyro_filter"]
+
         imu_cut_off_freq: 12.0
         ft_cut_off_freq: 10.0
         x_offset_cob: -0.015
