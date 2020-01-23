@@ -762,10 +762,10 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_cob_adjustment_.coeffRef(1) = cob_y_manual_adjustment_m_;
   pose_cob_adjustment_.coeffRef(2) = cob_z_manual_adjustment_m_;
 
-  ROS_ERROR("Offset X: %f", cob_x_manual_adjustment_m_);
+  /*ROS_ERROR("Offset X: %f", cob_x_manual_adjustment_m_);
   ROS_ERROR("Offset Y: %f", cob_y_manual_adjustment_m_);
   ROS_ERROR("Offset Z: %f", cob_z_manual_adjustment_m_);
-  ROS_ERROR("-------------");
+  ROS_ERROR("-------------");*/
 
   pose_right_foot_adjustment_.coeffRef(0) = r_foot_x_adjustment_by_force_x_;
   pose_right_foot_adjustment_.coeffRef(1) = r_foot_y_adjustment_by_force_y_;
