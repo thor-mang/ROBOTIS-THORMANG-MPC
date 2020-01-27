@@ -153,6 +153,8 @@ OnlineWalkingModule::OnlineWalkingModule()
   rot_z_pi_3d_ << -1,  0, 0,
                    0, -1, 0,
                    0,  0, 1;
+
+  first_time = true;
 }
 
 OnlineWalkingModule::~OnlineWalkingModule()
@@ -912,6 +914,8 @@ void OnlineWalkingModule::updateBalanceParam()
 
   current_balance_param_.hip_roll_swap_angle_rad         = current_update_gain*(desired_balance_param_.hip_roll_swap_angle_rad         - previous_balance_param_.hip_roll_swap_angle_rad        ) + previous_balance_param_.hip_roll_swap_angle_rad;
 
+
+
   /*ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_gyro_p_gain);
   ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_gyro_d_gain);
   ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_gyro_p_gain);
@@ -995,17 +999,6 @@ void OnlineWalkingModule::updateBalanceParam()
   ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_pitch_torque_cut_off_frequency);
 
   ROS_ERROR("-------------------------");
-
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_gyro_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_gyro_d_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_gyro_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_gyro_d_gain);
-
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_angle_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_angle_d_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_angle_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_angle_d_gain);
-
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_x_force_p_gain);
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_y_force_p_gain);
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_z_force_p_gain);
@@ -1017,10 +1010,73 @@ void OnlineWalkingModule::updateBalanceParam()
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_z_force_d_gain);
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_torque_d_gain);
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_torque_d_gain);
+*/
 
-  ROS_ERROR("-------------------------");*/
+  printParams();
 
   setBalanceParam(current_balance_param_);
+}
+
+void OnlineWalkingModule::printParams()
+{
+  if(first_time)
+  {
+    file_b = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/BalanceParams_Robotis.txt", "wb");
+    first_time = false;
+  }
+
+  std::string param_string;
+  param_string.append(std::to_string(current_balance_param_.cob_x_offset_m));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.cob_y_offset_m));
+
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_roll_gyro_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_roll_gyro_d_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_pitch_gyro_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_pitch_gyro_d_gain));
+
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_roll_angle_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_roll_angle_d_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_pitch_angle_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_pitch_angle_d_gain));
+
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_x_force_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_y_force_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_z_force_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_roll_torque_p_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_pitch_torque_p_gain));
+
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_x_force_d_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_y_force_d_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_z_force_d_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_roll_torque_d_gain));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_pitch_torque_d_gain));
+
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.roll_gyro_cut_off_frequency));
+  param_string.append(" ");
+  param_string.append(std::to_string(current_balance_param_.foot_x_force_cut_off_frequency));
+
+  std::fprintf(file_b, "%s", param_string.c_str());
+  std::fprintf(file_b, "\n");
 }
 
 
@@ -1299,6 +1355,13 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
       std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISHED_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
       publishDoneMsg("walking_balance");
+      if(!is_closed)
+      {
+        ROS_ERROR("Parameter Scanning Ready");
+        std::fclose(file_b);
+        is_closed = true;
+      }
+
     }
     else
     {
