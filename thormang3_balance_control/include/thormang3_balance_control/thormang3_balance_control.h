@@ -310,6 +310,11 @@ public:
   double getCOBManualAdjustmentY();
   double getCOBManualAdjustmentZ();
 
+  void printSensorValues(double walking_time);
+
+  std::FILE* file_s;
+  bool firstTime;
+
   // damping controllers
   BalancePDController foot_roll_gyro_ctrl_;
   BalancePDController foot_pitch_gyro_ctrl_;

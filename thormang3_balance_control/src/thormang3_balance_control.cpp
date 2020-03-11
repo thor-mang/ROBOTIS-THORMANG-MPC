@@ -718,7 +718,6 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   double left_foot_torque_roll_filtered  = left_foot_torque_roll_lpf_.getFilteredOutput(current_left_tx_Nm_);
   double left_foot_torque_pitch_filtered = left_foot_torque_pitch_lpf_.getFilteredOutput(current_left_ty_Nm_);
 
-
   // gyro
   foot_roll_adjustment_by_gyro_roll_   = -0.1*gyro_enable_*foot_roll_gyro_ctrl_.getFeedBack(roll_gyro_filtered);
   foot_pitch_adjustment_by_gyro_pitch_ = -0.1*gyro_enable_*foot_pitch_gyro_ctrl_.getFeedBack(pitch_gyro_filtered);
@@ -761,11 +760,6 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_cob_adjustment_.coeffRef(0) = cob_x_manual_adjustment_m_;
   pose_cob_adjustment_.coeffRef(1) = cob_y_manual_adjustment_m_;
   pose_cob_adjustment_.coeffRef(2) = cob_z_manual_adjustment_m_;
-
-  /*ROS_ERROR("Offset X: %f", cob_x_manual_adjustment_m_);
-  ROS_ERROR("Offset Y: %f", cob_y_manual_adjustment_m_);
-  ROS_ERROR("Offset Z: %f", cob_z_manual_adjustment_m_);
-  ROS_ERROR("-------------");*/
 
   pose_right_foot_adjustment_.coeffRef(0) = r_foot_x_adjustment_by_force_x_;
   pose_right_foot_adjustment_.coeffRef(1) = r_foot_y_adjustment_by_force_y_;
@@ -843,6 +837,51 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   *robot_to_cob_modified        = mat_robot_to_cob_modified_;
   *robot_to_right_foot_modified = mat_robot_to_right_foot_modified_;
   *robot_to_left_foot_modified  = mat_robot_to_left_foot_modified_;
+}
+
+void BalanceControlUsingPDController::printSensorValues(double walking_time)
+{
+    if(firstTime)
+    {
+        file_s = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Sensor_Values_Robotis.txt", "wb");
+        firstTime = false;
+    }
+
+    if(walking_time > 2.0)
+    {
+        std::fclose(file_s);
+    } else {
+        std::string sensor_string;
+        sensor_string.append(std::to_string(current_orientation_roll_rad_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_orientation_pitch_rad_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_gyro_roll_rad_per_sec_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_gyro_pitch_rad_per_sec_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_right_fx_N_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_right_fy_N_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_right_fz_N_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_right_tx_Nm_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_right_ty_Nm_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_left_fx_N_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_left_fy_N_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_left_fz_N_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_left_tx_Nm_));
+        sensor_string.append(" ");
+        sensor_string.append(std::to_string(current_left_ty_Nm_));
+        std::fprintf(file_s, "%s", sensor_string.c_str());
+        std::fprintf(file_s, "\n");
+    }
 }
 
 void BalanceControlUsingPDController::setDesiredPose(const Eigen::MatrixXd &robot_to_cob, const Eigen::MatrixXd &robot_to_right_foot, const Eigen::MatrixXd &robot_to_left_foot)
