@@ -710,6 +710,7 @@ bool OnlineWalkingModule::setBalanceParamServiceCallback(thormang3_walking_modul
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
   res.result = thormang3_walking_module_msgs::SetBalanceParam::Response::NO_ERROR;
 
+
   if( enable_ == false)
     res.result |= thormang3_walking_module_msgs::SetBalanceParam::Response::NOT_ENABLED_WALKING_MODULE;
 
@@ -987,16 +988,17 @@ void OnlineWalkingModule::updateBalanceParam()
   current_balance_param_.foot_roll_torque_cut_off_frequency   = current_update_gain*(desired_balance_param_.foot_roll_torque_cut_off_frequency   - previous_balance_param_.foot_roll_torque_cut_off_frequency ) + previous_balance_param_.foot_roll_torque_cut_off_frequency;
   current_balance_param_.foot_pitch_torque_cut_off_frequency  = current_update_gain*(desired_balance_param_.foot_pitch_torque_cut_off_frequency  - previous_balance_param_.foot_pitch_torque_cut_off_frequency) + previous_balance_param_.foot_pitch_torque_cut_off_frequency;
 
-  /*ROS_ERROR("Desired Gain: %f", desired_balance_param_.roll_gyro_cut_off_frequency );
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.pitch_gyro_cut_off_frequency);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.roll_angle_cut_off_frequency);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.pitch_angle_cut_off_frequency);
+  /*ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_x_force_d_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_y_force_d_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_z_force_d_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_roll_torque_d_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_pitch_torque_d_gain);
 
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_x_force_cut_off_frequency);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_y_force_cut_off_frequency);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_z_force_cut_off_frequency);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_roll_torque_cut_off_frequency);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_pitch_torque_cut_off_frequency);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_x_force_p_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_y_force_p_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_z_force_p_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_roll_torque_p_gain);
+  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_pitch_torque_p_gain);
 
   ROS_ERROR("-------------------------");
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_x_force_p_gain);
@@ -1009,8 +1011,7 @@ void OnlineWalkingModule::updateBalanceParam()
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_y_force_d_gain);
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_z_force_d_gain);
   ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_torque_d_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_torque_d_gain);
-*/
+  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_torque_d_gain);*/
 
   printParams();
 
