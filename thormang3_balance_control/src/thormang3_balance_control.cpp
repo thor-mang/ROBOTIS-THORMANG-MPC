@@ -665,6 +665,9 @@ void BalanceControlUsingPDController::initialize(const int control_cycle_msec)
   left_foot_force_z_lpf_.initialize(control_cycle_sec_, 1.0);
   left_foot_torque_roll_lpf_.initialize(control_cycle_sec_, 1.0);
   left_foot_torque_pitch_lpf_.initialize(control_cycle_sec_, 1.0);
+
+  firstTime = true;
+  isClosed = false;
 }
 
 void BalanceControlUsingPDController::setGyroBalanceEnable(bool enable)
@@ -843,13 +846,14 @@ void BalanceControlUsingPDController::printSensorValues(double walking_time)
 {
     if(firstTime)
     {
-        file_s = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Sensor_Values_Robotis.txt", "wb");
+        file_s = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/RobotisDebugData/Sensor_Values_Robotis.txt", "wb");
         firstTime = false;
     }
 
-    if(walking_time > 2.0)
+    if(walking_time > 2.0 && !isClosed)
     {
         std::fclose(file_s);
+        isClosed = true;
     } else {
         std::string sensor_string;
         sensor_string.append(std::to_string(current_orientation_roll_rad_));

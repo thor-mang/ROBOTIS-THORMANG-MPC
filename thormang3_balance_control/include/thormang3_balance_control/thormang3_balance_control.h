@@ -313,7 +313,7 @@ public:
   void printSensorValues(double walking_time);
 
   std::FILE* file_s;
-  bool firstTime;
+  bool firstTime, isClosed;
 
   // damping controllers
   BalancePDController foot_roll_gyro_ctrl_;
