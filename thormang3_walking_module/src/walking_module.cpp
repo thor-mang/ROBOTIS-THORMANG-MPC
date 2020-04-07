@@ -1022,7 +1022,7 @@ void OnlineWalkingModule::printParams()
 {
   if(first_time)
   {
-    file_b = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/BalanceParams_Robotis.txt", "wb");
+    file_b = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/RobotisDebugData/BalanceParams_Robotis.txt", "wb");
     first_time = false;
   }
 

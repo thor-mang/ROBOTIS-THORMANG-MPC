@@ -964,8 +964,8 @@ void THORMANG3OnlineWalking::process()
     {
       if(firstTime)
       {
-        file = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Step_Trajectories_Robotis.txt", "wb");
-        file_f = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Force_Trajectories_Robotis.txt", "wb");
+        file = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/RobotisDebugData/Step_Trajectories_Robotis.txt", "wb");
+        file_f = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/RobotisDebugData/Force_Trajectories_Robotis.txt", "wb");
         firstTime = false;
       }
       //period_time: Dauer von Ende des letzten zu Ende das aktuellen Schrittes
