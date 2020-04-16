@@ -77,7 +77,7 @@ plugin_sets:
         leg_index: 0
         sensor_name: "l_foot"
         frame_id: "l_foot_ft_link"
-        use_scaled: False
+        use_scaled: True
 
     right_foot_ft:
       import: thor_mang_ft_sensor
@@ -85,7 +85,7 @@ plugin_sets:
         leg_index: 1
         sensor_name: "r_foot"
         frame_id: "r_foot_ft_link"
-        use_scaled: False
+        use_scaled: True
 
     leg_joint_cmd: thor_mang_joint_cmd_interface
 
