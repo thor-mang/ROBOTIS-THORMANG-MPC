@@ -915,46 +915,6 @@ void OnlineWalkingModule::updateBalanceParam()
 
   current_balance_param_.hip_roll_swap_angle_rad         = current_update_gain*(desired_balance_param_.hip_roll_swap_angle_rad         - previous_balance_param_.hip_roll_swap_angle_rad        ) + previous_balance_param_.hip_roll_swap_angle_rad;
 
-
-
-  /*ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_gyro_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_gyro_d_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_gyro_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_gyro_d_gain);
-
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_angle_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_angle_d_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_angle_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_angle_d_gain);
-
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_x_force_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_y_force_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_z_force_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_torque_p_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_torque_p_gain);
-
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_x_force_d_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_y_force_d_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_z_force_d_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_torque_d_gain);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_torque_d_gain);
-
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.roll_gyro_cut_off_frequency );
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.pitch_gyro_cut_off_frequency);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.roll_angle_cut_off_frequency);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.pitch_angle_cut_off_frequency);
-
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_x_force_cut_off_frequency);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_y_force_cut_off_frequency);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_z_force_cut_off_frequency);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_roll_torque_cut_off_frequency);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.foot_pitch_torque_cut_off_frequency);
-
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.cob_x_offset_m);
-  ROS_ERROR("Previous Gain: %f", previous_balance_param_.cob_y_offset_m);
-
-  ROS_ERROR("-------------------------");*/
-
   current_balance_param_.foot_roll_gyro_p_gain                = current_update_gain*(desired_balance_param_.foot_roll_gyro_p_gain                - previous_balance_param_.foot_roll_gyro_p_gain              ) + previous_balance_param_.foot_roll_gyro_p_gain;
   current_balance_param_.foot_roll_gyro_d_gain                = current_update_gain*(desired_balance_param_.foot_roll_gyro_d_gain                - previous_balance_param_.foot_roll_gyro_d_gain              ) + previous_balance_param_.foot_roll_gyro_d_gain;
   current_balance_param_.foot_pitch_gyro_p_gain               = current_update_gain*(desired_balance_param_.foot_pitch_gyro_p_gain               - previous_balance_param_.foot_pitch_gyro_p_gain             ) + previous_balance_param_.foot_pitch_gyro_p_gain;
@@ -987,31 +947,6 @@ void OnlineWalkingModule::updateBalanceParam()
   current_balance_param_.foot_z_force_cut_off_frequency       = current_update_gain*(desired_balance_param_.foot_z_force_cut_off_frequency       - previous_balance_param_.foot_z_force_cut_off_frequency     ) + previous_balance_param_.foot_z_force_cut_off_frequency;
   current_balance_param_.foot_roll_torque_cut_off_frequency   = current_update_gain*(desired_balance_param_.foot_roll_torque_cut_off_frequency   - previous_balance_param_.foot_roll_torque_cut_off_frequency ) + previous_balance_param_.foot_roll_torque_cut_off_frequency;
   current_balance_param_.foot_pitch_torque_cut_off_frequency  = current_update_gain*(desired_balance_param_.foot_pitch_torque_cut_off_frequency  - previous_balance_param_.foot_pitch_torque_cut_off_frequency) + previous_balance_param_.foot_pitch_torque_cut_off_frequency;
-
-  /*ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_x_force_d_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_y_force_d_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_z_force_d_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_roll_torque_d_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_pitch_torque_d_gain);
-
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_x_force_p_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_y_force_p_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_z_force_p_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_roll_torque_p_gain);
-  ROS_ERROR("Desired Gain: %f", desired_balance_param_.foot_pitch_torque_p_gain);
-
-  ROS_ERROR("-------------------------");
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_x_force_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_y_force_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_z_force_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_torque_p_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_torque_p_gain);
-
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_x_force_d_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_y_force_d_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_z_force_d_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_roll_torque_d_gain);
-  ROS_ERROR("Computed Gain: %f", current_balance_param_.foot_pitch_torque_d_gain);*/
 
   printParams();
 
@@ -1323,6 +1258,11 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   r_foot_Ty_Nm_ = sensors["r_foot_ty_scaled_Nm"];
   r_foot_Tz_Nm_ = sensors["r_foot_tz_scaled_Nm"];
 
+  ROS_ERROR("Aus Sensor Array: %f", r_foot_fx_N_);
+  ROS_ERROR("Aus Sensor Array: %f", r_foot_fy_N_);
+  ROS_ERROR("Aus Sensor Array: %f", r_foot_fz_N_);
+  ROS_ERROR("------------------------");
+
   l_foot_fx_N_  = sensors["l_foot_fx_scaled_N"];
   l_foot_fy_N_  = sensors["l_foot_fy_scaled_N"];
   l_foot_fz_N_  = sensors["l_foot_fz_scaled_N"];
@@ -1330,13 +1270,17 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   l_foot_Ty_Nm_ = sensors["l_foot_ty_scaled_Nm"];
   l_foot_Tz_Nm_ = sensors["l_foot_tz_scaled_Nm"];
 
-
   r_foot_fx_N_ = robotis_framework::sign(r_foot_fx_N_) * fmin( fabs(r_foot_fx_N_), 2000.0);
   r_foot_fy_N_ = robotis_framework::sign(r_foot_fy_N_) * fmin( fabs(r_foot_fy_N_), 2000.0);
   r_foot_fz_N_ = robotis_framework::sign(r_foot_fz_N_) * fmin( fabs(r_foot_fz_N_), 2000.0);
   r_foot_Tx_Nm_ = robotis_framework::sign(r_foot_Tx_Nm_) * fmin(fabs(r_foot_Tx_Nm_), 300.0);
   r_foot_Ty_Nm_ = robotis_framework::sign(r_foot_Ty_Nm_) * fmin(fabs(r_foot_Ty_Nm_), 300.0);
   r_foot_Tz_Nm_ = robotis_framework::sign(r_foot_Tz_Nm_) * fmin(fabs(r_foot_Tz_Nm_), 300.0);
+
+  ROS_ERROR("Erste Filterung: %f", r_foot_fx_N_);
+  ROS_ERROR("Erste Filterung: %f", r_foot_fy_N_);
+  ROS_ERROR("Erste Filterung: %f", r_foot_fz_N_);
+  ROS_ERROR("------------------------");
 
   l_foot_fx_N_ = robotis_framework::sign(l_foot_fx_N_) * fmin( fabs(l_foot_fx_N_), 2000.0);
   l_foot_fy_N_ = robotis_framework::sign(l_foot_fy_N_) * fmin( fabs(l_foot_fy_N_), 2000.0);
@@ -1358,7 +1302,6 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
       publishDoneMsg("walking_balance");
       if(!is_closed)
       {
-        ROS_ERROR("Parameter Scanning Ready");
         std::fclose(file_b);
         is_closed = true;
       }

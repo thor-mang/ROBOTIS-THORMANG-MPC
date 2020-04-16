@@ -1432,6 +1432,11 @@ void THORMANG3OnlineWalking::process()
     double right_leg_Ty_Nm = current_right_ty_Nm_;
     double right_leg_Tz_Nm = current_right_tz_Nm_;
 
+    ROS_ERROR("Nach Übergabe an Walking: %f", right_leg_fx_N);
+    ROS_ERROR("Nach Übergabe an Walking: %f", right_leg_fy_N);
+    ROS_ERROR("Nach Übergabe an Walking: %f", right_leg_fz_N);
+    ROS_ERROR("------------------------");
+
     double left_leg_fx_N  = current_left_fx_N_;
     double left_leg_fy_N  = current_left_fy_N_;
     double left_leg_fz_N  = current_left_fz_N_;
@@ -1449,6 +1454,11 @@ void THORMANG3OnlineWalking::process()
     mat_right_torque(1,0) = right_leg_Ty_Nm;
     mat_right_torque(2,0) = right_leg_Tz_Nm;
 
+    ROS_ERROR("In Matrix geschrieben: %f", mat_right_force(0,0));
+    ROS_ERROR("In Matrix geschrieben: %f", mat_right_force(1,0));
+    ROS_ERROR("In Matrix geschrieben: %f", mat_right_force(2,0));
+    ROS_ERROR("------------------------");
+
     Eigen::MatrixXd  mat_left_force, mat_left_torque;
     mat_left_force.resize(4,1);     mat_left_force.fill(0);
     mat_left_torque.resize(4,1);    mat_left_torque.fill(0);
@@ -1461,6 +1471,11 @@ void THORMANG3OnlineWalking::process()
 
     mat_right_force  = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_force;
     mat_right_torque = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_torque;
+
+    ROS_ERROR("Nach Transformation: %f", mat_right_force(0,0));
+    ROS_ERROR("Nach Transformation: %f", mat_right_force(1,0));
+    ROS_ERROR("Nach Transformation: %f", mat_right_force(2,0));
+    ROS_ERROR("------------------------");
 
     mat_left_force  = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_force;
     mat_left_torque = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_torque;
@@ -1633,6 +1648,10 @@ void THORMANG3OnlineWalking::process()
     balance_ctrl_.printSensorValues(walking_time_);
 
     //Kinematics and sending commands to joints
+    //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
+    //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
+
+    //Kinematics and sending commands to joints (For deactivating balance control)
     rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_rfoot_);
     lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_lfoot_);
 
