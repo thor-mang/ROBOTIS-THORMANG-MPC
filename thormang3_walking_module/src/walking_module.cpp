@@ -1160,13 +1160,36 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   Eigen::Quaterniond imu_quat;
   tf::quaternionMsgToEigen(msg->orientation, imu_quat);
 
+  imu_quat.x() = 0.033333;
+  imu_quat.y() = 0.066666;
+  imu_quat.z() = 0.100000;
+  imu_quat.w() = 0.133333;
+
+  double angular_x = 1;
+  double angular_y = 2;
+  double angular_z = 3;
+
+  /*ROS_ERROR("Robotis Imu Data before Transformation:");
+  ROS_ERROR("Angular Velocity:");
+  ROS_ERROR("X: %f", angular_x);
+  ROS_ERROR("Y: %f", angular_y);
+  ROS_ERROR("Z: %f", angular_z);
+  ROS_ERROR("Orientation:");
+  ROS_ERROR("X: %f", imu_quat.x());
+  ROS_ERROR("Y: %f", imu_quat.y());
+  ROS_ERROR("Z: %f", imu_quat.z());
+  ROS_ERROR("W: %f", imu_quat.w());
+  ROS_ERROR("-------------------------");*/
+
   // rotate imu sensor values back to raw sensor frame (ENU -> NED)
   Eigen::AngleAxisd rotX(-M_PI, Eigen::Vector3d::UnitX());
   Eigen::AngleAxisd rotZ(M_PI/2, Eigen::Vector3d::UnitZ());
   imu_quat = rotZ * rotX * imu_quat;
 
-  online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
-                                            imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
+  /*online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
+                                            imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());*/
+  online_walking->setCurrentIMUSensorOutput(-1.0*angular_x, -1.0*angular_y,
+                                              imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
 }
 
 
@@ -1258,11 +1281,6 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   r_foot_Ty_Nm_ = sensors["r_foot_ty_scaled_Nm"];
   r_foot_Tz_Nm_ = sensors["r_foot_tz_scaled_Nm"];
 
-  ROS_ERROR("Aus Sensor Array: %f", r_foot_fx_N_);
-  ROS_ERROR("Aus Sensor Array: %f", r_foot_fy_N_);
-  ROS_ERROR("Aus Sensor Array: %f", r_foot_fz_N_);
-  ROS_ERROR("------------------------");
-
   l_foot_fx_N_  = sensors["l_foot_fx_scaled_N"];
   l_foot_fy_N_  = sensors["l_foot_fy_scaled_N"];
   l_foot_fz_N_  = sensors["l_foot_fz_scaled_N"];
@@ -1276,11 +1294,6 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
   r_foot_Tx_Nm_ = robotis_framework::sign(r_foot_Tx_Nm_) * fmin(fabs(r_foot_Tx_Nm_), 300.0);
   r_foot_Ty_Nm_ = robotis_framework::sign(r_foot_Ty_Nm_) * fmin(fabs(r_foot_Ty_Nm_), 300.0);
   r_foot_Tz_Nm_ = robotis_framework::sign(r_foot_Tz_Nm_) * fmin(fabs(r_foot_Tz_Nm_), 300.0);
-
-  ROS_ERROR("Erste Filterung: %f", r_foot_fx_N_);
-  ROS_ERROR("Erste Filterung: %f", r_foot_fy_N_);
-  ROS_ERROR("Erste Filterung: %f", r_foot_fz_N_);
-  ROS_ERROR("------------------------");
 
   l_foot_fx_N_ = robotis_framework::sign(l_foot_fx_N_) * fmin( fabs(l_foot_fx_N_), 2000.0);
   l_foot_fy_N_ = robotis_framework::sign(l_foot_fy_N_) * fmin( fabs(l_foot_fy_N_), 2000.0);
