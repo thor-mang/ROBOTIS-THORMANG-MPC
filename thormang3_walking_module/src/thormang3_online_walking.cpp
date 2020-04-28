@@ -1451,49 +1451,49 @@ void THORMANG3OnlineWalking::process()
     Eigen::MatrixXd  mat_right_force, mat_right_torque;
     mat_right_force.resize(4,1);    mat_right_force.fill(0);
     mat_right_torque.resize(4,1);   mat_right_torque.fill(0);
-    /*mat_right_force(0,0) = right_leg_fx_N;
+    mat_right_force(0,0) = right_leg_fx_N;
     mat_right_force(1,0) = right_leg_fy_N;
     mat_right_force(2,0) = right_leg_fz_N;
     mat_right_torque(0,0) = right_leg_Tx_Nm;
     mat_right_torque(1,0) = right_leg_Ty_Nm;
-    mat_right_torque(2,0) = right_leg_Tz_Nm;*/
-    mat_right_force(0,0) = 1.0;
+    mat_right_torque(2,0) = right_leg_Tz_Nm;
+    /*mat_right_force(0,0) = 1.0;
     mat_right_force(1,0) = 2.0;
     mat_right_force(2,0) = 3.0;
     mat_right_torque(0,0) = 1.0;
     mat_right_torque(1,0) = 2.0;
-    mat_right_torque(2,0) = 3.0;
+    mat_right_torque(2,0) = 3.0;*/
 
 
     Eigen::MatrixXd  mat_left_force, mat_left_torque;
     mat_left_force.resize(4,1);     mat_left_force.fill(0);
     mat_left_torque.resize(4,1);    mat_left_torque.fill(0);
-    /*mat_left_force(0,0) = left_leg_fx_N;
+    mat_left_force(0,0) = left_leg_fx_N;
     mat_left_force(1,0) = left_leg_fy_N;
     mat_left_force(2,0) = left_leg_fz_N;
     mat_left_torque(0,0) = left_leg_Tx_Nm;
     mat_left_torque(1,0) = left_leg_Ty_Nm;
-    mat_left_torque(2,0) = left_leg_Tz_Nm;*/
-    mat_left_force(0,0) = 1.0;
+    mat_left_torque(2,0) = left_leg_Tz_Nm;
+    /*mat_left_force(0,0) = 1.0;
     mat_left_force(1,0) = 2.0;
     mat_left_force(2,0) = 3.0;
     mat_left_torque(0,0) = 1.0;
     mat_left_torque(1,0) = 2.0;
-    mat_left_torque(2,0) = 3.0;
+    mat_left_torque(2,0) = 3.0;*/
 
-    ROS_ERROR("Robotis FT 0 before Transformation:");
+    /*ROS_ERROR("Robotis FT 0 before Transformation:");
     ROS_ERROR("Force x: %f", mat_left_force(0,0));
     ROS_ERROR("Force y: %f", mat_left_force(1,0));
     ROS_ERROR("Force z: %f", mat_left_force(2,0));
     ROS_ERROR("Torque x: %f", mat_left_torque(0,0));
     ROS_ERROR("Torque y: %f", mat_left_torque(1,0));
     ROS_ERROR("Torque z: %f", mat_left_torque(2,0));
-    ROS_ERROR("-------------------------");
+    ROS_ERROR("-------------------------");*/
 
     mat_left_force  = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_force;
     mat_left_torque = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_torque;
 
-    ROS_ERROR("Robotis FT 0 after Transformation:");
+    /*ROS_ERROR("Robotis FT 0 after Transformation:");
     ROS_ERROR("Force x: %f", mat_left_force(0,0));
     ROS_ERROR("Force y: %f", mat_left_force(1,0));
     ROS_ERROR("Force z: %f", mat_left_force(2,0));
@@ -1509,19 +1509,19 @@ void THORMANG3OnlineWalking::process()
     ROS_ERROR("Torque x: %f", mat_right_torque(0,0));
     ROS_ERROR("Torque y: %f", mat_right_torque(1,0));
     ROS_ERROR("Torque z: %f", mat_right_torque(2,0));
-    ROS_ERROR("-------------------------");
+    ROS_ERROR("-------------------------");*/
 
     mat_right_force  = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_force;
     mat_right_torque = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_torque;
 
-    ROS_ERROR("Robotis FT 1 after Transformation:");
+    /*ROS_ERROR("Robotis FT 1 after Transformation:");
     ROS_ERROR("Force x: %f", mat_right_force(0,0));
     ROS_ERROR("Force y: %f", mat_right_force(1,0));
     ROS_ERROR("Force z: %f", mat_right_force(2,0));
     ROS_ERROR("Torque x: %f", mat_right_torque(0,0));
     ROS_ERROR("Torque y: %f", mat_right_torque(1,0));
     ROS_ERROR("Torque z: %f", mat_right_torque(2,0));
-    ROS_ERROR("-------------------------");
+    ROS_ERROR("-------------------------");*/
 
     imu_data_mutex_lock_.lock();
     double gyro_roll_rad_per_sec  = current_gyro_roll_rad_per_sec_;
@@ -1687,7 +1687,7 @@ void THORMANG3OnlineWalking::process()
     mat_robot_to_cob_ = robotis_framework::getTranslation4D(10, 0, 0);
     mat_robot_to_lfoot_ = robotis_framework::getTranslation4D(10, 1, -1);
     mat_robot_to_rfoot_ = robotis_framework::getTranslation4D(10, -1, -1);
-    ROS_ERROR("Robotis Desired Position Body before Balancing:");
+    /*ROS_ERROR("Robotis Desired Position Body before Balancing:");
     ROS_ERROR("%s", toString(mat_robot_to_cob_).c_str());
     ROS_ERROR("-------------------------");
     ROS_ERROR("Robotis Desired Position Left Foot before Balancing:");
@@ -1695,7 +1695,7 @@ void THORMANG3OnlineWalking::process()
     ROS_ERROR("-------------------------");
     ROS_ERROR("Robotis Desired Position Right Foot before Balancing:");
     ROS_ERROR("%s", toString(mat_robot_to_rfoot_).c_str());
-    ROS_ERROR("-------------------------");
+    ROS_ERROR("-------------------------");*/
 
     balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
 
@@ -1703,7 +1703,7 @@ void THORMANG3OnlineWalking::process()
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
 
-    ROS_ERROR("Robotis Desired Position Body after Balancing:");
+    /*ROS_ERROR("Robotis Desired Position Body after Balancing:");
     ROS_ERROR("%s", toString(mat_robot_to_cob_modified_).c_str());
     ROS_ERROR("-------------------------");
     ROS_ERROR("Robotis Desired Position Left Foot after Balancing:");
@@ -1711,7 +1711,7 @@ void THORMANG3OnlineWalking::process()
     ROS_ERROR("-------------------------");
     ROS_ERROR("Robotis Desired Position Right Foot after Balancing:");
     ROS_ERROR("%s", toString(mat_robot_to_rf_modified_).c_str());
-    ROS_ERROR("-------------------------");
+    ROS_ERROR("-------------------------");*/
 
     balance_ctrl_.printSensorValues(walking_time_);
 
@@ -1723,14 +1723,14 @@ void THORMANG3OnlineWalking::process()
     //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_rfoot_);
     //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_lfoot_);
 
-    ROS_ERROR("Robotis Left Target for Walking:");
+    /*ROS_ERROR("Robotis Left Target for Walking:");
     Eigen::MatrixXd lhip = robotis_framework::getTransformationXYZRPY(lhip_to_lfoot_pose_.x, lhip_to_lfoot_pose_.y, lhip_to_lfoot_pose_.z, lhip_to_lfoot_pose_.roll, lhip_to_lfoot_pose_.pitch, lhip_to_lfoot_pose_.yaw);
     Eigen::MatrixXd rhip = robotis_framework::getTransformationXYZRPY(rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw);
     ROS_ERROR("%s", toString(lhip).c_str());
     ROS_ERROR("-------------------------");
     ROS_ERROR("Robotis Right Target for Walking:");
     ROS_ERROR("%s", toString(rhip).c_str());
-    ROS_ERROR("-------------------------");
+    ROS_ERROR("-------------------------");*/
 
     if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) )
     {
