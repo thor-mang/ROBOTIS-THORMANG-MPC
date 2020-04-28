@@ -721,7 +721,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   double left_foot_torque_roll_filtered  = left_foot_torque_roll_lpf_.getFilteredOutput(current_left_tx_Nm_);
   double left_foot_torque_pitch_filtered = left_foot_torque_pitch_lpf_.getFilteredOutput(current_left_ty_Nm_);
 
-  ROS_ERROR("Robotis Filtered FT 0 Data:");
+  /*ROS_ERROR("Robotis Filtered FT 0 Data:");
   ROS_ERROR("Filtered Force x: %f", left_foot_force_x_filtered);
   ROS_ERROR("Filtered Force y: %f", left_foot_force_y_filtered);
   ROS_ERROR("Filtered Force z: %f", left_foot_force_z_filtered);
@@ -742,7 +742,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   ROS_ERROR("Filtered Orientation:");
   ROS_ERROR("Roll: %f", roll_angle_filtered);
   ROS_ERROR("Pitch: %f", pitch_angle_filtered);
-  ROS_ERROR("-------------------------");
+  ROS_ERROR("-------------------------");*/
 
   // Regeln der IMU (Velocity) (Done)
   foot_roll_adjustment_by_gyro_roll_   = -0.1*gyro_enable_*foot_roll_gyro_ctrl_.getFeedBack(roll_gyro_filtered);
@@ -752,12 +752,12 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   foot_roll_adjustment_by_orientation_roll_   = -1.0*orientation_enable_ * foot_roll_angle_ctrl_.getFeedBack(roll_angle_filtered);
   foot_pitch_adjustment_by_orientation_pitch_ = -1.0*orientation_enable_ * foot_pitch_angle_ctrl_.getFeedBack(pitch_angle_filtered);
 
-  ROS_ERROR("Robotis Controlled Imu Data:");
+  /*ROS_ERROR("Robotis Controlled Imu Data:");
   ROS_ERROR("Orientation Roll: %f", foot_roll_adjustment_by_orientation_roll_);
   ROS_ERROR("Orientation Pitch: %f", foot_pitch_adjustment_by_orientation_pitch_);
   ROS_ERROR("Angular Velocity X: %f", foot_roll_adjustment_by_gyro_roll_);
   ROS_ERROR("Angular Velocity Y: %f", foot_pitch_adjustment_by_gyro_pitch_);
-  ROS_ERROR("-------------------------");
+  ROS_ERROR("-------------------------");*/
 
   // Nachkorrektur der Füße basierend auf den IMU Werten (Done)
   Eigen::MatrixXd mat_orientation_adjustment_by_imu = robotis_framework::getRotation4d(foot_roll_adjustment_by_gyro_roll_ + foot_roll_adjustment_by_orientation_roll_, foot_pitch_adjustment_by_gyro_pitch_ + foot_pitch_adjustment_by_orientation_pitch_, 0.0);
@@ -790,7 +790,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   l_foot_roll_adjustment_by_torque_roll_   = ft_enable_*left_foot_torque_roll_ctrl_.getFeedBack(left_foot_torque_roll_filtered);
   l_foot_pitch_adjustment_by_torque_pitch_ = ft_enable_*left_foot_torque_pitch_ctrl_.getFeedBack(left_foot_torque_pitch_filtered);
 
-  ROS_ERROR("Robotis Controlled FT 0 Data");
+  /*ROS_ERROR("Robotis Controlled FT 0 Data");
   ROS_ERROR("x_force_controller: %f", l_foot_x_adjustment_by_force_x_);
   ROS_ERROR("y_force_controller: %f", l_foot_x_adjustment_by_force_x_);
   ROS_ERROR("z_force_controller: %f", l_foot_x_adjustment_by_force_x_);
@@ -804,7 +804,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   ROS_ERROR("z_force_controller: %f", r_foot_x_adjustment_by_force_x_);
   ROS_ERROR("roll_torque_controller: %f", r_foot_x_adjustment_by_force_x_);
   ROS_ERROR("pitch_torque_controller: %f", r_foot_x_adjustment_by_force_x_);
-  ROS_ERROR("-------------------------");
+  ROS_ERROR("-------------------------");*/
 
   // Manuelle Justierung (Offset in X) (Überflüssig?)
   pose_cob_adjustment_.coeffRef(0) = cob_x_manual_adjustment_m_;
@@ -864,7 +864,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_left_foot_adjustment_.coeffRef(4) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(4)), foot_pitch_adjustment_abs_max_rad_), pose_left_foot_adjustment_.coeff(4));
   pose_left_foot_adjustment_.coeffRef(5) = 0;
 
-  ROS_ERROR("Robotis Left Leg Adjustment:");
+  /*ROS_ERROR("Robotis Left Leg Adjustment:");
   ROS_ERROR("X: %f", pose_left_foot_adjustment_.coeffRef(0));
   ROS_ERROR("Y: %f", pose_left_foot_adjustment_.coeffRef(1));
   ROS_ERROR("Z: %f", pose_left_foot_adjustment_.coeffRef(2));
@@ -879,7 +879,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   ROS_ERROR("Roll: %f", pose_right_foot_adjustment_.coeffRef(3));
   ROS_ERROR("Pitch: %f", pose_right_foot_adjustment_.coeffRef(4));
   ROS_ERROR("Yaw: %f", pose_right_foot_adjustment_.coeffRef(5));
-  ROS_ERROR("-------------------------");
+  ROS_ERROR("-------------------------");*/
 
   //Rotationsanteil aufrechnen
   Eigen::MatrixXd cob_rotation_adj = robotis_framework::getRotationZ(pose_cob_adjustment_.coeff(5)) * robotis_framework::getRotationY(pose_cob_adjustment_.coeff(4)) * robotis_framework::getRotationX(pose_cob_adjustment_.coeff(3));
