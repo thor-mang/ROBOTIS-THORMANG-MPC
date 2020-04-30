@@ -1169,17 +1169,19 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   double angular_y = 2;
   double angular_z = 3;
 
-  /*ROS_ERROR("Robotis Imu Data before Transformation:");
-  ROS_ERROR("Angular Velocity:");
-  ROS_ERROR("X: %f", angular_x);
-  ROS_ERROR("Y: %f", angular_y);
-  ROS_ERROR("Z: %f", angular_z);
-  ROS_ERROR("Orientation:");
-  ROS_ERROR("X: %f", imu_quat.x());
-  ROS_ERROR("Y: %f", imu_quat.y());
-  ROS_ERROR("Z: %f", imu_quat.z());
-  ROS_ERROR("W: %f", imu_quat.w());
-  ROS_ERROR("-------------------------");*/
+  if(online_walking->debugging) {
+      ROS_ERROR("Robotis Imu Data before Transformation:");
+      ROS_ERROR("Angular Velocity:");
+      ROS_ERROR("X: %f", angular_x);
+      ROS_ERROR("Y: %f", angular_y);
+      ROS_ERROR("Z: %f", angular_z);
+      ROS_ERROR("Orientation:");
+      ROS_ERROR("X: %f", imu_quat.x());
+      ROS_ERROR("Y: %f", imu_quat.y());
+      ROS_ERROR("Z: %f", imu_quat.z());
+      ROS_ERROR("W: %f", imu_quat.w());
+      ROS_ERROR("-------------------------");
+  }
 
   // rotate imu sensor values back to raw sensor frame (ENU -> NED)
   Eigen::AngleAxisd rotX(-M_PI, Eigen::Vector3d::UnitX());

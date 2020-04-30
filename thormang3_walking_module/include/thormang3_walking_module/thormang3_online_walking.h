@@ -130,6 +130,8 @@ public:
   double current_imu_roll_rad_, current_imu_pitch_rad_;
   double current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_;
 
+  bool debugging;
+
 private:
   std::string toString(Eigen::MatrixXd& mat);
 
