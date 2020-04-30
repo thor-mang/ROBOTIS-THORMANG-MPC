@@ -334,7 +334,6 @@ public:
   BalancePDController left_foot_torque_roll_ctrl_;
   BalancePDController left_foot_torque_pitch_ctrl_;
 
-
   BalanceLowPassFilter roll_gyro_lpf_;
   BalanceLowPassFilter pitch_gyro_lpf_;
 
@@ -352,6 +351,8 @@ public:
   BalanceLowPassFilter left_foot_force_z_lpf_;
   BalanceLowPassFilter left_foot_torque_roll_lpf_;
   BalanceLowPassFilter left_foot_torque_pitch_lpf_;
+
+  bool debugging;
 
 private:
   int balance_control_error_;
