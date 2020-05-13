@@ -723,8 +723,13 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   double left_foot_torque_roll_filtered  = left_foot_torque_roll_lpf_.getFilteredOutput(current_left_tx_Nm_);
   double left_foot_torque_pitch_filtered = left_foot_torque_pitch_lpf_.getFilteredOutput(current_left_ty_Nm_);
 
+  //ROS_ERROR("Old Alpha: %f", roll_gyro_lpf_.alpha_);
+
   if(debugging) {
       ROS_ERROR("Robotis Filtered FT 0 Data:");
+      ROS_ERROR("Filter Alpha: %f", left_foot_force_x_lpf_.alpha_);
+      ROS_ERROR("Filter Freq: %f", left_foot_force_x_lpf_.getCutOffFrequency());
+      ROS_ERROR("Prev Output: %f", left_foot_force_x_lpf_.prev_output_);
       ROS_ERROR("Filtered Force x: %f", left_foot_force_x_filtered);
       ROS_ERROR("Filtered Force y: %f", left_foot_force_y_filtered);
       ROS_ERROR("Filtered Force z: %f", left_foot_force_z_filtered);
@@ -732,6 +737,9 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
       ROS_ERROR("Filtered Torque y: %f", left_foot_torque_pitch_filtered);
       ROS_ERROR("-------------------------");
       ROS_ERROR("Robotis Filtered FT 1 Data:");
+      ROS_ERROR("Filter Alpha: %f", right_foot_force_x_lpf_.alpha_);
+      ROS_ERROR("Filter Freq: %f", right_foot_force_x_lpf_.getCutOffFrequency());
+      ROS_ERROR("Prev Output: %f", left_foot_force_x_lpf_.prev_output_);
       ROS_ERROR("Filtered Force x: %f", right_foot_force_x_filtered);
       ROS_ERROR("Filtered Force y: %f", right_foot_force_y_filtered);
       ROS_ERROR("Filtered Force z: %f", right_foot_force_z_filtered);

@@ -101,12 +101,14 @@ public:
   double getCutOffFrequency(void);
   double getFilteredOutput(double present_raw_value);
 
+  double alpha_;
+  double prev_output_;
+
 private:
   double cut_off_freq_;
   double control_cycle_sec_;
-  double alpha_;
 
-  double prev_output_;
+
 };
 
 class BalanceControlUsingDampingConroller
