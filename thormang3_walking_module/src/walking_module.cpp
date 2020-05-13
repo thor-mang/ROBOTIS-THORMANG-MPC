@@ -1188,9 +1188,11 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   Eigen::AngleAxisd rotZ(M_PI/2, Eigen::Vector3d::UnitZ());
   imu_quat = rotZ * rotX * imu_quat;
 
-  /*online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
-                                            imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());*/
-  online_walking->setCurrentIMUSensorOutput(-1.0*angular_x, -1.0*angular_y,
+  if(!online_walking->debugging)
+    online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
+                                            imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
+  else
+    online_walking->setCurrentIMUSensorOutput(-1.0*angular_x, -1.0*angular_y,
                                               imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
 }
 

@@ -313,7 +313,6 @@ void THORMANG3OnlineWalking::setCurrentIMUSensorOutput(double gyro_x, double gyr
   current_gyro_pitch_rad_per_sec_ = gyro_y;
 
   quat_current_imu_ = Eigen::Quaterniond(quat_w, quat_x, quat_y, quat_z);
-
   mat_current_imu_ = (rot_x_pi_3d_ * quat_current_imu_.toRotationMatrix()) * rot_z_pi_3d_;
 
   current_imu_roll_rad_  = atan2( mat_current_imu_.coeff(2,1), mat_current_imu_.coeff(2,2));
@@ -539,6 +538,7 @@ void THORMANG3OnlineWalking::initialize()
 
   debugging = false;
   balance_ctrl_.debugging = debugging;
+  debug_counter = 0;
 }
 
 void THORMANG3OnlineWalking::reInitialize()
@@ -1564,7 +1564,6 @@ void THORMANG3OnlineWalking::process()
     mat_g_to_acc.coeffRef(1,0) = y_lipm_.coeff(2,0);
     mat_robot_to_acc = mat_robot_to_g_ * mat_g_to_acc;
 
-
     //Force Values in x and y direction
     switch(balancing_index_)
     {
@@ -1731,12 +1730,12 @@ void THORMANG3OnlineWalking::process()
     balance_ctrl_.printSensorValues(walking_time_);
 
     //Kinematics and sending commands to joints
-    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
-    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
+    //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
+    //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
 
     //Kinematics and sending commands to joints (For deactivating balance control)
-    //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_rfoot_);
-    //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_lfoot_);
+    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_rfoot_);
+    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_lfoot_);
 
     if(debugging) {
         ROS_ERROR("Robotis Left Target for Walking:");
@@ -1747,6 +1746,11 @@ void THORMANG3OnlineWalking::process()
         ROS_ERROR("Robotis Right Target for Walking:");
         ROS_ERROR("%s", toString(rhip).c_str());
         ROS_ERROR("-------------------------");
+        if(debug_counter > 0) {
+            debugging = false;
+            balance_ctrl_.debugging = false;
+        }
+        debug_counter++;
     }
 
     if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) )

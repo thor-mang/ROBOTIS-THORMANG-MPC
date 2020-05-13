@@ -131,6 +131,7 @@ public:
   double current_gyro_roll_rad_per_sec_, current_gyro_pitch_rad_per_sec_;
 
   bool debugging;
+  int debug_counter;
 
 private:
   std::string toString(Eigen::MatrixXd& mat);
