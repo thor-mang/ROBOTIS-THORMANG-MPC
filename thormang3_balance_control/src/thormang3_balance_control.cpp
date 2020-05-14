@@ -937,7 +937,7 @@ void BalanceControlUsingPDController::printSensorValues(double walking_time)
         firstTime = false;
     }
 
-    if(walking_time > 2.0 && !isClosed)
+    if(walking_time > 200000.0 && !isClosed)
     {
         std::fclose(file_s);
         isClosed = true;
