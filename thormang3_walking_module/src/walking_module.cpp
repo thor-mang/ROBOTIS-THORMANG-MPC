@@ -1158,18 +1158,24 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
 
   Eigen::Quaterniond imu_quat;
+
   tf::quaternionMsgToEigen(msg->orientation, imu_quat);
 
-  imu_quat.x() = 0.033333;
-  imu_quat.y() = 0.066666;
-  imu_quat.z() = 0.100000;
-  imu_quat.w() = 0.133333;
-
-  double angular_x = 1;
-  double angular_y = 2;
-  double angular_z = 3;
+  double angular_x = msg->angular_velocity.x;
+  double angular_y = msg->angular_velocity.y;
+  double angular_z = msg->angular_velocity.z;
 
   if(online_walking->debugging) {
+      imu_quat.x() = 0.033333;
+      imu_quat.y() = 0.066666;
+      imu_quat.z() = 0.100000;
+      imu_quat.w() = 0.133333;
+      imu_quat.normalize();
+
+      angular_x = 1;
+      angular_y = 2;
+      angular_z = 3;
+
       ROS_ERROR("Robotis Imu Data before Transformation:");
       ROS_ERROR("Angular Velocity:");
       ROS_ERROR("X: %f", angular_x);
@@ -1188,12 +1194,7 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
   Eigen::AngleAxisd rotZ(M_PI/2, Eigen::Vector3d::UnitZ());
   imu_quat = rotZ * rotX * imu_quat;
 
-  if(!online_walking->debugging)
-    online_walking->setCurrentIMUSensorOutput(-1.0*(msg->angular_velocity.x), -1.0*(msg->angular_velocity.y),
-                                            imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
-  else
-    online_walking->setCurrentIMUSensorOutput(-1.0*angular_x, -1.0*angular_y,
-                                              imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
+  online_walking->setCurrentIMUSensorOutput(-1.0*(angular_x), -1.0*(angular_y), imu_quat.x(), imu_quat.y(), imu_quat.z(), imu_quat.w());
 }
 
 

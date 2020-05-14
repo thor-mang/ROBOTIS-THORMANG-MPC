@@ -1495,6 +1495,15 @@ void THORMANG3OnlineWalking::process()
         ROS_ERROR("Torque y: %f", mat_left_torque(1,0));
         ROS_ERROR("Torque z: %f", mat_left_torque(2,0));
         ROS_ERROR("-------------------------");
+
+        ROS_ERROR("Robotis FT 1 before Transformation:");
+        ROS_ERROR("Force x: %f", mat_right_force(0,0));
+        ROS_ERROR("Force y: %f", mat_right_force(1,0));
+        ROS_ERROR("Force z: %f", mat_right_force(2,0));
+        ROS_ERROR("Torque x: %f", mat_right_torque(0,0));
+        ROS_ERROR("Torque y: %f", mat_right_torque(1,0));
+        ROS_ERROR("Torque z: %f", mat_right_torque(2,0));
+        ROS_ERROR("-------------------------");
     }
 
     mat_left_force  = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_force;
@@ -1508,15 +1517,6 @@ void THORMANG3OnlineWalking::process()
         ROS_ERROR("Torque x: %f", mat_left_torque(0,0));
         ROS_ERROR("Torque y: %f", mat_left_torque(1,0));
         ROS_ERROR("Torque z: %f", mat_left_torque(2,0));
-        ROS_ERROR("-------------------------");
-
-        ROS_ERROR("Robotis FT 1 before Transformation:");
-        ROS_ERROR("Force x: %f", mat_right_force(0,0));
-        ROS_ERROR("Force y: %f", mat_right_force(1,0));
-        ROS_ERROR("Force z: %f", mat_right_force(2,0));
-        ROS_ERROR("Torque x: %f", mat_right_torque(0,0));
-        ROS_ERROR("Torque y: %f", mat_right_torque(1,0));
-        ROS_ERROR("Torque z: %f", mat_right_torque(2,0));
         ROS_ERROR("-------------------------");
     }
 
