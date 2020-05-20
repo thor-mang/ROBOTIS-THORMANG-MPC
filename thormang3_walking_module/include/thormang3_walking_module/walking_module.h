@@ -134,8 +134,6 @@ protected:
   void setJointFeedBackGain(thormang3_walking_module_msgs::JointFeedBackGain& msg);
   void updateJointFeedBackGain();
 
-  void printParams();
-
   std::map<std::string, int> joint_name_to_index_;
 
   bool            gazebo_;
@@ -183,10 +181,6 @@ protected:
   thormang3_walking_module_msgs::BalanceParam previous_balance_param_;
   thormang3_walking_module_msgs::BalanceParam current_balance_param_;
   thormang3_walking_module_msgs::BalanceParam desired_balance_param_;
-
-  bool first_time;
-  bool is_closed;
-  std::FILE* file_b;
 };
 
 }

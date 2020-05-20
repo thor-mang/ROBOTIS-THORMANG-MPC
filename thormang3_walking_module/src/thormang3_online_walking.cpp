@@ -234,10 +234,6 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
   quat_current_imu_.x() = sin(0.5*M_PI);
   quat_current_imu_.y() = 0;
   quat_current_imu_.z() = 0;
-
-  isClosed = false;
-  firstTime = true;
-
 }
 
 THORMANG3OnlineWalking::~THORMANG3OnlineWalking()
@@ -317,17 +313,6 @@ void THORMANG3OnlineWalking::setCurrentIMUSensorOutput(double gyro_x, double gyr
 
   current_imu_roll_rad_  = atan2( mat_current_imu_.coeff(2,1), mat_current_imu_.coeff(2,2));
   current_imu_pitch_rad_ = atan2(-mat_current_imu_.coeff(2,0), sqrt(robotis_framework::powDI(mat_current_imu_.coeff(2,1), 2) + robotis_framework::powDI(mat_current_imu_.coeff(2,2), 2)));
-
-  if(debugging) {
-      ROS_ERROR("Robotis Imu Data after Transformation:");
-      ROS_ERROR("Angular Velocity:");
-      ROS_ERROR("X: %f", gyro_x);
-      ROS_ERROR("Y: %f", gyro_y);
-      ROS_ERROR("Orientation:");
-      ROS_ERROR("Roll: %f", current_imu_roll_rad_);
-      ROS_ERROR("Pitch: %f", current_imu_pitch_rad_);
-      ROS_ERROR("-------------------------");
-  }
 
   imu_data_mutex_lock_.unlock();
 }
@@ -535,10 +520,6 @@ void THORMANG3OnlineWalking::initialize()
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
-
-  debugging = false;
-  balance_ctrl_.debugging = debugging;
-  debug_counter = 0;
 }
 
 void THORMANG3OnlineWalking::reInitialize()
@@ -647,8 +628,6 @@ void THORMANG3OnlineWalking::reInitialize()
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
-
-  step_counter = 0;
 }
 
 void THORMANG3OnlineWalking::start()
@@ -938,25 +917,6 @@ void THORMANG3OnlineWalking::calcDesiredPose()
     current_start_idx_for_ref_zmp_ = 0;
 }
 
-void THORMANG3OnlineWalking::printStepIdxData(Eigen::VectorXi idx_data)
-{
-  int p = 0;
-  int pi = idx_data(p);
-  std::map<int, int> idx_pairs;
-  int counter = 0;
-  while(idx_data(p) < preview_size_)
-  {
-    p = p + 1;
-    counter = counter + 1;
-    if(pi != idx_data(p))
-    {
-      idx_pairs[pi] = counter;
-      counter = 0;
-      pi = idx_data(p);
-    }
-  }
-}
-
 void THORMANG3OnlineWalking::process()
 {
   if(!ctrl_running)
@@ -975,12 +935,6 @@ void THORMANG3OnlineWalking::process()
 
     if((added_step_data_.size() != 0) && real_running)
     {
-      if(firstTime)
-      {
-        file = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/RobotisDebugData/Step_Trajectories_Robotis.txt", "wb");
-        file_f = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/RobotisDebugData/Force_Trajectories_Robotis.txt", "wb");
-        firstTime = false;
-      }
       //period_time: Dauer von Ende des letzten zu Ende das aktuellen Schrittes
       //dsp_ratio: Anteil der Zeit im Double Support
       //ssp_ratio: Anteil der Zeit im Single Support
@@ -1016,7 +970,6 @@ void THORMANG3OnlineWalking::process()
       //Update Trajectories before every new step
       if( (walking_time_ - reference_time_) < TIME_UNIT)
       {
-        step_counter++;
         //Currently not used
         waist_yaw_tra_.changeTrajectory(reference_time_, previous_step_waist_yaw_angle_rad_, 0, 0,
             added_step_data_[0].time_data.abs_step_time, added_step_data_[0].position_data.waist_yaw_angle, 0, 0);
@@ -1157,37 +1110,6 @@ void THORMANG3OnlineWalking::process()
       present_body_pose_.roll = ba_move;
       present_body_pose_.pitch = bb_move;
       present_body_pose_.yaw = bc_move;
-
-      //if(walking_time_ >= 3.2-1e-8 && walking_time_+1e-8 < 5.2)
-      //{
-          std::string pose_string;
-          pose_string.append(std::to_string(present_body_pose_.x));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(present_body_pose_.y));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(present_body_pose_.z));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(reference_zmp_x_.coeff(current_start_idx_for_ref_zmp_, 0)));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(reference_zmp_y_.coeff(current_start_idx_for_ref_zmp_, 0)));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(walking_time_));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(present_left_foot_pose_.x));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(present_left_foot_pose_.y));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(present_right_foot_pose_.x));
-          pose_string.append(" ");
-          pose_string.append(std::to_string(present_right_foot_pose_.y));
-          std::fprintf(file, "%s", pose_string.c_str());
-          std::fprintf(file, "\n");
-      //}else if(walking_time_+1e-8 > 5.192 && !isClosed)
-      //{
-          //ROS_ERROR("File Closed");
-          //c
-          //isClosed = true;
-      //}
 
       //Feet
       double x_move, y_move, z_move, a_move, b_move, c_move, z_vibe;
@@ -1336,8 +1258,6 @@ void THORMANG3OnlineWalking::process()
         calcStepIdxData();
         step_data_mutex_lock_.unlock();
         reInitialize();
-        std::fclose(file);
-        std::fclose(file_f);
         step_data_mutex_lock_.lock();
       }
 
@@ -1472,67 +1392,11 @@ void THORMANG3OnlineWalking::process()
     mat_left_torque(1,0) = left_leg_Ty_Nm;
     mat_left_torque(2,0) = left_leg_Tz_Nm;
 
-    if(debugging) {
-        mat_left_force(0,0) = 1.0;
-        mat_left_force(1,0) = 2.0;
-        mat_left_force(2,0) = 3.0;
-        mat_left_torque(0,0) = 1.0;
-        mat_left_torque(1,0) = 2.0;
-        mat_left_torque(2,0) = 3.0;
-
-        mat_right_force(0,0) = 1.0;
-        mat_right_force(1,0) = 2.0;
-        mat_right_force(2,0) = 3.0;
-        mat_right_torque(0,0) = 1.0;
-        mat_right_torque(1,0) = 2.0;
-        mat_right_torque(2,0) = 3.0;
-
-        ROS_ERROR("Robotis FT 0 before Transformation:");
-        ROS_ERROR("Force x: %f", mat_left_force(0,0));
-        ROS_ERROR("Force y: %f", mat_left_force(1,0));
-        ROS_ERROR("Force z: %f", mat_left_force(2,0));
-        ROS_ERROR("Torque x: %f", mat_left_torque(0,0));
-        ROS_ERROR("Torque y: %f", mat_left_torque(1,0));
-        ROS_ERROR("Torque z: %f", mat_left_torque(2,0));
-        ROS_ERROR("-------------------------");
-
-        ROS_ERROR("Robotis FT 1 before Transformation:");
-        ROS_ERROR("Force x: %f", mat_right_force(0,0));
-        ROS_ERROR("Force y: %f", mat_right_force(1,0));
-        ROS_ERROR("Force z: %f", mat_right_force(2,0));
-        ROS_ERROR("Torque x: %f", mat_right_torque(0,0));
-        ROS_ERROR("Torque y: %f", mat_right_torque(1,0));
-        ROS_ERROR("Torque z: %f", mat_right_torque(2,0));
-        ROS_ERROR("-------------------------");
-    }
-
     mat_left_force  = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_force;
     mat_left_torque = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_torque;
 
-    if(debugging) {
-        ROS_ERROR("Robotis FT 0 after Transformation:");
-        ROS_ERROR("Force x: %f", mat_left_force(0,0));
-        ROS_ERROR("Force y: %f", mat_left_force(1,0));
-        ROS_ERROR("Force z: %f", mat_left_force(2,0));
-        ROS_ERROR("Torque x: %f", mat_left_torque(0,0));
-        ROS_ERROR("Torque y: %f", mat_left_torque(1,0));
-        ROS_ERROR("Torque z: %f", mat_left_torque(2,0));
-        ROS_ERROR("-------------------------");
-    }
-
     mat_right_force  = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_force;
     mat_right_torque = mat_robot_to_rfoot_*mat_rfoot_to_rft_*mat_right_torque;
-
-    if(debugging) {
-        ROS_ERROR("Robotis FT 1 after Transformation:");
-        ROS_ERROR("Force x: %f", mat_right_force(0,0));
-        ROS_ERROR("Force y: %f", mat_right_force(1,0));
-        ROS_ERROR("Force z: %f", mat_right_force(2,0));
-        ROS_ERROR("Torque x: %f", mat_right_torque(0,0));
-        ROS_ERROR("Torque y: %f", mat_right_torque(1,0));
-        ROS_ERROR("Torque z: %f", mat_right_torque(2,0));
-        ROS_ERROR("-------------------------");
-    }
 
     imu_data_mutex_lock_.lock();
     double gyro_roll_rad_per_sec  = current_gyro_roll_rad_per_sec_;
@@ -1665,49 +1529,11 @@ void THORMANG3OnlineWalking::process()
       }
     }
 
-    if((added_step_data_.size() != 0) && real_running)
-    {
-        std::string force_string;
-        force_string.append(std::to_string(r_target_fx_N));
-        force_string.append(" ");
-        force_string.append(std::to_string(r_target_fy_N));
-        force_string.append(" ");
-        force_string.append(std::to_string(r_target_fz_N));
-        force_string.append(" ");
-        force_string.append(std::to_string(x_lipm_.coeff(2,0)));
-        force_string.append(" ");
-        force_string.append(std::to_string(y_lipm_.coeff(2,0)));
-        force_string.append(" ");
-        force_string.append(std::to_string(l_target_fz_N));
-        force_string.append(" ");
-        force_string.append(std::to_string(balancing_index_));
-        force_string.append(" ");
-        force_string.append(std::to_string(walking_time_));
-        std::fprintf(file_f, "%s", force_string.c_str());
-        std::fprintf(file_f, "\n");
-    }
-
     //Balancing Algorithm
     balance_ctrl_.setDesiredCOBGyro(0,0);
     balance_ctrl_.setDesiredCOBOrientation(present_body_pose_.roll, present_body_pose_.pitch);
     balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*1.0, r_target_fy_N*1.0, r_target_fz_N, 0, 0, 0,
                                             l_target_fx_N*1.0, l_target_fy_N*1.0, l_target_fz_N, 0, 0, 0);
-
-    //Only for debugging
-    if(debugging) {
-        mat_robot_to_cob_ = robotis_framework::getTranslation4D(10, 0, 0);
-        mat_robot_to_lfoot_ = robotis_framework::getTranslation4D(10, 1, -1);
-        mat_robot_to_rfoot_ = robotis_framework::getTranslation4D(10, -1, -1);
-        ROS_ERROR("Robotis Desired Position Body before Balancing:");
-        ROS_ERROR("%s", toString(mat_robot_to_cob_).c_str());
-        ROS_ERROR("-------------------------");
-        ROS_ERROR("Robotis Desired Position Left Foot before Balancing:");
-        ROS_ERROR("%s", toString(mat_robot_to_lfoot_).c_str());
-        ROS_ERROR("-------------------------");
-        ROS_ERROR("Robotis Desired Position Right Foot before Balancing:");
-        ROS_ERROR("%s", toString(mat_robot_to_rfoot_).c_str());
-        ROS_ERROR("-------------------------");
-    }
 
     balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
 
@@ -1715,43 +1541,9 @@ void THORMANG3OnlineWalking::process()
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
 
-    if(debugging) {
-        ROS_ERROR("Robotis Desired Position Body after Balancing:");
-        ROS_ERROR("%s", toString(mat_robot_to_cob_modified_).c_str());
-        ROS_ERROR("-------------------------");
-        ROS_ERROR("Robotis Desired Position Left Foot after Balancing:");
-        ROS_ERROR("%s", toString(mat_robot_to_lf_modified_).c_str());
-        ROS_ERROR("-------------------------");
-        ROS_ERROR("Robotis Desired Position Right Foot after Balancing:");
-        ROS_ERROR("%s", toString(mat_robot_to_rf_modified_).c_str());
-        ROS_ERROR("-------------------------");
-    }
-
-    balance_ctrl_.printSensorValues(walking_time_);
-
     //Kinematics and sending commands to joints
-    //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
-    //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
-
-    //Kinematics and sending commands to joints (For deactivating balance control)
-    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_rfoot_);
-    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_) * mat_robot_to_lfoot_);
-
-    if(debugging) {
-        ROS_ERROR("Robotis Left Target for Walking:");
-        Eigen::MatrixXd lhip = robotis_framework::getTransformationXYZRPY(lhip_to_lfoot_pose_.x, lhip_to_lfoot_pose_.y, lhip_to_lfoot_pose_.z, lhip_to_lfoot_pose_.roll, lhip_to_lfoot_pose_.pitch, lhip_to_lfoot_pose_.yaw);
-        Eigen::MatrixXd rhip = robotis_framework::getTransformationXYZRPY(rhip_to_rfoot_pose_.x, rhip_to_rfoot_pose_.y, rhip_to_rfoot_pose_.z, rhip_to_rfoot_pose_.roll, rhip_to_rfoot_pose_.pitch, rhip_to_rfoot_pose_.yaw);
-        ROS_ERROR("%s", toString(lhip).c_str());
-        ROS_ERROR("-------------------------");
-        ROS_ERROR("Robotis Right Target for Walking:");
-        ROS_ERROR("%s", toString(rhip).c_str());
-        ROS_ERROR("-------------------------");
-        if(debug_counter > 0) {
-            debugging = false;
-            balance_ctrl_.debugging = false;
-        }
-        debug_counter++;
-    }
+    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
+    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
 
     if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) )
     {

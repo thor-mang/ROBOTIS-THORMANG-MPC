@@ -153,8 +153,6 @@ OnlineWalkingModule::OnlineWalkingModule()
   rot_z_pi_3d_ << -1,  0, 0,
                    0, -1, 0,
                    0,  0, 1;
-
-  first_time = true;
 }
 
 OnlineWalkingModule::~OnlineWalkingModule()
@@ -948,73 +946,8 @@ void OnlineWalkingModule::updateBalanceParam()
   current_balance_param_.foot_roll_torque_cut_off_frequency   = current_update_gain*(desired_balance_param_.foot_roll_torque_cut_off_frequency   - previous_balance_param_.foot_roll_torque_cut_off_frequency ) + previous_balance_param_.foot_roll_torque_cut_off_frequency;
   current_balance_param_.foot_pitch_torque_cut_off_frequency  = current_update_gain*(desired_balance_param_.foot_pitch_torque_cut_off_frequency  - previous_balance_param_.foot_pitch_torque_cut_off_frequency) + previous_balance_param_.foot_pitch_torque_cut_off_frequency;
 
-  printParams();
-
   setBalanceParam(current_balance_param_);
 }
-
-void OnlineWalkingModule::printParams()
-{
-  if(first_time)
-  {
-    file_b = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/RobotisDebugData/BalanceParams_Robotis.txt", "wb");
-    first_time = false;
-  }
-
-  std::string param_string;
-  param_string.append(std::to_string(current_balance_param_.cob_x_offset_m));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.cob_y_offset_m));
-
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_roll_gyro_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_roll_gyro_d_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_pitch_gyro_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_pitch_gyro_d_gain));
-
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_roll_angle_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_roll_angle_d_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_pitch_angle_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_pitch_angle_d_gain));
-
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_x_force_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_y_force_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_z_force_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_roll_torque_p_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_pitch_torque_p_gain));
-
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_x_force_d_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_y_force_d_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_z_force_d_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_roll_torque_d_gain));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_pitch_torque_d_gain));
-
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.roll_gyro_cut_off_frequency));
-  param_string.append(" ");
-  param_string.append(std::to_string(current_balance_param_.foot_x_force_cut_off_frequency));
-
-  std::fprintf(file_b, "%s", param_string.c_str());
-  std::fprintf(file_b, "\n");
-}
-
 
 void OnlineWalkingModule::setJointFeedBackGain(thormang3_walking_module_msgs::JointFeedBackGain& msg)
 {
@@ -1163,31 +1096,6 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
 
   double angular_x = msg->angular_velocity.x;
   double angular_y = msg->angular_velocity.y;
-  double angular_z = msg->angular_velocity.z;
-
-  if(online_walking->debugging) {
-      imu_quat.x() = 0.033333;
-      imu_quat.y() = 0.066666;
-      imu_quat.z() = 0.100000;
-      imu_quat.w() = 0.133333;
-      imu_quat.normalize();
-
-      angular_x = 1;
-      angular_y = 2;
-      angular_z = 3;
-
-      ROS_ERROR("Robotis Imu Data before Transformation:");
-      ROS_ERROR("Angular Velocity:");
-      ROS_ERROR("X: %f", angular_x);
-      ROS_ERROR("Y: %f", angular_y);
-      ROS_ERROR("Z: %f", angular_z);
-      ROS_ERROR("Orientation:");
-      ROS_ERROR("X: %f", imu_quat.x());
-      ROS_ERROR("Y: %f", imu_quat.y());
-      ROS_ERROR("Z: %f", imu_quat.z());
-      ROS_ERROR("W: %f", imu_quat.w());
-      ROS_ERROR("-------------------------");
-  }
 
   // rotate imu sensor values back to raw sensor frame (ENU -> NED)
   Eigen::AngleAxisd rotX(-M_PI, Eigen::Vector3d::UnitX());
@@ -1318,12 +1226,6 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
       std::string status_msg = WalkingStatusMSG::BALANCE_PARAM_SETTING_FINISHED_MSG;
       publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, status_msg);
       publishDoneMsg("walking_balance");
-      if(!is_closed)
-      {
-        std::fclose(file_b);
-        is_closed = true;
-      }
-
     }
     else
     {
