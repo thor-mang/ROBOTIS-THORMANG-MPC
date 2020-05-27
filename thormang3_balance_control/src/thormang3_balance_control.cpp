@@ -642,6 +642,8 @@ void BalanceControlUsingPDController::initialize(const int control_cycle_msec)
 {
   balance_control_error_ = BalanceControlError::NoError;
 
+  walking_time = 0.0;
+
   control_cycle_sec_ = control_cycle_msec * 0.001;
 
   pose_cob_adjustment_.fill(0);
@@ -698,6 +700,28 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_cob_adjustment_.fill(0);
   pose_right_foot_adjustment_.fill(0);
   pose_left_foot_adjustment_.fill(0);
+
+  //DEBUGGING////////////////////////////////////////////
+  current_gyro_roll_rad_per_sec_ = sin(walking_time);
+  current_gyro_pitch_rad_per_sec_ = cos(walking_time);
+
+  current_orientation_roll_rad_ = sin(walking_time);
+  current_orientation_pitch_rad_ = cos(walking_time);
+
+  current_left_fx_N_ = sin(walking_time+0);
+  current_left_fy_N_ = sin(walking_time+1);
+  current_left_fz_N_ = sin(walking_time+2);
+  current_left_tx_Nm_ = sin(walking_time+3);
+  current_left_ty_Nm_ = sin(walking_time+4);
+
+  current_right_fx_N_ = sin(walking_time+0);
+  current_right_fy_N_ = sin(walking_time+1);
+  current_right_fz_N_ = sin(walking_time+2);
+  current_right_tx_Nm_ = sin(walking_time+3);
+  current_right_ty_Nm_ = sin(walking_time+4);
+
+  walking_time += 0.008;
+  //DEBUGGING////////////////////////////////////////////
 
   //Werte aus den Sensoren filtern (Done)
   double roll_gyro_filtered  = roll_gyro_lpf_.getFilteredOutput(current_gyro_roll_rad_per_sec_);
@@ -814,6 +838,21 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_left_foot_adjustment_.coeffRef(3) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(3)), foot_roll_adjustment_abs_max_rad_ ), pose_left_foot_adjustment_.coeff(3));
   pose_left_foot_adjustment_.coeffRef(4) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(4)), foot_pitch_adjustment_abs_max_rad_), pose_left_foot_adjustment_.coeff(4));
   pose_left_foot_adjustment_.coeffRef(5) = 0;
+
+  /*ROS_ERROR("On Time: %f", walking_time-0.008);
+  ROS_ERROR("Adjustments Linker Fuß:");
+  ROS_ERROR("Force X: %f", pose_left_foot_adjustment_[0]);
+  ROS_ERROR("Force Y: %f", pose_left_foot_adjustment_[1]);
+  ROS_ERROR("Force Z: %f", pose_left_foot_adjustment_[2]);
+  ROS_ERROR("Torque Pitch: %f", pose_left_foot_adjustment_[3]);
+  ROS_ERROR("Torque Roll: %f", pose_left_foot_adjustment_[4]);
+  ROS_ERROR("Adjustments Rechter Fuß:");
+  ROS_ERROR("Force X: %f", pose_right_foot_adjustment_[0]);
+  ROS_ERROR("Force Y: %f", pose_right_foot_adjustment_[1]);
+  ROS_ERROR("Force Z: %f", pose_right_foot_adjustment_[2]);
+  ROS_ERROR("Torque Pitch: %f", pose_right_foot_adjustment_[3]);
+  ROS_ERROR("Torque Roll: %f", pose_right_foot_adjustment_[4]);
+  ROS_ERROR("----------------------");*/
 
   //Rotationsanteil aufrechnen
   Eigen::MatrixXd cob_rotation_adj = robotis_framework::getRotationZ(pose_cob_adjustment_.coeff(5)) * robotis_framework::getRotationY(pose_cob_adjustment_.coeff(4)) * robotis_framework::getRotationX(pose_cob_adjustment_.coeff(3));

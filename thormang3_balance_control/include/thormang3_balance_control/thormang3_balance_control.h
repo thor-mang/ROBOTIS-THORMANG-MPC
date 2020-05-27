@@ -421,6 +421,8 @@ private:
   double foot_roll_adjustment_abs_max_rad_;
   double foot_pitch_adjustment_abs_max_rad_;
   double foot_yaw_adjustment_abs_max_rad_;
+
+  double walking_time;
 };
 
 }
