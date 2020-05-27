@@ -371,7 +371,7 @@ void THORMANG3OnlineWalking::initialize()
 
   Eigen::MatrixXd mat = robotis_framework::getTransformationXYZRPY(lhip_to_lfoot_pose_.x, lhip_to_lfoot_pose_.y, lhip_to_lfoot_pose_.z, lhip_to_lfoot_pose_.roll, lhip_to_lfoot_pose_.pitch, lhip_to_lfoot_pose_.yaw);
   std::string print = toString(mat);
-  ROS_ERROR_THROTTLE(1.0, "%s", print.c_str());
+  //ROS_ERROR_THROTTLE(1.0, "%s", print.c_str());
 
   if(thormang3_kd_->calcInverseKinematicsForLeftLeg(&l_leg_out_angle_rad_[0], lhip_to_lfoot_pose_.x, lhip_to_lfoot_pose_.y, lhip_to_lfoot_pose_.z, lhip_to_lfoot_pose_.roll, lhip_to_lfoot_pose_.pitch, lhip_to_lfoot_pose_.yaw) == false)
   {
