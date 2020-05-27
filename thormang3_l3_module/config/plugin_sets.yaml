@@ -27,7 +27,7 @@ plugin_sets:
         joint_p_gains: [1.0, 1.5, 0.15, 0.15, 0.05, 0.05]
         joint_d_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-        imu_weights: [1.0, 1.0, 0.1, 0.1]
+        imu_weights: [-1.0, -1.0, -0.1, -0.1]
         imu_p_gains: [1.0, 1.0, 0.3, 0.3]
         imu_d_gains: [0.0, 0.0, 0.0, 0.0]
 
