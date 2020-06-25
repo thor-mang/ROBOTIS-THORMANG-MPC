@@ -769,7 +769,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   l_foot_roll_adjustment_by_torque_roll_   = ft_enable_*left_foot_torque_roll_ctrl_.getFeedBack(left_foot_torque_roll_filtered);
   l_foot_pitch_adjustment_by_torque_pitch_ = ft_enable_*left_foot_torque_pitch_ctrl_.getFeedBack(left_foot_torque_pitch_filtered);
 
-  if(print_) {
+  /*if(print_) {
       ROS_ERROR("---------------------------------------");
       ROS_ERROR("Controlled Values: ");
       ROS_ERROR("Gyro Roll: %f", foot_roll_adjustment_by_gyro_roll_);
@@ -793,7 +793,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
       ROS_ERROR("IMU Correction");
       ROS_ERROR("Left: \n%s", toString(mat_l_xy).c_str());
       ROS_ERROR("Right: \n%s", toString(mat_r_xy).c_str());
-  }
+  }*/
 
   // Manuelle Justierung (Offset in X) (Überflüssig?)
   pose_cob_adjustment_.coeffRef(0) = cob_x_manual_adjustment_m_;
@@ -813,7 +813,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_left_foot_adjustment_.coeffRef(3) = (foot_roll_adjustment_by_gyro_roll_ + foot_roll_adjustment_by_orientation_roll_ + l_foot_roll_adjustment_by_torque_roll_);
   pose_left_foot_adjustment_.coeffRef(4) = (foot_pitch_adjustment_by_gyro_pitch_ + foot_pitch_adjustment_by_orientation_pitch_ + l_foot_pitch_adjustment_by_torque_pitch_);
 
-  if(print_) {
+  /*if(print_) {
       ROS_ERROR("---------------------------------------");
       ROS_ERROR("FT Correction Left");
       ROS_ERROR("X: %f", pose_left_foot_adjustment_.coeffRef(0));
@@ -829,7 +829,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
       ROS_ERROR("Roll: %f", pose_right_foot_adjustment_.coeffRef(3));
       ROS_ERROR("Pitch: %f", pose_right_foot_adjustment_.coeffRef(4));
       ROS_ERROR("---------------------------------------");
-  }
+  }*/
 
   // Limits überprüfen
   if((fabs(pose_cob_adjustment_.coeff(0)) == cob_x_adjustment_abs_max_m_      ) ||
@@ -872,7 +872,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   pose_left_foot_adjustment_.coeffRef(4) = copysign(fmin(fabs(pose_left_foot_adjustment_.coeff(4)), foot_pitch_adjustment_abs_max_rad_), pose_left_foot_adjustment_.coeff(4));
   pose_left_foot_adjustment_.coeffRef(5) = 0;
 
-  if(print_) {
+  /*if(print_) {
       ROS_ERROR("---------------------------------------");
       ROS_ERROR("FT Correction Left After Limiting");
       ROS_ERROR("X: %f", pose_left_foot_adjustment_.coeffRef(0));
@@ -888,7 +888,7 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
       ROS_ERROR("Roll: %f", pose_right_foot_adjustment_.coeffRef(3));
       ROS_ERROR("Pitch: %f", pose_right_foot_adjustment_.coeffRef(4));
       ROS_ERROR("---------------------------------------");
-  }
+  }*/
 
   //Rotationsanteil aufrechnen
   Eigen::MatrixXd cob_rotation_adj = robotis_framework::getRotationZ(pose_cob_adjustment_.coeff(5)) * robotis_framework::getRotationY(pose_cob_adjustment_.coeff(4)) * robotis_framework::getRotationX(pose_cob_adjustment_.coeff(3));
@@ -898,12 +898,6 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   mat_robot_to_right_foot_modified_.block<3,3>(0,0) = rf_rotation_adj * desired_robot_to_right_foot_.block<3,3>(0,0);
   mat_robot_to_left_foot_modified_.block<3,3>(0,0) = lf_rotation_adj * desired_robot_to_left_foot_.block<3,3>(0,0);
 
-  if(print_) {
-      ROS_ERROR("Right Foot Rotation: \n%s", toString(mat_robot_to_right_foot_modified_).c_str());
-      ROS_ERROR("Left Foot Rotation: \n%s", toString(mat_robot_to_left_foot_modified_).c_str());
-      ROS_ERROR("---------------------------------------");
-      print_ = false;
-  }
 
   //Translationsanteil additiv aufrechnen
   mat_robot_to_cob_modified_.coeffRef(0,3) = desired_robot_to_cob_.coeff(0,3) + pose_cob_adjustment_.coeff(0);
