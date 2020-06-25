@@ -84,9 +84,11 @@ public:
 
   double getFeedBack(double present_sensor_output);
 
-private:
   double curr_err_;
   double prev_err_;
+
+private:
+
 };
 
 class BalanceLowPassFilter
@@ -271,6 +273,8 @@ public:
   BalanceControlUsingPDController();
   ~BalanceControlUsingPDController();
 
+  std::string toString(Eigen::MatrixXd& mat);
+
   void initialize(const int control_cycle_msec);
 
   void setGyroBalanceEnable(bool enable);
@@ -348,6 +352,8 @@ public:
   BalanceLowPassFilter left_foot_force_z_lpf_;
   BalanceLowPassFilter left_foot_torque_roll_lpf_;
   BalanceLowPassFilter left_foot_torque_pitch_lpf_;
+
+  bool print_;
 
 private:
   int balance_control_error_;
