@@ -84,9 +84,11 @@ public:
 
   double getFeedBack(double present_sensor_output);
 
-private:
   double curr_err_;
   double prev_err_;
+
+private:
+
 };
 
 class BalanceLowPassFilter
@@ -270,6 +272,8 @@ class BalanceControlUsingPDController
 public:
   BalanceControlUsingPDController();
   ~BalanceControlUsingPDController();
+
+  std::string toString(Eigen::MatrixXd& mat);
 
   void initialize(const int control_cycle_msec);
 
