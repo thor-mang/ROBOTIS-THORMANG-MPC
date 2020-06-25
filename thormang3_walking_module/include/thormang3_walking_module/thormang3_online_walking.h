@@ -216,6 +216,9 @@ private:
   int current_step_data_status_;
 
   int step_counter;
+
+  double print_time_;
+  bool print_;
 };
 
 }

@@ -1094,8 +1094,16 @@ void OnlineWalkingModule::imuDataOutputCallback(const sensor_msgs::Imu::ConstPtr
 
   tf::quaternionMsgToEigen(msg->orientation, imu_quat);
 
+  imu_quat.x() = 0.5;
+  imu_quat.y() = 0.5;
+  imu_quat.z() = 0.5;
+  imu_quat.w() = 0.5;
+
   double angular_x = msg->angular_velocity.x;
   double angular_y = msg->angular_velocity.y;
+
+  angular_x = 0.5;
+  angular_y = 0.5;
 
   // rotate imu sensor values back to raw sensor frame (ENU -> NED)
   Eigen::AngleAxisd rotX(-M_PI, Eigen::Vector3d::UnitX());
