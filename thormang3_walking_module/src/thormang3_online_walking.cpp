@@ -520,9 +520,6 @@ void THORMANG3OnlineWalking::initialize()
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
-
-  print_time_ = -0.008;
-  print_ = true;
 }
 
 void THORMANG3OnlineWalking::reInitialize()
@@ -1378,22 +1375,22 @@ void THORMANG3OnlineWalking::process()
     Eigen::MatrixXd  mat_right_force, mat_right_torque;
     mat_right_force.resize(4,1);    mat_right_force.fill(0);
     mat_right_torque.resize(4,1);   mat_right_torque.fill(0);
-    mat_right_force(0,0) = 0.5;//right_leg_fx_N;
-    mat_right_force(1,0) = 0.5;//right_leg_fy_N;
-    mat_right_force(2,0) = 0.5;//right_leg_fz_N;
-    mat_right_torque(0,0) = 0.5;//right_leg_Tx_Nm;
-    mat_right_torque(1,0) = 0.5;//right_leg_Ty_Nm;
-    mat_right_torque(2,0) = 0.5;//right_leg_Tz_Nm;
+    mat_right_force(0,0) = right_leg_fx_N;
+    mat_right_force(1,0) = right_leg_fy_N;
+    mat_right_force(2,0) = right_leg_fz_N;
+    mat_right_torque(0,0) = right_leg_Tx_Nm;
+    mat_right_torque(1,0) = right_leg_Ty_Nm;
+    mat_right_torque(2,0) = right_leg_Tz_Nm;
 
     Eigen::MatrixXd  mat_left_force, mat_left_torque;
     mat_left_force.resize(4,1);     mat_left_force.fill(0);
     mat_left_torque.resize(4,1);    mat_left_torque.fill(0);
-    mat_left_force(0,0) = 0.5;//left_leg_fx_N;
-    mat_left_force(1,0) = 0.5;//left_leg_fy_N;
-    mat_left_force(2,0) = 0.5;//left_leg_fz_N;
-    mat_left_torque(0,0) = 0.5;//left_leg_Tx_Nm;
-    mat_left_torque(1,0) = 0.5;//left_leg_Ty_Nm;
-    mat_left_torque(2,0) = 0.5;//left_leg_Tz_Nm;
+    mat_left_force(0,0) = left_leg_fx_N;
+    mat_left_force(1,0) = left_leg_fy_N;
+    mat_left_force(2,0) = left_leg_fz_N;
+    mat_left_torque(0,0) = left_leg_Tx_Nm;
+    mat_left_torque(1,0) = left_leg_Ty_Nm;
+    mat_left_torque(2,0) = left_leg_Tz_Nm;
 
     mat_left_force  = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_force;
     mat_left_torque = mat_robot_to_lfoot_*mat_lfoot_to_lft_*mat_left_torque;
@@ -1539,39 +1536,8 @@ void THORMANG3OnlineWalking::process()
                                             l_target_fx_N*1.0, l_target_fy_N*1.0, l_target_fz_N, 0, 0, 0);
 
 
-
-    Eigen::MatrixXd body_before = robotis_framework::getTransformationXYZRPY(0, 0, 0, 0, 0, 0);
-    Eigen::MatrixXd l_foot_before = robotis_framework::getTransformationXYZRPY(0.07, 0.1, -0.6, 0, 0, 0);
-    Eigen::MatrixXd r_foot_before = robotis_framework::getTransformationXYZRPY(0.07, -0.1, -0.6, 0, 0, 0);
-
-    if(print_time_ >= 3.0 && print_) {
-        balance_ctrl_.print_ = true;
-
-        ROS_ERROR("Time: %f", print_time_);
-        ROS_ERROR("Body Pose before: \n%s", toString(body_before).c_str());
-        ROS_ERROR("Left Foot Pose before: \n%s", toString(l_foot_before).c_str());
-        ROS_ERROR("Right Foot Pose before: \n%s", toString(r_foot_before).c_str());
-    }
-
-    Eigen::MatrixXd body_after, l_foot_after, r_foot_after;
-
-    balance_ctrl_.setDesiredPose(body_before, r_foot_before, l_foot_before);
-    balance_ctrl_.process(&balance_error_, &body_after, &r_foot_after, &l_foot_after);
-
-    if(print_time_ >= 3.0 && print_) {
-        ROS_ERROR("Body Pose after: \n%s", toString(body_after).c_str());
-        ROS_ERROR("Left Foot Pose after: \n%s", toString(l_foot_after).c_str());
-        ROS_ERROR("Right Foot Pose after: \n%s", toString(r_foot_after).c_str());
-        ROS_ERROR("---------------------------------------");
-        print_ = false;
-    }
-
-    if(print_)
-        print_time_ += TIME_UNIT;
-
-
-    //balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
-    //balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
+    balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
+    balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
 
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
