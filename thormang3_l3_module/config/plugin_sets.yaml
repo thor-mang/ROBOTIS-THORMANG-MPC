@@ -20,15 +20,23 @@ plugin_sets:
         param_update_duration: 2.0
         time_unit: 0.008 
 
+        # ft_weights: [0.001, 0.001, 0.001, 1.0, 1.0, 0.0]
+        # ft_p_gains: [0.05, 0.05, 0.02, 0.0015, 0.0015, 0.0]
+        # ft_d_gains: [0.001, 0.001, 0.001, 0.0002, 0.0002, 0.0]
+
         ft_weights: [0.001, 0.001, 0.001, 1.0, 1.0, 0.0]
-        ft_p_gains: [0.05, 0.05, 0.02, 0.0015, 0.0015, 0.0]
-        ft_d_gains: [0.001, 0.001, 0.001, 0.0002, 0.0002, 0.0]
+        ft_p_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ft_d_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         joint_p_gains: [1.0, 1.5, 0.15, 0.15, 0.05, 0.05]
         joint_d_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         imu_weights: [-1.0, -1.0, -0.1, -0.1]
-        imu_p_gains: [1.0, 1.0, 0.3, 0.3]
+        # imu_p_gains: [1.0, 1.0, 0.3, 0.3]
+        # imu_d_gains: [0.0, 0.0, 0.0, 0.0]
+
+        # imu_weights: [-1.0, -1.0, -0.1, -0.1]
+        imu_p_gains: [1.0, 0.0, 0.3, 0.0]
         imu_d_gains: [0.0, 0.0, 0.0, 0.0]
 
         leg_controller_names: ["x_force_controller", "y_force_controller", "z_force_controller", "roll_torque_controller", "pitch_torque_controller", "yaw_torque_controller"]
