@@ -156,6 +156,13 @@ double BalancePDController::getFeedBack(double present_sensor_output)
   prev_err_ = curr_err_;
   curr_err_ = desired_ - present_sensor_output;
 
+  ROS_ERROR("Previous Error: %f", prev_err_);
+  ROS_ERROR("Current Error: %f", curr_err_);
+  ROS_ERROR("P Gain: %f", p_gain_);
+  ROS_ERROR("D Gain: %f", d_gain_);
+  ROS_ERROR("Desired Value: %f", desired_);
+  ROS_ERROR("----------------");
+
   return (p_gain_*curr_err_ + d_gain_*(curr_err_ - prev_err_));
 }
 
