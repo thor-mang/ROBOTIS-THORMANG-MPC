@@ -1539,11 +1539,16 @@ void THORMANG3OnlineWalking::process()
 
     balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
+    //Eigen::MatrixXd   = robotis_framework::getInverseTransformation(mat_robot_to_cob_);
     //Stabilizer End
 
     //Kinematics and sending commands to joints
-    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
-    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_lf_modified_);
+    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix(mat_rhip_to_cob_ * mat_robot_to_rf_modified_);
+    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix(mat_lhip_to_cob_ * mat_robot_to_lf_modified_);
+
+    //Kinematics and sending commands to joints
+    //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_rf_modified_);
+    //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_lf_modified_);
 
     if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) )
     {
