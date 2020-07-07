@@ -38,7 +38,7 @@ plugin_sets:
 
         imu_cut_off_freq: 12.0
         ft_cut_off_freq: 10.0
-        x_offset_cob: -0.015
+        x_offset_cob: 0.0
         y_offset_cob: 0.0
 
         feet_adjustment_limits: [0.05, 0.05, 0.05, 15.0, 15.0, 15.0]
