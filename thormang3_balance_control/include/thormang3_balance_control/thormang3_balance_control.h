@@ -349,8 +349,6 @@ public:
   BalanceLowPassFilter left_foot_torque_roll_lpf_;
   BalanceLowPassFilter left_foot_torque_pitch_lpf_;
 
-  bool print_;
-
 private:
   int balance_control_error_;
   double control_cycle_sec_;
