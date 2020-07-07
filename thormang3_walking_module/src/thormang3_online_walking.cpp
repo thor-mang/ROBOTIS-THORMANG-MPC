@@ -1378,12 +1378,12 @@ void THORMANG3OnlineWalking::process()
     Eigen::MatrixXd  mat_right_force, mat_right_torque;
     mat_right_force.resize(4,1);    mat_right_force.fill(0);
     mat_right_torque.resize(4,1);   mat_right_torque.fill(0);
-    mat_right_force(0,0) = 0.5; //right_leg_fx_N;
-    mat_right_force(1,0) = 0.5; //right_leg_fy_N;
-    mat_right_force(2,0) = 0.5; //right_leg_fz_N;
-    mat_right_torque(0,0) = 0.5; //right_leg_Tx_Nm;
-    mat_right_torque(1,0) = 0.5; //right_leg_Ty_Nm;
-    mat_right_torque(2,0) = 0.5; //right_leg_Tz_Nm;
+    mat_right_force(0,0) = right_leg_fx_N;
+    mat_right_force(1,0) = right_leg_fy_N;
+    mat_right_force(2,0) = right_leg_fz_N;
+    mat_right_torque(0,0) = right_leg_Tx_Nm;
+    mat_right_torque(1,0) = right_leg_Ty_Nm;
+    mat_right_torque(2,0) = right_leg_Tz_Nm;
 
     Eigen::MatrixXd  mat_left_force, mat_left_torque;
     mat_left_force.resize(4,1);     mat_left_force.fill(0);
@@ -1538,34 +1538,11 @@ void THORMANG3OnlineWalking::process()
     balance_ctrl_.setDesiredFootForceTorque(r_target_fx_N*1.0, r_target_fy_N*1.0, r_target_fz_N, 0, 0, 0,
                                             l_target_fx_N*1.0, l_target_fy_N*1.0, l_target_fz_N, 0, 0, 0);
 
-    Eigen::MatrixXd test_body = robotis_framework::getTransformationXYZRPY(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    Eigen::MatrixXd left_foot = robotis_framework::getTransformationXYZRPY(0.0, 0.1, -0.6, 0.0, 0.0, 0.0);
-    Eigen::MatrixXd right_foot = robotis_framework::getTransformationXYZRPY(0.0, -0.1, -0.6, 0.0, 0.0, 0.0);
-
-    if(print_)
-      print_time_ += TIME_UNIT;
-
-    if(print_ && print_time_ >= 3.0) {
-      ROS_ERROR("Body Before: \n%s", toString(test_body).c_str());
-      ROS_ERROR("Left Feet Before: \n%s", toString(left_foot).c_str());
-      ROS_ERROR("Right Feet Before: \n%s", toString(right_foot).c_str());
-      ROS_ERROR("----------------------------------");
-      balance_ctrl_.print_ = true;
-    }
-
     balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
-    //balance_ctrl_.setDesiredPose(test_body, right_foot, left_foot);
 
     balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
-
-    if(print_ && print_time_ >= 3.0) {
-      ROS_ERROR("Body After: \n%s", toString(mat_robot_to_cob_modified_).c_str());
-      ROS_ERROR("Left Feet After: \n%s", toString(mat_robot_to_lf_modified_).c_str());
-      ROS_ERROR("Right Feet After: \n%s", toString(mat_robot_to_rf_modified_).c_str());
-      print_ = false;
-    }
 
     //Kinematics and sending commands to joints
     rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
