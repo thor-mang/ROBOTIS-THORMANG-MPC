@@ -520,9 +520,6 @@ void THORMANG3OnlineWalking::initialize()
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
-
-  print_ = true;
-  print_time_ = 0.0;
 }
 
 void THORMANG3OnlineWalking::reInitialize()
