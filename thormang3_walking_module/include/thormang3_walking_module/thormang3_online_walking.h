@@ -91,6 +91,8 @@ public:
 
   inline double getWalkingTime() { return walking_time_; }
 
+  void printDebugData();
+
   Eigen::MatrixXd mat_cob_to_g_,  mat_g_to_cob_;
   Eigen::MatrixXd mat_robot_to_cob_, mat_cob_to_robot_;
   Eigen::MatrixXd mat_robot_to_g_, mat_g_to_robot_;
@@ -216,6 +218,10 @@ private:
   int current_step_data_status_;
 
   int step_counter;
+
+  bool first_time_;
+  int file_count_;
+  std::FILE* file_;
 };
 
 }

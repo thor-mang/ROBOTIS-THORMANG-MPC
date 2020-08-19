@@ -520,6 +520,9 @@ void THORMANG3OnlineWalking::initialize()
   left_fz_trajectory_end_time_  = 0;
   left_fz_trajectory_target_  = left_dsp_fz_N_;
   left_fz_trajectory_shift_   = left_dsp_fz_N_;
+
+  first_time_ = true;
+  file_count_ = 0;
 }
 
 void THORMANG3OnlineWalking::reInitialize()
@@ -931,6 +934,21 @@ void THORMANG3OnlineWalking::process()
     calcRefZMP();
     calcDesiredPose();
 
+    if(first_time_) {
+        file_ = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Body_Trajectories_Robotis.txt", "wb");
+        ROS_ERROR("Write File");
+        first_time_ = false;
+    }
+
+    if(file_count_ <= 200 || (file_count_ >= 300 && file_count_ <= 600)) {
+        printDebugData();
+        file_count_++;
+    } else if(file_count_ == 601) {
+        ROS_ERROR("Ready");
+        std::fclose(file_);
+        file_count_++;
+    }
+
     double hip_roll_swap = 0;
 
     if((added_step_data_.size() != 0) && real_running)
@@ -1254,6 +1272,7 @@ void THORMANG3OnlineWalking::process()
       //Walking finished, prepare for next step plan
       if(walking_time_ > added_step_data_[added_step_data_.size() - 1].time_data.abs_step_time - 0.5*0.001)
       {
+        file_count_ = 300;
         real_running = false;
         calcStepIdxData();
         step_data_mutex_lock_.unlock();
@@ -1546,6 +1565,10 @@ void THORMANG3OnlineWalking::process()
     rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * cob_to_robot) * mat_robot_to_rfoot_);
     lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * cob_to_robot) * mat_robot_to_lfoot_);
 
+    if((added_step_data_.size() != 0) && real_running) {
+        printDebugData();
+    }
+
     //Kinematics and sending commands to joints
     //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_rf_modified_);
     //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_lf_modified_);
@@ -1604,6 +1627,19 @@ void THORMANG3OnlineWalking::process()
       out_angle_rad_[angle_idx+6] = l_leg_out_angle_rad_[angle_idx] + leg_angle_feed_back_[angle_idx+6].getFeedBack(curr_angle_rad_[angle_idx+6]);
     }
   }
+}
+
+void THORMANG3OnlineWalking::printDebugData()
+{
+    std::string pose_string;
+    pose_string.append(std::to_string(present_body_pose_.x));
+    pose_string.append(" ");
+    pose_string.append(std::to_string(reference_zmp_x_.coeff(current_start_idx_for_ref_zmp_, 0)));
+    pose_string.append(" ");
+    pose_string.append(std::to_string(present_body_pose_.z));
+    pose_string.append(" ");
+    std::fprintf(file_, "%s", pose_string.c_str());
+    std::fprintf(file_, "\n");
 }
 
 
