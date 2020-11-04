@@ -935,8 +935,8 @@ void THORMANG3OnlineWalking::process()
     calcDesiredPose();
 
     if(first_time_) {
-        file_ = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Body_Trajectories_Robotis.txt", "wb");
-        ROS_ERROR("Write File");
+        //file_ = std::fopen("/home/thor/thor/src/l3/l3_zmp_walk/l3_zmp_walk_controller/scripts/Body_Trajectories_Robotis.txt", "wb");
+        //ROS_ERROR("Write File");
         first_time_ = false;
     }
 
@@ -945,7 +945,7 @@ void THORMANG3OnlineWalking::process()
         file_count_++;
     } else if(file_count_ == 601) {
         ROS_ERROR("Ready");
-        std::fclose(file_);
+        //std::fclose(file_);
         file_count_++;
     }
 
@@ -1638,8 +1638,8 @@ void THORMANG3OnlineWalking::printDebugData()
     pose_string.append(" ");
     pose_string.append(std::to_string(present_body_pose_.z));
     pose_string.append(" ");
-    std::fprintf(file_, "%s", pose_string.c_str());
-    std::fprintf(file_, "\n");
+    //std::fprintf(file_, "%s", pose_string.c_str());
+    //std::fprintf(file_, "\n");
 }
 
 
