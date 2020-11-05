@@ -57,6 +57,7 @@ plugin_sets:
        params:
         time_unit: 0.008
         preview_time: 1.6
+        body_offset_x: 0.07
 
     # FootTrajectoryGeneratorPlugin
     foot_trajectory_generator: 
