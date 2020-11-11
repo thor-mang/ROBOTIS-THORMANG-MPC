@@ -40,6 +40,8 @@
 
 #include "robotis_math/robotis_math.h"
 
+#include <geometry_msgs/Wrench.h>
+
 namespace thormang3
 {
 
@@ -349,6 +351,10 @@ public:
   BalanceLowPassFilter left_foot_torque_roll_lpf_;
   BalanceLowPassFilter left_foot_torque_pitch_lpf_;
 
+  ros::Publisher left_ft_publisher_;
+  ros::Publisher right_ft_publisher_;
+  ros::Publisher time_publisher_;
+
 private:
   int balance_control_error_;
   double control_cycle_sec_;
@@ -423,6 +429,8 @@ private:
   double foot_yaw_adjustment_abs_max_rad_;
 
   double walking_time;
+
+  double intern_walking_time_;
 };
 
 }

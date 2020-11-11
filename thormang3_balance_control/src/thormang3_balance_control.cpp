@@ -667,6 +667,8 @@ void BalanceControlUsingPDController::initialize(const int control_cycle_msec)
   left_foot_force_z_lpf_.initialize(control_cycle_sec_, 1.0);
   left_foot_torque_roll_lpf_.initialize(control_cycle_sec_, 1.0);
   left_foot_torque_pitch_lpf_.initialize(control_cycle_sec_, 1.0);
+
+  intern_walking_time_ = 0.0;
 }
 
 void BalanceControlUsingPDController::setGyroBalanceEnable(bool enable)
@@ -719,6 +721,28 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   double left_foot_force_z_filtered      = left_foot_force_z_lpf_.getFilteredOutput(current_left_fz_N_);
   double left_foot_torque_roll_filtered  = left_foot_torque_roll_lpf_.getFilteredOutput(current_left_tx_Nm_);
   double left_foot_torque_pitch_filtered = left_foot_torque_pitch_lpf_.getFilteredOutput(current_left_ty_Nm_);
+
+  geometry_msgs::Wrench left_msg;
+  geometry_msgs::Wrench right_msg;
+
+  left_msg.force.x = left_foot_force_x_filtered;
+  left_msg.force.y = left_foot_force_y_filtered;
+  left_msg.force.z = left_foot_force_z_filtered;
+  left_msg.torque.x = left_foot_torque_roll_filtered;
+  left_msg.torque.y = left_foot_torque_pitch_filtered;
+  left_msg.torque.z = 0.0;
+
+  right_msg.force.x = right_foot_force_x_filtered;
+  right_msg.force.y = right_foot_force_y_filtered;
+  right_msg.force.z = right_foot_force_z_filtered;
+  right_msg.torque.x = right_foot_torque_roll_filtered;
+  right_msg.torque.y = right_foot_torque_pitch_filtered;
+  right_msg.torque.z = 0.0;
+
+  left_ft_publisher_.publish(left_msg);
+  right_ft_publisher_.publish(right_msg);
+  time_publisher_.publish(intern_walking_time_);
+  intern_walking_time_ = intern_walking_time_ + 0.008;
 
   // Regeln der IMU (Velocity) (Done)
   foot_roll_adjustment_by_gyro_roll_   = -0.1*gyro_enable_*foot_roll_gyro_ctrl_.getFeedBack(roll_gyro_filtered);
