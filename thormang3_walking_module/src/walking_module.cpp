@@ -174,7 +174,16 @@ void OnlineWalkingModule::initialize(const int control_cycle_msec, robotis_frame
   online_walking->hip_roll_feedforward_angle_rad_ = 0.0*M_PI/180.0;
   online_walking->balance_ctrl_.setCOBManualAdjustment(-10.0*0.001, 0, 0);
 
+  ros::NodeHandle ros_node;
+  left_ft_publisher_ = ros_node.advertise<geometry_msgs::Wrench>("robotis/left_ft_data_filtered", 1);
+  right_ft_publisher_ = ros_node.advertise<geometry_msgs::Wrench>("robotis/right_ft_data_filtered", 1);
+  time_publisher_ = ros_node.advertise<std_msgs::Float64>("robotis/walking_time", 1);
+
   online_walking->initialize();
+
+  online_walking->balance_ctrl_.left_ft_publisher_ = left_ft_publisher_;
+  online_walking->balance_ctrl_.right_ft_publisher_ = right_ft_publisher_;
+  online_walking->balance_ctrl_.time_publisher_ = time_publisher_;
 
   process_mutex_.lock();
   desired_matrix_g_to_cob_   = online_walking->mat_g_to_cob_;
@@ -237,6 +246,7 @@ void OnlineWalkingModule::queueThread()
   status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
   pelvis_base_msg_pub_ = ros_node.advertise<geometry_msgs::PoseStamped>("robotis/pelvis_pose_base_walking", 1);
   done_msg_pub_ = ros_node.advertise<std_msgs::String>("robotis/movement_done", 1);
+
 #ifdef WALKING_TUNE
   walking_joint_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::WalkingJointStatesStamped>("robotis/walking/walking_joint_states", 1);
 #endif

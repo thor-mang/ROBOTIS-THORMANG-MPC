@@ -331,6 +331,9 @@ void THORMANG3OnlineWalking::initialize()
   balance_ctrl_.setOrientationBalanceEnable(true);
   balance_ctrl_.setForceTorqueBalanceEnable(true);
 
+  balance_ctrl_.left_ft_publisher_ = left_ft_publisher_;
+  balance_ctrl_.right_ft_publisher_ = right_ft_publisher_;
+
   //Initialize Time
   walking_time_ = 0; reference_time_ = 0;
 

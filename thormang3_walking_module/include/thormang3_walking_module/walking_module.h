@@ -41,6 +41,7 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Float64.h>
 #include <sensor_msgs/Imu.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <boost/thread.hpp>
@@ -181,6 +182,10 @@ protected:
   thormang3_walking_module_msgs::BalanceParam previous_balance_param_;
   thormang3_walking_module_msgs::BalanceParam current_balance_param_;
   thormang3_walking_module_msgs::BalanceParam desired_balance_param_;
+
+  ros::Publisher left_ft_publisher_;
+  ros::Publisher right_ft_publisher_;
+  ros::Publisher time_publisher_;
 };
 
 }
