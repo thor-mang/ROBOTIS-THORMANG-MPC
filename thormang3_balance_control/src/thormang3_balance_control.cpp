@@ -739,8 +739,8 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   right_msg.torque.y = right_foot_torque_pitch_filtered;
   right_msg.torque.z = 0.0;
 
-  //left_ft_publisher_.publish(left_msg);
-  right_ft_publisher_.publish(left_msg);
+  left_ft_publisher_.publish(right_msg);
+  //right_ft_publisher_.publish(left_msg);
   time_publisher_.publish(intern_walking_time_);
   intern_walking_time_ = intern_walking_time_ + 0.008;
 
