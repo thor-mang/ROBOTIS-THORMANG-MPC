@@ -177,12 +177,14 @@ void OnlineWalkingModule::initialize(const int control_cycle_msec, robotis_frame
   ros::NodeHandle ros_node;
   left_ft_publisher_ = ros_node.advertise<geometry_msgs::Wrench>("robotis/left_ft_data_filtered", 1);
   right_ft_publisher_ = ros_node.advertise<geometry_msgs::Wrench>("robotis/right_ft_data_filtered", 1);
+  imu_publisher_ = ros_node.advertise<sensor_msgs::Imu>("robotis/imu_data_filtered", 1);
   time_publisher_ = ros_node.advertise<std_msgs::Float64>("robotis/walking_time", 1);
 
   online_walking->initialize();
 
   online_walking->balance_ctrl_.left_ft_publisher_ = left_ft_publisher_;
   online_walking->balance_ctrl_.right_ft_publisher_ = right_ft_publisher_;
+  online_walking->balance_ctrl_.imu_publisher_ = imu_publisher_;
   online_walking->balance_ctrl_.time_publisher_ = time_publisher_;
 
   process_mutex_.lock();

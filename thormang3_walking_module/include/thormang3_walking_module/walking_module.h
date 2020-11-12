@@ -185,6 +185,7 @@ protected:
 
   ros::Publisher left_ft_publisher_;
   ros::Publisher right_ft_publisher_;
+  ros::Publisher imu_publisher_;
   ros::Publisher time_publisher_;
 };
 
