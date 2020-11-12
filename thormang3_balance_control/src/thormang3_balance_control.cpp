@@ -739,8 +739,15 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   right_msg.torque.y = right_foot_torque_pitch_filtered;
   right_msg.torque.z = 0.0;
 
+  sensor_msgs::Imu imu_msg;
+  imu_msg.angular_velocity.x = roll_gyro_filtered;
+  imu_msg.angular_velocity.y = pitch_gyro_filtered;
+  imu_msg.orientation.x = roll_angle_filtered;
+  imu_msg.orientation.y = pitch_angle_filtered;
+
   left_ft_publisher_.publish(left_msg);
   right_ft_publisher_.publish(right_msg);
+  imu_publisher_.publish(imu_msg);
   time_publisher_.publish(intern_walking_time_);
   intern_walking_time_ = intern_walking_time_ + 0.008;
 
@@ -769,6 +776,8 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
 
   mat_r_xy = mat_orientation_adjustment_by_imu * mat_r_xy;
   mat_l_xy = mat_orientation_adjustment_by_imu * mat_l_xy;
+
+  ROS_ERROR("{%f, %f, %f, %f}", roll_angle_filtered, pitch_angle_filtered, roll_gyro_filtered, pitch_gyro_filtered);
 
   // Regeln der FT Sensoren (Done)
   r_foot_x_adjustment_by_force_x_ = ft_enable_*0.001*right_foot_force_x_ctrl_.getFeedBack(right_foot_force_x_filtered);

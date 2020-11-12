@@ -41,6 +41,7 @@
 #include "robotis_math/robotis_math.h"
 
 #include <geometry_msgs/Wrench.h>
+#include <sensor_msgs/Imu.h>
 
 namespace thormang3
 {
@@ -353,6 +354,7 @@ public:
 
   ros::Publisher left_ft_publisher_;
   ros::Publisher right_ft_publisher_;
+  ros::Publisher imu_publisher_;
   ros::Publisher time_publisher_;
 
 private:
