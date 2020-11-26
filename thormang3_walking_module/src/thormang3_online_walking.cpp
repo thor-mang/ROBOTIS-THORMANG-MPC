@@ -1565,16 +1565,16 @@ void THORMANG3OnlineWalking::process()
     //Stabilizer End
 
     //Kinematics and sending commands to joints
-    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * cob_to_robot) * mat_robot_to_rfoot_);
-    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * cob_to_robot) * mat_robot_to_lfoot_);
+    //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * cob_to_robot) * mat_robot_to_rfoot_);
+    //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * cob_to_robot) * mat_robot_to_lfoot_);
 
     if((added_step_data_.size() != 0) && real_running) {
         printDebugData();
     }
 
     //Kinematics and sending commands to joints
-    //rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_rf_modified_);
-    //lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_lf_modified_);
+    rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_rf_modified_);
+    lhip_to_lfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_lhip_to_cob_ * mat_cob_to_robot_modified_) *  mat_robot_to_lf_modified_);
 
     if((rhip_to_rfoot_pose_.yaw > 30.0*M_PI/180.0) || (rhip_to_rfoot_pose_.yaw < -30.0*M_PI/180.0) )
     {
