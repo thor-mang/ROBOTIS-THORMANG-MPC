@@ -105,3 +105,8 @@ plugin_sets:
       name: state_publisher
       params:
         ns: "/johnny5/l3/state_publisher"
+
+        leg_controller_names: ["x_force_controller", "y_force_controller", "z_force_controller", "roll_torque_controller", "pitch_torque_controller", "yaw_torque_controller"]
+        imu_controller_names: ["roll_orientation_controller", "pitch_orientation_controller", "roll_gyro_controller", "pitch_gyro_controller"]
+        leg_filter_names: ["x_force_filter", "y_force_filter", "z_force_filter", "roll_torque_filter", "pitch_torque_filter"]
+        imu_filter_names: ["x_orientation_filter", "y_orientation_filter", "x_velocity_filter", "y_velocity_filter"]
