@@ -20,6 +20,10 @@ plugin_sets:
         param_update_duration: 2.0
         time_unit: 0.008 
 
+        ft_enable: False
+        orientation_enable: True
+        gyro_enable: False
+
         ft_weights: [0.001, 0.001, 0.001, 1.0, 1.0, 0.0]
         ft_p_gains: [0.05, 0.05, 0.02, 0.0015, 0.0015, 0.0]
         ft_d_gains: [0.001, 0.001, 0.001, 0.0002, 0.0002, 0.0]
