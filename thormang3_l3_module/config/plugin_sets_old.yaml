@@ -11,7 +11,7 @@ plugin_sets:
         gravity: 9.81
 
     # JointBalanceControllerPlugin
-    z_motion_joint_balance_controller: 
+    robotis_joint_balance_controller: 
       params:
         gravity: 9.81
         fsp_ratio: 0.2
@@ -20,44 +20,30 @@ plugin_sets:
         param_update_duration: 2.0
         time_unit: 0.008 
 
-        ft_p_gains: [0.2, 0.0015, 0.0015]
-        ft_d_gains: [0.001, 0.0002, 0.0002]
+        ft_enable: False
+        orientation_enable: True
+        gyro_enable: False
 
+        ft_weights: [0.001, 0.001, 0.001, 1.0, 1.0, 0.0]
+        ft_p_gains: [0.05, 0.05, 0.02, 0.0015, 0.0015, 0.0]
+        ft_d_gains: [0.001, 0.001, 0.001, 0.0002, 0.0002, 0.0]
+
+        joint_p_gains: [1.0, 1.5, 0.15, 0.15, 0.05, 0.05]
+        joint_d_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+        imu_weights: [-1.0, -1.0, -0.1, -0.1]
         imu_p_gains: [1.0, 1.0, 0.3, 0.3]
         imu_d_gains: [0.0, 0.0, 0.0, 0.0]
 
-        zmp_p_gains: [0.0, 0.0]
-        zmp_d_gains: [0.0, 0.0]
-
-        springmass_gains: [0.0, 0.0, 0.0]
-
-        joint_feedback_p_gains: [1.0, 1.5, 0.15, 0.15, 0.05, 0.05]
-        joint_feedback_d_gains: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-
-        leg_controller_names: ["z_force_controller", "roll_torque_controller", "pitch_torque_controller"]
+        leg_controller_names: ["x_force_controller", "y_force_controller", "z_force_controller", "roll_torque_controller", "pitch_torque_controller", "yaw_torque_controller"]
         imu_controller_names: ["roll_orientation_controller", "pitch_orientation_controller", "roll_gyro_controller", "pitch_gyro_controller"]
-        zmp_controller_names: ["x_controller", "y_controller"]
-        springmass_controller_names: ["z_controller"]
-        joint_feedback_controller_names: ["hip_yaw", "hip_roll", "hip_pitch", "knee_pitch", "ankle_pitch", "ankle_roll"]
-
         leg_filter_names: ["x_force_filter", "y_force_filter", "z_force_filter", "roll_torque_filter", "pitch_torque_filter"]
         imu_filter_names: ["x_orientation_filter", "y_orientation_filter", "x_velocity_filter", "y_velocity_filter"]
 
         imu_cut_off_freq: 12.0
         ft_cut_off_freq: 10.0
-
-        cob_x_adjustment_abs_max_m: 0.02
-        cob_y_adjustment_abs_max_m: 0.02
-        foot_x_adjustment_abs_max_m: 0.01
-        foot_y_adjustment_abs_max_m: 0.01
-        foot_z_adjustment_abs_max_m: 0.03
-        foot_roll_adjustment_abs_max_rad: 0.13
-        foot_pitch_adjustment_abs_max_rad: 0.13
-
         x_offset_cob: 0.0
         y_offset_cob: 0.0
-        roll_offset_cob: 0.0
-        pitch_offset_cob: 0.0
 
         feet_adjustment_limits: [0.05, 0.05, 0.05, 15.0, 15.0, 15.0]
 
@@ -78,16 +64,14 @@ plugin_sets:
         body_offset_x: 0.071
 
     # FootTrajectoryGeneratorPlugin
-    z_motion_foot_trajectory_generator: 
+    foot_trajectory_generator: 
       params:
        z_swap_value: 0.1 
 
     # BodyTrajectoryGeneratorPlugin
-    z_motion_body_trajectory_generator:
+    body_trajectory_generator:
       params:
        z_swap_value: 0.01
-       delta_x_boundary: 0.005
-       fsp_ratio: 0.2
 
     # Interface Plugins
     imu_sensor_topic:
