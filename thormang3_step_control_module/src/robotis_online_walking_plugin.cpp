@@ -31,9 +31,9 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::updateStepPlan(const msgs::StepP
 
     if (step.support.size() != 2)
       return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "updateStepPlan: First step of an initial step plan must contain 2 support legs.");
-    else if (step.support[0].foot_idx != Foot::LEFT)
+    else if (step.support[0].idx != Foot::LEFT)
       return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Initial step foothold with idx = 0 is not left foot!");
-    else if (step.support[1].foot_idx != Foot::RIGHT)
+    else if (step.support[1].idx != Foot::RIGHT)
       return ErrorStatusError(msgs::ErrorStatus::ERR_UNKNOWN, getName(), "Initial step foothold with idx = 1 is not right foot!");
 
     robotis_framework::StepData ref_step;
@@ -212,7 +212,7 @@ msgs::ErrorStatus THORMANG3OnlineWalkingPlugin::executeStep(Step::ConstPtr step)
     step_data << *step;
     /// TODO: compensate drift in z
     step_data.position_data.body_pose.z = ref_step_data.position_data.body_pose.z;
-    if (step->getStepDataMap().begin()->second->target->foot_idx == Foot::LEFT)
+    if (step->getStepDataMap().begin()->second->target->idx == Foot::LEFT)
       step_data.position_data.left_foot_pose.z = ref_step_data.position_data.right_foot_pose.z;
     else
       step_data.position_data.right_foot_pose.z = ref_step_data.position_data.left_foot_pose.z;
