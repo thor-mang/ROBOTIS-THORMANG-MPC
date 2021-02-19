@@ -947,7 +947,6 @@ void THORMANG3OnlineWalking::process()
         printDebugData();
         file_count_++;
     } else if(file_count_ == 601) {
-        ROS_ERROR("Ready");
         //std::fclose(file_);
         file_count_++;
     }
