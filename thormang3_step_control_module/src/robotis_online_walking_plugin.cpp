@@ -4,6 +4,8 @@
 
 #include <thormang3_walking_module/walking_module.h>
 
+#include <l3_libs/conversions/l3_msg_std_conversions.h>
+
 
 
 namespace thormang3
